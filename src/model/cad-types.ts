@@ -86,6 +86,10 @@ const CON_POINTS = { kind: 'points', points: [{ x: 3, y: 0 }, { x: 0, y: 12 }, {
 const BISTABLE_POINTS = { kind: 'points', points: [{ x: 0, y: 0 }, { x: 6, y: 0 }, { x: 3, y: 12 }] } as const;
 /** Счётчик импульсов 9016: A1 C D R сверху (0 6 9 12), A2 снизу под C. В файле флаги 0..3 и 6, метки лежат в слотах флагов. */
 const COUNTER_POINTS = { kind: 'points', points: [{ x: 0, y: 0 }, { x: 6, y: 0 }, { x: 9, y: 0 }, { x: 12, y: 0 }, { x: 6, y: 12 }] } as const;
+/** Conmutador I-II-III 8021: общий вывод 1 сверху над средней нижней клеммой, 2 3 4 снизу (шаг 6). */
+const CONMUT3_POINTS = { kind: 'points', points: [{ x: 6, y: 0 }, { x: 0, y: 12 }, { x: 6, y: 12 }, { x: 12, y: 12 }] } as const;
+/** Conmutador cruce 8022: 1 2 сверху, 3 4 снизу (шаг 6). */
+const CRUCE_POINTS = { kind: 'points', points: [{ x: 0, y: 0 }, { x: 6, y: 0 }, { x: 0, y: 12 }, { x: 6, y: 12 }] } as const;
 /** Двухрядный аппарат, у которого рамка выше, чем расстояние между рядами клемм (рамка 30, ряды через 12). */
 const ROWS2_GAP12 = { kind: 'rows', rows: 2, pitchX: 6, rowGap: 12 } as const;
 
@@ -228,6 +232,12 @@ const TABLE: readonly CadTypeInfo[] = [
   { code: 8014, family: 'pushbutton', label: 'Final de carrera NA-NC', layout: ROWS2_P9, commandIds: [32925], confidence: 'confirmed', note: '15×15: клеммы 11 13 / 12 14 (шаг 9); концевик с НЗ и НО контактами, общий привод с роликом.' },
   { code: 8015, family: 'pushbutton', label: 'Final de carrera COM', layout: CON_POINTS, commandIds: [32926], confidence: 'confirmed', note: '12×15: клеммы 11 (общий), 12 (НЗ), 14 (НО); переключающий контакт концевика.' },
   { code: 8018, family: 'thermal-contact', label: 'Contacto auxiliar relé térmico NA-NC', layout: { kind: 'rows', rows: 2, pitchX: 9 }, commandIds: [32929], confidence: 'confirmed', note: 'Клеммы 95 97 96 98, шаг 9.' },
+  { code: 8016, family: 'thermal-contact', label: 'Contacto auxiliar relé térmico NA', layout: ROWS2, commandIds: [32927], confidence: 'confirmed', note: '6×15: клеммы 97 98, в образце префикс -F; замыкается при срабатывании тепловой защиты.' },
+  { code: 8017, family: 'thermal-contact', label: 'Contacto auxiliar relé térmico NC', layout: ROWS2, commandIds: [32928], confidence: 'confirmed', note: '6×15: клеммы 95 96, префикс -F; размыкается при срабатывании тепловой защиты.' },
+  { code: 8019, family: 'thermal-contact', label: 'Contacto auxiliar relé térmico CON', layout: CON_POINTS, commandIds: [32930], confidence: 'confirmed', note: '12×15: клеммы 95 (общий), 96 (НЗ), 98 (НО); при срабатывании 95-96 размыкается, 95-98 замыкается.' },
+  { code: 8020, family: 'pushbutton', label: 'Conmutador I-0-II', layout: CON_POINTS, commandIds: [33047], confidence: 'confirmed', note: '12×15: клеммы 1 (общий, сверху), 2 и 3 снизу. Позиции I = 1-2, 0 = разомкнуто (покой), II = 1-3. Логика позиций выведена по скриншотам (inferred), клик обходит 0 → I → II.' },
+  { code: 8021, family: 'pushbutton', label: 'Conmutador I-II-III', layout: CONMUT3_POINTS, commandIds: [33048], confidence: 'confirmed', note: '18×15: клеммы 1 (общий, сверху), 2 3 4 снизу. Позиции I = 1-2 (покой), II = 1-3, III = 1-4. Логика позиций выведена по скриншотам (inferred), клик обходит по кругу.' },
+  { code: 8022, family: 'pushbutton', label: 'Conmutador cruce', layout: CRUCE_POINTS, commandIds: [33049], confidence: 'confirmed', note: '12×15: клеммы 1 2 / 3 4. Покой — перекрёст (1-4 и 2-3), активное положение — прямо (1-3 и 2-4). Логика выведена по скриншотам (inferred).' },
 
   { code: 9000, family: 'coil', label: 'Bobina contactor, relé', layout: ROWS2, commandIds: [32949], confidence: 'probable', note: 'Клеммы A1 A2.' },
   { code: 9004, family: 'coil', label: 'Temporizador a la conexión', layout: ROWS2, commandIds: [32952], confidence: 'probable', note: 'Клеммы A1 A2, в текстовых полях после клемм два параметра (в образцах 0 и 5, 0 и 10).' },

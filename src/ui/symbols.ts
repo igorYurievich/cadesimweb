@@ -1,4 +1,5 @@
 import { getCadType } from '@model/cad-types';
+import { POSITION_SPECS, currentPosition, getBehavior } from '@engine/behaviors';
 import { buildTerminals, rotateOffset, unrotatedSize } from '@model/geometry';
 import type { SchemaElement } from '@model/types';
 
@@ -150,6 +151,57 @@ const ACTUATORS: Readonly<Record<ActuatorKind, (x: number, nc: boolean, to?: num
   maintained: maintainedActuator,
   limit: limitActuator,
 };
+
+/** Подписи положений над символом (оранжевые, как в образце) и конец пунктира привода у лопасти. */
+const SELECTOR_MARKS: Readonly<Record<number, { text: string; to: number }>> = {
+  8020: { text: 'I -0 -II', to: 3 },
+  8021: { text: 'I-II -III', to: 4 },
+  8022: { text: '', to: 3 },
+};
+const POSITION_LABEL_COLOR = '#e08a1e';
+
+/**
+ * Conmutador 8020–8022: выводы, ступенчатый привод слева и по группе лопастей на каждую позицию (`.sel-pos-N`).
+ * Какая группа видна, решает атрибут data-position символа (CSS), его выставляет app.ts по UserInputs.positions.
+ * Пары клемм каждой позиции берутся из таблицы поведения, поэтому символ и расчёт не расходятся.
+ */
+function drawSelector(g: SVGGElement, element: SchemaElement, rotation: number): void {
+  const spec = POSITION_SPECS[element.typeCode];
+  const mark = SELECTOR_MARKS[element.typeCode];
+  if (!spec || !mark) return;
+  const terms = element.terminals.map((t) => t.offset);
+  const bottomXs = terms.filter((o) => o.y > 0).map((o) => o.x).sort((a, b) => a - b);
+  const ticks = element.typeCode !== 8022;
+  const stubs: string[] = [];
+  for (const o of terms) {
+    if (o.y <= 0) { stubs.push(`M ${o.x} 0 V ${G}`); continue; }
+    stubs.push(`M ${o.x} ${ZONE - G} V ${ZONE}`);
+    // Контактная «полочка» у нижних клемм: у левой вправо, у остальных влево (как у CON).
+    if (ticks) stubs.push(`M ${o.x} ${ZONE - G} H ${o.x + (o.x === bottomXs[0] ? 1.8 : -1.8)}`);
+  }
+  g.append(path(stubs.join(' ')));
+  const links = getBehavior(element.typeCode).links;
+  const topX = (terms.find((o) => o.y <= 0) ?? { x: 0 }).x;
+  spec.labels.forEach((_, position) => {
+    const pos = group(`sel-pos sel-pos-${position}`);
+    const here = links.filter((link) => link.position === position);
+    // Позиция без замкнутых пар (0 у I-0-II): лопасть стоит вертикально над общим выводом и ничего не касается.
+    if (here.length === 0) pos.append(path(`M ${topX} ${G} V ${ZONE - G}`));
+    for (const link of here) {
+      const a = terms[link.terminals[0] as number];
+      const b = terms[link.terminals[1] as number];
+      if (a && b) pos.append(path(`M ${a.x} ${G} L ${b.x} ${ZONE - G}`));
+    }
+    g.append(pos);
+  });
+  const left = Math.min(...terms.map((o) => o.x));
+  g.append(maintainedActuator(left, true, mark.to));
+  if (mark.text) {
+    const text = label(mark.text, left - 9.5, 1.5, { size: 1.9, fill: POSITION_LABEL_COLOR, upright: rotation });
+    text.setAttribute('class', 'pos-label');
+    g.append(text);
+  }
+}
 
 /** Круг-индикатор «Botón pulsador» 8023 (рамка 6×6): зелёный диск и тонкое кольцо вокруг. Цвет не зависит от состояния. */
 function drawIndicator(g: SVGGElement): void {
@@ -465,6 +517,32 @@ function drawMotorProtection(g: SVGGElement, element: SchemaElement): void {
 }
 
 // ── Прочее ──────────────────────────────────────────────────────────────────
+
+/** Метка срабатывания теплового реле справа от лопасти (общая для 8016–8019): x — правая клемма/лопасть. */
+function thermalTripMark(x: number): SVGPathElement {
+  return path(`M ${x + 3.8} 4 V 5 H ${x + 5.2} V 7 H ${x + 3.8} V 7.8`, 0.8);
+}
+
+/** Тепловой контакт 8016 (НО) и 8017 (НЗ): одна колонка, «π» слева, пунктир к лопасти, метка срабатывания справа. */
+function drawThermalSingle(g: SVGGElement, element: SchemaElement, nc: boolean): void {
+  const x = columns(element)[0] ?? 0;
+  g.append(contactColumn(x, rowGapOf(element), { nc, control: 'trip' }));
+  g.append(dashed(`M ${x - 4.7} 6 H ${nc ? x + 1.5 : x - 1.5}`, '1.6 1.2'));
+  g.append(path(`M ${x - 6.7} 7.8 V 6 H ${x - 5.1} V 7.8`, 0.8));
+  g.append(thermalTripMark(x));
+}
+
+/** Тепловой контакт CON 8019: общий 95 сверху, НЗ 96 и НО 98 снизу; пунктир идёт к середине лопасти 95-96. */
+function drawThermalCon(g: SVGGElement, element: SchemaElement): void {
+  const top = element.terminals[0]?.offset.x ?? 3;
+  const nc = element.terminals[1]?.offset.x ?? 0;
+  const no = element.terminals[2]?.offset.x ?? 6;
+  const left = Math.min(top, nc, no);
+  g.append(conColumn(top, nc, no, 'trip'));
+  g.append(dashed(`M ${left - 4.7} 6 H ${(top + nc) / 2}`, '1.6 1.2'));
+  g.append(path(`M ${left - 6.7} 7.8 V 6 H ${left - 5.1} V 7.8`, 0.8));
+  g.append(thermalTripMark(no));
+}
 
 function drawThermalAux(g: SVGGElement, element: SchemaElement): void {
   const xs = columns(element);
@@ -990,6 +1068,18 @@ function drawBody(g: SVGGElement, element: SchemaElement, rotation: number): voi
     case 8018:
       drawThermalAux(g, element);
       break;
+    case 8016:
+    case 8017:
+      drawThermalSingle(g, element, element.typeCode === 8017);
+      break;
+    case 8019:
+      drawThermalCon(g, element);
+      break;
+    case 8020:
+    case 8021:
+    case 8022:
+      drawSelector(g, element, rotation);
+      break;
     case 9000:
       drawCoil(g, element, false);
       break;
@@ -1090,6 +1180,8 @@ export function createElementSymbol(element: SchemaElement): SVGGElement | null 
   };
   const root = shape('g', { class: 'schematic-element', 'data-element-id': element.id, 'data-type-code': element.typeCode, 'aria-label': `${element.name || info.label} — ${info.label}` });
   const rotation = element.rotation * 90;
+  // Многопозиционный переключатель: до расчёта симуляции показываем позицию покоя.
+  if (POSITION_SPECS[element.typeCode]) root.setAttribute('data-position', String(currentPosition(element.typeCode, undefined)));
   root.setAttribute('transform', `translate(${element.position.x} ${element.position.y}) rotate(${rotation})`);
   // Невидимая область захвата: без неё элемент из тонких линий трудно выделить и нажать.
   const txs = canonical.terminals.map((t) => t.offset.x);
@@ -1129,7 +1221,7 @@ export function createElementSymbol(element: SchemaElement): SVGGElement | null 
     root.append(shape('rect', { class: 'hit-area', x: hx - 10, y: 2, width: 10, height: 8, fill: '#000', 'fill-opacity': 0, stroke: 'none' }));
   }
   // Привод кнопки (скоба, грибок, ступенька выключателя или ролик концевика) выступает влево от первой клеммы: у кнопок панели «Accionamientos» тоже есть своя область захвата.
-  if ([8000, 8001, 8002, 8003, 8004, 8005, 8006, 8007, 8008, 8009, 8010, 8011, 8012, 8013, 8014, 8015].includes(element.typeCode)) {
+  if ([8000, 8001, 8002, 8003, 8004, 8005, 8006, 8007, 8008, 8009, 8010, 8011, 8012, 8013, 8014, 8015, 8020, 8021, 8022].includes(element.typeCode)) {
     const hx = Math.min(...txs, 0);
     root.append(shape('rect', { class: 'hit-area', x: hx - 9, y: 1, width: 9, height: 10, fill: '#000', 'fill-opacity': 0, stroke: 'none' }));
   }

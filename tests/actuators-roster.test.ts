@@ -2,15 +2,13 @@ import { describe, expect, it } from 'vitest';
 import { getCadType, isKnownCadType } from '@model/cad-types';
 import { importCad } from '@model/cad-import';
 import { computeSwitching, createEmptyInputs } from '@engine/index';
-import { getBehavior, invalidTerminalIndexes, missingBehaviors } from '../src/engine/behaviors';
+import { POSITION_SPECS, getBehavior, invalidTerminalIndexes, missingBehaviors, nextPosition } from '../src/engine/behaviors';
 import { fixture } from './helpers';
 
 /** Образец accionamientos.cad: 24 элемента панели «Accionamientos» (+ служебная запись 20000). */
 const FILE = 'accionamientos.cad';
-/** Уже реализованные коды (8000–8006 и 8023 были раньше, 8007–8015 и 8018 — этот шаг). */
-const DONE = [8023, 8000, 8001, 8002, 8003, 8004, 8005, 8006, 8007, 8008, 8009, 8010, 8011, 8012, 8013, 8014, 8015, 8018];
-/** Ещё не реализованы: тепловые 8016/8017/8019 и переключатели 8020–8022 (следующий шаг). */
-const PENDING = [8016, 8017, 8019, 8020, 8021, 8022];
+/** Все 24 кода панели «Accionamientos» из образца. */
+const ALL = [8023, 8000, 8001, 8002, 8003, 8004, 8005, 8006, 8007, 8008, 8009, 8010, 8011, 8020, 8021, 8022, 8012, 8013, 8014, 8015, 8016, 8017, 8018, 8019];
 
 /** Клеммы и рамка по образцу .cad (порядок = индексы SchemaElement.terminals). */
 const SPEC: Record<number, { labels: string[]; w: number }> = {
@@ -23,7 +21,13 @@ const SPEC: Record<number, { labels: string[]; w: number }> = {
   8013: { labels: ['11', '12'], w: 6 },
   8014: { labels: ['11', '13', '12', '14'], w: 15 },
   8015: { labels: ['11', '12', '14'], w: 12 },
+  8016: { labels: ['97', '98'], w: 6 },
+  8017: { labels: ['95', '96'], w: 6 },
   8018: { labels: ['95', '97', '96', '98'], w: 15 },
+  8019: { labels: ['95', '96', '98'], w: 12 },
+  8020: { labels: ['1', '2', '3'], w: 12 },
+  8021: { labels: ['1', '2', '3', '4'], w: 18 },
+  8022: { labels: ['1', '2', '3', '4'], w: 12 },
 };
 
 describe('accionamientos: sample import', () => {
@@ -32,12 +36,12 @@ describe('accionamientos: sample import', () => {
 
   it('the sample has all 24 panel elements', () => {
     expect(items).toHaveLength(24);
-    expect(items.map((e) => e.typeCode).sort()).toEqual([...DONE, ...PENDING].sort());
+    expect(items.map((e) => e.typeCode).sort()).toEqual([...ALL].sort());
   });
 
-  it('every implemented code is known and has a behavior; only the pending ones are still unknown', () => {
-    for (const code of DONE) expect(isKnownCadType(code)).toBe(true);
-    expect([...new Set(unknownTypes)].sort()).toEqual([...PENDING].sort());
+  it('all 24 codes are known and have a behavior', () => {
+    for (const code of ALL) expect(isKnownCadType(code)).toBe(true);
+    expect(unknownTypes).toEqual([]);
     expect(missingBehaviors()).toEqual([]);
   });
 
@@ -50,13 +54,13 @@ describe('accionamientos: sample import', () => {
     }
   });
 
-  it('families: 8007–8015 are pushbuttons, 8018 stays a thermal contact', () => {
-    for (let code = 8007; code <= 8015; code += 1) expect(getCadType(code).family).toBe('pushbutton');
-    expect(getCadType(8018).family).toBe('thermal-contact');
+  it('families: 8007–8015 and 8020–8022 are pushbuttons, 8016–8019 are thermal contacts', () => {
+    for (const code of [8007, 8008, 8009, 8010, 8011, 8012, 8013, 8014, 8015, 8020, 8021, 8022]) expect(getCadType(code).family).toBe('pushbutton');
+    for (const code of [8016, 8017, 8018, 8019]) expect(getCadType(code).family).toBe('thermal-contact');
   });
 
-  it('the new elements follow the placement defaults of the sample (-S for actuators)', () => {
-    for (const e of items.filter((item) => item.typeCode >= 8007 && item.typeCode <= 8015)) expect(e.name).toBe('-S');
+  it('the placement prefix of the sample: -S for actuators, -F for thermal contacts', () => {
+    for (const e of items.filter((item) => item.typeCode !== 8023)) expect(e.name).toBe(e.typeCode >= 8016 && e.typeCode <= 8019 ? '-F' : '-S');
   });
 });
 
@@ -112,5 +116,58 @@ describe('accionamientos: behavior', () => {
   it('8018 thermal contact is unchanged: NC 95-96 → NO 97-98 on trip', () => {
     expect(closed(8018)).toEqual(['0-2']);
     expect(closed(8018, (inputs, id) => { inputs.tripped[id] = true; })).toEqual(['1-3']);
+  });
+
+  const trip = (inputs: ReturnType<typeof createEmptyInputs>, id: number): void => { inputs.tripped[id] = true; };
+  const at = (position: number) => (inputs: ReturnType<typeof createEmptyInputs>, id: number): void => { inputs.positions = { [id]: position }; };
+
+  it('thermal contacts 8016 / 8017 / 8019: NO closes, NC opens, CON swaps when the protection trips', () => {
+    expect(closed(8016)).toEqual([]);
+    expect(closed(8016, trip)).toEqual(['0-1']);
+    expect(closed(8017)).toEqual(['0-1']);
+    expect(closed(8017, trip)).toEqual([]);
+    expect(closed(8019)).toEqual(['0-1']);
+    expect(closed(8019, trip)).toEqual(['0-2']);
+    for (const code of [8016, 8017, 8019]) expect(getBehavior(code).links.every((l) => l.control === 'thermal')).toBe(true);
+  });
+
+  it('Conmutador I-0-II (8020): rest = 0 (nothing closed), I = 1-2, II = 1-3', () => {
+    expect(closed(8020)).toEqual([]);
+    expect(closed(8020, at(0))).toEqual(['0-1']);
+    expect(closed(8020, at(1))).toEqual([]);
+    expect(closed(8020, at(2))).toEqual(['0-2']);
+  });
+
+  it('Conmutador I-II-III (8021): rest = I, then 1-3, 1-4', () => {
+    expect(closed(8021)).toEqual(['0-1']);
+    expect(closed(8021, at(1))).toEqual(['0-2']);
+    expect(closed(8021, at(2))).toEqual(['0-3']);
+  });
+
+  it('Conmutador cruce (8022): crossed 1-4 / 2-3 at rest, straight 1-3 / 2-4 when active', () => {
+    expect(closed(8022)).toEqual(['0-3', '1-2']);
+    expect(closed(8022, at(1))).toEqual(['0-2', '1-3']);
+  });
+
+  it('a click cycles positions starting from rest; an invalid stored position falls back to rest', () => {
+    expect([8020, 8021, 8022].map((code) => POSITION_SPECS[code]?.cycle.length)).toEqual([3, 3, 2]);
+    expect(nextPosition(8020, undefined)).toBe(0);
+    expect(nextPosition(8020, 0)).toBe(2);
+    expect(nextPosition(8020, 2)).toBe(1);
+    expect(nextPosition(8021, undefined)).toBe(1);
+    expect(nextPosition(8021, 2)).toBe(0);
+    expect(nextPosition(8022, undefined)).toBe(1);
+    expect(nextPosition(8022, 1)).toBe(0);
+    expect(nextPosition(8021, 99)).toBe(1);
+  });
+
+  it('positions of several selectors are independent (by element id)', () => {
+    const a = find(8020);
+    const b = find(8021);
+    const inputs = createEmptyInputs();
+    inputs.positions = { [a.id]: 2, [b.id]: 2 };
+    const edges = computeSwitching(schema, inputs).edges;
+    expect(edges.filter((e) => e.element === a.id).map((e) => `${e.a.index}-${e.b.index}`)).toEqual(['0-2']);
+    expect(edges.filter((e) => e.element === b.id).map((e) => `${e.a.index}-${e.b.index}`)).toEqual(['0-3']);
   });
 });

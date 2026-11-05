@@ -12,7 +12,7 @@ import { EXAMPLES } from '../data/examples';
 import type { Schema, SchemaElement, SheetInfo, WireKind, WireSegment } from '@model/types';
 import { createEmptyInputs, createEmptyMemory, simulate } from '@engine/simulate';
 import { terminalKey } from '@engine/types';
-import { getBehavior } from '@engine/behaviors';
+import { POSITION_SPECS, currentPosition, getBehavior, nextPosition } from '@engine/behaviors';
 import { auxContactActive } from '@engine/switching';
 import { buildWireLinks, pointOnSegment } from '@engine/wire-links';
 import type { EngineMemory, EngineState, PotentialLabel, TerminalKey, UserInputs } from '@engine/types';
@@ -79,7 +79,7 @@ const latchedTypes = new Set([2003, 2004, 2005, 2007, 5005, 5006, 5007, 5008, 50
 /** Тепловая защита двигателя 6007 при старте симуляции уже взведена (включена); остальные аппараты включает пользователь. */
 const armedByDefaultTypes = new Set([6007]);
 const startsOpen = (typeCode: number): boolean => latchedTypes.has(typeCode) && !armedByDefaultTypes.has(typeCode);
-const PLACEABLE_TYPES = [1000, 1001, 1002, 1008, 1010, 1003, 1005, 1004, 1006, 1007, 1011, 1012, 1009, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 3000, 3001, 3002, 3003, 3011, 3004, 3005, 3006, 3007, 3008, 3009, 3010, 3015, 3012, 3017, 3016, 3013, 3014, 3018, 3019, 3020, 5000, 5001, 5002, 5003, 5004, 5005, 5006, 5007, 5008, 5009, 6000, 6001, 6002, 6003, 6004, 6005, 6006, 6007, 6008, 6009, 6010, 6011, 6012, 6013, 6014, 7000, 7001, 7002, 7003, 7004, 7005, 7006, 7007, 7008, 7009, 7010, 7011, 7012, 7013, 7014, 7015, 8000, 8001, 8002, 8003, 8004, 8005, 8006, 8007, 8008, 8009, 8010, 8011, 8012, 8013, 8014, 8015, 8023, 8018, 9000, 9001, 9002, 9003, 9004, 9005, 9006, 9007, 9015, 9014, 9016, 9008, 9009, 9010, 9011, 9012, 9013];
+const PLACEABLE_TYPES = [1000, 1001, 1002, 1008, 1010, 1003, 1005, 1004, 1006, 1007, 1011, 1012, 1009, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 3000, 3001, 3002, 3003, 3011, 3004, 3005, 3006, 3007, 3008, 3009, 3010, 3015, 3012, 3017, 3016, 3013, 3014, 3018, 3019, 3020, 5000, 5001, 5002, 5003, 5004, 5005, 5006, 5007, 5008, 5009, 6000, 6001, 6002, 6003, 6004, 6005, 6006, 6007, 6008, 6009, 6010, 6011, 6012, 6013, 6014, 7000, 7001, 7002, 7003, 7004, 7005, 7006, 7007, 7008, 7009, 7010, 7011, 7012, 7013, 7014, 7015, 8000, 8001, 8002, 8003, 8004, 8005, 8006, 8007, 8008, 8009, 8010, 8011, 8012, 8013, 8014, 8015, 8016, 8017, 8019, 8020, 8021, 8022, 8023, 8018, 9000, 9001, 9002, 9003, 9004, 9005, 9006, 9007, 9015, 9014, 9016, 9008, 9009, 9010, 9011, 9012, 9013];
 const PLACE_DEFAULTS: Record<number, { prefix: string; size: { w: number; h: number }; labels: string[] }> = {
   1000: { prefix: 'M', size: { w: 24, h: 12 }, labels: ['U1', 'V1', 'W1', 'PE'] },
   1001: { prefix: 'M', size: { w: 24, h: 27 }, labels: ['U1', 'V1', 'W1', 'PE', 'W2', 'U2', 'V2'] },
@@ -186,6 +186,12 @@ const PLACE_DEFAULTS: Record<number, { prefix: string; size: { w: number; h: num
   8013: { prefix: 'S', size: { w: 6, h: 15 }, labels: ['11', '12'] },
   8014: { prefix: 'S', size: { w: 15, h: 15 }, labels: ['11', '13', '12', '14'] },
   8015: { prefix: 'S', size: { w: 12, h: 15 }, labels: ['11', '12', '14'] },
+  8016: { prefix: 'F', size: { w: 6, h: 15 }, labels: ['97', '98'] },
+  8017: { prefix: 'F', size: { w: 6, h: 15 }, labels: ['95', '96'] },
+  8019: { prefix: 'F', size: { w: 12, h: 15 }, labels: ['95', '96', '98'] },
+  8020: { prefix: 'S', size: { w: 12, h: 15 }, labels: ['1', '2', '3'] },
+  8021: { prefix: 'S', size: { w: 18, h: 15 }, labels: ['1', '2', '3', '4'] },
+  8022: { prefix: 'S', size: { w: 12, h: 15 }, labels: ['1', '2', '3', '4'] },
   // Тепловой контакт: в образце accionamientos.cad префикс -F, рамка 15×15 (раньше FG и 15×21).
   8018: { prefix: 'F', size: { w: 15, h: 15 }, labels: ['95', '97', '96', '98'] },
   9000: { prefix: 'KM', size: { w: 6, h: 21 }, labels: ['A1', 'A2'] },
@@ -782,6 +788,7 @@ export function mountApp(root: HTMLElement): void {
   /** Пустые входы: автоматы и выключатели по умолчанию ВЫКЛЮЧЕНЫ (включает пользователь кликом), тепловая защита 6007 взведена. */
   const createSimInputs = (): UserInputs => {
     const inputs = createEmptyInputs();
+    inputs.positions = {};  // положения Conmutador: нет записи = позиция покоя
     for (const element of schema.elements) if (startsOpen(element.typeCode)) inputs.toggled[element.id] = false;
     return inputs;
   };
@@ -850,6 +857,7 @@ export function mountApp(root: HTMLElement): void {
       const manuallyOpen = result !== undefined && latchedTypes.has(element.typeCode) && !(simInputs.toggled[element.id] ?? defaultClosed);
       // У выключателя с фиксацией лопасть рисуется по тому же классу, что и у нажатой кнопки.
       symbol.classList.toggle('is-sim-pressed', (simInputs.pressed[element.id] ?? false) || (maintainedTypes.has(element.typeCode) && simInputs.toggled[element.id] === true));
+      if (POSITION_SPECS[element.typeCode]) symbol.setAttribute('data-position', String(currentPosition(element.typeCode, simInputs.positions?.[element.id])));
       symbol.classList.toggle('is-sim-open', manuallyOpen || tripped);
       symbol.classList.toggle('is-sim-tripped', tripped);
       symbol.classList.toggle('is-sim-fault-glow', Boolean(simInputs.tripped[element.id]));
@@ -970,7 +978,7 @@ export function mountApp(root: HTMLElement): void {
   const momentaryTypes = new Set([8000, 8001, 8002, 8003, 8004, 8005, 8006, 8007, 8012, 8013, 8014, 8015]);
   /** Ручные выключатели с фиксацией (Interruptor): клик переключает привод, toggled = «привод включён», нет записи = покой. Не входят в latchedTypes. */
   const maintainedTypes = new Set([8008, 8009, 8010, 8011]);
-  const trippableTypes = new Set([6000, 6001, 6002, 6003, 6004, 6005, 6006, 6007, 6008, 6009, 6010, 6011, 6012, 8018]);
+  const trippableTypes = new Set([6000, 6001, 6002, 6003, 6004, 6005, 6006, 6007, 6008, 6009, 6010, 6011, 6012, 8016, 8017, 8018, 8019]);
   const applySimulationInput = (): void => { evaluateSimulation(); renderSchema(); };
   const pressMomentary = (id: number): void => {
     if (simMode === 'edit' || heldInputs.has(id)) return;
@@ -2040,6 +2048,18 @@ export function mountApp(root: HTMLElement): void {
         const element = schema.elements.find((candidate) => candidate.id === hit.id);
         if (element && momentaryTypes.has(element.typeCode)) {
           pressMomentary(element.id); svg.setPointerCapture(event.pointerId); event.preventDefault(); return;
+        }
+        if (element && POSITION_SPECS[element.typeCode]) {
+          // Conmutador: клик переводит в следующую позицию по кругу (порядок в POSITION_SPECS.cycle).
+          const positions = (simInputs.positions ??= {});
+          const next = nextPosition(element.typeCode, positions[element.id]);
+          positions[element.id] = next;
+          if (element.name.trim() !== '') {
+            for (const twin of schema.elements) {
+              if (twin.id !== element.id && twin.typeCode === element.typeCode && twin.name === element.name) positions[twin.id] = next;
+            }
+          }
+          applySimulationInput(); event.preventDefault(); return;
         }
         if (element && maintainedTypes.has(element.typeCode)) {
           const next = !(simInputs.toggled[element.id] ?? false);

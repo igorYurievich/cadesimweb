@@ -1,7 +1,7 @@
 /** Расчёт внутренних контактов и замкнутых рёбер (этап 5.3b). */
 
 import type { Schema, SchemaElement } from '../model/types';
-import { getBehavior } from './behaviors';
+import { currentPosition, getBehavior } from './behaviors';
 import type { BehaviorLink } from './behaviors';
 import type { TerminalRef, TimerState, UserInputs } from './types';
 import { resolveThermalState } from './thermal';
@@ -59,6 +59,7 @@ function controlActive(element: SchemaElement, link: BehaviorLink, inputs: UserI
     case 'toggled': return inputs.toggled[element.id] ?? link.defaultClosed ?? false;
     case 'coil-name': return auxContactActive(element, schema, coils, timers);
     case 'thermal': return (inputs.tripped[element.id] ?? false) || (element.name !== '' && thermal.trippedNames.has(element.name));
+    case 'position': return currentPosition(element.typeCode, inputs.positions?.[element.id]) === link.position;
     case 'always': return true;
   }
 }

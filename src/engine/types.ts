@@ -85,6 +85,11 @@ export interface UserInputs {
    * переключатель, автомат включён). Нет записи = положение по умолчанию.
    */
   toggled: Record<ElementId, boolean>;
+  /**
+   * Положение многопозиционных переключателей (Conmutador 8020–8022): индекс позиции в порядке подписей.
+   * Нет записи = позиция покоя (см. POSITION_SPECS в behaviors.ts). Поле необязательное, чтобы не ломать createEmptyInputs.
+   */
+  positions?: Record<ElementId, number>;
   /** Ручная имитация перегрузки: тепловое реле или автомат отключены. */
   tripped: Record<ElementId, boolean>;
 }

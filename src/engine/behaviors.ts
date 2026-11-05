@@ -2,7 +2,7 @@
 
 import { allCadTypes } from '../model/cad-types';
 
-export type ControlMode = 'pressed' | 'toggled' | 'coil-name' | 'thermal' | 'always';
+export type ControlMode = 'pressed' | 'toggled' | 'coil-name' | 'thermal' | 'position' | 'always';
 export type BehaviorLinkKind = 'switch' | 'load' | 'source-strip' | 'none';
 
 /** Индексы относятся к SchemaElement.terminals, метки клемм на них не влияют. */
@@ -14,6 +14,8 @@ export interface BehaviorLink {
   normallyClosed?: boolean;
   /** Для аппаратов с ручным выключателем: без входа положение включено. */
   defaultClosed?: boolean;
+  /** Для control 'position': контакт замкнут, только пока переключатель стоит в этой позиции (индекс в POSITION_SPECS.labels). */
+  position?: number;
   /** Размыкать полюс при ручной имитации срабатывания защиты. */
   opensWhenTripped?: boolean;
   /** Для source-strip: потенциалы клемм по порядку, если в файле нет меток. */
@@ -31,6 +33,48 @@ const switches = (
   control: ControlMode,
   options: Pick<BehaviorLink, 'normallyClosed' | 'defaultClosed' | 'opensWhenTripped'> = {},
 ): BehaviorLink[] => pairs.map(([a, b]) => ({ terminals: [a, b], kind: 'switch', control, ...options }));
+
+/** Контакты многопозиционного переключателя: пары клемм замкнуты только в позиции position. */
+const inPosition = (pairs: ReadonlyArray<readonly [number, number]>, position: number): BehaviorLink[] =>
+  pairs.map(([a, b]) => ({ terminals: [a, b], kind: 'switch', control: 'position', position }));
+
+/** Многопозиционный переключатель: подписи позиций, позиция покоя и порядок обхода кликом. */
+export interface PositionSpec {
+  /** Подписи позиций; индекс в массиве = номер позиции (его хранит UserInputs.positions). */
+  labels: readonly string[];
+  /** Позиция без входа (пользователь ничего не нажимал). */
+  rest: number;
+  /** Порядок обхода по кругу, начиная с позиции покоя. */
+  cycle: readonly number[];
+}
+
+/**
+ * Позиции Conmutador по образцу accionamientos.cad и скриншотам (confidence 'inferred', см. note в cad-types.ts):
+ *  - 8020 I-0-II: общий 1; I = 1-2, 0 = ничего, II = 1-3; покой — 0, клик: 0 → I → II → 0;
+ *  - 8021 I-II-III: общий 1; I = 1-2, II = 1-3, III = 1-4; покой — I (лопасть наклонена к 2), клик по кругу;
+ *  - 8022 cruce: покой — перекрёст (1-4 и 2-3), активное положение — прямо (1-3 и 2-4).
+ */
+export const POSITION_SPECS: Readonly<Record<number, PositionSpec>> = {
+  8020: { labels: ['I', '0', 'II'], rest: 1, cycle: [1, 0, 2] },
+  8021: { labels: ['I', 'II', 'III'], rest: 0, cycle: [0, 1, 2] },
+  8022: { labels: ['cruzado', 'recto'], rest: 0, cycle: [0, 1] },
+};
+
+/** Текущая позиция переключателя: сохранённая, если она допустима, иначе позиция покоя. */
+export function currentPosition(typeCode: number, stored: number | undefined): number {
+  const spec = POSITION_SPECS[typeCode];
+  if (!spec) return 0;
+  return stored !== undefined && stored >= 0 && stored < spec.labels.length ? stored : spec.rest;
+}
+
+/** Следующая позиция по кругу (клик по переключателю). */
+export function nextPosition(typeCode: number, stored: number | undefined): number {
+  const spec = POSITION_SPECS[typeCode];
+  if (!spec) return 0;
+  const now = currentPosition(typeCode, stored);
+  const at = spec.cycle.indexOf(now);
+  return spec.cycle[(at + 1) % spec.cycle.length] ?? spec.rest;
+}
 
 const inert = (): BehaviorLink[] => [{ terminals: [], kind: 'none', control: 'always' }];
 
@@ -166,6 +210,15 @@ const TABLE: readonly TypeBehavior[] = [
     ...switches([[0, 2]], 'thermal', { normallyClosed: true }),
     ...switches([[1, 3]], 'thermal'),
   ] },
+  // Тепловые контакты 8016/8017/8019: как 8018, срабатывают от моторной защиты или ручной имитации (control 'thermal').
+  // НО замыкается при срабатывании, НЗ размыкается; CON — общий 95, НЗ 96, НО 98.
+  { typeCode: 8016, links: switches([[0, 1]], 'thermal') },
+  { typeCode: 8017, links: switches([[0, 1]], 'thermal', { normallyClosed: true }) },
+  { typeCode: 8019, links: [...switches([[0, 1]], 'thermal', { normallyClosed: true }), ...switches([[0, 2]], 'thermal')] },
+  // Conmutador: позиции описаны в POSITION_SPECS. Клеммы 8020 — 1 (общий) 2 3; 8021 — 1 2 3 4; 8022 — 1 2 / 3 4 (верхний ряд, нижний ряд).
+  { typeCode: 8020, links: [...inPosition([[0, 1]], 0), ...inPosition([[0, 2]], 2)] },
+  { typeCode: 8021, links: [...inPosition([[0, 1]], 0), ...inPosition([[0, 2]], 1), ...inPosition([[0, 3]], 2)] },
+  { typeCode: 8022, links: [...inPosition([[0, 3], [1, 2]], 0), ...inPosition([[0, 2], [1, 3]], 1)] },
   { typeCode: 9000, links: [{ terminals: [0, 1], kind: 'load', control: 'always' }] },
   { typeCode: 9004, links: [{ terminals: [0, 1], kind: 'load', control: 'always' }] },
   { typeCode: 9008, links: [{ terminals: [0, 1], kind: 'load', control: 'always' }] },

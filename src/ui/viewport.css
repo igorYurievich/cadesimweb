@@ -191,6 +191,12 @@ kbd { padding: 2px 6px; border: 1px solid var(--border); border-radius: 4px; bac
 .is-sim-pressed .contact.by-pressed:not(.rest-closed) .blade-closed { display: inline; }
 .is-sim-pressed .contact.by-pressed.rest-closed .blade-closed { display: none; }
 .is-sim-pressed .contact.by-pressed.rest-closed .blade-open { display: inline; }
+/* Conmutador: видна только группа лопастей текущей позиции (data-position ставит app.ts). */
+.sel-pos { display: none; }
+.schematic-element[data-position="0"] .sel-pos-0,
+.schematic-element[data-position="1"] .sel-pos-1,
+.schematic-element[data-position="2"] .sel-pos-2 { display: inline; }
+.schematic-element.is-powered .pos-label { fill: currentColor; }
 .is-sim-open .contact.by-open .blade-closed { display: none; }
 .is-sim-open .contact.by-open .blade-open { display: inline; }
 .is-sim-tripped .contact.by-trip.rest-closed .blade-closed { display: none; }
