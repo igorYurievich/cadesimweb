@@ -140,9 +140,16 @@ const TABLE: readonly TypeBehavior[] = [
   { typeCode: 7013, links: inert() },
   { typeCode: 7014, links: inert() },
   { typeCode: 7015, links: inert() },
+  // Кнопки панели «Accionamientos»: контакт переключается, пока кнопка нажата. Клеммы: NA-NC — 11 13 / 12 14 (НЗ 0-2, НО 1-3);
+  // CON — общий 0, НЗ 1, НО 2. 8023 (круг-индикатор) без клемм и без поведения.
+  { typeCode: 8023, links: inert() },
   { typeCode: 8000, links: switches([[0, 1]], 'pressed') },
   { typeCode: 8001, links: switches([[0, 1]], 'pressed', { normallyClosed: true }) },
+  { typeCode: 8002, links: [...switches([[0, 2]], 'pressed', { normallyClosed: true }), ...switches([[1, 3]], 'pressed')] },
+  { typeCode: 8003, links: [...switches([[0, 1]], 'pressed', { normallyClosed: true }), ...switches([[0, 2]], 'pressed')] },
+  { typeCode: 8004, links: switches([[0, 1]], 'pressed') },
   { typeCode: 8005, links: switches([[0, 1]], 'pressed', { normallyClosed: true }) },
+  { typeCode: 8006, links: [...switches([[0, 2]], 'pressed', { normallyClosed: true }), ...switches([[1, 3]], 'pressed')] },
   { typeCode: 8013, links: switches([[0, 1]], 'pressed', { normallyClosed: true }) },
   { typeCode: 8018, links: [
     ...switches([[0, 2]], 'thermal', { normallyClosed: true }),

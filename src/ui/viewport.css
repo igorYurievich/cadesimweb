@@ -186,6 +186,11 @@ kbd { padding: 2px 6px; border: 1px solid var(--border); border-radius: 4px; bac
 .mp-open { display: none; }
 .is-sim-open .mp-closed { display: none; }
 .is-sim-open .mp-open { display: inline; }
+/* Кнопки панели «Accionamientos» с несколькими контактами (НО+НЗ, переключающий): положение следует за нажатием кнопки. */
+.is-sim-pressed .contact.by-pressed:not(.rest-closed) .blade-open { display: none; }
+.is-sim-pressed .contact.by-pressed:not(.rest-closed) .blade-closed { display: inline; }
+.is-sim-pressed .contact.by-pressed.rest-closed .blade-closed { display: none; }
+.is-sim-pressed .contact.by-pressed.rest-closed .blade-open { display: inline; }
 .is-sim-open .contact.by-open .blade-closed { display: none; }
 .is-sim-open .contact.by-open .blade-open { display: inline; }
 .is-sim-tripped .contact.by-trip.rest-closed .blade-closed { display: none; }

@@ -71,12 +71,12 @@ function label(value: string, x: number, y: number, opts: { size?: number; ancho
 const ZONE = 12;
 const G = 3;
 
-type Control = 'engine' | 'open' | 'trip' | 'aux';
+type Control = 'engine' | 'open' | 'trip' | 'aux' | 'pressed';
 
 interface ContactOptions {
   /** NO: в покое разомкнут; NC: в покое замкнут. */
   nc?: boolean;
-  /** Что переключает положение: результат движка, ручное размыкание/срабатывание защиты или тепловое реле. */
+  /** Что переключает положение: результат движка, ручное размыкание/срабатывание защиты, тепловое реле или нажатие кнопки (многоконтактные кнопки). */
   control?: Control;
   /** Метка расцепителя (чёрная точка на лопасти) у автоматов. */
   blob?: boolean;
@@ -120,14 +120,49 @@ function linkBar(xs: number[], y = ZONE / 2): SVGPathElement {
   return dashed(`M ${first + 0.8} ${y} H ${last + 3.2}`, '2.2 1.7');
 }
 
-/** Толкатель кнопки: скоба слева и пунктир к середине контакта. */
-function pushActuator(x: number, nc: boolean): SVGGElement {
-  const midX = nc ? x + 1.5 : x - 1.5;
-  return group('actuator', dashed(`M ${x - 6} 6 H ${midX}`, '1.5 1.1'), path(`M ${x - 4.7} 4.5 H ${x - 6} V 7.5 H ${x - 4.7}`));
+/** Толкатель кнопки: скоба слева и пунктир к середине контакта (to — x конца пунктира, если он не у лопасти колонки x). */
+function pushActuator(x: number, nc: boolean, to = nc ? x + 1.5 : x - 1.5): SVGGElement {
+  return group('actuator', dashed(`M ${x - 6} 6 H ${to}`, '1.5 1.1'), path(`M ${x - 4.7} 4.5 H ${x - 6} V 7.5 H ${x - 4.7}`));
+}
+
+/** Привод «грибок» (seta): полукруглая головка выпуклой стороной влево, короткий шток и пунктир к середине контакта. */
+function setaActuator(x: number, nc: boolean, to = nc ? x + 1.5 : x - 1.5): SVGGElement {
+  return group('actuator',
+    dashed(`M ${x - 4} 6 H ${to}`, '1.5 1.1'),
+    path(`M ${x - 5} 3.6 V 8.4 M ${x - 5} 3.6 A 2.4 2.4 0 0 0 ${x - 5} 8.4 M ${x - 5} 6 H ${x - 4}`),
+  );
+}
+
+/** Круг-индикатор «Botón pulsador» 8023 (рамка 6×6): зелёный диск и тонкое кольцо вокруг. Цвет не зависит от состояния. */
+function drawIndicator(g: SVGGElement): void {
+  g.append(circle(3, 3, 3.3, { fill: '#fff', stroke: '#6b7280', 'stroke-width': 0.6 }));
+  g.append(circle(3, 3, 2.5, { fill: '#0a8a1c', stroke: 'none' }));
+}
+
+/** Кнопка НО+НЗ (8002 плоская, 8006 грибок): НЗ колонка слева, НО справа, общий толкатель и пунктирная связь между колонками. */
+function drawPushPair(g: SVGGElement, element: SchemaElement, mushroom: boolean): void {
+  const xs = columns(element);
+  const rowGap = rowGapOf(element);
+  const nc = xs[0] ?? 0;
+  const no = xs[1] ?? nc + 9;
+  g.append(contactColumn(nc, rowGap, { nc: true, control: 'pressed' }));
+  g.append(contactColumn(no, rowGap, { control: 'pressed' }));
+  g.append(dashed(`M ${nc + 1.5} 6 H ${no - 1.5}`, '1.5 1.1'));
+  g.append((mushroom ? setaActuator : pushActuator)(nc, true));
+}
+
+/** Кнопка CON 8003: общий вывод сверху, НЗ и НО снизу, толкатель слева с пунктиром к середине лопасти. */
+function drawPushChangeover(g: SVGGElement, element: SchemaElement): void {
+  const top = element.terminals[0]?.offset.x ?? 3;
+  const nc = element.terminals[1]?.offset.x ?? 0;
+  const no = element.terminals[2]?.offset.x ?? 6;
+  g.append(conColumn(top, nc, no, 'pressed'));
+  const left = Math.min(top, nc, no);
+  g.append(pushActuator(left, true, (top + nc) / 2));
 }
 
 /** Привод конечного выключателя: пунктир к контакту и ролик на конце. */
-function limitActuator(x: number, nc: boolean): SVGGElement {
+export function limitActuator(x: number, nc: boolean): SVGGElement {
   const midX = nc ? x + 1.5 : x - 1.5;
   return group('actuator', dashed(`M ${x - 5} 6 H ${midX}`, '1.5 1.1'), circle(x - 6.4, 6, 1.4, { 'stroke-width': 0.8 }), path(`M ${x - 6.4} 4.6 V 3.2`, 0.7));
 }
@@ -732,11 +767,11 @@ function delayMark(timing: AuxTiming, cx: number): { mark: SVGGElement; right: n
 }
 
 /** Переключающий контакт CON: общий вывод сверху, НЗ и НО снизу; лопасть в покое лежит на НЗ, после срабатывания на НО. */
-function conColumn(topX: number, ncX: number, noX: number): SVGGElement {
+function conColumn(topX: number, ncX: number, noX: number, control: Control = 'aux'): SVGGElement {
   const stubs = path(`M ${topX} 0 V ${G} M ${ncX} ${ZONE - G} V ${ZONE} M ${noX} ${ZONE - G} V ${ZONE} M ${noX} ${ZONE - G} H ${noX - 1.8}`);
   const rest = group('blade-closed', path(`M ${topX} ${G} L ${ncX} ${ZONE - G}`));
   const switched = group('blade-open', path(`M ${topX} ${G} L ${noX} ${ZONE - G}`));
-  return group('contact by-aux rest-closed', stubs, rest, switched);
+  return group(`contact by-${control} rest-closed`, stubs, rest, switched);
 }
 
 function drawAuxContact(g: SVGGElement, element: SchemaElement): void {
@@ -882,6 +917,9 @@ function drawBody(g: SVGGElement, element: SchemaElement, rotation: number): voi
     case 7008: case 7009: case 7010: case 7011: case 7012: case 7013: case 7014: case 7015:
       drawAuxContact(g, element);
       break;
+    case 8023:
+      drawIndicator(g);
+      break;
     case 8000:
     case 8001:
     case 8013: {
@@ -891,10 +929,21 @@ function drawBody(g: SVGGElement, element: SchemaElement, rotation: number): voi
       g.append(pushActuator(x, nc));
       break;
     }
+    case 8002:
+      drawPushPair(g, element, false);
+      break;
+    case 8006:
+      drawPushPair(g, element, true);
+      break;
+    case 8003:
+      drawPushChangeover(g, element);
+      break;
+    case 8004:
     case 8005: {
       const x = xs[0] ?? 0;
-      g.append(contactColumn(x, rowGap, { nc: true, control: 'engine' }));
-      g.append(limitActuator(x, true));
+      const nc = element.typeCode === 8005;
+      g.append(contactColumn(x, rowGap, { nc, control: 'engine' }));
+      g.append(setaActuator(x, nc));
       break;
     }
     case 8018:
@@ -1013,6 +1062,8 @@ export function createElementSymbol(element: SchemaElement): SVGGElement | null 
     2009: { x: 0, y: -2, w: 24, h: 7 },
     3015: { x: -2, y: -1, w: 10, h: 11 },
     3020: { x: -1, y: 1, w: 11, h: 15 },
+    // Круг-индикатор 8023 без клемм: область захвата по рамке 6×6 с запасом на кольцо.
+    8023: { x: -0.5, y: -0.5, w: 7, h: 7 },
     // Двигатели без окружности радиуса 9: тело и выводы лежат вокруг начала координат, часть выше клемм (отрицательные y).
     1006: { x: -1, y: -11, w: 20, h: 18.5 },
     1007: { x: -1, y: -13.5, w: 20, h: 18.5 },
@@ -1036,7 +1087,8 @@ export function createElementSymbol(element: SchemaElement): SVGGElement | null 
     const hx = Math.min(...txs, 0);
     root.append(shape('rect', { class: 'hit-area', x: hx - 10, y: 2, width: 10, height: 8, fill: '#000', 'fill-opacity': 0, stroke: 'none' }));
   }
-  if ([8000, 8001, 8005, 8013].includes(element.typeCode)) {
+  // Привод кнопки (скоба или грибок) выступает влево от первой клеммы: у кнопок панели «Accionamientos» тоже есть своя область захвата.
+  if ([8000, 8001, 8002, 8003, 8004, 8005, 8006, 8013].includes(element.typeCode)) {
     const hx = Math.min(...txs, 0);
     root.append(shape('rect', { class: 'hit-area', x: hx - 9, y: 1, width: 9, height: 10, fill: '#000', 'fill-opacity': 0, stroke: 'none' }));
   }

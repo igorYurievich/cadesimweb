@@ -206,10 +206,19 @@ const TABLE: readonly CadTypeInfo[] = [
   { code: 7014, family: 'aux-contact', label: 'Contacto temporizado a la conexión deconexión NA+NC', layout: ROWS2_P9, commandIds: [32947], confidence: 'probable', note: '15×15: клеммы 55 57 / 56 58. Только символ.' },
   { code: 7015, family: 'aux-contact', label: 'Contacto temporizado a la conexión deconexión CON', layout: CON_POINTS, commandIds: [32948], confidence: 'probable', note: '12×15: клеммы 55 56 58. Только символ.' },
 
-  { code: 8000, family: 'pushbutton', label: 'Pulsador NA', layout: ROWS2, commandIds: [32909], confidence: 'probable', note: 'Клеммы 13 14.' },
-  { code: 8001, family: 'pushbutton', label: 'Pulsador NC (вариант 8001)', layout: ROWS2, commandIds: [], confidence: 'unknown', note: 'Клеммы 11 12, -S1 и -S3 в Actividad 1.6: кнопка «Стоп», размыкающий контакт. Кандидаты: Pulsador seta NC 32915, Interruptor NC 32920.' },
-  { code: 8005, family: 'pushbutton', label: 'Final de carrera NC', layout: ROWS2, commandIds: [32924], confidence: 'probable', note: 'Клеммы 11 12, имя -FC в Actividad 1.1.2: конечный выключатель, размыкающий контакт. Тип выведен по клеммам и имени (сам файл для проверки не приложен).' },
-  { code: 8013, family: 'pushbutton', label: 'Pulsador NC', layout: ROWS2, commandIds: [32910], confidence: 'probable', note: 'Клеммы 11 12.' },
+  // ── Приводы (панель «Accionamientos»): первые 8 кнопок ──
+  // Образец: accionamientos.cad. Привязка кодов типов к командам идёт по образцу, а не по прежним догадкам:
+  // 8001 = Pulsador NC, 8005 = Pulsador seta NC, 8013 = Final de carrera NC (раньше 8001 был неизвестен,
+  // 8005 считался конечным выключателем, а 8013 — Pulsador NC). Рамка по высоте везде 15, у 8023 — 6×6.
+  { code: 8023, family: 'pushbutton', label: 'Botón pulsador', layout: { kind: 'none' }, commandIds: [33278], confidence: 'confirmed', note: 'Круг-индикатор 6×6 без клемм, залитый зелёным, с кольцом. Поведения нет, только символ.' },
+  { code: 8000, family: 'pushbutton', label: 'Pulsador NA', layout: ROWS2, commandIds: [32909], confidence: 'confirmed', note: '6×15: клеммы 13 14.' },
+  { code: 8001, family: 'pushbutton', label: 'Pulsador NC', layout: ROWS2, commandIds: [32910], confidence: 'confirmed', note: '6×15: клеммы 11 12, -S1 и -S3 в Actividad 1.6: кнопка «Стоп», размыкающий контакт.' },
+  { code: 8002, family: 'pushbutton', label: 'Pulsador NA-NC', layout: ROWS2_P9, commandIds: [32912], confidence: 'confirmed', note: '15×15: клеммы 11 13 / 12 14 (шаг 9); 11-12 НЗ, 13-14 НО, общий толкатель.' },
+  { code: 8003, family: 'pushbutton', label: 'Pulsador CON', layout: CON_POINTS, commandIds: [32913], confidence: 'confirmed', note: '12×15: клеммы 11 (общий, сверху), 12 (НЗ) и 14 (НО) снизу; переключающий контакт.' },
+  { code: 8004, family: 'pushbutton', label: 'Pulsador seta NA', layout: ROWS2, commandIds: [32914], confidence: 'confirmed', note: '6×15: клеммы 13 14, привод «грибок».' },
+  { code: 8005, family: 'pushbutton', label: 'Pulsador seta NC', layout: ROWS2, commandIds: [32915], confidence: 'confirmed', note: '6×15: клеммы 11 12, привод «грибок». В Actividad 1.1.2 под -FC раньше стоял 8005, теперь там 8013.' },
+  { code: 8006, family: 'pushbutton', label: 'Pulsador seta NA-NC', layout: ROWS2_P9, commandIds: [32917], confidence: 'confirmed', note: '15×15: клеммы 11 13 / 12 14 (шаг 9), привод «грибок».' },
+  { code: 8013, family: 'pushbutton', label: 'Final de carrera NC', layout: ROWS2, commandIds: [32924], confidence: 'confirmed', note: '6×15: клеммы 11 12, конечный выключатель, размыкающий контакт (по образцу accionamientos.cad). Символ пока как у кнопки, остальные Final de carrera ещё не доделаны.' },
   { code: 8018, family: 'thermal-contact', label: 'Contacto auxiliar relé térmico NA-NC', layout: { kind: 'rows', rows: 2, pitchX: 9 }, commandIds: [32929], confidence: 'confirmed', note: 'Клеммы 95 97 96 98, шаг 9.' },
 
   { code: 9000, family: 'coil', label: 'Bobina contactor, relé', layout: ROWS2, commandIds: [32949], confidence: 'probable', note: 'Клеммы A1 A2.' },
