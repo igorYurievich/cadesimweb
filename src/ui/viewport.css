@@ -1,0 +1,271 @@
+:root { color-scheme: light; }
+
+#app {
+  --app-bg: #f2f5f9;
+  --surface: #ffffff;
+  --surface-soft: #f8fafc;
+  --surface-hover: #edf3f8;
+  --border: #dce3eb;
+  --border-strong: #c5d0dc;
+  --text: #192433;
+  --muted: #687789;
+  --accent: #176fc1;
+  --accent-soft: #e8f2fc;
+  --stage-bg: #e8edf3;
+  min-height: 100%;
+  color: var(--text);
+  background: var(--app-bg);
+}
+
+#app[data-theme="dark"] {
+  color-scheme: dark;
+  --app-bg: #141a22;
+  --surface: #1c242e;
+  --surface-soft: #222c38;
+  --surface-hover: #2a3745;
+  --border: #344252;
+  --border-strong: #46586d;
+  --text: #e8edf3;
+  --muted: #a5b1bf;
+  --accent: #65adf0;
+  --accent-soft: #203b55;
+  --stage-bg: #10161d;
+}
+
+* { box-sizing: border-box; }
+html, body, #app { width: 100%; height: 100%; margin: 0; }
+body { color: var(--text); background: var(--app-bg); font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+button, select { font: inherit; }
+button:focus-visible, select:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ── Каркас ─────────────────────────────────────────────── */
+:root { --radius: 8px; --shadow: 0 6px 18px #10203022; --control-h: 32px; }
+#app[data-theme="dark"] { --shadow: 0 6px 18px #00000066; }
+.app-shell { display: flex; width: 100%; height: 100%; min-height: 420px; flex-direction: column; background: var(--app-bg); font-size: 13px; }
+
+#cad-file { display: none; }
+/* ── Верхняя панель: бренд · меню · автор · тема ────────── */
+.app-header { display: flex; height: 48px; flex: 0 0 auto; align-items: center; gap: 18px; padding: 0 14px; border-bottom: 1px solid var(--border); background: var(--surface); }
+.brand-lockup { display: flex; flex: 0 0 auto; align-items: center; gap: 10px; }
+.brand-mark { display: grid; width: 30px; height: 30px; place-items: center; border-radius: 8px; background: linear-gradient(145deg, #1786d1, #1355a0); color: #fff; font-size: 12px; font-weight: 750; letter-spacing: -.04em; }
+.app-header h1 { margin: 0; font-size: 14px; font-weight: 700; letter-spacing: -.01em; white-space: nowrap; }
+.app-header h1 span { color: var(--muted); font-weight: 500; }
+.app-menu { display: flex; align-items: center; gap: 2px; }
+.menu-group { position: relative; display: flex; align-items: center; }
+.menu-group > summary { padding: 6px 10px; border-radius: 6px; color: var(--text); font-size: 13px; list-style: none; cursor: pointer; user-select: none; }
+.menu-group > summary::-webkit-details-marker { display: none; }
+.menu-group[open] > summary, .menu-group > summary:hover { background: var(--surface-hover); }
+.menu-popover { position: absolute; z-index: 30; top: calc(100% + 8px); left: 0; display: grid; min-width: 232px; padding: 5px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); box-shadow: var(--shadow); }
+.menu-language { display: grid; gap: 7px; padding: 8px 10px; color: var(--muted); font-size: 12px; }
+.menu-language select { width: 100%; height: 34px; padding: 0 9px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface-soft); color: var(--text); font: inherit; font-size: 12px; }
+.menu-language select:focus { border-color: var(--accent); outline: 2px solid var(--accent-soft); }
+.menu-toggle-list { display: grid; gap: 2px; padding: 2px 5px 5px; }
+.menu-toggle { display: flex; min-height: 32px; align-items: center; gap: 9px; padding: 4px 6px; border-radius: 6px; color: var(--text); font-size: 12px; cursor: pointer; }
+.menu-toggle:hover { background: var(--surface-hover); }
+.menu-toggle input { width: 15px; height: 15px; margin: 0; accent-color: var(--accent); cursor: pointer; }
+.menu-command { display: flex; min-height: 34px; align-items: center; justify-content: space-between; gap: 24px; padding: 0 10px; border: 0; border-radius: 6px; background: transparent; color: var(--text); font: inherit; font-size: 13px; text-align: left; cursor: pointer; }
+.menu-command:hover:not(:disabled) { background: var(--surface-hover); }
+.menu-heading { margin: 6px 10px 2px; padding-top: 8px; border-top: 1px solid var(--border); color: var(--muted); font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
+.menu-examples { display: grid; max-height: min(60vh, 420px); overflow-y: auto; }
+.menu-examples .menu-command { min-width: 420px; }
+.menu-command:disabled { color: var(--muted); opacity: .5; cursor: default; }
+kbd { padding: 2px 6px; border: 1px solid var(--border); border-radius: 4px; background: var(--surface-soft); color: var(--muted); font: inherit; font-size: 11px; white-space: nowrap; }
+
+/* ── Панель инструментов: одна строка, группы через разделители ── */
+.viewport-toolbar { display: flex; flex: 0 0 auto; flex-wrap: wrap; align-items: center; gap: 8px 6px; padding: 8px 14px; border-bottom: 1px solid var(--border); background: var(--surface-soft); }
+.tool-group { display: flex; min-width: 0; align-items: center; gap: 6px; }
+.tool-sep { width: 1px; height: 22px; margin: 0 2px; background: var(--border-strong); opacity: .7; }
+.viewport-toolbar button, .viewport-toolbar select { height: var(--control-h); padding: 0 12px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--text); font: inherit; font-size: 12px; font-weight: 550; white-space: nowrap; cursor: pointer; }
+.viewport-toolbar select { max-width: 170px; padding: 0 8px; font-weight: 450; }
+.viewport-toolbar button:hover:not(:disabled), .viewport-toolbar select:hover { border-color: var(--border-strong); background: var(--surface-hover); }
+.viewport-toolbar button:disabled { opacity: .42; cursor: default; }
+.viewport-toolbar .icon-btn { width: var(--control-h); padding: 0; font-size: 15px; }
+.file-name { max-width: 320px; margin-left: auto; overflow: hidden; color: var(--muted); font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
+
+.simulation-controls { margin-left: auto; padding: 3px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
+.simulation-controls > button { border-color: transparent; background: transparent; }
+.simulation-controls > #sim-run:not(:disabled) { border-color: #19834a; background: #19834a; color: #fff; }
+.simulation-controls > #sim-run:hover:not(:disabled) { border-color: #146c3d; background: #146c3d; }
+#app[data-theme="dark"] .simulation-controls > #sim-run:not(:disabled) { border-color: #2f9a62; background: #2f9a62; }
+.simulation-speed { display: flex; align-items: center; padding: 0 4px; white-space: nowrap; }
+.speed-btn { min-width: 52px; padding: 3px 8px; background: var(--accent-soft) !important; color: var(--accent) !important; border-color: var(--accent) !important; font-size: 12px; font-variant-numeric: tabular-nums; font-weight: 650 !important; }
+.simulation-state { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; background: var(--surface-hover); color: var(--muted); font-size: 11px; font-weight: 650; white-space: nowrap; }
+.simulation-state::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.simulation-state[data-mode="run"] { background: #dff4e8; color: #19834a; }
+.simulation-state[data-mode="pause"] { background: #fbeed6; color: #aa6a0a; }
+#app[data-theme="dark"] .simulation-state[data-mode="run"] { background: #1d3a2b; color: #68d49a; }
+#app[data-theme="dark"] .simulation-state[data-mode="pause"] { background: #3d3119; color: #f0b95c; }
+
+/* ── Нижняя строка состояния ────────────────────────────── */
+.app-footer { display: flex; height: 28px; flex: 0 0 auto; align-items: center; justify-content: space-between; gap: 18px; padding: 0 14px; border-top: 1px solid var(--border); background: var(--surface); color: var(--muted); font-size: 12px; }
+.status-bar { min-width: 0; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.zoom-value { flex: 0 0 auto; min-width: 48px; color: var(--text); font-size: 12px; font-variant-numeric: tabular-nums; text-align: right; }
+.viewport-help { flex: 0 1 auto; overflow: hidden; color: var(--muted); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; opacity: .85; }
+
+/* ── Рабочая область: палитра · лист · свойства ─────────── */
+.editor-workspace { display: flex; flex: 1; min-height: 0; }
+.component-palette { display: flex; width: 280px; flex: 0 0 280px; min-height: 0; flex-direction: column; gap: 10px; padding: 12px; overflow: hidden; border-right: 1px solid var(--border); background: var(--surface); }
+.palette-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.palette-heading h2 { margin: 0; font-size: 14px; font-weight: 700; }
+.palette-heading span { color: var(--muted); font-size: 11px; }
+.palette-search-row { display: grid; grid-template-columns: 1fr; gap: 6px; }
+.component-palette input, .component-palette select { width: 100%; height: var(--control-h); padding: 0 10px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface-soft); color: var(--text); font: inherit; font-size: 12px; }
+.component-palette input:focus, .component-palette select:focus { border-color: var(--accent); outline: 2px solid var(--accent-soft); }
+.palette-groups { min-height: 0; margin: 0 -4px; padding: 0 4px; overflow: auto; }
+.palette-group-toggle { display: flex; width: 100%; align-items: center; gap: 9px; padding: 8px; border-radius: 7px; background: transparent; color: var(--text); font: inherit; font-size: 12px; font-weight: 650; list-style: none; text-align: left; cursor: pointer; user-select: none; }
+.palette-group-toggle::-webkit-details-marker { display: none; }
+.palette-group-toggle::before { content: ""; width: 6px; height: 6px; flex: 0 0 auto; border-right: 1.6px solid var(--muted); border-bottom: 1.6px solid var(--muted); transform: rotate(-45deg); transition: transform .14s; }
+.palette-group[open] > .palette-group-toggle::before { transform: rotate(45deg); }
+.palette-group-toggle:hover { background: var(--surface-hover); }
+.palette-count-badge { min-width: 24px; margin-left: auto; padding: 1px 7px; border-radius: 999px; background: var(--surface-hover); color: var(--muted); font-size: 11px; font-weight: 600; text-align: center; }
+.palette-items { display: grid; gap: 2px; padding: 2px 0 8px 22px; }
+.palette-item { min-height: 30px; padding: 5px 9px; border: 1px solid transparent; border-radius: 6px; background: transparent; color: var(--text); font: inherit; font-size: 12px; text-align: left; cursor: grab; }
+.palette-item:hover:not(:disabled), .palette-item[aria-pressed="true"] { border-color: var(--border); background: var(--accent-soft); }
+.palette-item[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); font-weight: 600; }
+.palette-item:disabled { color: var(--muted); opacity: .55; cursor: not-allowed; }
+
+.properties-panel { display: flex; width: 264px; flex: 0 0 264px; min-height: 0; flex-direction: column; gap: 12px; padding: 14px 14px; overflow: auto; border-left: 1px solid var(--border); background: var(--surface); }
+.properties-panel h2 { margin: 0; font-size: 14px; font-weight: 700; }
+.property-fields { display: grid; align-content: start; gap: 12px; }
+.property-fields h3 { margin: 4px 0 -4px; font-size: 12px; }
+.property-empty, .property-type { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
+.property-type { color: var(--accent); font-weight: 650; }
+.property-field { display: grid; gap: 5px; color: var(--muted); font-size: 11px; font-weight: 550; }
+.property-field input, .property-field select { width: 100%; height: var(--control-h); padding: 0 9px; border: 1px solid var(--border); border-radius: 7px; background: var(--surface-soft); color: var(--text); font: inherit; font-size: 12px; font-weight: 400; }
+.property-field input:focus, .property-field select:focus { border-color: var(--accent); outline: 2px solid var(--accent-soft); }
+
+/* ── Холст и плавающие элементы ─────────────────────────── */
+.viewport-stage { position: relative; flex: 1; min-width: 0; min-height: 0; overflow: hidden; background: var(--stage-bg); }
+#sheet-paper { filter: drop-shadow(0 2px 10px #0a182833); }
+
+.app-dialog { width: min(420px, calc(100% - 32px)); padding: 20px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); color: var(--text); box-shadow: 0 20px 60px #08111f55; }
+.app-dialog::backdrop { background: #0b142080; backdrop-filter: blur(2px); }
+.app-dialog h2 { margin: 0 0 10px; font-size: 17px; }
+.app-dialog p { color: var(--muted); font-size: 12px; line-height: 1.55; }
+.dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; }
+.dialog-actions button { min-height: 34px; padding: 0 12px; border: 1px solid var(--border-strong); border-radius: 7px; background: var(--surface); color: var(--text); font: inherit; font-size: 11px; cursor: pointer; }
+.dialog-actions .primary-action { border-color: var(--accent); background: var(--accent); color: #fff; }
+.shortcuts-dialog dl { display: grid; gap: 8px; margin: 16px 0 0; }
+.shortcuts-dialog dl > div { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding-bottom: 7px; border-bottom: 1px solid var(--border); }
+.shortcuts-dialog dt { color: var(--muted); font-size: 11px; }
+.shortcuts-dialog dd { display: flex; gap: 4px; margin: 0; }
+.about-dialog { text-align: center; }
+.about-dialog .about-mark { display: grid; width: 52px; height: 52px; place-items: center; margin: 0 auto 12px; border-radius: 15px; background: linear-gradient(145deg, #1786d1, #1355a0); color: #fff; font-size: 18px; font-weight: 750; box-shadow: 0 4px 12px #11578b33; }
+.about-dialog dl { display: grid; gap: 8px; margin: 18px auto 0; max-width: 260px; }
+.about-dialog dl > div { display: flex; justify-content: space-between; gap: 10px; padding-bottom: 7px; border-bottom: 1px solid var(--border); }
+.about-dialog dt { color: var(--muted); font-size: 11px; }
+.about-dialog dd { margin: 0; color: var(--text); font-size: 11px; font-weight: 650; }
+.about-dialog .dialog-actions { justify-content: center; }
+
+.simulation-message { padding: 8px 14px; border-bottom: 1px solid #e6b7b1; background: #fff0ed; color: #9e3027; font-size: 12px; line-height: 1.45; }
+.simulation-message[hidden] { display: none; }
+#app[data-theme="dark"] .simulation-message { border-color: #713b37; background: #382321; color: #ffaaa0; }
+/* Символы: серые в покое, красные под напряжением (как в CADe_SIMU). */
+.schematic-element { color: #7b8189; }
+.schematic-element.is-powered { color: #e3181f; }
+.schematic-element.is-sim-active.is-sim-open { color: #8b9097; }
+.schematic-element.is-sim-fault-glow { filter: drop-shadow(0 0 2px #d3483e); }
+
+/* Положения лопасти контакта: по умолчанию показан покой (NO разомкнут, NC и автоматы замкнуты). */
+.contact .blade-closed { display: none; }
+.contact.rest-closed .blade-open { display: none; }
+.contact.rest-closed .blade-closed { display: inline; }
+.is-sim-active.is-sim-closed .contact.by-engine .blade-open { display: none; }
+.is-sim-active.is-sim-closed .contact.by-engine .blade-closed { display: inline; }
+.is-sim-active:not(.is-sim-closed) .contact.by-engine .blade-open { display: inline; }
+.is-sim-active:not(.is-sim-closed) .contact.by-engine .blade-closed { display: none; }
+/* Вспомогательные контакты 7000–7015: в симуляции положение задаёт класс is-aux-active (катушка или таймер с тем же именем),
+   независимо для НО и НЗ полюса: у НЗ лопасть в покое замкнута, при срабатывании размыкается. */
+.is-sim-active.is-aux-active .contact.by-aux:not(.rest-closed) .blade-open { display: none; }
+.is-sim-active.is-aux-active .contact.by-aux:not(.rest-closed) .blade-closed { display: inline; }
+.is-sim-active.is-aux-active .contact.by-aux.rest-closed .blade-closed { display: none; }
+.is-sim-active.is-aux-active .contact.by-aux.rest-closed .blade-open { display: inline; }
+.fuse-closed { display: none; }
+.is-sim-active:not(.is-sim-open) .fuse-open { display: none; }
+.is-sim-active:not(.is-sim-open) .fuse-closed { display: inline; }
+.mp-open { display: none; }
+.is-sim-open .mp-closed { display: none; }
+.is-sim-open .mp-open { display: inline; }
+.is-sim-open .contact.by-open .blade-closed { display: none; }
+.is-sim-open .contact.by-open .blade-open { display: inline; }
+.is-sim-tripped .contact.by-trip.rest-closed .blade-closed { display: none; }
+.is-sim-tripped .contact.by-trip.rest-closed .blade-open { display: inline; }
+.is-sim-tripped .contact.by-trip:not(.rest-closed) .blade-open { display: none; }
+.is-sim-tripped .contact.by-trip:not(.rest-closed) .blade-closed { display: inline; }
+
+.schematic-element.is-coil-energized rect { fill: #bdbdbd; }
+/* Пока лампа выключена (в том числе вне симуляции), стекло и ободок нейтральные. */
+.schematic-element .lamp-glass { fill: #f6f7f8; stroke: #7b8794; filter: none; }
+.schematic-element.is-lamp-lit .lamp-glass { filter: drop-shadow(0 0 2.8px currentColor); }
+.schematic-element.is-lamp-lit .lamp-glass.lamp-c0 { fill: #43df70; stroke: #16843a; filter: drop-shadow(0 0 3px #29dc5a); }
+.schematic-element.is-lamp-lit .lamp-glass.lamp-c1 { fill: #ff3b30; stroke: #a8120b; filter: drop-shadow(0 0 3px #ff4a3d); }
+.schematic-element.is-lamp-lit .lamp-glass.lamp-c2 { fill: #ffe600; stroke: #b88a00; filter: drop-shadow(0 0 3px #ffd400); }
+.motor-rotor { opacity: 0; transform-box: fill-box; transform-origin: center; }
+.schematic-element.is-motor-running .motor-body > circle { fill: #bdbdbd; }
+.schematic-element.is-motor-running .motor-rotor { opacity: 1; animation: motor-rotation var(--motor-period, 1.8s) linear infinite; animation-play-state: var(--motor-play-state, paused); }
+.schematic-element.is-motor-faulted .motor-body > circle { fill: #fde5e2; stroke: #c53d35; }
+/* Направление задаётся только зеркалом scaleX(-1): стрелка и вращение разворачиваются вместе (animation-direction: reverse вместе с зеркалом гасил разворот). */
+@keyframes motor-rotation {
+  from { transform: scaleX(var(--motor-mirror, 1)) rotate(0deg); }
+  to { transform: scaleX(var(--motor-mirror, 1)) rotate(360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .schematic-element.is-motor-running .motor-rotor { animation: none; }
+}
+.simulation-context-menu { position: fixed; z-index: 20; display: grid; min-width: 196px; gap: 2px; padding: 5px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); box-shadow: 0 10px 28px #1020303b; }
+.simulation-context-menu[hidden] { display: none; }
+.simulation-context-menu button { min-height: 34px; padding: 0 9px; border: 0; border-radius: 5px; background: transparent; color: var(--text); font: inherit; font-size: 11px; text-align: left; cursor: pointer; }
+.simulation-context-menu button:hover { background: var(--surface-hover); }
+.viewport-svg { display: block; width: 100%; height: 100%; touch-action: none; cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M3 2L3 18L7.4 14.2L10.4 21L13.2 19.8L10.3 13.2L16 12.8Z' fill='%230b3d6e' stroke='%23fff' stroke-width='1.5' stroke-linejoin='round'/%3E%3C/svg%3E") 3 2, default; user-select: none; }
+.viewport-svg:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.viewport-svg.is-pan-tool { cursor: grab; }
+.viewport-svg.is-panning { cursor: grabbing; }
+.viewport-toolbar button.is-active { border-color: var(--accent); background: var(--surface-hover); box-shadow: inset 0 0 0 1px var(--accent); }
+/* Собственные курсоры холста: тонкий прицел при размещении и рисовании провода, стрелка и «перемещение» в остальное время. */
+.viewport-svg.is-placing, .viewport-svg.is-drawing-wire, .viewport-svg.is-placing .schematic-element, .viewport-svg.is-drawing-wire .schematic-element { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cg fill='none' stroke-linecap='round'%3E%3Cpath d='M16 3V12M16 20V29M3 16H12M20 16H29' stroke='%23fff' stroke-width='3.6'/%3E%3Cpath d='M16 3V12M16 20V29M3 16H12M20 16H29' stroke='%230b3d6e' stroke-width='1.6'/%3E%3Ccircle cx='16' cy='16' r='1.6' fill='%23e5484d' stroke='%23fff' stroke-width='.8'/%3E%3C/g%3E%3C/svg%3E") 16 16, crosshair; }
+.placement-ghost, .placement-ghost .schematic-element { color: #1d6fbe !important; opacity: .85; pointer-events: none; }
+.viewport-backdrop { fill: var(--stage-bg); }
+.schematic-element { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Cg fill='%230b3d6e' stroke='%23fff' stroke-width='1.2' stroke-linejoin='round'%3E%3Cpath d='M14 2L18 7H15.4V12.6H21V10L26 14L21 18V15.4H15.4V21H18L14 26L10 21H12.6V15.4H7V18L2 14L7 10V12.6H12.6V7H10Z'/%3E%3C/g%3E%3C/svg%3E") 14 14, move; }
+.schematic-element text { user-select: none; }
+.is-selected-wire { stroke: #0a67c7 !important; stroke-width: 2.3px !important; }
+.is-selected-junction { stroke: #0a67c7 !important; stroke-width: 1.5px !important; r: 2.4px; }
+.element-selection-box, .selection-marquee { fill: rgba(29, 111, 190, .07); stroke: #2676bd; stroke-width: 1.2px; stroke-dasharray: 4 3; vector-effect: non-scaling-stroke; pointer-events: none; }
+.wire-end-handle { fill: #fff; stroke: #126fc2; stroke-width: 1.5px; vector-effect: non-scaling-stroke; cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cg fill='none' stroke-linecap='round'%3E%3Cpath d='M16 3V12M16 20V29M3 16H12M20 16H29' stroke='%23fff' stroke-width='3.6'/%3E%3Cpath d='M16 3V12M16 20V29M3 16H12M20 16H29' stroke='%230b3d6e' stroke-width='1.6'/%3E%3Ccircle cx='16' cy='16' r='1.6' fill='%23e5484d' stroke='%23fff' stroke-width='.8'/%3E%3C/g%3E%3C/svg%3E") 16 16, crosshair; }
+.wire-draft { pointer-events: none; }
+.wire-draft-point { fill: #fff; stroke: #2676bd; stroke-width: 1.2px; vector-effect: non-scaling-stroke; pointer-events: none; }
+
+/* ── Адаптивность ───────────────────────────────────────── */
+@media (max-width: 1180px) {
+  .component-palette { width: 236px; flex-basis: 236px; }
+  .properties-panel { width: 232px; flex-basis: 232px; }
+  .viewport-help { display: none; }
+}
+
+@media (max-width: 860px) {
+  .app-header { gap: 10px; padding: 0 10px; overflow-x: auto; }
+  .viewport-toolbar { padding: 8px 10px; }
+  .simulation-controls { margin-left: 0; flex-wrap: wrap; }
+  .editor-workspace { flex-direction: column; }
+  .component-palette { width: 100%; flex: 0 0 auto; max-height: 36vh; border-right: 0; border-bottom: 1px solid var(--border); }
+  .properties-panel { width: 100%; flex: 0 0 auto; max-height: 28vh; border-left: 0; border-bottom: 1px solid var(--border); }
+  .viewport-stage { min-height: 260px; }
+}
+
+@media (max-width: 480px) {
+  .brand-lockup h1 { display: none; }
+}
+
+.sheet-dialog { width: min(380px, calc(100% - 32px)); }
+.sheet-fields { display: grid; gap: 12px; margin-top: 14px; }
+.sheet-size-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.sheet-dialog .property-field input, .sheet-dialog .property-field select { height: 34px; }
+
+/* Отсчёт выдержки таймера: виден только в симуляции. */
+.timer-readout { display: none; fill: #6b7280; }
+.schematic-element.is-sim-active .timer-readout { display: inline; }
+.schematic-element.is-timer-counting .timer-readout { fill: #c26a00; }
+.schematic-element.is-timer-done .timer-readout { fill: #16843a; }
+
+.stamp-cell { cursor: text; }
+.stamp-cell:hover { fill: rgba(38, 118, 189, .13); }
+.stamp-editor { position: absolute; z-index: 6; box-sizing: border-box; padding: 0 4px; border: 2px solid var(--accent); border-radius: 2px; background: #fff; color: #111; font-family: Arial, sans-serif; outline: none; }

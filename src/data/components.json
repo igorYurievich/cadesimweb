@@ -1,0 +1,2415 @@
+{
+  "_comment": "Каталог команд-кнопок CADe_SIMU 4.2. Формат строки: [commandId, es, en, it, ru]. Русские подписи заполнены для всех элементов.",
+  "groups": [
+    {
+      "name": "Alimentaciones y fuentes",
+      "toolbar": 183,
+      "items": [
+        [
+          32873,
+          "Alimentación Fase",
+          "Phase power",
+          "Alimentazione Fase",
+          "Фазное питание"
+        ],
+        [
+          32874,
+          "Alimentación Neutro",
+          "Power Neutro",
+          "AlimentazioneNeutro",
+          "Нейтральное питание"
+        ],
+        [
+          32883,
+          "Alimentación Protección",
+          "Power Protection",
+          "Alimentazione Protezione",
+          "Защитное заземление"
+        ],
+        [
+          32872,
+          "Alimentación Fase + Neutro",
+          "Power Phase + Neutro",
+          "Alimentazione Fase + Neutro",
+          "Фаза + нейтраль"
+        ],
+        [
+          32906,
+          "Alimentación Fase + Neutro + Protección",
+          "Power Phase + Neutro + Protection",
+          "Alimentazione Fase + Neutro + Protezione",
+          "Фаза + нейтраль + защитное заземление"
+        ],
+        [
+          32870,
+          "Alimentación L1 + L2 + L3",
+          "Power  L1 + L2 + L3",
+          "Alimentazione L1 + L2 + L3",
+          "Трёхфазное питание L1/L2/L3"
+        ],
+        [
+          32879,
+          "Alimentación L1 + L2 + L3 + PE",
+          "Power  L1 + L2 + L3 + PE",
+          "Alimentazione L1 + L2 + L3 + PE",
+          "Трёхфазное питание L1/L2/L3 + PE"
+        ],
+        [
+          32869,
+          "Alimentación L1 + L2 + L3 + N",
+          "Power  L1 + L2 + L3 + N",
+          "Alimentazione L1 + L2 + L3 + N",
+          "Фаза + нейтраль питания L1/L2/L3 + N"
+        ],
+        [
+          32882,
+          "Alimentación L1 + L2 + L3 + N + PE",
+          "Power L1 + L2 + L3 + N + PE",
+          "Alimentazione L1 + L2 + L3 + N + PE",
+          "Трёхфазное питание L1/L2/L3 + N + PE"
+        ],
+        [
+          32876,
+          "Alimentación Positivo",
+          "Positive power",
+          "Alimentazione Positivo",
+          "Положительное питание"
+        ],
+        [
+          32877,
+          "Alimentación Negativo",
+          "Negative power",
+          "Alimentazione Negativo",
+          "Отрицательное питание"
+        ],
+        [
+          32875,
+          "Alimentación +-",
+          "Power +-",
+          "Alimentazione +-",
+          "Питание ±"
+        ],
+        [
+          33042,
+          "Alimentación Protección",
+          "Power Protection",
+          "Alimentazione cavo fase",
+          "Защитное заземление"
+        ],
+        [
+          32995,
+          "Transformador",
+          "Transformer",
+          "Trasformatore",
+          "Трансформатор"
+        ],
+        [
+          33045,
+          "Transformador III",
+          "Transformer III",
+          "trasformatore III",
+          "Трёхфазный трансформатор"
+        ],
+        [
+          33043,
+          "Diodo",
+          "Diode",
+          "Diodo",
+          "Диод"
+        ],
+        [
+          32997,
+          "Rectificador",
+          "Rectifier",
+          "Rectifier",
+          "Выпрямитель"
+        ],
+        [
+          32998,
+          "Fuente de alimentación",
+          "Power supply",
+          "Alimentazione",
+          "Источник питания"
+        ],
+        [
+          33044,
+          "Fuente de alimentación III",
+          "Power supply III",
+          "Alimentazione III",
+          "Трёхфазный источник питания"
+        ],
+        [
+          33046,
+          "Bateria",
+          "Battery",
+          "Batteria",
+          "Аккумулятор"
+        ],
+        [
+          33263,
+          "Toma de corriente",
+          "Electrical outlet",
+          "Presa elettrica",
+          "Розетка"
+        ]
+      ]
+    },
+    {
+      "name": "Fusibles y seccionadores",
+      "toolbar": 177,
+      "items": [
+        [
+          32853,
+          "Fusible I",
+          "Fuse I",
+          "Fusibile I",
+          "Предохранитель I"
+        ],
+        [
+          32842,
+          "Fusible IN",
+          "Fuse IN",
+          "Fusibile IN",
+          "Предохранитель I+N"
+        ],
+        [
+          32839,
+          "Fusible II",
+          "Fuse II",
+          "Fusibile II",
+          "Предохранитель II"
+        ],
+        [
+          32840,
+          "Fusible III",
+          "Fuse III",
+          "Fusibile III",
+          "Предохранитель III"
+        ],
+        [
+          32841,
+          "Fusible IIIN",
+          "Fuse IIIN",
+          "Fusibile IIIN",
+          "Предохранитель III+N"
+        ],
+        [
+          32854,
+          "Fusible seccionable I",
+          "Fuse disconnector I",
+          "Sezionatore con fusibile I",
+          "Предохранитель-разъединитель I"
+        ],
+        [
+          32843,
+          "Fusible seccionable IN",
+          "Fuse disconnector IN",
+          "Sezionatore con fusibile IN",
+          "Предохранитель-разъединитель I+N"
+        ],
+        [
+          32844,
+          "Fusible seccionable II",
+          "Fuse disconnector II",
+          "Sezionatore con fusibile II",
+          "Предохранитель-разъединитель II"
+        ],
+        [
+          32845,
+          "Fusible seccionable III",
+          "Fuse disconnector III",
+          "Sezionatore con fusibile III",
+          "Предохранитель-разъединитель III"
+        ],
+        [
+          32848,
+          "Fusible seccionable IIIN",
+          "Fuse disconnector IIIN",
+          "Sezionatore con fusibile IIIN",
+          "Предохранитель-разъединитель III+N"
+        ]
+      ]
+    },
+    {
+      "name": "Automáticos, diferenciales, relé térmico, disyuntores, limitadores de sobretensión",
+      "toolbar": 179,
+      "items": [
+        [
+          32858,
+          "Interruptor automático I",
+          "Automatic switch I",
+          "Interruttore automatico I",
+          "Автоматический выключатель I"
+        ],
+        [
+          32859,
+          "Interruptor automático IN",
+          "Automatic switch IN",
+          "Interruttore automatico IN",
+          "Автоматический выключатель I+N"
+        ],
+        [
+          32860,
+          "Interruptor automático II",
+          "Automatic switch II",
+          "Interruttore automatico II",
+          "Автоматический выключатель II"
+        ],
+        [
+          32861,
+          "Interruptor automático III",
+          "Automatic switch III",
+          "Interruttore automatico III",
+          "Автоматический выключатель III"
+        ],
+        [
+          32862,
+          "Interruptor automático IIIN",
+          "Automatic switch IIIN",
+          "Interruttore automatico IIIN",
+          "Автоматический выключатель III+N"
+        ],
+        [
+          32863,
+          "Interruptor diferencial IN",
+          "Differential switch IN",
+          "Interruttore differenziale IN",
+          "Устройство защитного отключения I+N"
+        ],
+        [
+          32864,
+          "Interruptor diferencial IIIN",
+          "Differential switch IIIN",
+          "Interruttore differenziale IIIN",
+          "Устройство защитного отключения III+N"
+        ],
+        [
+          32865,
+          "Relé térmico",
+          "Thermal Relay",
+          "Relè termico",
+          "Тепловое реле"
+        ],
+        [
+          32898,
+          "Disyuntor I",
+          "Magnetothermic switch I",
+          "Interruttore magnetotermico I",
+          "Автоматический выключатель I"
+        ],
+        [
+          33050,
+          "Disyuntor IN",
+          "Magnetothermic switch IN",
+          "Interruttore magnetotermico IN",
+          "Автоматический выключатель I+N"
+        ],
+        [
+          32866,
+          "Disyuntor II",
+          "Magnetothermic switch II",
+          "Interruttore magnetotermico II",
+          "Автоматический выключатель II"
+        ],
+        [
+          32867,
+          "Disyuntor III",
+          "Magnetothermic switch III",
+          "Interruttore magnetotermico III",
+          "Автоматический выключатель III"
+        ],
+        [
+          33052,
+          "Disyuntor IIIN",
+          "Magnetothermic switch IIIN",
+          "Interruttore magnetotermico IIIN",
+          "Автоматический выключатель III+N"
+        ],
+        [
+          33054,
+          "Limitador sobretensiones IN",
+          "Overvoltage limiter IN",
+          "Llimitatore di sovratensione IN",
+          "Ограничитель перенапряжения I+N"
+        ],
+        [
+          33055,
+          "Limitador sobretensiones IIIN",
+          "Overvoltage limiter IIIN",
+          "Limitatore di sovratensione IIIN",
+          "Ограничитель перенапряжения III+N"
+        ]
+      ]
+    },
+    {
+      "name": "Contactores e interruptores (potencia)",
+      "toolbar": 175,
+      "items": [
+        [
+          32899,
+          "Contactor I",
+          "Contactor I",
+          "Contattore I",
+          "Контактор I"
+        ],
+        [
+          32834,
+          "Contactor II",
+          "Contactor II",
+          "Contattore II",
+          "Контактор II"
+        ],
+        [
+          32833,
+          "Contactor III",
+          "Contactor III",
+          "Contattore III",
+          "Контактор III"
+        ],
+        [
+          32835,
+          "Contactor IIII",
+          "Contactor IIII",
+          "Contattore IIII",
+          "Контактор IV"
+        ],
+        [
+          33219,
+          "Contactor III",
+          "Contactor III",
+          "Contattore III",
+          "Контактор III"
+        ],
+        [
+          32900,
+          "Interruptor I",
+          "Switch I",
+          "Interrutture I",
+          "Выключатель I"
+        ],
+        [
+          32836,
+          "Interruptor II",
+          "Switch II",
+          "Interrutture II",
+          "Выключатель II"
+        ],
+        [
+          32837,
+          "Interruptor III",
+          "Switch III",
+          "Interrutture III",
+          "Выключатель III"
+        ],
+        [
+          32838,
+          "Interruptor IIII",
+          "Switch IIII",
+          "Interrutture IIII",
+          "Выключатель IV"
+        ],
+        [
+          33392,
+          "Enclavamiento",
+          "Interlocking",
+          "Ad incastro",
+          "Механическая блокировка"
+        ]
+      ]
+    },
+    {
+      "name": "Motores",
+      "toolbar": 173,
+      "items": [
+        [
+          32828,
+          "Motor trifásico",
+          "Three-phase motor",
+          "Motore trifase",
+          "Трёхфазный двигатель"
+        ],
+        [
+          32829,
+          "Motor trifásico YD",
+          "Three-phase motor YD",
+          "Motore trifase YD",
+          "Трёхфазный двигатель со схемой пуска звезда–треугольник"
+        ],
+        [
+          32830,
+          "Motor monofásico",
+          "Single-phase motor",
+          "Motore monofase",
+          "Однофазный двигатель"
+        ],
+        [
+          33103,
+          "Motor monofásico",
+          "Single-phase motor",
+          "Motore monofase",
+          "Однофазный двигатель"
+        ],
+        [
+          33237,
+          "Motor trifásico como monofásico",
+          "Motor trifase as motor monofase",
+          "Motore trifase como motore monofase",
+          "Трёхфазный двигатель в однофазном режиме"
+        ],
+        [
+          32831,
+          "Motor Dahalander",
+          "Motor Dahalander",
+          "Motore Dahalander",
+          "Двигатель Даландера"
+        ],
+        [
+          32994,
+          "Motor II Veloc",
+          "Two speed motor",
+          "Motore a due velocità",
+          "Двухскоростной двигатель"
+        ],
+        [
+          32832,
+          "Motor trifásico rotor bobinado",
+          "Wound rotor induction motor",
+          "Motore a rotore anelli",
+          "Трёхфазный двигатель с фазным ротором"
+        ],
+        [
+          32999,
+          "Motor cc. de imán permanente",
+          "DC motor. Iman P.",
+          "DC Motore Iman P.",
+          "Двигатель постоянного тока с постоянными магнитами"
+        ],
+        [
+          33000,
+          "Motor cc. de independiente",
+          "DC motor. Indep.",
+          "DC Motore Indep.",
+          "Двигатель постоянного тока с независимым возбуждением"
+        ],
+        [
+          33295,
+          "Motor paso a paso unipolar",
+          "Unipolar stepper motor",
+          "Motore passo-passo unipolare",
+          "Униполярный шаговый двигатель"
+        ],
+        [
+          33296,
+          "Motor paso a paso bipolar",
+          "Bipolar stepper motor",
+          "Motore passo-passo bipolare",
+          "Биполярный шаговый двигатель"
+        ],
+        [
+          33104,
+          "Freno",
+          "Brake",
+          "Freno",
+          "Тормоз"
+        ],
+        [
+          33257,
+          "Actuador lineal eléctrico",
+          "Electric Linear Actuator",
+          "Attuatore lineare elettrico",
+          "Электрический линейный привод"
+        ]
+      ]
+    },
+    {
+      "name": "Potencia: resistencias, arrancadores, variadores, controladores",
+      "toolbar": 213,
+      "items": [
+        [
+          33002,
+          "Resistencia I",
+          "Resistence I",
+          "Resistenza I",
+          "Резистор I"
+        ],
+        [
+          33003,
+          "Resistencia III",
+          "Resistence III",
+          "Resistenza III",
+          "Резистор III"
+        ],
+        [
+          33004,
+          "Autotransformador III",
+          "Autotransformer III",
+          "Autotransformatore III",
+          "Автотрансформатор III"
+        ],
+        [
+          33005,
+          "Arrancador electónico c.a.",
+          "Electronic starter a.c.",
+          "Starter elettronico c.a.",
+          "Электронный пускатель переменного тока"
+        ],
+        [
+          33089,
+          "Control arrancador electrónico c.a..",
+          "Electronic starter control a.c.",
+          "Controllo starter elettronico c.a.",
+          "Управление электронным пускателем переменного тока."
+        ],
+        [
+          33262,
+          "Control inversor electrónico c.a..",
+          null,
+          null,
+          "Управление электронным инвертором переменного тока."
+        ],
+        [
+          33006,
+          "Variador velocidad c.a. II",
+          "Variable speed c.a. II",
+          "Variatore velocità. c.a. II",
+          "Преобразователь частоты переменного тока II"
+        ],
+        [
+          33007,
+          "Variador velocidad c.a. III",
+          "Variable speed a.c. III",
+          "Variatore velocità c.a. III",
+          "Преобразователь частоты переменного тока III"
+        ],
+        [
+          33011,
+          "Control Variador velocidad c.a.",
+          "Drive speed control a.c.",
+          "Control variatore velocità c.a.",
+          "Управление Преобразователь частоты переменного тока"
+        ],
+        [
+          33015,
+          "Variador velocidad c.c. II",
+          "Variable speed d.c. II",
+          "Variatore velocità c.c. II",
+          "Преобразователь скорости двигателя постоянного тока II"
+        ],
+        [
+          33016,
+          "Variador velocidad c.c. II",
+          "Variable speed d.c. II",
+          "Variatore velocità c.c. II",
+          "Преобразователь скорости двигателя постоянного тока II"
+        ],
+        [
+          33018,
+          "Variador velocidad c.c. III",
+          "Variable speed d.c. III",
+          "Variatore velocità c.c. IIII",
+          "Преобразователь скорости двигателя постоянного тока III"
+        ],
+        [
+          33017,
+          "Variador velocidad c.c. III",
+          "Variable speed d.c. III",
+          "Variatore velocità c.c. IIII",
+          "Преобразователь скорости двигателя постоянного тока III"
+        ],
+        [
+          33012,
+          "Control variador velocidad c.c.",
+          "Drive speed control d.c.",
+          "Control variatore velocità. c.c.",
+          "Управление Преобразователь скорости двигателя постоянного тока"
+        ],
+        [
+          33297,
+          "Controlador motor paso a paso",
+          "Stepper motor driver",
+          "Controller del motore passo-passo",
+          "Контроллер шагового двигателя"
+        ],
+        [
+          33298,
+          "Controlador motor paso a paso 2 CLK",
+          "Stepper motor driver 2 CLK",
+          "Controller del motore passo-passo 2 CLK",
+          "Контроллер шагового двигателя, 2 тактовых сигнала"
+        ],
+        [
+          33299,
+          "Controlador motor paso a paso CLK/DIR",
+          "Stepper motor driver CLK/DIR",
+          "Controller del motore passo-passo CLK/DIR",
+          "Контроллер шагового двигателя, такт/направление"
+        ]
+      ]
+    },
+    {
+      "name": "Contactos auxiliares y temporizados",
+      "toolbar": 191,
+      "items": [
+        [
+          32937,
+          "Contacto NA",
+          "NO contact",
+          "Contatto NO",
+          "Замыкающий контакт (НО)"
+        ],
+        [
+          32938,
+          "Contacto NC",
+          "NC contact",
+          "Contatto NC",
+          "Размыкающий контакт (НЗ)"
+        ],
+        [
+          32939,
+          "Contacto NA+NC",
+          "NO+NC contact",
+          "Contatto NO+NC",
+          "Контакты НО+НЗ"
+        ],
+        [
+          32940,
+          "Contacto CON",
+          "CON contact",
+          "Contatto CON",
+          "Переключающий контакт"
+        ],
+        [
+          32933,
+          "Contacto temporizado a la conexión NA",
+          "NO contact with the connection timed",
+          "Contatto temporizzato ritardato alla eccitazione NO",
+          "Контакт с задержкой включения НО"
+        ],
+        [
+          32934,
+          "Contacto temporizado a la conexión NC",
+          "NC contact with the connection timed",
+          "Contatto temporizzato ritardato alla eccitazione NC",
+          "Контакт с задержкой включения НЗ"
+        ],
+        [
+          32935,
+          "Contacto temporizado a la conexión NA+NC",
+          "NO+NC contact with the connection timed",
+          "Contatto temporizzato ritardato alla eccitazione NO+NC",
+          "Контакт с задержкой включения НО+НЗ"
+        ],
+        [
+          32936,
+          "Contacto temporizado a la conexión CON",
+          "CON contact with the connection timed",
+          "Contatto temporizzato ritardato alla eccitazione CON",
+          "Контакт с задержкой включения переключающий"
+        ],
+        [
+          32941,
+          "Contacto temporizado a la deconexión NA",
+          "NO Contact timed to disconnection",
+          "Contatto temporizzato ritardato alla diseccitazione NO",
+          "Контакт с задержкой отключения НО"
+        ],
+        [
+          32942,
+          "Contacto temporizado a la deconexión NC",
+          "NC Contact timed to disconnection",
+          "Contatto temporizzato ritardato alla diseccitazione NC",
+          "Контакт с задержкой отключения НЗ"
+        ],
+        [
+          32943,
+          "Contacto temporizado a la deconexión NA+NC",
+          "NO+NC Contact timed to disconnection",
+          "Contatto temporizzato ritardato alla diseccitazione NO+NC",
+          "Контакт с задержкой отключения НО+НЗ"
+        ],
+        [
+          32944,
+          "Contacto temporizado a la deconexión CON",
+          "CON Contact timed to disconnection",
+          "Contatto temporizzato ritardato alla diseccitazione CON",
+          "Контакт с задержкой отключения переключающий"
+        ],
+        [
+          32945,
+          "Contacto temporizado a la conexión deconexión NA",
+          "NO contact with the connection disconnection timed",
+          "Contatto temporizzato ritardato alla eccitaziones diseccitazione NO",
+          "Контакт с задержкой включения и отключения НО"
+        ],
+        [
+          32946,
+          "Contacto temporizado a la conexión deconexión NC",
+          "NC contact with the connection disconnection timed",
+          "Contatto temporizzato ritardato alla eccitaziones diseccitazione NC",
+          "Контакт с задержкой включения и отключения НЗ"
+        ],
+        [
+          32947,
+          "Contacto temporizado a la conexión deconexión NA+NC",
+          "NO+NC contact with the connection disconnection timed",
+          "Contatto temporizzato ritardato alla eccitaziones diseccitazione NO+NC",
+          "Контакты с задержкой включения и отключения НО+НЗ"
+        ],
+        [
+          32948,
+          "Contacto temporizado a la conexión deconexión CON",
+          "CON contact with the connection disconnection timed",
+          "Contatto temporizzato ritardato alla eccitaziones diseccitazione CON",
+          "Переключающий контакт с задержкой включения и отключения"
+        ]
+      ]
+    },
+    {
+      "name": "Accionamientos (pulsadores, setas, interruptores, conmutadores, finales de carrera)",
+      "toolbar": 189,
+      "items": [
+        [
+          33278,
+          "Botón pulsador",
+          "Push button",
+          "Pulsante",
+          "Кнопка"
+        ],
+        [
+          32909,
+          "Pulsador NA",
+          "Push button",
+          "Pulsante NO",
+          "Кнопка НО"
+        ],
+        [
+          32910,
+          "Pulsador NC",
+          "NC button",
+          "Pulsante NC",
+          "Кнопка НЗ"
+        ],
+        [
+          32912,
+          "Pulsador NA-NC",
+          "NO-NC button",
+          "Pulsante NO-NC",
+          "Кнопка НО-НЗ"
+        ],
+        [
+          32913,
+          "Pulsador CON",
+          "CON button",
+          "Pulsante CON",
+          "Кнопка переключающий"
+        ],
+        [
+          32914,
+          "Pulsador seta NA",
+          "NO button mushroom",
+          "Pulsante fungo NO",
+          "Кнопка грибовидная кнопка НО"
+        ],
+        [
+          32915,
+          "Pulsador seta NC",
+          "NC button mushroom",
+          "Pulsante fungo NC",
+          "Кнопка грибовидная кнопка НЗ"
+        ],
+        [
+          32917,
+          "Pulsador seta NA-NC",
+          "NO-NC button mushroom",
+          "Pulsante fungo NO-NC",
+          "Кнопка грибовидная кнопка НО-НЗ"
+        ],
+        [
+          32918,
+          "Pulsador seta CON",
+          "CON button mushroom",
+          "Pulsante fungo CON",
+          "Кнопка грибовидная кнопка переключающий"
+        ],
+        [
+          32919,
+          "Interruptor NA",
+          "NO switch",
+          "Interruttore NO",
+          "Выключатель НО"
+        ],
+        [
+          32920,
+          "Interruptor NC",
+          "NC switch",
+          "Interruttore NC",
+          "Выключатель НЗ"
+        ],
+        [
+          32921,
+          "Interruptor NA-NC",
+          "NO-NC switch",
+          "Interruttore NO-NC",
+          "Выключатель НО-НЗ"
+        ],
+        [
+          32922,
+          "Interruptor CON",
+          "COM switch",
+          "Interruttore CON",
+          "Выключатель переключающий"
+        ],
+        [
+          33047,
+          "Conmutador I-0-II",
+          "I-0-II switch",
+          "Commutatore I-0-II",
+          "Переключатель I–0–II"
+        ],
+        [
+          33048,
+          "Conmutador I-II-III",
+          "I-II-III switch",
+          "Commutatore I-II-III",
+          "Переключатель I–II–III"
+        ],
+        [
+          33049,
+          "Conmutador cruce",
+          "Crossover switch",
+          "Conmutador di giunzione",
+          "Перекрёстный переключатель"
+        ],
+        [
+          32923,
+          "Final de carrera NA",
+          "NO limit",
+          "Finecorsa NO",
+          "Концевой выключатель НО"
+        ],
+        [
+          32924,
+          "Final de carrera NC",
+          "NC limit",
+          "Finecorsa NC",
+          "Концевой выключатель НЗ"
+        ],
+        [
+          32925,
+          "Final de carrera NA-NC",
+          "NO-NC limit",
+          "Finecorsa NO-NC",
+          "Концевой выключатель НО-НЗ"
+        ],
+        [
+          32926,
+          "Final de carrera COM",
+          "COM limit",
+          "Finecorsa COM",
+          "Концевой выключатель общий"
+        ],
+        [
+          32927,
+          "Contacto auxiliar relé térmico NA",
+          "NO Auxiliary heat relay",
+          "Contatto ausiliario relè termico NO",
+          "Вспомогательный контакт теплового реле НО"
+        ],
+        [
+          32928,
+          "Contacto auxiliar relé térmico NC",
+          "NC Auxiliary heat relay",
+          "Contatto ausiliario relè termico NC",
+          "Вспомогательный контакт теплового реле НЗ"
+        ],
+        [
+          32929,
+          "Contacto auxiliar relé térmico NA-NC",
+          "NO-NC Auxiliary heat relay",
+          "Contatto ausiliario relè termico NO-NC",
+          "Вспомогательный контакт теплового реле НО-НЗ"
+        ],
+        [
+          32930,
+          "Contacto auxiliar relé térmico CON",
+          "COM Auxiliary heat relay",
+          "Contatto ausiliario relè termico CON",
+          "Вспомогательный контакт теплового реле переключающий"
+        ]
+      ]
+    },
+    {
+      "name": "Detectores / sensores",
+      "toolbar": 215,
+      "items": [
+        [
+          33032,
+          "Det. inductivo NA",
+          "NO Inductive detector",
+          "Sensori induttivo NO",
+          "Индуктивный датчик НО"
+        ],
+        [
+          33020,
+          "Det. inductivo NC",
+          "NCInductive detector",
+          "Sensori induttivo NC",
+          "Индуктивный датчик НЗ"
+        ],
+        [
+          33021,
+          "Det. capacitivo NA",
+          "NO Capacitive detector",
+          "Sensori capacitivo NO",
+          "Ёмкостный датчик НО"
+        ],
+        [
+          33022,
+          "Det. capacitivo NC",
+          "NC Capacitive detector",
+          "Sensori capacitivo NC",
+          "Ёмкостный датчик НЗ"
+        ],
+        [
+          33023,
+          "Det. magnético NA",
+          "NO Magnetic detector",
+          "Sensori  magnetico NO",
+          "Магнитный датчик НО"
+        ],
+        [
+          33024,
+          "Det. magnético NC",
+          "NC Magnetic detector",
+          "Sensori  magnetico NC",
+          "Магнитный датчик НЗ"
+        ],
+        [
+          33025,
+          "Barrera fotoeléctica",
+          "Light barrier",
+          "Fotodellula",
+          "Фотоэлектрический датчик"
+        ],
+        [
+          33027,
+          "Barrera emisor",
+          "Emitter barrier",
+          "Fotodellula emettitore",
+          "Излучатель фотоэлектрического датчика"
+        ],
+        [
+          33034,
+          "Barrera receptor NA",
+          "NO receptor barrier",
+          "Fotodellula recevitore NO",
+          "Приёмник фотоэлектрического барьера НО"
+        ],
+        [
+          33033,
+          "Barrera receptor NC",
+          "NC receptor barrier",
+          "Fotodellula recevitore NC",
+          "Приёмник фотоэлектрического барьера НЗ"
+        ],
+        [
+          33253,
+          "Presostato NA",
+          "Pressure switch NO",
+          "Pressostato NO",
+          "Реле давления НО"
+        ],
+        [
+          33254,
+          "Presostato NA",
+          "Pressure switch NC",
+          "Pressostato NC",
+          "Реле давления НО"
+        ],
+        [
+          33255,
+          "Vacuostato NA",
+          "Empty pressure NO",
+          "Pressione di vuoto NO",
+          "Вакуумное реле НО"
+        ],
+        [
+          33256,
+          "Vacuostato NC",
+          "Empty pressure NC",
+          "Pressione di vuoto NC",
+          "Вакуумное реле НЗ"
+        ],
+        [
+          33346,
+          "Termostato NA",
+          "Thermostat NO",
+          "Termostato NO",
+          "Термостат НО"
+        ],
+        [
+          33347,
+          "Termostato NC",
+          "Thermostat NC",
+          "Termostato NC",
+          "Термостат НЗ"
+        ]
+      ]
+    },
+    {
+      "name": "Bobinas, temporizadores y señalización",
+      "toolbar": 193,
+      "items": [
+        [
+          32949,
+          "Bobina contactor, relé",
+          "Coil contactor, relay",
+          "Bobine contattori, relè",
+          "Катушка контактора/реле"
+        ],
+        [
+          32956,
+          "Bobina biestable contactor, relé",
+          "Bistable contactor coil, relay",
+          "Bistabile bobina contattore, relè",
+          "Бистабильная катушка контактора/реле"
+        ],
+        [
+          32964,
+          "Telerruptor",
+          "Step relay",
+          "Teleruttore",
+          "Импульсное реле"
+        ],
+        [
+          32951,
+          "Bobina electroválvula",
+          "Solenoid coil",
+          "Bobina elettrovalvola",
+          "Катушка электромагнитного клапана"
+        ],
+        [
+          32952,
+          "Temporizador a la conexión",
+          "Connection timer",
+          "Temporizzatore ritardato alla eccitazione",
+          "Реле времени с задержкой включения"
+        ],
+        [
+          32953,
+          "Temporizador a la desconexión",
+          "Timer to disconnect",
+          "Temporizzatore con ritardo alla diseccitazione",
+          "Реле времени с задержкой отключения"
+        ],
+        [
+          32954,
+          "Temporizador a la conexión desconexión",
+          "Disconnect connection timer",
+          "Temporizzatore con ritardo alla eccitazione diseccitazione",
+          "Реле времени с задержкой включения и отключения"
+        ],
+        [
+          32955,
+          "Relé intermitente",
+          "Flasher relay",
+          "Relè intermitente",
+          "Реле-прерыватель"
+        ],
+        [
+          33223,
+          "Generador de pulsos",
+          "Pulse Generator",
+          "Generatore di impulsi",
+          "Генератор импульсов"
+        ],
+        [
+          33098,
+          "Interruptor horario",
+          "Time switch",
+          "Interruttore orario",
+          "Реле времени"
+        ],
+        [
+          33236,
+          "Contador de pulsos",
+          "Pulse counter",
+          "Contatore di impulsi",
+          "Счётчик импульсов"
+        ],
+        [
+          32957,
+          "Piloto señalización",
+          "Pilot signal",
+          "Lampadina",
+          "Сигнальная лампа"
+        ],
+        [
+          32958,
+          "Piloto señalización intermitente",
+          "Iintermittent pilot",
+          "Lampadina intermitente",
+          "Мигающая сигнальная лампа"
+        ],
+        [
+          32961,
+          "Timbre",
+          "Ring",
+          "Pulsante",
+          "Звонок"
+        ],
+        [
+          32962,
+          "Zumbador",
+          "Buzzer",
+          "Vibratore",
+          "Зуммер"
+        ],
+        [
+          32960,
+          "Sirena",
+          "Siren",
+          "Sirena",
+          "Сирена"
+        ],
+        [
+          32959,
+          "Bocina",
+          "Horn",
+          "Clacson",
+          "Звуковой сигнал"
+        ]
+      ]
+    },
+    {
+      "name": "Relés electrónicos y protecciones",
+      "toolbar": 291,
+      "items": [
+        [
+          33258,
+          "Relé estado sólido SSR DC",
+          "Solid State Relay SSR DC",
+          "SSR relè a stato solido DC",
+          "Твердотельное реле постоянного тока (SSR)"
+        ],
+        [
+          33259,
+          "Relé estado sólido SSR AC",
+          "Solid State Relay SSR AC",
+          "SSR relè a stato solido AC",
+          "Твердотельное реле переменного тока (SSR)"
+        ],
+        [
+          33260,
+          "Contactor de estado sólido",
+          "Solid state contactor",
+          "Solid state contattore",
+          "Твердотельный контактор"
+        ],
+        [
+          33261,
+          "Contactor inversor de estado sólido",
+          "Solid state inverter contactor",
+          "Stato solido contattore di inversione",
+          "Реверсивный твердотельный контактор"
+        ],
+        [
+          33266,
+          "Relé de falta de fase + N",
+          "Phase + N fault relay",
+          "Fase di relè mancanza + N",
+          "Реле контроля фаз и нейтрали"
+        ],
+        [
+          33267,
+          "Relé de falta de fase",
+          "Phase loss relay",
+          "Mancanza di fase relè",
+          "Реле контроля наличия фаз"
+        ],
+        [
+          33271,
+          "Relé de secuencia de fase + N",
+          "Phase + N sequence relay",
+          "Sequenza delle fasi relè + N",
+          "Реле контроля чередования фаз и нейтрали"
+        ],
+        [
+          33269,
+          "Relé de secuencia de fase",
+          "Phase sequence relay",
+          "Sequenza delle fasi Relè",
+          "Реле контроля чередования фаз"
+        ],
+        [
+          33344,
+          "Proteccion contra sobretensiones permanentes",
+          "Protection against permanent overvoltages",
+          "Protezione contro le sovratensioni permanenti",
+          "Защита от длительных перенапряжений"
+        ],
+        [
+          33345,
+          "proteccion contra sobretensiones permanentes",
+          "Protection against permanent overvoltages",
+          "Protezione contro le sovratensioni permanenti",
+          "Защита от длительных перенапряжений"
+        ],
+        [
+          33372,
+          "Relé SPST",
+          "Relay SPST",
+          "Relè SPST",
+          "Реле с нормально разомкнутым контактом (SPST)"
+        ],
+        [
+          33373,
+          "Relé SPDT",
+          "Relay SPDT",
+          "Relè SPDT",
+          "Реле с переключающим контактом (SPDT)"
+        ]
+      ]
+    },
+    {
+      "name": "Lógica",
+      "toolbar": 226,
+      "items": [
+        [
+          33056,
+          "AND",
+          "AND",
+          "AND",
+          "И"
+        ],
+        [
+          33057,
+          "OR",
+          "OR",
+          "OR",
+          "ИЛИ"
+        ],
+        [
+          33058,
+          "INV",
+          "INV",
+          "INV",
+          "НЕ"
+        ],
+        [
+          33059,
+          "EXOR",
+          "EXOR",
+          "EXOR",
+          "ИСКЛ. ИЛИ"
+        ],
+        [
+          33060,
+          "NAND",
+          "NAND",
+          "NAND",
+          "Элемент И-НЕ"
+        ],
+        [
+          33061,
+          "NOR",
+          "NOR",
+          "NOR",
+          "ИЛИ-НЕ"
+        ],
+        [
+          33100,
+          "Biestable",
+          "Biestable",
+          "bistabile",
+          "Триггер"
+        ],
+        [
+          33111,
+          "Divisor Binario",
+          "Binary divider",
+          "Binary Divider",
+          "Двоичный делитель"
+        ],
+        [
+          33099,
+          "Temporizador conexión",
+          "Connection timer",
+          "Timer onr",
+          "Реле времени с задержкой включения"
+        ],
+        [
+          33300,
+          "Temporizador pulso conexión",
+          "Pulse connection timer",
+          "Pulse timer onr",
+          "Реле времени импульсного включения"
+        ],
+        [
+          33112,
+          "Temporizador desconexión",
+          "timer off",
+          "Timer off",
+          "Реле времени с задержкой отключения"
+        ],
+        [
+          33114,
+          "Temporizador intermitente",
+          "Intermittent timer",
+          "Timer intermittente",
+          "Реле времени циклического действия"
+        ],
+        [
+          33226,
+          null,
+          "Pulse Generator",
+          "Generatore di impulsi",
+          "Генератор импульсов"
+        ],
+        [
+          33097,
+          "Contador",
+          "Counterr",
+          "Contatorer",
+          "Счётчик"
+        ],
+        [
+          33277,
+          "Contador ascendente-descendente",
+          "Counter ascending-descending",
+          "Up-down contatore",
+          "Реверсивный счётчик"
+        ],
+        [
+          33292,
+          "Contador 4 bits",
+          "Counter 4 bits",
+          "Contatore a 4 bit",
+          "4-битный счётчик"
+        ],
+        [
+          33293,
+          "Contador 4 bits",
+          "Counter 4 bits",
+          "Contatore a 4 bit",
+          "4-битный счётчик"
+        ],
+        [
+          33301,
+          "Contador 4 bits ASC/DES",
+          "Counter 4 bits ASC/DES",
+          "Contatore a 4 bit  ASC/DES",
+          "Реверсивный 4-битный счётчик"
+        ],
+        [
+          33302,
+          "Contador 4 bits decadas",
+          "Counter 4 bits decades",
+          "Contatore decadi 4 bit",
+          "Декадный 4-битный счётчик"
+        ],
+        [
+          33079,
+          "Prueba",
+          "Test",
+          "Prova",
+          "Тест"
+        ],
+        [
+          33080,
+          "Visualiza",
+          "Visualize",
+          "Visualizza",
+          "Индикатор"
+        ],
+        [
+          33294,
+          "Decodificador 7 segmentos",
+          "Decoder BCD 7 Seg",
+          "Decoder BCD 7 Seg",
+          "Декодер семисегментного индикатора"
+        ],
+        [
+          33115,
+          null,
+          "Display BCD",
+          "Display BCD",
+          "Дисплей BCD"
+        ],
+        [
+          33116,
+          null,
+          "Display 7 Seg.",
+          "Display 7 Seg.",
+          "Семисегментный дисплей"
+        ],
+        [
+          33117,
+          "Preselctor",
+          "Preselector",
+          "Pre-selettore",
+          "Предустановленный селектор"
+        ],
+        [
+          33035,
+          "Cable positivo",
+          "Positive wire",
+          "Cavo positivo",
+          "Положительный провод"
+        ],
+        [
+          32889,
+          "Conexión",
+          "Connection",
+          "Collegamento",
+          "Соединение"
+        ]
+      ]
+    },
+    {
+      "name": "Ladder",
+      "toolbar": 292,
+      "items": [
+        [
+          33062,
+          "NA",
+          "NO",
+          "NO",
+          "Замыкающий контакт (НО)"
+        ],
+        [
+          33063,
+          "NC",
+          "NC",
+          "NC",
+          "Размыкающий контакт (НЗ)"
+        ],
+        [
+          33065,
+          "Flanco ascendente",
+          "Positive edge",
+          "Fronte positivo",
+          "Фронт нарастания"
+        ],
+        [
+          33066,
+          "Flanco descendente",
+          "Negative edge",
+          "Fronte in discesa",
+          "Фронт спада"
+        ],
+        [
+          33291,
+          "First Scan",
+          "First Scan",
+          "First Scan",
+          "Первый цикл"
+        ],
+        [
+          33067,
+          "Asignar",
+          "Assignr",
+          "Assegnarer",
+          "Назначить"
+        ],
+        [
+          33069,
+          "Set",
+          "Set",
+          "Set",
+          "Установить"
+        ],
+        [
+          33070,
+          "Reset",
+          "Reset",
+          "Reset",
+          "Сброс"
+        ],
+        [
+          33100,
+          "Biestable",
+          "Biestable",
+          "bistabile",
+          "Триггер"
+        ],
+        [
+          33111,
+          "Divisor Binario",
+          "Binary divider",
+          "Binary Divider",
+          "Двоичный делитель"
+        ],
+        [
+          33099,
+          "Temporizador conexión",
+          "Connection timer",
+          "Timer onr",
+          "Реле времени с задержкой включения"
+        ],
+        [
+          33300,
+          "Temporizador pulso conexión",
+          "Pulse connection timer",
+          "Pulse timer onr",
+          "Реле времени импульсного включения"
+        ],
+        [
+          33112,
+          "Temporizador desconexión",
+          "timer off",
+          "Timer off",
+          "Реле времени с задержкой отключения"
+        ],
+        [
+          33114,
+          "Temporizador intermitente",
+          "Intermittent timer",
+          "Timer intermittente",
+          "Реле времени циклического действия"
+        ],
+        [
+          33226,
+          null,
+          "Pulse Generator",
+          "Generatore di impulsi",
+          "Генератор импульсов"
+        ],
+        [
+          33097,
+          "Contador",
+          "Counterr",
+          "Contatorer",
+          "Счётчик"
+        ],
+        [
+          33277,
+          "Contador ascendente-descendente",
+          "Counter ascending-descending",
+          "Up-down contatore",
+          "Реверсивный счётчик"
+        ],
+        [
+          32876,
+          "Alimentación Positivo",
+          "Positive power",
+          "Alimentazione Positivo",
+          "Положительное питание"
+        ],
+        [
+          32877,
+          "Alimentación Negativo",
+          "Negative power",
+          "Alimentazione Negativo",
+          "Отрицательное питание"
+        ],
+        [
+          33035,
+          "Cable positivo",
+          "Positive wire",
+          "Cavo positivo",
+          "Положительный провод"
+        ],
+        [
+          33037,
+          "Cable negativo",
+          "Negative wire",
+          "Cavo negativo",
+          "Отрицательный провод"
+        ]
+      ]
+    },
+    {
+      "name": "GRAFCET",
+      "toolbar": 228,
+      "items": [
+        [
+          33088,
+          "Etapa inicial",
+          "Initial stage",
+          "Tappa iniciale",
+          "Начальный шаг"
+        ],
+        [
+          33083,
+          "Etapa",
+          "Stage",
+          "Tappa",
+          "Шаг"
+        ],
+        [
+          33084,
+          "Transición",
+          "Transition",
+          "Transicione",
+          "Переход"
+        ],
+        [
+          33085,
+          "Acción",
+          "Action",
+          "Azione",
+          "Действие"
+        ],
+        [
+          33101,
+          "\"0\"",
+          "\"0\"",
+          "\"0\"",
+          "\"0\""
+        ],
+        [
+          33094,
+          "Divergencia en \"O\"",
+          "Divergence in \"O\"",
+          "Divergenza in \"O\"",
+          "Разветвление ИЛИ"
+        ],
+        [
+          33095,
+          "Convergencia en \"O\"",
+          "Convergence in \"O\"",
+          "Convergenza in \"O\"",
+          "Слияние ИЛИ"
+        ],
+        [
+          33102,
+          "\"Y\"",
+          "\"Y\"",
+          "\"Y\"",
+          "Соединение И"
+        ],
+        [
+          33086,
+          "Divergencia en \"Y\"",
+          "Divergence in \"Y\"",
+          "Divergenza in \"Y\"",
+          "Разветвление И"
+        ],
+        [
+          33093,
+          "Convergencia en \"Y\"",
+          "Convergencia en \"Y\"",
+          "Convergenza in \"Y\"",
+          "Слияние И"
+        ],
+        [
+          33092,
+          "Línea enlace",
+          "Line link",
+          "Linea Grafcet",
+          "Линия связи"
+        ],
+        [
+          33090,
+          "Enlace de entrada",
+          "Input Link",
+          "Link in entrata",
+          "Входная связь"
+        ],
+        [
+          33091,
+          "Enlace de salida",
+          "Output link",
+          "Uscita Link",
+          "Выходная связь"
+        ],
+        [
+          33096,
+          "Macro etapa",
+          "Macro stage",
+          "Macro tappa",
+          "Макрошаг"
+        ]
+      ]
+    },
+    {
+      "name": "Entrada/Salida, PLC, LOGO, Arduino",
+      "toolbar": 242,
+      "items": [
+        [
+          33108,
+          "Intercambio entradas PC_SIMU",
+          "Exchange PC_SIMU entries",
+          "Intercambio di biglietti PC_SIMU",
+          "Обмен входами с PC_SIMU"
+        ],
+        [
+          33109,
+          "Intercambio salidas PC_SIMU",
+          "Exchanging departures PC_SIMU",
+          "Uscite di Exchange PC_SIMU",
+          "Обмен выходами с PC_SIMU"
+        ],
+        [
+          33238,
+          "Módulo lógico",
+          "Logical module",
+          "Modulo logico",
+          "Логический модуль"
+        ],
+        [
+          33336,
+          "LOGO  4DI/4DO",
+          "LOGO  4DI/4DO",
+          "LOGO  4DI/4DO",
+          "Логический модуль LOGO, 4 цифровых входа/4 цифровых выхода"
+        ],
+        [
+          33240,
+          "PLC S7-1200",
+          "PLC S7-1200",
+          "PLC S7-1200",
+          "ПЛК Siemens S7-1200"
+        ],
+        [
+          33337,
+          "S7-1200 8DI/8DO",
+          "S7-1200 8DI/8DO",
+          "S7-1200 8DI/8DO",
+          "ПЛК Siemens S7-1200, 8 входов/8 выходов"
+        ],
+        [
+          33326,
+          "PLC CPU S7-1500",
+          "PLC CPU S7-1500",
+          "PLC CPU S7-1500",
+          "ЦПУ ПЛК Siemens S7-1500"
+        ],
+        [
+          33328,
+          "S7-1500 DI/DO",
+          "S7-1500 DI/DO",
+          "PLC S7-1500 DI/DO",
+          "Модуль входов/выходов Siemens S7-1500"
+        ],
+        [
+          33331,
+          "ET-200",
+          null,
+          "ET-200",
+          "Модуль распределённой периферии ET-200"
+        ],
+        [
+          33334,
+          "ET-200 8DI",
+          "ET-200 8DI",
+          "ET-200 8DI",
+          "Модуль ET-200, 8 входов"
+        ],
+        [
+          33335,
+          "ET-200 8DO",
+          "ET-200 8DO",
+          "ET-200 8DO",
+          "Модуль ET-200, 8 выходов"
+        ],
+        [
+          33272,
+          "Entrada digital PLC",
+          "PLC digital input",
+          "Ingresso digitale PLC",
+          "Цифровой вход ПЛК"
+        ],
+        [
+          33273,
+          "Salida digital PLC",
+          "PLC digital output",
+          "Uscita digitale PLC",
+          "Цифровой выход ПЛК"
+        ],
+        [
+          33274,
+          "CPU PLC",
+          "CPU PLC",
+          "CPU PLC",
+          "ЦПУ ПЛК"
+        ],
+        [
+          33275,
+          "Alimentación I/O digital PLC",
+          "Power supply Digital I / O PLC",
+          "Potenza digitali PLC I/O",
+          "Питание цифровых входов/выходов ПЛК"
+        ],
+        [
+          33276,
+          "Alimentación I/O digital PLC",
+          "Power supply Digital I / O PLC",
+          "Potenza digitali PLC I/O",
+          "Питание цифровых входов/выходов ПЛК"
+        ],
+        [
+          33324,
+          "Arduino uno",
+          "Arduino one",
+          "Arduino uno",
+          "Arduino Uno"
+        ]
+      ]
+    },
+    {
+      "name": "Actuadores neumáticos",
+      "toolbar": 269,
+      "items": [
+        [
+          33242,
+          "Actuador simple efecto",
+          "Single acting actuator",
+          "Attuatore semplice effetto",
+          "Пневмоцилиндр одностороннего действия"
+        ],
+        [
+          33243,
+          "Actuador doble efecto",
+          "Double acting actuator",
+          "Attuatore a doppio effetto",
+          "Пневмоцилиндр двустороннего действия"
+        ],
+        [
+          33245,
+          "Actuador sin vástago",
+          "Stemless actuator",
+          "Senza stelo",
+          "Бесштоковый пневмоцилиндр"
+        ],
+        [
+          33246,
+          "Actuador sin vástago magnético",
+          "Actuator without magnetic stem",
+          "Attuatore senza stelo magnetico",
+          "Бесштоковый пневмоцилиндр с магнитной муфтой"
+        ],
+        [
+          33247,
+          "Actuador giro",
+          "Rotating actuator",
+          "Attuatore turno",
+          "Поворотный пневмопривод"
+        ],
+        [
+          33252,
+          "Pinza simple efecto",
+          "Simple clamp effect",
+          "Morsetto semplice effetto",
+          "Пневмозахват одностороннего действия"
+        ],
+        [
+          33248,
+          "Pinza doble efecto",
+          "Double clamp",
+          "Pinza a doppio effetto",
+          "Пневмозахват двустороннего действия"
+        ],
+        [
+          33249,
+          "Ventosa",
+          "Sucker",
+          "Ventosa",
+          "Вакуумная присоска"
+        ],
+        [
+          33250,
+          "Motor neumático",
+          "Pneumatic motor",
+          "Air Motor",
+          "Пневмодвигатель"
+        ],
+        [
+          33251,
+          "Motor neumático reversible",
+          "Reversible pneumatic motor",
+          "Pneumatici motore reversibile",
+          "Реверсивный пневмодвигатель"
+        ]
+      ]
+    },
+    {
+      "name": "Cables y conexiones",
+      "toolbar": 187,
+      "items": [
+        [
+          32884,
+          "Cable fase",
+          "Phase wire",
+          "Cavo fase",
+          "Фазный провод"
+        ],
+        [
+          32895,
+          "Cable neutro",
+          "Neutral wire",
+          "Cavo neutro",
+          "Нейтральный провод"
+        ],
+        [
+          32896,
+          "Cable protección",
+          "Protection wire",
+          "Cavo protezione",
+          "Защитный провод"
+        ],
+        [
+          33035,
+          "Cable positivo",
+          "Positive wire",
+          "Cavo positivo",
+          "Положительный провод"
+        ],
+        [
+          33037,
+          "Cable negativo",
+          "Negative wire",
+          "Cavo negativo",
+          "Отрицательный провод"
+        ],
+        [
+          33229,
+          "Cable color",
+          "colored wire",
+          "Filo colorato",
+          "Цветной провод"
+        ],
+        [
+          32889,
+          "Conexión",
+          "Connection",
+          "Collegamento",
+          "Соединение"
+        ],
+        [
+          32893,
+          "Cable III vertical",
+          "Vertical wire III",
+          "Filo III verticale",
+          "Трёхфазный вертикальный провод"
+        ],
+        [
+          32891,
+          "Cable III vertical",
+          "Vertical wire IIIl",
+          "Filo III verticalel",
+          "Трёхфазный вертикальный провод"
+        ],
+        [
+          32894,
+          "Cable III horizontal",
+          "Horizontal wire III",
+          "Filo III orizzontale",
+          "Трёхфазный горизонтальный провод"
+        ],
+        [
+          32892,
+          "Cable III horizontal",
+          "Horizontal wire IIIl",
+          "Filo III orizzontalel",
+          "Трёхфазный горизонтальный провод"
+        ],
+        [
+          32885,
+          "Manguera",
+          "Tube",
+          "Tubo flessibile",
+          "Пневмолиния"
+        ],
+        [
+          32888,
+          "Entrada mangueral",
+          "Entry tube",
+          "Ingresso tubo",
+          "Ввод пневмолинии"
+        ],
+        [
+          32890,
+          "Entrada mangueral",
+          "Entry tube",
+          "Ingresso tubol",
+          "Ввод пневмолинии"
+        ],
+        [
+          32968,
+          "Borne cuadrado",
+          "Borne square",
+          "Terminale quadrato",
+          "Квадратная клемма"
+        ],
+        [
+          32969,
+          "Borne redondo",
+          "Borne round",
+          "Terminale rotondo",
+          "Круглая клемма"
+        ],
+        [
+          32991,
+          "2 Bornes redondos",
+          "2 Borne round",
+          "2 Terminale rotondo",
+          "Две круглые клеммы"
+        ],
+        [
+          32992,
+          "3 Bornes redondos",
+          "3 Borne round",
+          "3 Terminale rotondo",
+          "Три круглые клеммы"
+        ],
+        [
+          32993,
+          "3 Bornes redondos",
+          "3 Borne round",
+          "3Terminale rotondo",
+          "Три круглые клеммы"
+        ],
+        [
+          32897,
+          "Conexión de salida",
+          "Output connection",
+          "Collegamento di uscita",
+          "Выходное соединение"
+        ],
+        [
+          32970,
+          "Conexión de entrada",
+          "Input Connection",
+          "Collegamento dìngresso",
+          "Входное соединение"
+        ]
+      ]
+    },
+    {
+      "name": "Símbolos realistas — barra A (probablemente 2D)",
+      "toolbar": 301,
+      "items": [
+        [
+          33311,
+          "Motor trifásico",
+          null,
+          null,
+          "Трёхфазный двигатель"
+        ],
+        [
+          33393,
+          "Motor trifásico YD",
+          null,
+          null,
+          "Трёхфазный двигатель со схемой пуска звезда–треугольник"
+        ],
+        [
+          33352,
+          "Interruptor automático",
+          null,
+          null,
+          "Автоматический выключатель"
+        ],
+        [
+          33354,
+          "Interruptor diferencial",
+          null,
+          null,
+          "Устройство защитного отключения"
+        ],
+        [
+          33339,
+          "Disyuntor",
+          null,
+          null,
+          "Автоматический выключатель"
+        ],
+        [
+          33340,
+          "Relé térmico",
+          null,
+          null,
+          "Тепловое реле"
+        ],
+        [
+          33386,
+          "Interruptor",
+          null,
+          null,
+          "Выключатель"
+        ],
+        [
+          33390,
+          "Seccionador",
+          null,
+          null,
+          "Разъединитель"
+        ],
+        [
+          33338,
+          "Contactor",
+          null,
+          null,
+          "Контактор"
+        ],
+        [
+          33380,
+          "Contactos auxiliares",
+          null,
+          null,
+          "Вспомогательные контакты"
+        ],
+        [
+          33381,
+          "Contactos auxiliares ON delay",
+          null,
+          null,
+          "Вспомогательные контакты с задержкой включения"
+        ],
+        [
+          33382,
+          "Contactos auxiliares OFF delay",
+          null,
+          null,
+          "Вспомогательные контакты с задержкой отключения"
+        ],
+        [
+          33313,
+          "Rele zócalo",
+          null,
+          null,
+          "Реле в колодке"
+        ],
+        [
+          33314,
+          "Rele temporizado zócalo",
+          null,
+          null,
+          "Реле времени в колодке"
+        ],
+        [
+          33374,
+          "Relé de 1 canal",
+          null,
+          null,
+          "Одноканальное реле"
+        ],
+        [
+          33317,
+          "Pulsador",
+          null,
+          null,
+          "Кнопка"
+        ],
+        [
+          33318,
+          "Piloto",
+          null,
+          null,
+          "Сигнальная лампа"
+        ],
+        [
+          33371,
+          "Diodo LED",
+          null,
+          null,
+          "Светодиод"
+        ],
+        [
+          33323,
+          "Botonera",
+          null,
+          null,
+          "Пульт кнопочный"
+        ],
+        [
+          33319,
+          "Borna",
+          null,
+          null,
+          "Клемма"
+        ],
+        [
+          33363,
+          "Componente tamaño pequeño",
+          null,
+          null,
+          "Малый компонент"
+        ],
+        [
+          33364,
+          "Componente tamaño medio",
+          null,
+          null,
+          "Средний компонент"
+        ],
+        [
+          33365,
+          "Componente tamaño grande",
+          null,
+          null,
+          "Большой компонент"
+        ]
+      ]
+    },
+    {
+      "name": "Símbolos realistas — barra B (probablemente 3D)",
+      "toolbar": 307,
+      "items": [
+        [
+          33312,
+          "Motor trifásico",
+          null,
+          null,
+          "Трёхфазный двигатель"
+        ],
+        [
+          33394,
+          "Motor trifásico YD",
+          null,
+          null,
+          "Трёхфазный двигатель со схемой пуска звезда–треугольник"
+        ],
+        [
+          33356,
+          "Interruptor automático",
+          null,
+          null,
+          "Автоматический выключатель"
+        ],
+        [
+          33357,
+          "Interrptor diferencial",
+          null,
+          null,
+          "Устройство защитного отключения"
+        ],
+        [
+          33342,
+          "Disyuntor",
+          null,
+          null,
+          "Автоматический выключатель"
+        ],
+        [
+          33343,
+          "Relé térmico",
+          null,
+          null,
+          "Тепловое реле"
+        ],
+        [
+          33387,
+          "Interruptor",
+          null,
+          null,
+          "Выключатель"
+        ],
+        [
+          33391,
+          "Seccionador",
+          null,
+          null,
+          "Разъединитель"
+        ],
+        [
+          33341,
+          "Contactor",
+          null,
+          null,
+          "Контактор"
+        ],
+        [
+          33383,
+          "Contactos auxiliares",
+          null,
+          null,
+          "Вспомогательные контакты"
+        ],
+        [
+          33384,
+          "Contactos auxiliares ON delay",
+          null,
+          null,
+          "Вспомогательные контакты с задержкой включения"
+        ],
+        [
+          33385,
+          "Contactos auxiliares OFF delay",
+          null,
+          null,
+          "Вспомогательные контакты с задержкой отключения"
+        ],
+        [
+          33315,
+          "Rele zócalo",
+          null,
+          null,
+          "Реле в колодке"
+        ],
+        [
+          33316,
+          "Rele temporizado zócalo",
+          null,
+          null,
+          "Реле времени в колодке"
+        ],
+        [
+          33376,
+          "Relé 1 canal",
+          null,
+          null,
+          "Одноканальное реле"
+        ],
+        [
+          33320,
+          "Pulsador",
+          null,
+          null,
+          "Кнопка"
+        ],
+        [
+          33321,
+          "Piloto",
+          null,
+          null,
+          "Сигнальная лампа"
+        ],
+        [
+          33375,
+          "Diodo led",
+          null,
+          null,
+          "Светодиод"
+        ],
+        [
+          33323,
+          "Botonera",
+          null,
+          null,
+          "Пульт кнопочный"
+        ],
+        [
+          33322,
+          "Borna",
+          null,
+          null,
+          "Клемма"
+        ],
+        [
+          33363,
+          "Componente tamaño pequeño",
+          null,
+          null,
+          "Малый компонент"
+        ],
+        [
+          33364,
+          "Componente tamaño medio",
+          null,
+          null,
+          "Средний компонент"
+        ],
+        [
+          33365,
+          "Componente tamaño grande",
+          null,
+          null,
+          "Большой компонент"
+        ]
+      ]
+    }
+  ]
+}

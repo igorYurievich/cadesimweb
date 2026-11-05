@@ -1,0 +1,2626 @@
+[
+ {
+  "id": 32873,
+  "group": "Alimentaciones y fuentes",
+  "toolbar": 183,
+  "es": "Alimentación Fase",
+  "en": "Phase power",
+  "it": "Alimentazione Fase"
+ },
+ {
+  "id": 32874,
+  "group": "Alimentaciones y fuentes",
+  "toolbar": 183,
+  "es": "Alimentación Neutro",
+  "en": "Power Neutro",
+  "it": "AlimentazioneNeutro"
+ },
+ {
+  "id": 32883,
+  "group": "Alimentaciones y fuentes",
+  "toolbar": 183,
+  "es": "Alimentación Protección",
+  "en": "Power Protection",
+  "it": "Alimentazione Protezione"
+ },
+ {
+  "id": 32872,
+  "group": "Alimentaciones y fuentes",
+  "toolbar": 183,
+  "es": "Alimentación Fase + Neutro",
+  "en": "Power Phase + Neutro",
+  "it": "Alimentazione Fase + Neutro"
+ },
+ {
+  "id": 32906,
+  "group": "Alimentaciones y fuentes",
+  "toolbar": 183,
+  "es": "Alimentación Fase + Neutro + Protección",
+  "en": "Power Phase + Neutro + Protection",
+  "it": "Alimentazione Fase + Neutro + Protezione"
+ },
+ {
+  "id": 32870,
+  "group": "Alimentaciones y fuentes",
+  "toolbar": 183,
+  "es": "Alimentación L1 + L2 + L3",
+  "en": "Power  L1 + L2 + L3",
+  "it": "Alimentazione L1 + L2 + L3"
+ },
+ {
+  "id": 32879,
+  "group": "Alimentaciones y fuentes",
+  "toolbar": 183,
+  "es": "Alimentación L1 + L2 + L3 + PE",
+  "en": "Power  L1 + L2 + L3 + PE",
+  "it": "Alimentazione L1 + L2 + L3 + PE"
+ },
+ {
+  "id": 32869,
+  "group": "Alimentaciones y fuentes",
+  "toolbar": 183,
+  "es": "Alimentación L1 + L2 + L3 + N",
+  "en": "Power  L1 + L2 + L3 + N",
+  "it": "Alimentazione L1 + L2 + L3 + N"
+ },
+ {
+  "id": 32882,
+  "group": "Alimentaciones y fuentes",
+  "toolbar": 183,
+  "es": "Alimentación L1 + L2 + L3 + N + PE",
+  "en": "Power L1 + L2 + L3 + N + PE",
+  "it": "Alimentazione L1 + L2 + L3 + N + PE"
+ },
+ {
+  "id": 32876,
+  "group": "Alimentaciones y fuentes",
+  "toolbar": 183,
+  "es": "Alimentación Positivo",
+  "en": "Positive power",
+  "it": "Alimentazione Positivo"
+ },
+ {
+  "id": 32877,
+  "group": "Alimentaciones y fuentes",
+  "toolbar": 183,
+  "es": "Alimentación Negativo",
+  "en": "Negative power",
+  "it": "Alimentazione Negativo"
+ },
+ {
+  "id": 32875,
+  "group": "Alimentaciones y fuentes",
+  "toolbar": 183,
+  "es": "Alimentación +-",
+  "en": "Power +-",
+  "it": "Alimentazione +-"
+ },
+ {
+  "id": 33042,
+  "group": "Alimentaciones y fuentes",
+  "toolbar": 183,
+  "es": "Alimentación Protección",
+  "en": "Power Protection",
+  "it": "Alimentazione cavo fase"
+ },
+ {
+  "id": 32995,
+  "group": "Alimentaciones y fuentes",
+  "toolbar": 183,
+  "es": "Transformador",
+  "en": "Transformer",
+  "it": "Trasformatore"
+ },
+ {
+  "id": 33045,
+  "group": "Alimentaciones y fuentes",
+  "toolbar": 183,
+  "es": "Transformador III",
+  "en": "Transformer III",
+  "it": "trasformatore III"
+ },
+ {
+  "id": 33043,
+  "group": "Alimentaciones y fuentes",
+  "toolbar": 183,
+  "es": "Diodo",
+  "en": "Diode",
+  "it": "Diodo"
+ },
+ {
+  "id": 32997,
+  "group": "Alimentaciones y fuentes",
+  "toolbar": 183,
+  "es": "Rectificador",
+  "en": "Rectifier",
+  "it": "Rectifier"
+ },
+ {
+  "id": 32998,
+  "group": "Alimentaciones y fuentes",
+  "toolbar": 183,
+  "es": "Fuente de alimentación",
+  "en": "Power supply",
+  "it": "Alimentazione"
+ },
+ {
+  "id": 33044,
+  "group": "Alimentaciones y fuentes",
+  "toolbar": 183,
+  "es": "Fuente de alimentación III",
+  "en": "Power supply III",
+  "it": "Alimentazione III"
+ },
+ {
+  "id": 33046,
+  "group": "Alimentaciones y fuentes",
+  "toolbar": 183,
+  "es": "Bateria",
+  "en": "Battery",
+  "it": "Batteria"
+ },
+ {
+  "id": 33263,
+  "group": "Alimentaciones y fuentes",
+  "toolbar": 183,
+  "es": "Toma de corriente",
+  "en": "Electrical outlet",
+  "it": "Presa elettrica"
+ },
+ {
+  "id": 32853,
+  "group": "Fusibles y seccionadores",
+  "toolbar": 177,
+  "es": "Fusible I",
+  "en": "Fuse I",
+  "it": "Fusibile I"
+ },
+ {
+  "id": 32842,
+  "group": "Fusibles y seccionadores",
+  "toolbar": 177,
+  "es": "Fusible IN",
+  "en": "Fuse IN",
+  "it": "Fusibile IN"
+ },
+ {
+  "id": 32839,
+  "group": "Fusibles y seccionadores",
+  "toolbar": 177,
+  "es": "Fusible II",
+  "en": "Fuse II",
+  "it": "Fusibile II"
+ },
+ {
+  "id": 32840,
+  "group": "Fusibles y seccionadores",
+  "toolbar": 177,
+  "es": "Fusible III",
+  "en": "Fuse III",
+  "it": "Fusibile III"
+ },
+ {
+  "id": 32841,
+  "group": "Fusibles y seccionadores",
+  "toolbar": 177,
+  "es": "Fusible IIIN",
+  "en": "Fuse IIIN",
+  "it": "Fusibile IIIN"
+ },
+ {
+  "id": 32854,
+  "group": "Fusibles y seccionadores",
+  "toolbar": 177,
+  "es": "Fusible seccionable I",
+  "en": "Fuse disconnector I",
+  "it": "Sezionatore con fusibile I"
+ },
+ {
+  "id": 32843,
+  "group": "Fusibles y seccionadores",
+  "toolbar": 177,
+  "es": "Fusible seccionable IN",
+  "en": "Fuse disconnector IN",
+  "it": "Sezionatore con fusibile IN"
+ },
+ {
+  "id": 32844,
+  "group": "Fusibles y seccionadores",
+  "toolbar": 177,
+  "es": "Fusible seccionable II",
+  "en": "Fuse disconnector II",
+  "it": "Sezionatore con fusibile II"
+ },
+ {
+  "id": 32845,
+  "group": "Fusibles y seccionadores",
+  "toolbar": 177,
+  "es": "Fusible seccionable III",
+  "en": "Fuse disconnector III",
+  "it": "Sezionatore con fusibile III"
+ },
+ {
+  "id": 32848,
+  "group": "Fusibles y seccionadores",
+  "toolbar": 177,
+  "es": "Fusible seccionable IIIN",
+  "en": "Fuse disconnector IIIN",
+  "it": "Sezionatore con fusibile IIIN"
+ },
+ {
+  "id": 32858,
+  "group": "Automáticos, diferenciales, relé térmico, disyuntores, limitadores de sobretensión",
+  "toolbar": 179,
+  "es": "Interruptor automático I",
+  "en": "Automatic switch I",
+  "it": "Interruttore automatico I"
+ },
+ {
+  "id": 32859,
+  "group": "Automáticos, diferenciales, relé térmico, disyuntores, limitadores de sobretensión",
+  "toolbar": 179,
+  "es": "Interruptor automático IN",
+  "en": "Automatic switch IN",
+  "it": "Interruttore automatico IN"
+ },
+ {
+  "id": 32860,
+  "group": "Automáticos, diferenciales, relé térmico, disyuntores, limitadores de sobretensión",
+  "toolbar": 179,
+  "es": "Interruptor automático II",
+  "en": "Automatic switch II",
+  "it": "Interruttore automatico II"
+ },
+ {
+  "id": 32861,
+  "group": "Automáticos, diferenciales, relé térmico, disyuntores, limitadores de sobretensión",
+  "toolbar": 179,
+  "es": "Interruptor automático III",
+  "en": "Automatic switch III",
+  "it": "Interruttore automatico III"
+ },
+ {
+  "id": 32862,
+  "group": "Automáticos, diferenciales, relé térmico, disyuntores, limitadores de sobretensión",
+  "toolbar": 179,
+  "es": "Interruptor automático IIIN",
+  "en": "Automatic switch IIIN",
+  "it": "Interruttore automatico IIIN"
+ },
+ {
+  "id": 32863,
+  "group": "Automáticos, diferenciales, relé térmico, disyuntores, limitadores de sobretensión",
+  "toolbar": 179,
+  "es": "Interruptor diferencial IN",
+  "en": "Differential switch IN",
+  "it": "Interruttore differenziale IN"
+ },
+ {
+  "id": 32864,
+  "group": "Automáticos, diferenciales, relé térmico, disyuntores, limitadores de sobretensión",
+  "toolbar": 179,
+  "es": "Interruptor diferencial IIIN",
+  "en": "Differential switch IIIN",
+  "it": "Interruttore differenziale IIIN"
+ },
+ {
+  "id": 32865,
+  "group": "Automáticos, diferenciales, relé térmico, disyuntores, limitadores de sobretensión",
+  "toolbar": 179,
+  "es": "Relé térmico",
+  "en": "Thermal Relay",
+  "it": "Relè termico"
+ },
+ {
+  "id": 32898,
+  "group": "Automáticos, diferenciales, relé térmico, disyuntores, limitadores de sobretensión",
+  "toolbar": 179,
+  "es": "Disyuntor I",
+  "en": "Magnetothermic switch I",
+  "it": "Interruttore magnetotermico I"
+ },
+ {
+  "id": 33050,
+  "group": "Automáticos, diferenciales, relé térmico, disyuntores, limitadores de sobretensión",
+  "toolbar": 179,
+  "es": "Disyuntor IN",
+  "en": "Magnetothermic switch IN",
+  "it": "Interruttore magnetotermico IN"
+ },
+ {
+  "id": 32866,
+  "group": "Automáticos, diferenciales, relé térmico, disyuntores, limitadores de sobretensión",
+  "toolbar": 179,
+  "es": "Disyuntor II",
+  "en": "Magnetothermic switch II",
+  "it": "Interruttore magnetotermico II"
+ },
+ {
+  "id": 32867,
+  "group": "Automáticos, diferenciales, relé térmico, disyuntores, limitadores de sobretensión",
+  "toolbar": 179,
+  "es": "Disyuntor III",
+  "en": "Magnetothermic switch III",
+  "it": "Interruttore magnetotermico III"
+ },
+ {
+  "id": 33052,
+  "group": "Automáticos, diferenciales, relé térmico, disyuntores, limitadores de sobretensión",
+  "toolbar": 179,
+  "es": "Disyuntor IIIN",
+  "en": "Magnetothermic switch IIIN",
+  "it": "Interruttore magnetotermico IIIN"
+ },
+ {
+  "id": 33054,
+  "group": "Automáticos, diferenciales, relé térmico, disyuntores, limitadores de sobretensión",
+  "toolbar": 179,
+  "es": "Limitador sobretensiones IN",
+  "en": "Overvoltage limiter IN",
+  "it": "Llimitatore di sovratensione IN"
+ },
+ {
+  "id": 33055,
+  "group": "Automáticos, diferenciales, relé térmico, disyuntores, limitadores de sobretensión",
+  "toolbar": 179,
+  "es": "Limitador sobretensiones IIIN",
+  "en": "Overvoltage limiter IIIN",
+  "it": "Limitatore di sovratensione IIIN"
+ },
+ {
+  "id": 32899,
+  "group": "Contactores e interruptores (potencia)",
+  "toolbar": 175,
+  "es": "Contactor I",
+  "en": "Contactor I",
+  "it": "Contattore I"
+ },
+ {
+  "id": 32834,
+  "group": "Contactores e interruptores (potencia)",
+  "toolbar": 175,
+  "es": "Contactor II",
+  "en": "Contactor II",
+  "it": "Contattore II"
+ },
+ {
+  "id": 32833,
+  "group": "Contactores e interruptores (potencia)",
+  "toolbar": 175,
+  "es": "Contactor III",
+  "en": "Contactor III",
+  "it": "Contattore III"
+ },
+ {
+  "id": 32835,
+  "group": "Contactores e interruptores (potencia)",
+  "toolbar": 175,
+  "es": "Contactor IIII",
+  "en": "Contactor IIII",
+  "it": "Contattore IIII"
+ },
+ {
+  "id": 33219,
+  "group": "Contactores e interruptores (potencia)",
+  "toolbar": 175,
+  "es": "Contactor III",
+  "en": "Contactor III",
+  "it": "Contattore III"
+ },
+ {
+  "id": 32900,
+  "group": "Contactores e interruptores (potencia)",
+  "toolbar": 175,
+  "es": "Interruptor I",
+  "en": "Switch I",
+  "it": "Interrutture I"
+ },
+ {
+  "id": 32836,
+  "group": "Contactores e interruptores (potencia)",
+  "toolbar": 175,
+  "es": "Interruptor II",
+  "en": "Switch II",
+  "it": "Interrutture II"
+ },
+ {
+  "id": 32837,
+  "group": "Contactores e interruptores (potencia)",
+  "toolbar": 175,
+  "es": "Interruptor III",
+  "en": "Switch III",
+  "it": "Interrutture III"
+ },
+ {
+  "id": 32838,
+  "group": "Contactores e interruptores (potencia)",
+  "toolbar": 175,
+  "es": "Interruptor IIII",
+  "en": "Switch IIII",
+  "it": "Interrutture IIII"
+ },
+ {
+  "id": 33392,
+  "group": "Contactores e interruptores (potencia)",
+  "toolbar": 175,
+  "es": "Enclavamiento",
+  "en": "Interlocking",
+  "it": "Ad incastro"
+ },
+ {
+  "id": 32828,
+  "group": "Motores",
+  "toolbar": 173,
+  "es": "Motor trifásico",
+  "en": "Three-phase motor",
+  "it": "Motore trifase"
+ },
+ {
+  "id": 32829,
+  "group": "Motores",
+  "toolbar": 173,
+  "es": "Motor trifásico YD",
+  "en": "Three-phase motor YD",
+  "it": "Motore trifase YD"
+ },
+ {
+  "id": 32830,
+  "group": "Motores",
+  "toolbar": 173,
+  "es": "Motor monofásico",
+  "en": "Single-phase motor",
+  "it": "Motore monofase"
+ },
+ {
+  "id": 33103,
+  "group": "Motores",
+  "toolbar": 173,
+  "es": "Motor monofásico",
+  "en": "Single-phase motor",
+  "it": "Motore monofase"
+ },
+ {
+  "id": 33237,
+  "group": "Motores",
+  "toolbar": 173,
+  "es": "Motor trifásico como monofásico",
+  "en": "Motor trifase as motor monofase",
+  "it": "Motore trifase como motore monofase"
+ },
+ {
+  "id": 32831,
+  "group": "Motores",
+  "toolbar": 173,
+  "es": "Motor Dahalander",
+  "en": "Motor Dahalander",
+  "it": "Motore Dahalander"
+ },
+ {
+  "id": 32994,
+  "group": "Motores",
+  "toolbar": 173,
+  "es": "Motor II Veloc",
+  "en": "Two speed motor",
+  "it": "Motore a due velocità"
+ },
+ {
+  "id": 32832,
+  "group": "Motores",
+  "toolbar": 173,
+  "es": "Motor trifásico rotor bobinado",
+  "en": "Wound rotor induction motor",
+  "it": "Motore a rotore anelli"
+ },
+ {
+  "id": 32999,
+  "group": "Motores",
+  "toolbar": 173,
+  "es": "Motor cc. de imán permanente",
+  "en": "DC motor. Iman P.",
+  "it": "DC Motore Iman P."
+ },
+ {
+  "id": 33000,
+  "group": "Motores",
+  "toolbar": 173,
+  "es": "Motor cc. de independiente",
+  "en": "DC motor. Indep.",
+  "it": "DC Motore Indep."
+ },
+ {
+  "id": 33295,
+  "group": "Motores",
+  "toolbar": 173,
+  "es": "Motor paso a paso unipolar",
+  "en": "Unipolar stepper motor",
+  "it": "Motore passo-passo unipolare"
+ },
+ {
+  "id": 33296,
+  "group": "Motores",
+  "toolbar": 173,
+  "es": "Motor paso a paso bipolar",
+  "en": "Bipolar stepper motor",
+  "it": "Motore passo-passo bipolare"
+ },
+ {
+  "id": 33104,
+  "group": "Motores",
+  "toolbar": 173,
+  "es": "Freno",
+  "en": "Brake",
+  "it": "Freno"
+ },
+ {
+  "id": 33257,
+  "group": "Motores",
+  "toolbar": 173,
+  "es": "Actuador lineal eléctrico",
+  "en": "Electric Linear Actuator",
+  "it": "Attuatore lineare elettrico"
+ },
+ {
+  "id": 33002,
+  "group": "Potencia: resistencias, arrancadores, variadores, controladores",
+  "toolbar": 213,
+  "es": "Resistencia I",
+  "en": "Resistence I",
+  "it": "Resistenza I"
+ },
+ {
+  "id": 33003,
+  "group": "Potencia: resistencias, arrancadores, variadores, controladores",
+  "toolbar": 213,
+  "es": "Resistencia III",
+  "en": "Resistence III",
+  "it": "Resistenza III"
+ },
+ {
+  "id": 33004,
+  "group": "Potencia: resistencias, arrancadores, variadores, controladores",
+  "toolbar": 213,
+  "es": "Autotransformador III",
+  "en": "Autotransformer III",
+  "it": "Autotransformatore III"
+ },
+ {
+  "id": 33005,
+  "group": "Potencia: resistencias, arrancadores, variadores, controladores",
+  "toolbar": 213,
+  "es": "Arrancador electónico c.a.",
+  "en": "Electronic starter a.c.",
+  "it": "Starter elettronico c.a."
+ },
+ {
+  "id": 33089,
+  "group": "Potencia: resistencias, arrancadores, variadores, controladores",
+  "toolbar": 213,
+  "es": "Control arrancador electrónico c.a..",
+  "en": "Electronic starter control a.c.",
+  "it": "Controllo starter elettronico c.a."
+ },
+ {
+  "id": 33262,
+  "group": "Potencia: resistencias, arrancadores, variadores, controladores",
+  "toolbar": 213,
+  "es": "Control inversor electrónico c.a..",
+  "en": null,
+  "it": null
+ },
+ {
+  "id": 33006,
+  "group": "Potencia: resistencias, arrancadores, variadores, controladores",
+  "toolbar": 213,
+  "es": "Variador velocidad c.a. II",
+  "en": "Variable speed c.a. II",
+  "it": "Variatore velocità. c.a. II"
+ },
+ {
+  "id": 33007,
+  "group": "Potencia: resistencias, arrancadores, variadores, controladores",
+  "toolbar": 213,
+  "es": "Variador velocidad c.a. III",
+  "en": "Variable speed a.c. III",
+  "it": "Variatore velocità c.a. III"
+ },
+ {
+  "id": 33011,
+  "group": "Potencia: resistencias, arrancadores, variadores, controladores",
+  "toolbar": 213,
+  "es": "Control Variador velocidad c.a.",
+  "en": "Drive speed control a.c.",
+  "it": "Control variatore velocità c.a."
+ },
+ {
+  "id": 33015,
+  "group": "Potencia: resistencias, arrancadores, variadores, controladores",
+  "toolbar": 213,
+  "es": "Variador velocidad c.c. II",
+  "en": "Variable speed d.c. II",
+  "it": "Variatore velocità c.c. II"
+ },
+ {
+  "id": 33016,
+  "group": "Potencia: resistencias, arrancadores, variadores, controladores",
+  "toolbar": 213,
+  "es": "Variador velocidad c.c. II",
+  "en": "Variable speed d.c. II",
+  "it": "Variatore velocità c.c. II"
+ },
+ {
+  "id": 33018,
+  "group": "Potencia: resistencias, arrancadores, variadores, controladores",
+  "toolbar": 213,
+  "es": "Variador velocidad c.c. III",
+  "en": "Variable speed d.c. III",
+  "it": "Variatore velocità c.c. IIII"
+ },
+ {
+  "id": 33017,
+  "group": "Potencia: resistencias, arrancadores, variadores, controladores",
+  "toolbar": 213,
+  "es": "Variador velocidad c.c. III",
+  "en": "Variable speed d.c. III",
+  "it": "Variatore velocità c.c. IIII"
+ },
+ {
+  "id": 33012,
+  "group": "Potencia: resistencias, arrancadores, variadores, controladores",
+  "toolbar": 213,
+  "es": "Control variador velocidad c.c.",
+  "en": "Drive speed control d.c.",
+  "it": "Control variatore velocità. c.c."
+ },
+ {
+  "id": 33297,
+  "group": "Potencia: resistencias, arrancadores, variadores, controladores",
+  "toolbar": 213,
+  "es": "Controlador motor paso a paso",
+  "en": "Stepper motor driver",
+  "it": "Controller del motore passo-passo"
+ },
+ {
+  "id": 33298,
+  "group": "Potencia: resistencias, arrancadores, variadores, controladores",
+  "toolbar": 213,
+  "es": "Controlador motor paso a paso 2 CLK",
+  "en": "Stepper motor driver 2 CLK",
+  "it": "Controller del motore passo-passo 2 CLK"
+ },
+ {
+  "id": 33299,
+  "group": "Potencia: resistencias, arrancadores, variadores, controladores",
+  "toolbar": 213,
+  "es": "Controlador motor paso a paso CLK/DIR",
+  "en": "Stepper motor driver CLK/DIR",
+  "it": "Controller del motore passo-passo CLK/DIR"
+ },
+ {
+  "id": 32937,
+  "group": "Contactos auxiliares y temporizados",
+  "toolbar": 191,
+  "es": "Contacto NA",
+  "en": "NO contact",
+  "it": "Contatto NO"
+ },
+ {
+  "id": 32938,
+  "group": "Contactos auxiliares y temporizados",
+  "toolbar": 191,
+  "es": "Contacto NC",
+  "en": "NC contact",
+  "it": "Contatto NC"
+ },
+ {
+  "id": 32939,
+  "group": "Contactos auxiliares y temporizados",
+  "toolbar": 191,
+  "es": "Contacto NA+NC",
+  "en": "NO+NC contact",
+  "it": "Contatto NO+NC"
+ },
+ {
+  "id": 32940,
+  "group": "Contactos auxiliares y temporizados",
+  "toolbar": 191,
+  "es": "Contacto CON",
+  "en": "CON contact",
+  "it": "Contatto CON"
+ },
+ {
+  "id": 32933,
+  "group": "Contactos auxiliares y temporizados",
+  "toolbar": 191,
+  "es": "Contacto temporizado a la conexión NA",
+  "en": "NO contact with the connection timed",
+  "it": "Contatto temporizzato ritardato alla eccitazione NO"
+ },
+ {
+  "id": 32934,
+  "group": "Contactos auxiliares y temporizados",
+  "toolbar": 191,
+  "es": "Contacto temporizado a la conexión NC",
+  "en": "NC contact with the connection timed",
+  "it": "Contatto temporizzato ritardato alla eccitazione NC"
+ },
+ {
+  "id": 32935,
+  "group": "Contactos auxiliares y temporizados",
+  "toolbar": 191,
+  "es": "Contacto temporizado a la conexión NA+NC",
+  "en": "NO+NC contact with the connection timed",
+  "it": "Contatto temporizzato ritardato alla eccitazione NO+NC"
+ },
+ {
+  "id": 32936,
+  "group": "Contactos auxiliares y temporizados",
+  "toolbar": 191,
+  "es": "Contacto temporizado a la conexión CON",
+  "en": "CON contact with the connection timed",
+  "it": "Contatto temporizzato ritardato alla eccitazione CON"
+ },
+ {
+  "id": 32941,
+  "group": "Contactos auxiliares y temporizados",
+  "toolbar": 191,
+  "es": "Contacto temporizado a la deconexión NA",
+  "en": "NO Contact timed to disconnection",
+  "it": "Contatto temporizzato ritardato alla diseccitazione NO"
+ },
+ {
+  "id": 32942,
+  "group": "Contactos auxiliares y temporizados",
+  "toolbar": 191,
+  "es": "Contacto temporizado a la deconexión NC",
+  "en": "NC Contact timed to disconnection",
+  "it": "Contatto temporizzato ritardato alla diseccitazione NC"
+ },
+ {
+  "id": 32943,
+  "group": "Contactos auxiliares y temporizados",
+  "toolbar": 191,
+  "es": "Contacto temporizado a la deconexión NA+NC",
+  "en": "NO+NC Contact timed to disconnection",
+  "it": "Contatto temporizzato ritardato alla diseccitazione NO+NC"
+ },
+ {
+  "id": 32944,
+  "group": "Contactos auxiliares y temporizados",
+  "toolbar": 191,
+  "es": "Contacto temporizado a la deconexión CON",
+  "en": "CON Contact timed to disconnection",
+  "it": "Contatto temporizzato ritardato alla diseccitazione CON"
+ },
+ {
+  "id": 32945,
+  "group": "Contactos auxiliares y temporizados",
+  "toolbar": 191,
+  "es": "Contacto temporizado a la conexión deconexión NA",
+  "en": "NO contact with the connection disconnection timed",
+  "it": "Contatto temporizzato ritardato alla eccitaziones diseccitazione NO"
+ },
+ {
+  "id": 32946,
+  "group": "Contactos auxiliares y temporizados",
+  "toolbar": 191,
+  "es": "Contacto temporizado a la conexión deconexión NC",
+  "en": "NC contact with the connection disconnection timed",
+  "it": "Contatto temporizzato ritardato alla eccitaziones diseccitazione NC"
+ },
+ {
+  "id": 32947,
+  "group": "Contactos auxiliares y temporizados",
+  "toolbar": 191,
+  "es": "Contacto temporizado a la conexión deconexión NA+NC",
+  "en": "NO+NC contact with the connection disconnection timed",
+  "it": "Contatto temporizzato ritardato alla eccitaziones diseccitazione NO+NC"
+ },
+ {
+  "id": 32948,
+  "group": "Contactos auxiliares y temporizados",
+  "toolbar": 191,
+  "es": "Contacto temporizado a la conexión deconexión CON",
+  "en": "CON contact with the connection disconnection timed",
+  "it": "Contatto temporizzato ritardato alla eccitaziones diseccitazione CON"
+ },
+ {
+  "id": 33278,
+  "group": "Accionamientos (pulsadores, setas, interruptores, conmutadores, finales de carrera)",
+  "toolbar": 189,
+  "es": "Botón pulsador",
+  "en": "Push button",
+  "it": "Pulsante"
+ },
+ {
+  "id": 32909,
+  "group": "Accionamientos (pulsadores, setas, interruptores, conmutadores, finales de carrera)",
+  "toolbar": 189,
+  "es": "Pulsador NA",
+  "en": "Push button",
+  "it": "Pulsante NO"
+ },
+ {
+  "id": 32910,
+  "group": "Accionamientos (pulsadores, setas, interruptores, conmutadores, finales de carrera)",
+  "toolbar": 189,
+  "es": "Pulsador NC",
+  "en": "NC button",
+  "it": "Pulsante NC"
+ },
+ {
+  "id": 32912,
+  "group": "Accionamientos (pulsadores, setas, interruptores, conmutadores, finales de carrera)",
+  "toolbar": 189,
+  "es": "Pulsador NA-NC",
+  "en": "NO-NC button",
+  "it": "Pulsante NO-NC"
+ },
+ {
+  "id": 32913,
+  "group": "Accionamientos (pulsadores, setas, interruptores, conmutadores, finales de carrera)",
+  "toolbar": 189,
+  "es": "Pulsador CON",
+  "en": "CON button",
+  "it": "Pulsante CON"
+ },
+ {
+  "id": 32914,
+  "group": "Accionamientos (pulsadores, setas, interruptores, conmutadores, finales de carrera)",
+  "toolbar": 189,
+  "es": "Pulsador seta NA",
+  "en": "NO button mushroom",
+  "it": "Pulsante fungo NO"
+ },
+ {
+  "id": 32915,
+  "group": "Accionamientos (pulsadores, setas, interruptores, conmutadores, finales de carrera)",
+  "toolbar": 189,
+  "es": "Pulsador seta NC",
+  "en": "NC button mushroom",
+  "it": "Pulsante fungo NC"
+ },
+ {
+  "id": 32917,
+  "group": "Accionamientos (pulsadores, setas, interruptores, conmutadores, finales de carrera)",
+  "toolbar": 189,
+  "es": "Pulsador seta NA-NC",
+  "en": "NO-NC button mushroom",
+  "it": "Pulsante fungo NO-NC"
+ },
+ {
+  "id": 32918,
+  "group": "Accionamientos (pulsadores, setas, interruptores, conmutadores, finales de carrera)",
+  "toolbar": 189,
+  "es": "Pulsador seta CON",
+  "en": "CON button mushroom",
+  "it": "Pulsante fungo CON"
+ },
+ {
+  "id": 32919,
+  "group": "Accionamientos (pulsadores, setas, interruptores, conmutadores, finales de carrera)",
+  "toolbar": 189,
+  "es": "Interruptor NA",
+  "en": "NO switch",
+  "it": "Interruttore NO"
+ },
+ {
+  "id": 32920,
+  "group": "Accionamientos (pulsadores, setas, interruptores, conmutadores, finales de carrera)",
+  "toolbar": 189,
+  "es": "Interruptor NC",
+  "en": "NC switch",
+  "it": "Interruttore NC"
+ },
+ {
+  "id": 32921,
+  "group": "Accionamientos (pulsadores, setas, interruptores, conmutadores, finales de carrera)",
+  "toolbar": 189,
+  "es": "Interruptor NA-NC",
+  "en": "NO-NC switch",
+  "it": "Interruttore NO-NC"
+ },
+ {
+  "id": 32922,
+  "group": "Accionamientos (pulsadores, setas, interruptores, conmutadores, finales de carrera)",
+  "toolbar": 189,
+  "es": "Interruptor CON",
+  "en": "COM switch",
+  "it": "Interruttore CON"
+ },
+ {
+  "id": 33047,
+  "group": "Accionamientos (pulsadores, setas, interruptores, conmutadores, finales de carrera)",
+  "toolbar": 189,
+  "es": "Conmutador I-0-II",
+  "en": "I-0-II switch",
+  "it": "Commutatore I-0-II"
+ },
+ {
+  "id": 33048,
+  "group": "Accionamientos (pulsadores, setas, interruptores, conmutadores, finales de carrera)",
+  "toolbar": 189,
+  "es": "Conmutador I-II-III",
+  "en": "I-II-III switch",
+  "it": "Commutatore I-II-III"
+ },
+ {
+  "id": 33049,
+  "group": "Accionamientos (pulsadores, setas, interruptores, conmutadores, finales de carrera)",
+  "toolbar": 189,
+  "es": "Conmutador cruce",
+  "en": "Crossover switch",
+  "it": "Conmutador di giunzione"
+ },
+ {
+  "id": 32923,
+  "group": "Accionamientos (pulsadores, setas, interruptores, conmutadores, finales de carrera)",
+  "toolbar": 189,
+  "es": "Final de carrera NA",
+  "en": "NO limit",
+  "it": "Finecorsa NO"
+ },
+ {
+  "id": 32924,
+  "group": "Accionamientos (pulsadores, setas, interruptores, conmutadores, finales de carrera)",
+  "toolbar": 189,
+  "es": "Final de carrera NC",
+  "en": "NC limit",
+  "it": "Finecorsa NC"
+ },
+ {
+  "id": 32925,
+  "group": "Accionamientos (pulsadores, setas, interruptores, conmutadores, finales de carrera)",
+  "toolbar": 189,
+  "es": "Final de carrera NA-NC",
+  "en": "NO-NC limit",
+  "it": "Finecorsa NO-NC"
+ },
+ {
+  "id": 32926,
+  "group": "Accionamientos (pulsadores, setas, interruptores, conmutadores, finales de carrera)",
+  "toolbar": 189,
+  "es": "Final de carrera COM",
+  "en": "COM limit",
+  "it": "Finecorsa COM"
+ },
+ {
+  "id": 32927,
+  "group": "Accionamientos (pulsadores, setas, interruptores, conmutadores, finales de carrera)",
+  "toolbar": 189,
+  "es": "Contacto auxiliar relé térmico NA",
+  "en": "NO Auxiliary heat relay",
+  "it": "Contatto ausiliario relè termico NO"
+ },
+ {
+  "id": 32928,
+  "group": "Accionamientos (pulsadores, setas, interruptores, conmutadores, finales de carrera)",
+  "toolbar": 189,
+  "es": "Contacto auxiliar relé térmico NC",
+  "en": "NC Auxiliary heat relay",
+  "it": "Contatto ausiliario relè termico NC"
+ },
+ {
+  "id": 32929,
+  "group": "Accionamientos (pulsadores, setas, interruptores, conmutadores, finales de carrera)",
+  "toolbar": 189,
+  "es": "Contacto auxiliar relé térmico NA-NC",
+  "en": "NO-NC Auxiliary heat relay",
+  "it": "Contatto ausiliario relè termico NO-NC"
+ },
+ {
+  "id": 32930,
+  "group": "Accionamientos (pulsadores, setas, interruptores, conmutadores, finales de carrera)",
+  "toolbar": 189,
+  "es": "Contacto auxiliar relé térmico CON",
+  "en": "COM Auxiliary heat relay",
+  "it": "Contatto ausiliario relè termico CON"
+ },
+ {
+  "id": 33032,
+  "group": "Detectores / sensores",
+  "toolbar": 215,
+  "es": "Det. inductivo NA",
+  "en": "NO Inductive detector",
+  "it": "Sensori induttivo NO"
+ },
+ {
+  "id": 33020,
+  "group": "Detectores / sensores",
+  "toolbar": 215,
+  "es": "Det. inductivo NC",
+  "en": "NCInductive detector",
+  "it": "Sensori induttivo NC"
+ },
+ {
+  "id": 33021,
+  "group": "Detectores / sensores",
+  "toolbar": 215,
+  "es": "Det. capacitivo NA",
+  "en": "NO Capacitive detector",
+  "it": "Sensori capacitivo NO"
+ },
+ {
+  "id": 33022,
+  "group": "Detectores / sensores",
+  "toolbar": 215,
+  "es": "Det. capacitivo NC",
+  "en": "NC Capacitive detector",
+  "it": "Sensori capacitivo NC"
+ },
+ {
+  "id": 33023,
+  "group": "Detectores / sensores",
+  "toolbar": 215,
+  "es": "Det. magnético NA",
+  "en": "NO Magnetic detector",
+  "it": "Sensori  magnetico NO"
+ },
+ {
+  "id": 33024,
+  "group": "Detectores / sensores",
+  "toolbar": 215,
+  "es": "Det. magnético NC",
+  "en": "NC Magnetic detector",
+  "it": "Sensori  magnetico NC"
+ },
+ {
+  "id": 33025,
+  "group": "Detectores / sensores",
+  "toolbar": 215,
+  "es": "Barrera fotoeléctica",
+  "en": "Light barrier",
+  "it": "Fotodellula"
+ },
+ {
+  "id": 33027,
+  "group": "Detectores / sensores",
+  "toolbar": 215,
+  "es": "Barrera emisor",
+  "en": "Emitter barrier",
+  "it": "Fotodellula emettitore"
+ },
+ {
+  "id": 33034,
+  "group": "Detectores / sensores",
+  "toolbar": 215,
+  "es": "Barrera receptor NA",
+  "en": "NO receptor barrier",
+  "it": "Fotodellula recevitore NO"
+ },
+ {
+  "id": 33033,
+  "group": "Detectores / sensores",
+  "toolbar": 215,
+  "es": "Barrera receptor NC",
+  "en": "NC receptor barrier",
+  "it": "Fotodellula recevitore NC"
+ },
+ {
+  "id": 33253,
+  "group": "Detectores / sensores",
+  "toolbar": 215,
+  "es": "Presostato NA",
+  "en": "Pressure switch NO",
+  "it": "Pressostato NO"
+ },
+ {
+  "id": 33254,
+  "group": "Detectores / sensores",
+  "toolbar": 215,
+  "es": "Presostato NA",
+  "en": "Pressure switch NC",
+  "it": "Pressostato NC"
+ },
+ {
+  "id": 33255,
+  "group": "Detectores / sensores",
+  "toolbar": 215,
+  "es": "Vacuostato NA",
+  "en": "Empty pressure NO",
+  "it": "Pressione di vuoto NO"
+ },
+ {
+  "id": 33256,
+  "group": "Detectores / sensores",
+  "toolbar": 215,
+  "es": "Vacuostato NC",
+  "en": "Empty pressure NC",
+  "it": "Pressione di vuoto NC"
+ },
+ {
+  "id": 33346,
+  "group": "Detectores / sensores",
+  "toolbar": 215,
+  "es": "Termostato NA",
+  "en": "Thermostat NO",
+  "it": "Termostato NO"
+ },
+ {
+  "id": 33347,
+  "group": "Detectores / sensores",
+  "toolbar": 215,
+  "es": "Termostato NC",
+  "en": "Thermostat NC",
+  "it": "Termostato NC"
+ },
+ {
+  "id": 32949,
+  "group": "Bobinas, temporizadores y señalización",
+  "toolbar": 193,
+  "es": "Bobina contactor, relé",
+  "en": "Coil contactor, relay",
+  "it": "Bobine contattori, relè"
+ },
+ {
+  "id": 32956,
+  "group": "Bobinas, temporizadores y señalización",
+  "toolbar": 193,
+  "es": "Bobina biestable contactor, relé",
+  "en": "Bistable contactor coil, relay",
+  "it": "Bistabile bobina contattore, relè"
+ },
+ {
+  "id": 32964,
+  "group": "Bobinas, temporizadores y señalización",
+  "toolbar": 193,
+  "es": "Telerruptor",
+  "en": "Step relay",
+  "it": "Teleruttore"
+ },
+ {
+  "id": 32951,
+  "group": "Bobinas, temporizadores y señalización",
+  "toolbar": 193,
+  "es": "Bobina electroválvula",
+  "en": "Solenoid coil",
+  "it": "Bobina elettrovalvola"
+ },
+ {
+  "id": 32952,
+  "group": "Bobinas, temporizadores y señalización",
+  "toolbar": 193,
+  "es": "Temporizador a la conexión",
+  "en": "Connection timer",
+  "it": "Temporizzatore ritardato alla eccitazione"
+ },
+ {
+  "id": 32953,
+  "group": "Bobinas, temporizadores y señalización",
+  "toolbar": 193,
+  "es": "Temporizador a la desconexión",
+  "en": "Timer to disconnect",
+  "it": "Temporizzatore con ritardo alla diseccitazione"
+ },
+ {
+  "id": 32954,
+  "group": "Bobinas, temporizadores y señalización",
+  "toolbar": 193,
+  "es": "Temporizador a la conexión desconexión",
+  "en": "Disconnect connection timer",
+  "it": "Temporizzatore con ritardo alla eccitazione diseccitazione"
+ },
+ {
+  "id": 32955,
+  "group": "Bobinas, temporizadores y señalización",
+  "toolbar": 193,
+  "es": "Relé intermitente",
+  "en": "Flasher relay",
+  "it": "Relè intermitente"
+ },
+ {
+  "id": 33223,
+  "group": "Bobinas, temporizadores y señalización",
+  "toolbar": 193,
+  "es": "Generador de pulsos",
+  "en": "Pulse Generator",
+  "it": "Generatore di impulsi"
+ },
+ {
+  "id": 33098,
+  "group": "Bobinas, temporizadores y señalización",
+  "toolbar": 193,
+  "es": "Interruptor horario",
+  "en": "Time switch",
+  "it": "Interruttore orario"
+ },
+ {
+  "id": 33236,
+  "group": "Bobinas, temporizadores y señalización",
+  "toolbar": 193,
+  "es": "Contador de pulsos",
+  "en": "Pulse counter",
+  "it": "Contatore di impulsi"
+ },
+ {
+  "id": 32957,
+  "group": "Bobinas, temporizadores y señalización",
+  "toolbar": 193,
+  "es": "Piloto señalización",
+  "en": "Pilot signal",
+  "it": "Lampadina"
+ },
+ {
+  "id": 32958,
+  "group": "Bobinas, temporizadores y señalización",
+  "toolbar": 193,
+  "es": "Piloto señalización intermitente",
+  "en": "Iintermittent pilot",
+  "it": "Lampadina intermitente"
+ },
+ {
+  "id": 32961,
+  "group": "Bobinas, temporizadores y señalización",
+  "toolbar": 193,
+  "es": "Timbre",
+  "en": "Ring",
+  "it": "Pulsante"
+ },
+ {
+  "id": 32962,
+  "group": "Bobinas, temporizadores y señalización",
+  "toolbar": 193,
+  "es": "Zumbador",
+  "en": "Buzzer",
+  "it": "Vibratore"
+ },
+ {
+  "id": 32960,
+  "group": "Bobinas, temporizadores y señalización",
+  "toolbar": 193,
+  "es": "Sirena",
+  "en": "Siren",
+  "it": "Sirena"
+ },
+ {
+  "id": 32959,
+  "group": "Bobinas, temporizadores y señalización",
+  "toolbar": 193,
+  "es": "Bocina",
+  "en": "Horn",
+  "it": "Clacson"
+ },
+ {
+  "id": 33258,
+  "group": "Relés electrónicos y protecciones",
+  "toolbar": 291,
+  "es": "Relé estado sólido SSR DC",
+  "en": "Solid State Relay SSR DC",
+  "it": "SSR relè a stato solido DC"
+ },
+ {
+  "id": 33259,
+  "group": "Relés electrónicos y protecciones",
+  "toolbar": 291,
+  "es": "Relé estado sólido SSR AC",
+  "en": "Solid State Relay SSR AC",
+  "it": "SSR relè a stato solido AC"
+ },
+ {
+  "id": 33260,
+  "group": "Relés electrónicos y protecciones",
+  "toolbar": 291,
+  "es": "Contactor de estado sólido",
+  "en": "Solid state contactor",
+  "it": "Solid state contattore"
+ },
+ {
+  "id": 33261,
+  "group": "Relés electrónicos y protecciones",
+  "toolbar": 291,
+  "es": "Contactor inversor de estado sólido",
+  "en": "Solid state inverter contactor",
+  "it": "Stato solido contattore di inversione"
+ },
+ {
+  "id": 33266,
+  "group": "Relés electrónicos y protecciones",
+  "toolbar": 291,
+  "es": "Relé de falta de fase + N",
+  "en": "Phase + N fault relay",
+  "it": "Fase di relè mancanza + N"
+ },
+ {
+  "id": 33267,
+  "group": "Relés electrónicos y protecciones",
+  "toolbar": 291,
+  "es": "Relé de falta de fase",
+  "en": "Phase loss relay",
+  "it": "Mancanza di fase relè"
+ },
+ {
+  "id": 33271,
+  "group": "Relés electrónicos y protecciones",
+  "toolbar": 291,
+  "es": "Relé de secuencia de fase + N",
+  "en": "Phase + N sequence relay",
+  "it": "Sequenza delle fasi relè + N"
+ },
+ {
+  "id": 33269,
+  "group": "Relés electrónicos y protecciones",
+  "toolbar": 291,
+  "es": "Relé de secuencia de fase",
+  "en": "Phase sequence relay",
+  "it": "Sequenza delle fasi Relè"
+ },
+ {
+  "id": 33344,
+  "group": "Relés electrónicos y protecciones",
+  "toolbar": 291,
+  "es": "Proteccion contra sobretensiones permanentes",
+  "en": "Protection against permanent overvoltages",
+  "it": "Protezione contro le sovratensioni permanenti"
+ },
+ {
+  "id": 33345,
+  "group": "Relés electrónicos y protecciones",
+  "toolbar": 291,
+  "es": "proteccion contra sobretensiones permanentes",
+  "en": "Protection against permanent overvoltages",
+  "it": "Protezione contro le sovratensioni permanenti"
+ },
+ {
+  "id": 33372,
+  "group": "Relés electrónicos y protecciones",
+  "toolbar": 291,
+  "es": "Relé SPST",
+  "en": "Relay SPST",
+  "it": "Relè SPST"
+ },
+ {
+  "id": 33373,
+  "group": "Relés electrónicos y protecciones",
+  "toolbar": 291,
+  "es": "Relé SPDT",
+  "en": "Relay SPDT",
+  "it": "Relè SPDT"
+ },
+ {
+  "id": 33056,
+  "group": "Lógica",
+  "toolbar": 226,
+  "es": "AND",
+  "en": "AND",
+  "it": "AND"
+ },
+ {
+  "id": 33057,
+  "group": "Lógica",
+  "toolbar": 226,
+  "es": "OR",
+  "en": "OR",
+  "it": "OR"
+ },
+ {
+  "id": 33058,
+  "group": "Lógica",
+  "toolbar": 226,
+  "es": "INV",
+  "en": "INV",
+  "it": "INV"
+ },
+ {
+  "id": 33059,
+  "group": "Lógica",
+  "toolbar": 226,
+  "es": "EXOR",
+  "en": "EXOR",
+  "it": "EXOR"
+ },
+ {
+  "id": 33060,
+  "group": "Lógica",
+  "toolbar": 226,
+  "es": "NAND",
+  "en": "NAND",
+  "it": "NAND"
+ },
+ {
+  "id": 33061,
+  "group": "Lógica",
+  "toolbar": 226,
+  "es": "NOR",
+  "en": "NOR",
+  "it": "NOR"
+ },
+ {
+  "id": 33100,
+  "group": "Lógica",
+  "toolbar": 226,
+  "es": "Biestable",
+  "en": "Biestable",
+  "it": "bistabile"
+ },
+ {
+  "id": 33111,
+  "group": "Lógica",
+  "toolbar": 226,
+  "es": "Divisor Binario",
+  "en": "Binary divider",
+  "it": "Binary Divider"
+ },
+ {
+  "id": 33099,
+  "group": "Lógica",
+  "toolbar": 226,
+  "es": "Temporizador conexión",
+  "en": "Connection timer",
+  "it": "Timer onr"
+ },
+ {
+  "id": 33300,
+  "group": "Lógica",
+  "toolbar": 226,
+  "es": "Temporizador pulso conexión",
+  "en": "Pulse connection timer",
+  "it": "Pulse timer onr"
+ },
+ {
+  "id": 33112,
+  "group": "Lógica",
+  "toolbar": 226,
+  "es": "Temporizador desconexión",
+  "en": "timer off",
+  "it": "Timer off"
+ },
+ {
+  "id": 33114,
+  "group": "Lógica",
+  "toolbar": 226,
+  "es": "Temporizador intermitente",
+  "en": "Intermittent timer",
+  "it": "Timer intermittente"
+ },
+ {
+  "id": 33226,
+  "group": "Lógica",
+  "toolbar": 226,
+  "es": null,
+  "en": "Pulse Generator",
+  "it": "Generatore di impulsi"
+ },
+ {
+  "id": 33097,
+  "group": "Lógica",
+  "toolbar": 226,
+  "es": "Contador",
+  "en": "Counterr",
+  "it": "Contatorer"
+ },
+ {
+  "id": 33277,
+  "group": "Lógica",
+  "toolbar": 226,
+  "es": "Contador ascendente-descendente",
+  "en": "Counter ascending-descending",
+  "it": "Up-down contatore"
+ },
+ {
+  "id": 33292,
+  "group": "Lógica",
+  "toolbar": 226,
+  "es": "Contador 4 bits",
+  "en": "Counter 4 bits",
+  "it": "Contatore a 4 bit"
+ },
+ {
+  "id": 33293,
+  "group": "Lógica",
+  "toolbar": 226,
+  "es": "Contador 4 bits",
+  "en": "Counter 4 bits",
+  "it": "Contatore a 4 bit"
+ },
+ {
+  "id": 33301,
+  "group": "Lógica",
+  "toolbar": 226,
+  "es": "Contador 4 bits ASC/DES",
+  "en": "Counter 4 bits ASC/DES",
+  "it": "Contatore a 4 bit  ASC/DES"
+ },
+ {
+  "id": 33302,
+  "group": "Lógica",
+  "toolbar": 226,
+  "es": "Contador 4 bits decadas",
+  "en": "Counter 4 bits decades",
+  "it": "Contatore decadi 4 bit"
+ },
+ {
+  "id": 33079,
+  "group": "Lógica",
+  "toolbar": 226,
+  "es": "Prueba",
+  "en": "Test",
+  "it": "Prova"
+ },
+ {
+  "id": 33080,
+  "group": "Lógica",
+  "toolbar": 226,
+  "es": "Visualiza",
+  "en": "Visualize",
+  "it": "Visualizza"
+ },
+ {
+  "id": 33294,
+  "group": "Lógica",
+  "toolbar": 226,
+  "es": "Decodificador 7 segmentos",
+  "en": "Decoder BCD 7 Seg",
+  "it": "Decoder BCD 7 Seg"
+ },
+ {
+  "id": 33115,
+  "group": "Lógica",
+  "toolbar": 226,
+  "es": null,
+  "en": "Display BCD",
+  "it": "Display BCD"
+ },
+ {
+  "id": 33116,
+  "group": "Lógica",
+  "toolbar": 226,
+  "es": null,
+  "en": "Display 7 Seg.",
+  "it": "Display 7 Seg."
+ },
+ {
+  "id": 33117,
+  "group": "Lógica",
+  "toolbar": 226,
+  "es": "Preselctor",
+  "en": "Preselector",
+  "it": "Pre-selettore"
+ },
+ {
+  "id": 33035,
+  "group": "Lógica",
+  "toolbar": 226,
+  "es": "Cable positivo",
+  "en": "Positive wire",
+  "it": "Cavo positivo"
+ },
+ {
+  "id": 32889,
+  "group": "Lógica",
+  "toolbar": 226,
+  "es": "Conexión",
+  "en": "Connection",
+  "it": "Collegamento"
+ },
+ {
+  "id": 33062,
+  "group": "Ladder",
+  "toolbar": 292,
+  "es": "NA",
+  "en": "NO",
+  "it": "NO"
+ },
+ {
+  "id": 33063,
+  "group": "Ladder",
+  "toolbar": 292,
+  "es": "NC",
+  "en": "NC",
+  "it": "NC"
+ },
+ {
+  "id": 33065,
+  "group": "Ladder",
+  "toolbar": 292,
+  "es": "Flanco ascendente",
+  "en": "Positive edge",
+  "it": "Fronte positivo"
+ },
+ {
+  "id": 33066,
+  "group": "Ladder",
+  "toolbar": 292,
+  "es": "Flanco descendente",
+  "en": "Negative edge",
+  "it": "Fronte in discesa"
+ },
+ {
+  "id": 33291,
+  "group": "Ladder",
+  "toolbar": 292,
+  "es": "First Scan",
+  "en": "First Scan",
+  "it": "First Scan"
+ },
+ {
+  "id": 33067,
+  "group": "Ladder",
+  "toolbar": 292,
+  "es": "Asignar",
+  "en": "Assignr",
+  "it": "Assegnarer"
+ },
+ {
+  "id": 33069,
+  "group": "Ladder",
+  "toolbar": 292,
+  "es": "Set",
+  "en": "Set",
+  "it": "Set"
+ },
+ {
+  "id": 33070,
+  "group": "Ladder",
+  "toolbar": 292,
+  "es": "Reset",
+  "en": "Reset",
+  "it": "Reset"
+ },
+ {
+  "id": 33100,
+  "group": "Ladder",
+  "toolbar": 292,
+  "es": "Biestable",
+  "en": "Biestable",
+  "it": "bistabile"
+ },
+ {
+  "id": 33111,
+  "group": "Ladder",
+  "toolbar": 292,
+  "es": "Divisor Binario",
+  "en": "Binary divider",
+  "it": "Binary Divider"
+ },
+ {
+  "id": 33099,
+  "group": "Ladder",
+  "toolbar": 292,
+  "es": "Temporizador conexión",
+  "en": "Connection timer",
+  "it": "Timer onr"
+ },
+ {
+  "id": 33300,
+  "group": "Ladder",
+  "toolbar": 292,
+  "es": "Temporizador pulso conexión",
+  "en": "Pulse connection timer",
+  "it": "Pulse timer onr"
+ },
+ {
+  "id": 33112,
+  "group": "Ladder",
+  "toolbar": 292,
+  "es": "Temporizador desconexión",
+  "en": "timer off",
+  "it": "Timer off"
+ },
+ {
+  "id": 33114,
+  "group": "Ladder",
+  "toolbar": 292,
+  "es": "Temporizador intermitente",
+  "en": "Intermittent timer",
+  "it": "Timer intermittente"
+ },
+ {
+  "id": 33226,
+  "group": "Ladder",
+  "toolbar": 292,
+  "es": null,
+  "en": "Pulse Generator",
+  "it": "Generatore di impulsi"
+ },
+ {
+  "id": 33097,
+  "group": "Ladder",
+  "toolbar": 292,
+  "es": "Contador",
+  "en": "Counterr",
+  "it": "Contatorer"
+ },
+ {
+  "id": 33277,
+  "group": "Ladder",
+  "toolbar": 292,
+  "es": "Contador ascendente-descendente",
+  "en": "Counter ascending-descending",
+  "it": "Up-down contatore"
+ },
+ {
+  "id": 32876,
+  "group": "Ladder",
+  "toolbar": 292,
+  "es": "Alimentación Positivo",
+  "en": "Positive power",
+  "it": "Alimentazione Positivo"
+ },
+ {
+  "id": 32877,
+  "group": "Ladder",
+  "toolbar": 292,
+  "es": "Alimentación Negativo",
+  "en": "Negative power",
+  "it": "Alimentazione Negativo"
+ },
+ {
+  "id": 33035,
+  "group": "Ladder",
+  "toolbar": 292,
+  "es": "Cable positivo",
+  "en": "Positive wire",
+  "it": "Cavo positivo"
+ },
+ {
+  "id": 33037,
+  "group": "Ladder",
+  "toolbar": 292,
+  "es": "Cable negativo",
+  "en": "Negative wire",
+  "it": "Cavo negativo"
+ },
+ {
+  "id": 33088,
+  "group": "GRAFCET",
+  "toolbar": 228,
+  "es": "Etapa inicial",
+  "en": "Initial stage",
+  "it": "Tappa iniciale"
+ },
+ {
+  "id": 33083,
+  "group": "GRAFCET",
+  "toolbar": 228,
+  "es": "Etapa",
+  "en": "Stage",
+  "it": "Tappa"
+ },
+ {
+  "id": 33084,
+  "group": "GRAFCET",
+  "toolbar": 228,
+  "es": "Transición",
+  "en": "Transition",
+  "it": "Transicione"
+ },
+ {
+  "id": 33085,
+  "group": "GRAFCET",
+  "toolbar": 228,
+  "es": "Acción",
+  "en": "Action",
+  "it": "Azione"
+ },
+ {
+  "id": 33101,
+  "group": "GRAFCET",
+  "toolbar": 228,
+  "es": "\"0\"",
+  "en": "\"0\"",
+  "it": "\"0\""
+ },
+ {
+  "id": 33094,
+  "group": "GRAFCET",
+  "toolbar": 228,
+  "es": "Divergencia en \"O\"",
+  "en": "Divergence in \"O\"",
+  "it": "Divergenza in \"O\""
+ },
+ {
+  "id": 33095,
+  "group": "GRAFCET",
+  "toolbar": 228,
+  "es": "Convergencia en \"O\"",
+  "en": "Convergence in \"O\"",
+  "it": "Convergenza in \"O\""
+ },
+ {
+  "id": 33102,
+  "group": "GRAFCET",
+  "toolbar": 228,
+  "es": "\"Y\"",
+  "en": "\"Y\"",
+  "it": "\"Y\""
+ },
+ {
+  "id": 33086,
+  "group": "GRAFCET",
+  "toolbar": 228,
+  "es": "Divergencia en \"Y\"",
+  "en": "Divergence in \"Y\"",
+  "it": "Divergenza in \"Y\""
+ },
+ {
+  "id": 33093,
+  "group": "GRAFCET",
+  "toolbar": 228,
+  "es": "Convergencia en \"Y\"",
+  "en": "Convergencia en \"Y\"",
+  "it": "Convergenza in \"Y\""
+ },
+ {
+  "id": 33092,
+  "group": "GRAFCET",
+  "toolbar": 228,
+  "es": "Línea enlace",
+  "en": "Line link",
+  "it": "Linea Grafcet"
+ },
+ {
+  "id": 33090,
+  "group": "GRAFCET",
+  "toolbar": 228,
+  "es": "Enlace de entrada",
+  "en": "Input Link",
+  "it": "Link in entrata"
+ },
+ {
+  "id": 33091,
+  "group": "GRAFCET",
+  "toolbar": 228,
+  "es": "Enlace de salida",
+  "en": "Output link",
+  "it": "Uscita Link"
+ },
+ {
+  "id": 33096,
+  "group": "GRAFCET",
+  "toolbar": 228,
+  "es": "Macro etapa",
+  "en": "Macro stage",
+  "it": "Macro tappa"
+ },
+ {
+  "id": 33108,
+  "group": "Entrada/Salida, PLC, LOGO, Arduino",
+  "toolbar": 242,
+  "es": "Intercambio entradas PC_SIMU",
+  "en": "Exchange PC_SIMU entries",
+  "it": "Intercambio di biglietti PC_SIMU"
+ },
+ {
+  "id": 33109,
+  "group": "Entrada/Salida, PLC, LOGO, Arduino",
+  "toolbar": 242,
+  "es": "Intercambio salidas PC_SIMU",
+  "en": "Exchanging departures PC_SIMU",
+  "it": "Uscite di Exchange PC_SIMU"
+ },
+ {
+  "id": 33238,
+  "group": "Entrada/Salida, PLC, LOGO, Arduino",
+  "toolbar": 242,
+  "es": "Módulo lógico",
+  "en": "Logical module",
+  "it": "Modulo logico"
+ },
+ {
+  "id": 33336,
+  "group": "Entrada/Salida, PLC, LOGO, Arduino",
+  "toolbar": 242,
+  "es": "LOGO  4DI/4DO",
+  "en": "LOGO  4DI/4DO",
+  "it": "LOGO  4DI/4DO"
+ },
+ {
+  "id": 33240,
+  "group": "Entrada/Salida, PLC, LOGO, Arduino",
+  "toolbar": 242,
+  "es": "PLC S7-1200",
+  "en": "PLC S7-1200",
+  "it": "PLC S7-1200"
+ },
+ {
+  "id": 33337,
+  "group": "Entrada/Salida, PLC, LOGO, Arduino",
+  "toolbar": 242,
+  "es": "S7-1200 8DI/8DO",
+  "en": "S7-1200 8DI/8DO",
+  "it": "S7-1200 8DI/8DO"
+ },
+ {
+  "id": 33326,
+  "group": "Entrada/Salida, PLC, LOGO, Arduino",
+  "toolbar": 242,
+  "es": "PLC CPU S7-1500",
+  "en": "PLC CPU S7-1500",
+  "it": "PLC CPU S7-1500"
+ },
+ {
+  "id": 33328,
+  "group": "Entrada/Salida, PLC, LOGO, Arduino",
+  "toolbar": 242,
+  "es": "S7-1500 DI/DO",
+  "en": "S7-1500 DI/DO",
+  "it": "PLC S7-1500 DI/DO"
+ },
+ {
+  "id": 33331,
+  "group": "Entrada/Salida, PLC, LOGO, Arduino",
+  "toolbar": 242,
+  "es": "ET-200",
+  "en": null,
+  "it": "ET-200"
+ },
+ {
+  "id": 33334,
+  "group": "Entrada/Salida, PLC, LOGO, Arduino",
+  "toolbar": 242,
+  "es": "ET-200 8DI",
+  "en": "ET-200 8DI",
+  "it": "ET-200 8DI"
+ },
+ {
+  "id": 33335,
+  "group": "Entrada/Salida, PLC, LOGO, Arduino",
+  "toolbar": 242,
+  "es": "ET-200 8DO",
+  "en": "ET-200 8DO",
+  "it": "ET-200 8DO"
+ },
+ {
+  "id": 33272,
+  "group": "Entrada/Salida, PLC, LOGO, Arduino",
+  "toolbar": 242,
+  "es": "Entrada digital PLC",
+  "en": "PLC digital input",
+  "it": "Ingresso digitale PLC"
+ },
+ {
+  "id": 33273,
+  "group": "Entrada/Salida, PLC, LOGO, Arduino",
+  "toolbar": 242,
+  "es": "Salida digital PLC",
+  "en": "PLC digital output",
+  "it": "Uscita digitale PLC"
+ },
+ {
+  "id": 33274,
+  "group": "Entrada/Salida, PLC, LOGO, Arduino",
+  "toolbar": 242,
+  "es": "CPU PLC",
+  "en": "CPU PLC",
+  "it": "CPU PLC"
+ },
+ {
+  "id": 33275,
+  "group": "Entrada/Salida, PLC, LOGO, Arduino",
+  "toolbar": 242,
+  "es": "Alimentación I/O digital PLC",
+  "en": "Power supply Digital I / O PLC",
+  "it": "Potenza digitali PLC I/O"
+ },
+ {
+  "id": 33276,
+  "group": "Entrada/Salida, PLC, LOGO, Arduino",
+  "toolbar": 242,
+  "es": "Alimentación I/O digital PLC",
+  "en": "Power supply Digital I / O PLC",
+  "it": "Potenza digitali PLC I/O"
+ },
+ {
+  "id": 33324,
+  "group": "Entrada/Salida, PLC, LOGO, Arduino",
+  "toolbar": 242,
+  "es": "Arduino uno",
+  "en": "Arduino one",
+  "it": "Arduino uno"
+ },
+ {
+  "id": 33242,
+  "group": "Actuadores neumáticos",
+  "toolbar": 269,
+  "es": "Actuador simple efecto",
+  "en": "Single acting actuator",
+  "it": "Attuatore semplice effetto"
+ },
+ {
+  "id": 33243,
+  "group": "Actuadores neumáticos",
+  "toolbar": 269,
+  "es": "Actuador doble efecto",
+  "en": "Double acting actuator",
+  "it": "Attuatore a doppio effetto"
+ },
+ {
+  "id": 33245,
+  "group": "Actuadores neumáticos",
+  "toolbar": 269,
+  "es": "Actuador sin vástago",
+  "en": "Stemless actuator",
+  "it": "Senza stelo"
+ },
+ {
+  "id": 33246,
+  "group": "Actuadores neumáticos",
+  "toolbar": 269,
+  "es": "Actuador sin vástago magnético",
+  "en": "Actuator without magnetic stem",
+  "it": "Attuatore senza stelo magnetico"
+ },
+ {
+  "id": 33247,
+  "group": "Actuadores neumáticos",
+  "toolbar": 269,
+  "es": "Actuador giro",
+  "en": "Rotating actuator",
+  "it": "Attuatore turno"
+ },
+ {
+  "id": 33252,
+  "group": "Actuadores neumáticos",
+  "toolbar": 269,
+  "es": "Pinza simple efecto",
+  "en": "Simple clamp effect",
+  "it": "Morsetto semplice effetto"
+ },
+ {
+  "id": 33248,
+  "group": "Actuadores neumáticos",
+  "toolbar": 269,
+  "es": "Pinza doble efecto",
+  "en": "Double clamp",
+  "it": "Pinza a doppio effetto"
+ },
+ {
+  "id": 33249,
+  "group": "Actuadores neumáticos",
+  "toolbar": 269,
+  "es": "Ventosa",
+  "en": "Sucker",
+  "it": "Ventosa"
+ },
+ {
+  "id": 33250,
+  "group": "Actuadores neumáticos",
+  "toolbar": 269,
+  "es": "Motor neumático",
+  "en": "Pneumatic motor",
+  "it": "Air Motor"
+ },
+ {
+  "id": 33251,
+  "group": "Actuadores neumáticos",
+  "toolbar": 269,
+  "es": "Motor neumático reversible",
+  "en": "Reversible pneumatic motor",
+  "it": "Pneumatici motore reversibile"
+ },
+ {
+  "id": 32884,
+  "group": "Cables y conexiones",
+  "toolbar": 187,
+  "es": "Cable fase",
+  "en": "Phase wire",
+  "it": "Cavo fase"
+ },
+ {
+  "id": 32895,
+  "group": "Cables y conexiones",
+  "toolbar": 187,
+  "es": "Cable neutro",
+  "en": "Neutral wire",
+  "it": "Cavo neutro"
+ },
+ {
+  "id": 32896,
+  "group": "Cables y conexiones",
+  "toolbar": 187,
+  "es": "Cable protección",
+  "en": "Protection wire",
+  "it": "Cavo protezione"
+ },
+ {
+  "id": 33035,
+  "group": "Cables y conexiones",
+  "toolbar": 187,
+  "es": "Cable positivo",
+  "en": "Positive wire",
+  "it": "Cavo positivo"
+ },
+ {
+  "id": 33037,
+  "group": "Cables y conexiones",
+  "toolbar": 187,
+  "es": "Cable negativo",
+  "en": "Negative wire",
+  "it": "Cavo negativo"
+ },
+ {
+  "id": 33229,
+  "group": "Cables y conexiones",
+  "toolbar": 187,
+  "es": "Cable color",
+  "en": "colored wire",
+  "it": "Filo colorato"
+ },
+ {
+  "id": 32889,
+  "group": "Cables y conexiones",
+  "toolbar": 187,
+  "es": "Conexión",
+  "en": "Connection",
+  "it": "Collegamento"
+ },
+ {
+  "id": 32893,
+  "group": "Cables y conexiones",
+  "toolbar": 187,
+  "es": "Cable III vertical",
+  "en": "Vertical wire III",
+  "it": "Filo III verticale"
+ },
+ {
+  "id": 32891,
+  "group": "Cables y conexiones",
+  "toolbar": 187,
+  "es": "Cable III vertical",
+  "en": "Vertical wire IIIl",
+  "it": "Filo III verticalel"
+ },
+ {
+  "id": 32894,
+  "group": "Cables y conexiones",
+  "toolbar": 187,
+  "es": "Cable III horizontal",
+  "en": "Horizontal wire III",
+  "it": "Filo III orizzontale"
+ },
+ {
+  "id": 32892,
+  "group": "Cables y conexiones",
+  "toolbar": 187,
+  "es": "Cable III horizontal",
+  "en": "Horizontal wire IIIl",
+  "it": "Filo III orizzontalel"
+ },
+ {
+  "id": 32885,
+  "group": "Cables y conexiones",
+  "toolbar": 187,
+  "es": "Manguera",
+  "en": "Tube",
+  "it": "Tubo flessibile"
+ },
+ {
+  "id": 32888,
+  "group": "Cables y conexiones",
+  "toolbar": 187,
+  "es": "Entrada mangueral",
+  "en": "Entry tube",
+  "it": "Ingresso tubo"
+ },
+ {
+  "id": 32890,
+  "group": "Cables y conexiones",
+  "toolbar": 187,
+  "es": "Entrada mangueral",
+  "en": "Entry tube",
+  "it": "Ingresso tubol"
+ },
+ {
+  "id": 32968,
+  "group": "Cables y conexiones",
+  "toolbar": 187,
+  "es": "Borne cuadrado",
+  "en": "Borne square",
+  "it": "Terminale quadrato"
+ },
+ {
+  "id": 32969,
+  "group": "Cables y conexiones",
+  "toolbar": 187,
+  "es": "Borne redondo",
+  "en": "Borne round",
+  "it": "Terminale rotondo"
+ },
+ {
+  "id": 32991,
+  "group": "Cables y conexiones",
+  "toolbar": 187,
+  "es": "2 Bornes redondos",
+  "en": "2 Borne round",
+  "it": "2 Terminale rotondo"
+ },
+ {
+  "id": 32992,
+  "group": "Cables y conexiones",
+  "toolbar": 187,
+  "es": "3 Bornes redondos",
+  "en": "3 Borne round",
+  "it": "3 Terminale rotondo"
+ },
+ {
+  "id": 32993,
+  "group": "Cables y conexiones",
+  "toolbar": 187,
+  "es": "3 Bornes redondos",
+  "en": "3 Borne round",
+  "it": "3Terminale rotondo"
+ },
+ {
+  "id": 32897,
+  "group": "Cables y conexiones",
+  "toolbar": 187,
+  "es": "Conexión de salida",
+  "en": "Output connection",
+  "it": "Collegamento di uscita"
+ },
+ {
+  "id": 32970,
+  "group": "Cables y conexiones",
+  "toolbar": 187,
+  "es": "Conexión de entrada",
+  "en": "Input Connection",
+  "it": "Collegamento dìngresso"
+ },
+ {
+  "id": 33311,
+  "group": "Símbolos realistas — barra A (probablemente 2D)",
+  "toolbar": 301,
+  "es": "Motor trifásico",
+  "en": null,
+  "it": null
+ },
+ {
+  "id": 33393,
+  "group": "Símbolos realistas — barra A (probablemente 2D)",
+  "toolbar": 301,
+  "es": "Motor trifásico YD",
+  "en": null,
+  "it": null
+ },
+ {
+  "id": 33352,
+  "group": "Símbolos realistas — barra A (probablemente 2D)",
+  "toolbar": 301,
+  "es": "Interruptor automático",
+  "en": null,
+  "it": null
+ },
+ {
+  "id": 33354,
+  "group": "Símbolos realistas — barra A (probablemente 2D)",
+  "toolbar": 301,
+  "es": "Interruptor diferencial",
+  "en": null,
+  "it": null
+ },
+ {
+  "id": 33339,
+  "group": "Símbolos realistas — barra A (probablemente 2D)",
+  "toolbar": 301,
+  "es": "Disyuntor",
+  "en": null,
+  "it": null
+ },
+ {
+  "id": 33340,
+  "group": "Símbolos realistas — barra A (probablemente 2D)",
+  "toolbar": 301,
+  "es": "Relé térmico",
+  "en": null,
+  "it": null
+ },
+ {
+  "id": 33386,
+  "group": "Símbolos realistas — barra A (probablemente 2D)",
+  "toolbar": 301,
+  "es": "Interruptor",
+  "en": null,
+  "it": null
+ },
+ {
+  "id": 33390,
+  "group": "Símbolos realistas — barra A (probablemente 2D)",
+  "toolbar": 301,
+  "es": "Seccionador",
+  "en": null,
+  "it": null
+ },
+ {
+  "id": 33338,
+  "group": "Símbolos realistas — barra A (probablemente 2D)",
+  "toolbar": 301,
+  "es": "Contactor",
+  "en": null,
+  "it": null
+ },
+ {
+  "id": 33380,
+  "group": "Símbolos realistas — barra A (probablemente 2D)",
+  "toolbar": 301,
+  "es": "Contactos auxiliares",
+  "en": null,
+  "it": null
+ },
+ {
+  "id": 33381,
+  "group": "Símbolos realistas — barra A (probablemente 2D)",
+  "toolbar": 301,
+  "es": "Contactos auxiliares ON delay",
+  "en": null,
+  "it": null
+ },
+ {
+  "id": 33382,
+  "group": "Símbolos realistas — barra A (probablemente 2D)",
+  "toolbar": 301,
+  "es": "Contactos auxiliares OFF delay",
+  "en": null,
+  "it": null
+ },
+ {
+  "id": 33313,
+  "group": "Símbolos realistas — barra A (probablemente 2D)",
+  "toolbar": 301,
+  "es": "Rele zócalo",
+  "en": null,
+  "it": null
+ },
+ {
+  "id": 33314,
+  "group": "Símbolos realistas — barra A (probablemente 2D)",
+  "toolbar": 301,
+  "es": "Rele temporizado zócalo",
+  "en": null,
+  "it": null
+ },
+ {
+  "id": 33374,
+  "group": "Símbolos realistas — barra A (probablemente 2D)",
+  "toolbar": 301,
+  "es": "Relé de 1 canal",
+  "en": null,
+  "it": null
+ },
+ {
+  "id": 33317,
+  "group": "Símbolos realistas — barra A (probablemente 2D)",
+  "toolbar": 301,
+  "es": "Pulsador",
+  "en": null,
+  "it": null
+ },
+ {
+  "id": 33318,
+  "group": "Símbolos realistas — barra A (probablemente 2D)",
+  "toolbar": 301,
+  "es": "Piloto",
+  "en": null,
+  "it": null
+ },
+ {
+  "id": 33371,
+  "group": "Símbolos realistas — barra A (probablemente 2D)",
+  "toolbar": 301,
+  "es": "Diodo LED",
+  "en": null,
+  "it": null
+ },
+ {
+  "id": 33323,
+  "group": "Símbolos realistas — barra A (probablemente 2D)",
+  "toolbar": 301,
+  "es": "Botonera",
+  "en": null,
+  "it": null
+ },
+ {
+  "id": 33319,
+  "group": "Símbolos realistas — barra A (probablemente 2D)",
+  "toolbar": 301,
+  "es": "Borna",
+  "en": null,
+  "it": null
+ },
+ {
+  "id": 33363,
+  "group": "Símbolos realistas — barra A (probablemente 2D)",
+  "toolbar": 301,
+  "es": "Componente tamaño pequeño",
+  "en": null,
+  "it": null
+ },
+ {
+  "id": 33364,
+  "group": "Símbolos realistas — barra A (probablemente 2D)",
+  "toolbar": 301,
+  "es": "Componente tamaño medio",
+  "en": null,
+  "it": null
+ },
+ {
+  "id": 33365,
+  "group": "Símbolos realistas — barra A (probablemente 2D)",
+  "toolbar": 301,
+  "es": "Componente tamaño grande",
+  "en": null,
+  "it": null
+ },
+ {
+  "id": 33312,
+  "group": "Símbolos realistas — barra B (probablemente 3D)",
+  "toolbar": 307,
+  "es": "Motor trifásico",
+  "en": null,
+  "it": null
+ },
+ {
+  "id": 33394,
+  "group": "Símbolos realistas — barra B (probablemente 3D)",
+  "toolbar": 307,
+  "es": "Motor trifásico YD",
+  "en": null,
+  "it": null
+ },
+ {
+  "id": 33356,
+  "group": "Símbolos realistas — barra B (probablemente 3D)",
+  "toolbar": 307,
+  "es": "Interruptor automático",
+  "en": null,
+  "it": null
+ },
+ {
+  "id": 33357,
+  "group": "Símbolos realistas — barra B (probablemente 3D)",
+  "toolbar": 307,
+  "es": "Interrptor diferencial",
+  "en": null,
+  "it": null
+ },
+ {
+  "id": 33342,
+  "group": "Símbolos realistas — barra B (probablemente 3D)",
+  "toolbar": 307,
+  "es": "Disyuntor",
+  "en": null,
+  "it": null
+ },
+ {
+  "id": 33343,
+  "group": "Símbolos realistas — barra B (probablemente 3D)",
+  "toolbar": 307,
+  "es": "Relé térmico",
+  "en": null,
+  "it": null
+ },
+ {
+  "id": 33387,
+  "group": "Símbolos realistas — barra B (probablemente 3D)",
+  "toolbar": 307,
+  "es": "Interruptor",
+  "en": null,
+  "it": null
+ },
+ {
+  "id": 33391,
+  "group": "Símbolos realistas — barra B (probablemente 3D)",
+  "toolbar": 307,
+  "es": "Seccionador",
+  "en": null,
+  "it": null
+ },
+ {
+  "id": 33341,
+  "group": "Símbolos realistas — barra B (probablemente 3D)",
+  "toolbar": 307,
+  "es": "Contactor",
+  "en": null,
+  "it": null
+ },
+ {
+  "id": 33383,
+  "group": "Símbolos realistas — barra B (probablemente 3D)",
+  "toolbar": 307,
+  "es": "Contactos auxiliares",
+  "en": null,
+  "it": null
+ },
+ {
+  "id": 33384,
+  "group": "Símbolos realistas — barra B (probablemente 3D)",
+  "toolbar": 307,
+  "es": "Contactos auxiliares ON delay",
+  "en": null,
+  "it": null
+ },
+ {
+  "id": 33385,
+  "group": "Símbolos realistas — barra B (probablemente 3D)",
+  "toolbar": 307,
+  "es": "Contactos auxiliares OFF delay",
+  "en": null,
+  "it": null
+ },
+ {
+  "id": 33315,
+  "group": "Símbolos realistas — barra B (probablemente 3D)",
+  "toolbar": 307,
+  "es": "Rele zócalo",
+  "en": null,
+  "it": null
+ },
+ {
+  "id": 33316,
+  "group": "Símbolos realistas — barra B (probablemente 3D)",
+  "toolbar": 307,
+  "es": "Rele temporizado zócalo",
+  "en": null,
+  "it": null
+ },
+ {
+  "id": 33376,
+  "group": "Símbolos realistas — barra B (probablemente 3D)",
+  "toolbar": 307,
+  "es": "Relé 1 canal",
+  "en": null,
+  "it": null
+ },
+ {
+  "id": 33320,
+  "group": "Símbolos realistas — barra B (probablemente 3D)",
+  "toolbar": 307,
+  "es": "Pulsador",
+  "en": null,
+  "it": null
+ },
+ {
+  "id": 33321,
+  "group": "Símbolos realistas — barra B (probablemente 3D)",
+  "toolbar": 307,
+  "es": "Piloto",
+  "en": null,
+  "it": null
+ },
+ {
+  "id": 33375,
+  "group": "Símbolos realistas — barra B (probablemente 3D)",
+  "toolbar": 307,
+  "es": "Diodo led",
+  "en": null,
+  "it": null
+ },
+ {
+  "id": 33323,
+  "group": "Símbolos realistas — barra B (probablemente 3D)",
+  "toolbar": 307,
+  "es": "Botonera",
+  "en": null,
+  "it": null
+ },
+ {
+  "id": 33322,
+  "group": "Símbolos realistas — barra B (probablemente 3D)",
+  "toolbar": 307,
+  "es": "Borna",
+  "en": null,
+  "it": null
+ },
+ {
+  "id": 33363,
+  "group": "Símbolos realistas — barra B (probablemente 3D)",
+  "toolbar": 307,
+  "es": "Componente tamaño pequeño",
+  "en": null,
+  "it": null
+ },
+ {
+  "id": 33364,
+  "group": "Símbolos realistas — barra B (probablemente 3D)",
+  "toolbar": 307,
+  "es": "Componente tamaño medio",
+  "en": null,
+  "it": null
+ },
+ {
+  "id": 33365,
+  "group": "Símbolos realistas — barra B (probablemente 3D)",
+  "toolbar": 307,
+  "es": "Componente tamaño grande",
+  "en": null,
+  "it": null
+ }
+]
