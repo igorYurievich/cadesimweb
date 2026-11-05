@@ -151,6 +151,17 @@ const TABLE: readonly TypeBehavior[] = [
   { typeCode: 8005, links: switches([[0, 1]], 'pressed', { normallyClosed: true }) },
   { typeCode: 8006, links: [...switches([[0, 2]], 'pressed', { normallyClosed: true }), ...switches([[1, 3]], 'pressed')] },
   { typeCode: 8013, links: switches([[0, 1]], 'pressed', { normallyClosed: true }) },
+  // Seta CON и концевики 8012/8014/8015: как кнопки, нажатие с удержанием.
+  { typeCode: 8007, links: [...switches([[0, 1]], 'pressed', { normallyClosed: true }), ...switches([[0, 2]], 'pressed')] },
+  { typeCode: 8012, links: switches([[0, 1]], 'pressed') },
+  { typeCode: 8014, links: [...switches([[0, 2]], 'pressed', { normallyClosed: true }), ...switches([[1, 3]], 'pressed')] },
+  { typeCode: 8015, links: [...switches([[0, 1]], 'pressed', { normallyClosed: true }), ...switches([[0, 2]], 'pressed')] },
+  // Interruptor 8008–8011: тот же контактный состав, но с фиксацией. toggled = «привод включён» (у НЗ контакт при этом разомкнут),
+  // без входа — положение покоя. Не путать с latchedTypes в app.ts (там toggled = аппарат замкнут).
+  { typeCode: 8008, links: switches([[0, 1]], 'toggled') },
+  { typeCode: 8009, links: switches([[0, 1]], 'toggled', { normallyClosed: true }) },
+  { typeCode: 8010, links: [...switches([[0, 2]], 'toggled', { normallyClosed: true }), ...switches([[1, 3]], 'toggled')] },
+  { typeCode: 8011, links: [...switches([[0, 1]], 'toggled', { normallyClosed: true }), ...switches([[0, 2]], 'toggled')] },
   { typeCode: 8018, links: [
     ...switches([[0, 2]], 'thermal', { normallyClosed: true }),
     ...switches([[1, 3]], 'thermal'),

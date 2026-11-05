@@ -79,7 +79,7 @@ const latchedTypes = new Set([2003, 2004, 2005, 2007, 5005, 5006, 5007, 5008, 50
 /** Тепловая защита двигателя 6007 при старте симуляции уже взведена (включена); остальные аппараты включает пользователь. */
 const armedByDefaultTypes = new Set([6007]);
 const startsOpen = (typeCode: number): boolean => latchedTypes.has(typeCode) && !armedByDefaultTypes.has(typeCode);
-const PLACEABLE_TYPES = [1000, 1001, 1002, 1008, 1010, 1003, 1005, 1004, 1006, 1007, 1011, 1012, 1009, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 3000, 3001, 3002, 3003, 3011, 3004, 3005, 3006, 3007, 3008, 3009, 3010, 3015, 3012, 3017, 3016, 3013, 3014, 3018, 3019, 3020, 5000, 5001, 5002, 5003, 5004, 5005, 5006, 5007, 5008, 5009, 6000, 6001, 6002, 6003, 6004, 6005, 6006, 6007, 6008, 6009, 6010, 6011, 6012, 6013, 6014, 7000, 7001, 7002, 7003, 7004, 7005, 7006, 7007, 7008, 7009, 7010, 7011, 7012, 7013, 7014, 7015, 8000, 8001, 8002, 8003, 8004, 8005, 8006, 8013, 8023, 8018, 9000, 9001, 9002, 9003, 9004, 9005, 9006, 9007, 9015, 9014, 9016, 9008, 9009, 9010, 9011, 9012, 9013];
+const PLACEABLE_TYPES = [1000, 1001, 1002, 1008, 1010, 1003, 1005, 1004, 1006, 1007, 1011, 1012, 1009, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 3000, 3001, 3002, 3003, 3011, 3004, 3005, 3006, 3007, 3008, 3009, 3010, 3015, 3012, 3017, 3016, 3013, 3014, 3018, 3019, 3020, 5000, 5001, 5002, 5003, 5004, 5005, 5006, 5007, 5008, 5009, 6000, 6001, 6002, 6003, 6004, 6005, 6006, 6007, 6008, 6009, 6010, 6011, 6012, 6013, 6014, 7000, 7001, 7002, 7003, 7004, 7005, 7006, 7007, 7008, 7009, 7010, 7011, 7012, 7013, 7014, 7015, 8000, 8001, 8002, 8003, 8004, 8005, 8006, 8007, 8008, 8009, 8010, 8011, 8012, 8013, 8014, 8015, 8023, 8018, 9000, 9001, 9002, 9003, 9004, 9005, 9006, 9007, 9015, 9014, 9016, 9008, 9009, 9010, 9011, 9012, 9013];
 const PLACE_DEFAULTS: Record<number, { prefix: string; size: { w: number; h: number }; labels: string[] }> = {
   1000: { prefix: 'M', size: { w: 24, h: 12 }, labels: ['U1', 'V1', 'W1', 'PE'] },
   1001: { prefix: 'M', size: { w: 24, h: 27 }, labels: ['U1', 'V1', 'W1', 'PE', 'W2', 'U2', 'V2'] },
@@ -177,8 +177,17 @@ const PLACE_DEFAULTS: Record<number, { prefix: string; size: { w: number; h: num
   8004: { prefix: 'S', size: { w: 6, h: 15 }, labels: ['13', '14'] },
   8005: { prefix: 'S', size: { w: 6, h: 15 }, labels: ['11', '12'] },
   8006: { prefix: 'S', size: { w: 15, h: 15 }, labels: ['11', '13', '12', '14'] },
+  8007: { prefix: 'S', size: { w: 12, h: 15 }, labels: ['11', '12', '14'] },
+  8008: { prefix: 'S', size: { w: 6, h: 15 }, labels: ['13', '14'] },
+  8009: { prefix: 'S', size: { w: 6, h: 15 }, labels: ['11', '12'] },
+  8010: { prefix: 'S', size: { w: 15, h: 15 }, labels: ['11', '13', '12', '14'] },
+  8011: { prefix: 'S', size: { w: 12, h: 15 }, labels: ['11', '12', '14'] },
+  8012: { prefix: 'S', size: { w: 6, h: 15 }, labels: ['13', '14'] },
   8013: { prefix: 'S', size: { w: 6, h: 15 }, labels: ['11', '12'] },
-  8018: { prefix: 'FG', size: { w: 15, h: 21 }, labels: ['95', '97', '96', '98'] },
+  8014: { prefix: 'S', size: { w: 15, h: 15 }, labels: ['11', '13', '12', '14'] },
+  8015: { prefix: 'S', size: { w: 12, h: 15 }, labels: ['11', '12', '14'] },
+  // Тепловой контакт: в образце accionamientos.cad префикс -F, рамка 15×15 (раньше FG и 15×21).
+  8018: { prefix: 'F', size: { w: 15, h: 15 }, labels: ['95', '97', '96', '98'] },
   9000: { prefix: 'KM', size: { w: 6, h: 21 }, labels: ['A1', 'A2'] },
   9004: { prefix: 'KT', size: { w: 6, h: 21 }, labels: ['A1', 'A2'] },
   9008: { prefix: 'H', size: { w: 6, h: 21 }, labels: ['X1', 'X2'] },
@@ -839,7 +848,8 @@ export function mountApp(root: HTMLElement): void {
       const tripped = Boolean(simInputs.tripped[element.id] || result?.tripped[element.id]);
       const defaultClosed = armedByDefaultTypes.has(element.typeCode);
       const manuallyOpen = result !== undefined && latchedTypes.has(element.typeCode) && !(simInputs.toggled[element.id] ?? defaultClosed);
-      symbol.classList.toggle('is-sim-pressed', simInputs.pressed[element.id] ?? false);
+      // У выключателя с фиксацией лопасть рисуется по тому же классу, что и у нажатой кнопки.
+      symbol.classList.toggle('is-sim-pressed', (simInputs.pressed[element.id] ?? false) || (maintainedTypes.has(element.typeCode) && simInputs.toggled[element.id] === true));
       symbol.classList.toggle('is-sim-open', manuallyOpen || tripped);
       symbol.classList.toggle('is-sim-tripped', tripped);
       symbol.classList.toggle('is-sim-fault-glow', Boolean(simInputs.tripped[element.id]));
@@ -957,7 +967,9 @@ export function mountApp(root: HTMLElement): void {
     renderSchema();
     status.textContent = 'Симуляция остановлена.';
   };
-  const momentaryTypes = new Set([8000, 8001, 8002, 8003, 8004, 8005, 8006, 8013]);
+  const momentaryTypes = new Set([8000, 8001, 8002, 8003, 8004, 8005, 8006, 8007, 8012, 8013, 8014, 8015]);
+  /** Ручные выключатели с фиксацией (Interruptor): клик переключает привод, toggled = «привод включён», нет записи = покой. Не входят в latchedTypes. */
+  const maintainedTypes = new Set([8008, 8009, 8010, 8011]);
   const trippableTypes = new Set([6000, 6001, 6002, 6003, 6004, 6005, 6006, 6007, 6008, 6009, 6010, 6011, 6012, 8018]);
   const applySimulationInput = (): void => { evaluateSimulation(); renderSchema(); };
   const pressMomentary = (id: number): void => {
@@ -2028,6 +2040,17 @@ export function mountApp(root: HTMLElement): void {
         const element = schema.elements.find((candidate) => candidate.id === hit.id);
         if (element && momentaryTypes.has(element.typeCode)) {
           pressMomentary(element.id); svg.setPointerCapture(event.pointerId); event.preventDefault(); return;
+        }
+        if (element && maintainedTypes.has(element.typeCode)) {
+          const next = !(simInputs.toggled[element.id] ?? false);
+          simInputs.toggled[element.id] = next;
+          // Контакты одного устройства, нарисованные несколькими символами с тем же обозначением, переключаются вместе.
+          if (element.name.trim() !== '') {
+            for (const twin of schema.elements) {
+              if (twin.id !== element.id && twin.typeCode === element.typeCode && twin.name === element.name) simInputs.toggled[twin.id] = next;
+            }
+          }
+          applySimulationInput(); event.preventDefault(); return;
         }
         if (element && latchedTypes.has(element.typeCode)) {
           const defaultClosed = armedByDefaultTypes.has(element.typeCode);

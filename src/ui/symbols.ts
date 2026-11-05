@@ -133,14 +133,39 @@ function setaActuator(x: number, nc: boolean, to = nc ? x + 1.5 : x - 1.5): SVGG
   );
 }
 
+/**
+ * Привод ручного выключателя с фиксацией (Interruptor 8008–8011) по образцу accionamientos.cad:
+ * ступенчатая скоба (вертикаль с коротким хвостом влево внизу и полкой вправо вверху) и пунктир к середине контакта.
+ * Это не switchActuator (тот рисует привод автомата).
+ */
+function maintainedActuator(x: number, nc: boolean, to = nc ? x + 1.5 : x - 1.5): SVGGElement {
+  return group('actuator', path(`M ${x - 7.5} 8.5 H ${x - 6.2} V 6 H ${x - 4.7}`), dashed(`M ${x - 4.7} 6 H ${to}`, '1.5 1.1'));
+}
+
+/** Вид привода для кнопок и переключателей панели «Accionamientos». */
+type ActuatorKind = 'push' | 'seta' | 'maintained' | 'limit';
+const ACTUATORS: Readonly<Record<ActuatorKind, (x: number, nc: boolean, to?: number) => SVGGElement>> = {
+  push: pushActuator,
+  seta: setaActuator,
+  maintained: maintainedActuator,
+  limit: limitActuator,
+};
+
 /** Круг-индикатор «Botón pulsador» 8023 (рамка 6×6): зелёный диск и тонкое кольцо вокруг. Цвет не зависит от состояния. */
 function drawIndicator(g: SVGGElement): void {
   g.append(circle(3, 3, 3.3, { fill: '#fff', stroke: '#6b7280', 'stroke-width': 0.6 }));
   g.append(circle(3, 3, 2.5, { fill: '#0a8a1c', stroke: 'none' }));
 }
 
-/** Кнопка НО+НЗ (8002 плоская, 8006 грибок): НЗ колонка слева, НО справа, общий толкатель и пунктирная связь между колонками. */
-function drawPushPair(g: SVGGElement, element: SchemaElement, mushroom: boolean): void {
+/** Одиночный контакт панели «Accionamientos» (кнопка, грибок, выключатель с фиксацией, концевик). */
+function drawSingleActuated(g: SVGGElement, element: SchemaElement, nc: boolean, actuator: ActuatorKind): void {
+  const x = columns(element)[0] ?? 0;
+  g.append(contactColumn(x, rowGapOf(element), { nc, control: 'engine' }));
+  g.append(ACTUATORS[actuator](x, nc));
+}
+
+/** Кнопка НО+НЗ (8002 плоская, 8006 грибок; также 8010 выключатель и 8014 концевик): НЗ колонка слева, НО справа, общий толкатель и пунктирная связь между колонками. */
+function drawPushPair(g: SVGGElement, element: SchemaElement, actuator: ActuatorKind): void {
   const xs = columns(element);
   const rowGap = rowGapOf(element);
   const nc = xs[0] ?? 0;
@@ -148,22 +173,22 @@ function drawPushPair(g: SVGGElement, element: SchemaElement, mushroom: boolean)
   g.append(contactColumn(nc, rowGap, { nc: true, control: 'pressed' }));
   g.append(contactColumn(no, rowGap, { control: 'pressed' }));
   g.append(dashed(`M ${nc + 1.5} 6 H ${no - 1.5}`, '1.5 1.1'));
-  g.append((mushroom ? setaActuator : pushActuator)(nc, true));
+  g.append(ACTUATORS[actuator](nc, true));
 }
 
 /** Кнопка CON 8003: общий вывод сверху, НЗ и НО снизу, толкатель слева с пунктиром к середине лопасти. */
-function drawPushChangeover(g: SVGGElement, element: SchemaElement): void {
+function drawPushChangeover(g: SVGGElement, element: SchemaElement, actuator: ActuatorKind = 'push'): void {
   const top = element.terminals[0]?.offset.x ?? 3;
   const nc = element.terminals[1]?.offset.x ?? 0;
   const no = element.terminals[2]?.offset.x ?? 6;
   g.append(conColumn(top, nc, no, 'pressed'));
   const left = Math.min(top, nc, no);
-  g.append(pushActuator(left, true, (top + nc) / 2));
+  g.append(ACTUATORS[actuator](left, true, (top + nc) / 2));
 }
 
 /** Привод конечного выключателя: пунктир к контакту и ролик на конце. */
-export function limitActuator(x: number, nc: boolean): SVGGElement {
-  const midX = nc ? x + 1.5 : x - 1.5;
+export function limitActuator(x: number, nc: boolean, to = nc ? x + 1.5 : x - 1.5): SVGGElement {
+  const midX = to;
   return group('actuator', dashed(`M ${x - 5} 6 H ${midX}`, '1.5 1.1'), circle(x - 6.4, 6, 1.4, { 'stroke-width': 0.8 }), path(`M ${x - 6.4} 4.6 V 3.2`, 0.7));
 }
 
@@ -922,30 +947,46 @@ function drawBody(g: SVGGElement, element: SchemaElement, rotation: number): voi
       break;
     case 8000:
     case 8001:
-    case 8013: {
-      const x = xs[0] ?? 0;
-      const nc = element.typeCode === 8013 || element.typeCode === 8001;
-      g.append(contactColumn(x, rowGap, { nc, control: 'engine' }));
-      g.append(pushActuator(x, nc));
+      drawSingleActuated(g, element, element.typeCode === 8001, 'push');
       break;
-    }
+    case 8004:
+    case 8005:
+      drawSingleActuated(g, element, element.typeCode === 8005, 'seta');
+      break;
+    // Interruptor с фиксацией: скоба-«ступенька», пунктир к лопасти.
+    case 8008:
+    case 8009:
+      drawSingleActuated(g, element, element.typeCode === 8009, 'maintained');
+      break;
+    // Концевики: привод с роликом (limitActuator).
+    case 8012:
+    case 8013:
+      drawSingleActuated(g, element, element.typeCode === 8013, 'limit');
+      break;
     case 8002:
-      drawPushPair(g, element, false);
+      drawPushPair(g, element, 'push');
       break;
     case 8006:
-      drawPushPair(g, element, true);
+      drawPushPair(g, element, 'seta');
+      break;
+    case 8010:
+      drawPushPair(g, element, 'maintained');
+      break;
+    case 8014:
+      drawPushPair(g, element, 'limit');
       break;
     case 8003:
       drawPushChangeover(g, element);
       break;
-    case 8004:
-    case 8005: {
-      const x = xs[0] ?? 0;
-      const nc = element.typeCode === 8005;
-      g.append(contactColumn(x, rowGap, { nc, control: 'engine' }));
-      g.append(setaActuator(x, nc));
+    case 8007:
+      drawPushChangeover(g, element, 'seta');
       break;
-    }
+    case 8011:
+      drawPushChangeover(g, element, 'maintained');
+      break;
+    case 8015:
+      drawPushChangeover(g, element, 'limit');
+      break;
     case 8018:
       drawThermalAux(g, element);
       break;
@@ -1087,8 +1128,8 @@ export function createElementSymbol(element: SchemaElement): SVGGElement | null 
     const hx = Math.min(...txs, 0);
     root.append(shape('rect', { class: 'hit-area', x: hx - 10, y: 2, width: 10, height: 8, fill: '#000', 'fill-opacity': 0, stroke: 'none' }));
   }
-  // Привод кнопки (скоба или грибок) выступает влево от первой клеммы: у кнопок панели «Accionamientos» тоже есть своя область захвата.
-  if ([8000, 8001, 8002, 8003, 8004, 8005, 8006, 8013].includes(element.typeCode)) {
+  // Привод кнопки (скоба, грибок, ступенька выключателя или ролик концевика) выступает влево от первой клеммы: у кнопок панели «Accionamientos» тоже есть своя область захвата.
+  if ([8000, 8001, 8002, 8003, 8004, 8005, 8006, 8007, 8008, 8009, 8010, 8011, 8012, 8013, 8014, 8015].includes(element.typeCode)) {
     const hx = Math.min(...txs, 0);
     root.append(shape('rect', { class: 'hit-area', x: hx - 9, y: 1, width: 9, height: 10, fill: '#000', 'fill-opacity': 0, stroke: 'none' }));
   }
