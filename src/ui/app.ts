@@ -284,7 +284,7 @@ const INTERFACE_TEXT = {
     elements: 'Elementos', search: 'Buscar elementos…', properties: 'Propiedades', selectElement: 'Selecciona un elemento en la hoja para editar sus propiedades.', schematic: 'Área de trabajo del esquema', elementCount: '{count} elementos', running: 'Simulación en marcha',
     status: 'Selecciona un archivo .cad para abrir un esquema.', zoom: 'Zoom', helpCanvas: 'Clic: seleccionar · Arrastrar: mover · Marco: seleccionar área vacía · Espacio / botón central: desplazar',
     sheetSize: 'Tamaño de hoja', format: 'Formato', custom: 'Personalizado', landscape: 'apaisado', portrait: 'vertical', width: 'Ancho, mm', height: 'Alto, mm', apply: 'Aplicar',
-    themeLight: 'Tema claro', themeDark: 'Tema oscuro', gridHide: 'Ocultar cuadrícula', wireColorsPerPhase: 'Colores de cables: por fase', wireColorsUniform: 'Fases de cables: rojo / gris', gridShow: 'Mostrar cuadrícula', selectedMany: 'Selecciona un solo elemento para ver sus propiedades.', noWireProperties: 'Los cables no tienen propiedades editables.', missingElement: 'No se encontró el elemento.', name: 'Nombre', function: 'Función', terminals: 'Etiquetas de terminales', terminal: 'Terminal', lampColor: 'Color de lámpara', delay: 'Retardo, s',
+    themeLight: 'Tema claro', themeDark: 'Tema oscuro', gridHide: 'Ocultar cuadrícula', wireColorsPerPhase: 'Colores de cables: por fase', wireColorsUniform: 'Fases de cables: rojo / gris', gridShow: 'Mostrar cuadrícula', propsShow: 'Mostrar panel de propiedades', propsHide: 'Ocultar panel de propiedades', propsDone: 'Listo', selectedMany: 'Selecciona un solo elemento para ver sus propiedades.', noWireProperties: 'Los cables no tienen propiedades editables.', missingElement: 'No se encontró el elemento.', name: 'Nombre', function: 'Función', terminals: 'Etiquetas de terminales', terminal: 'Terminal', lampColor: 'Color de lámpara', delay: 'Retardo, s',
     newTitle: '¿Crear un esquema nuevo?', newWarning: 'El esquema actual y su historial de cambios se borrarán.', create: 'Crear',
     aboutBio: 'El autor, IGOR LIPSKIY, es estudiante de 2.º curso de Sistemas Electrotécnicos y Automatizados en el IES Lagunas.', aboutNonCommercial: 'Proyecto sin ánimo de lucro: no es comercial y nadie lo venderá.', aboutContact: 'Para cualquier consulta:', accessTitle: 'Acceso', accessText: 'Introduce la contraseña para continuar.', accessPlaceholder: 'Contraseña', accessEnter: 'Entrar', accessWrong: 'Contraseña incorrecta', betaTitle: 'Versión beta', betaText: 'Esto es una versión beta. La lógica de todos los componentes aún no está terminada, por lo que la simulación puede comportarse de forma incorrecta.', betaOk: 'Entendido', shortcutsTitle: 'Atajos de teclado', aboutText: 'Editor de esquemas eléctricos y simulador de lógica de relés.', author: 'Autor', version: 'Versión', close: 'Cerrar',
     overload: 'Simular sobrecarga', reset: 'Restablecer entradas', green: 'Verde', red: 'Rojo', yellow: 'Amarillo', contactor1: 'Contactor 1 (KM1)', contactor2: 'Contactor 2 (KM2)',
@@ -298,7 +298,7 @@ const INTERFACE_TEXT = {
     elements: 'Components', search: 'Search components…', properties: 'Properties', selectElement: 'Select a component on the sheet to edit its properties.', schematic: 'Schematic workspace', elementCount: '{count} components', running: 'Simulation running',
     status: 'Choose a .cad file to open a schematic.', zoom: 'Zoom', helpCanvas: 'Click: select · Drag: move · Box: select empty area · Space / middle button: pan',
     sheetSize: 'Sheet size', format: 'Format', custom: 'Custom', landscape: 'landscape', portrait: 'portrait', width: 'Width, mm', height: 'Height, mm', apply: 'Apply',
-    themeLight: 'Light theme', themeDark: 'Dark theme', gridHide: 'Hide grid', wireColorsPerPhase: 'Wire colors: per phase', wireColorsUniform: 'Phase wires: red / gray', gridShow: 'Show grid', selectedMany: 'Select one component to view its properties.', noWireProperties: 'Wires have no editable properties.', missingElement: 'Component not found.', name: 'Name', function: 'Function', terminals: 'Terminal labels', terminal: 'Terminal', lampColor: 'Lamp color', delay: 'Delay, s',
+    themeLight: 'Light theme', themeDark: 'Dark theme', gridHide: 'Hide grid', wireColorsPerPhase: 'Wire colors: per phase', wireColorsUniform: 'Phase wires: red / gray', gridShow: 'Show grid', propsShow: 'Show properties panel', propsHide: 'Hide properties panel', propsDone: 'Done', selectedMany: 'Select one component to view its properties.', noWireProperties: 'Wires have no editable properties.', missingElement: 'Component not found.', name: 'Name', function: 'Function', terminals: 'Terminal labels', terminal: 'Terminal', lampColor: 'Lamp color', delay: 'Delay, s',
     newTitle: 'Create a new schematic?', newWarning: 'The current schematic and its undo history will be cleared.', create: 'Create',
     aboutBio: 'The author, IGOR LIPSKIY, is a 2nd-year student of Sistemas Electrotécnicos y Automatizados at IES Lagunas.', aboutNonCommercial: 'Non-commercial project: nothing here is for sale and nobody will sell it.', aboutContact: 'For any questions:', accessTitle: 'Access', accessText: 'Enter the password to continue.', accessPlaceholder: 'Password', accessEnter: 'Enter', accessWrong: 'Wrong password', betaTitle: 'Beta version', betaText: 'This is a beta version. The logic of all components is not finished yet, so the simulation may behave incorrectly.', betaOk: 'Got it', shortcutsTitle: 'Keyboard shortcuts', aboutText: 'Electrical schematic editor and relay logic simulator.', author: 'Author', version: 'Version', close: 'Close',
     overload: 'Simulate overload', reset: 'Reset inputs', green: 'Green', red: 'Red', yellow: 'Yellow', contactor1: 'Contactor 1 (KM1)', contactor2: 'Contactor 2 (KM2)',
@@ -312,7 +312,7 @@ const INTERFACE_TEXT = {
     elements: 'Elementi', search: 'Cerca elementi…', properties: 'Proprietà', selectElement: 'Seleziona un elemento sul foglio per modificarne le proprietà.', schematic: 'Area di lavoro dello schema', elementCount: '{count} elementi', running: 'Simulazione in esecuzione',
     status: 'Seleziona un file .cad per aprire uno schema.', zoom: 'Zoom', helpCanvas: 'Clic: seleziona · Trascina: sposta · Riquadro: seleziona area vuota · Spazio / pulsante centrale: panoramica',
     sheetSize: 'Dimensioni foglio', format: 'Formato', custom: 'Personalizzato', landscape: 'orizzontale', portrait: 'verticale', width: 'Larghezza, mm', height: 'Altezza, mm', apply: 'Applica',
-    themeLight: 'Tema chiaro', themeDark: 'Tema scuro', gridHide: 'Nascondi griglia', wireColorsPerPhase: 'Colori cavi: per fase', wireColorsUniform: 'Fasi dei cavi: rosso / grigio', gridShow: 'Mostra griglia', selectedMany: 'Seleziona un solo elemento per visualizzarne le proprietà.', noWireProperties: 'I cavi non hanno proprietà modificabili.', missingElement: 'Elemento non trovato.', name: 'Nome', function: 'Funzione', terminals: 'Etichette dei terminali', terminal: 'Terminale', lampColor: 'Colore lampada', delay: 'Ritardo, s',
+    themeLight: 'Tema chiaro', themeDark: 'Tema scuro', gridHide: 'Nascondi griglia', wireColorsPerPhase: 'Colori cavi: per fase', wireColorsUniform: 'Fasi dei cavi: rosso / grigio', gridShow: 'Mostra griglia', propsShow: 'Mostra pannello proprietà', propsHide: 'Nascondi pannello proprietà', propsDone: 'Fatto', selectedMany: 'Seleziona un solo elemento per visualizzarne le proprietà.', noWireProperties: 'I cavi non hanno proprietà modificabili.', missingElement: 'Elemento non trovato.', name: 'Nome', function: 'Funzione', terminals: 'Etichette dei terminali', terminal: 'Terminale', lampColor: 'Colore lampada', delay: 'Ritardo, s',
     newTitle: 'Creare un nuovo schema?', newWarning: 'Lo schema attuale e la cronologia delle modifiche verranno eliminati.', create: 'Crea',
     aboutBio: 'L’autore, IGOR LIPSKIY, è uno studente del 2º anno di Sistemas Electrotécnicos y Automatizados presso l’IES Lagunas.', aboutNonCommercial: 'Progetto non commerciale: non è in vendita e nessuno lo venderà.', aboutContact: 'Per qualsiasi domanda:', accessTitle: 'Accesso', accessText: 'Inserisci la password per continuare.', accessPlaceholder: 'Password', accessEnter: 'Entra', accessWrong: 'Password errata', betaTitle: 'Versione beta', betaText: 'Questa è una versione beta. La logica di tutti i componenti non è ancora completata, quindi la simulazione può comportarsi in modo errato.', betaOk: 'Ho capito', shortcutsTitle: 'Scorciatoie da tastiera', aboutText: 'Editor di schemi elettrici e simulatore di logica a relè.', author: 'Autore', version: 'Versione', close: 'Chiudi',
     overload: 'Simula sovraccarico', reset: 'Azzera ingressi', green: 'Verde', red: 'Rosso', yellow: 'Giallo', contactor1: 'Contattore 1 (KM1)', contactor2: 'Contattore 2 (KM2)',
@@ -326,7 +326,7 @@ const INTERFACE_TEXT = {
     elements: 'Элементы', search: 'Поиск элементов…', properties: 'Свойства', selectElement: 'Выберите элемент на листе, чтобы изменить его свойства.', schematic: 'Поле схемы', elementCount: '{count} элементов', running: 'Симуляция запущена',
     status: 'Выберите файл .cad, чтобы открыть схему.', zoom: 'Масштаб', helpCanvas: 'Клик — выбрать · Перетащить — двигать · Рамка — пустое место · Пробел / средняя кнопка — панорама',
     sheetSize: 'Размер листа', format: 'Формат', custom: 'Пользовательский', landscape: 'альбомный', portrait: 'книжный', width: 'Ширина, мм', height: 'Высота, мм', apply: 'Применить',
-    themeLight: 'Светлая тема', themeDark: 'Тёмная тема', gridHide: 'Скрыть сетку', wireColorsPerPhase: 'Цвета проводов: по фазам', wireColorsUniform: 'Фазы: красный / серый', gridShow: 'Показать сетку', selectedMany: 'Выберите один элемент, чтобы изменить его свойства.', noWireProperties: 'Для проводов нет редактируемых свойств.', missingElement: 'Элемент не найден.', name: 'Имя', function: 'Функция', terminals: 'Метки клемм', terminal: 'Клемма', lampColor: 'Цвет лампы', delay: 'Выдержка, с',
+    themeLight: 'Светлая тема', themeDark: 'Тёмная тема', gridHide: 'Скрыть сетку', wireColorsPerPhase: 'Цвета проводов: по фазам', wireColorsUniform: 'Фазы: красный / серый', gridShow: 'Показать сетку', propsShow: 'Показать панель свойств', propsHide: 'Скрыть панель свойств', propsDone: 'Готово', selectedMany: 'Выберите один элемент, чтобы изменить его свойства.', noWireProperties: 'Для проводов нет редактируемых свойств.', missingElement: 'Элемент не найден.', name: 'Имя', function: 'Функция', terminals: 'Метки клемм', terminal: 'Клемма', lampColor: 'Цвет лампы', delay: 'Выдержка, с',
     newTitle: 'Создать новую схему?', newWarning: 'Текущая схема и история изменений будут очищены.', create: 'Создать',
     aboutBio: 'Автор — IGOR LIPSKIY, студент 2 курса Sistemas Electrotécnicos y Automatizados центра IES Lagunas.', aboutNonCommercial: 'Проект некоммерческий: ничего здесь не продаётся и продавать никто не будет.', aboutContact: 'По любым вопросам:', accessTitle: 'Доступ', accessText: 'Введите пароль, чтобы продолжить.', accessPlaceholder: 'Пароль', accessEnter: 'Войти', accessWrong: 'Неверный пароль', betaTitle: 'Бета-версия', betaText: 'Это бета-версия. Логика всех компонентов ещё не доработана, поэтому симуляция может работать некорректно.', betaOk: 'Понятно', shortcutsTitle: 'Горячие клавиши', aboutText: 'Редактор электрических схем и симулятор релейной логики.', author: 'Автор', version: 'Версия', close: 'Закрыть',
     overload: 'Имитировать перегрузку', reset: 'Сбросить входы', green: 'Зелёная', red: 'Красная', yellow: 'Жёлтая', contactor1: 'Контактор 1 (KM1)', contactor2: 'Контактор 2 (KM2)',
@@ -488,6 +488,7 @@ export function mountApp(root: HTMLElement): void {
             <button type="button" class="menu-command" data-command="zoom-out">Уменьшить <kbd>−</kbd></button>
             <button type="button" class="menu-command" data-command="fit">Показать всё <kbd>Ctrl+0</kbd></button>
             <button type="button" class="menu-command" data-command="grid" id="grid-command"></button>
+            <button type="button" class="menu-command" data-command="properties-panel" id="properties-panel-command"></button>
             <button type="button" class="menu-command" data-command="theme" id="theme-command"></button>
             <button type="button" class="menu-command" data-command="wire-colors" id="wire-colors-command"></button>
           </div></details>
@@ -577,7 +578,7 @@ export function mountApp(root: HTMLElement): void {
         </svg>
         </section>
         <aside id="properties-panel" class="properties-panel" aria-label="Свойства элемента">
-          <h2>Свойства</h2><div id="property-fields" class="property-fields"></div>
+          <div class="properties-head"><h2>Свойства</h2><button type="button" id="properties-close" class="properties-close" title="Готово">Готово</button></div><div id="property-fields" class="property-fields"></div>
         </aside>
       </div>
       <footer class="app-footer">
@@ -678,6 +679,56 @@ export function mountApp(root: HTMLElement): void {
     try { localStorage.setItem(GRID_KEY, gridVisible ? 'on' : 'off'); } catch { /* Grid still toggles for this session. */ }
   };
   applyGrid();
+
+  /** Панель свойств: по умолчанию скрыта; открывается двойным кликом по элементу как плавающее окно. Пункт «Вид» закрепляет её справа. */
+  const PROPERTIES_PANEL_KEY = 'cadesimu-properties-panel';
+  const propertiesPanel = root.querySelector<HTMLElement>('#properties-panel');
+  const propertiesPanelCommand = root.querySelector<HTMLButtonElement>('#properties-panel-command');
+  let propertiesDocked = (() => { try { return localStorage.getItem(PROPERTIES_PANEL_KEY) === 'on'; } catch { return false; } })();
+  let propertiesFloating = false;
+  const applyPropertiesPanel = (): void => {
+    if (!propertiesPanel) return;
+    const open = propertiesDocked || propertiesFloating;
+    propertiesPanel.hidden = !open;
+    propertiesPanel.classList.toggle('is-floating', open && !propertiesDocked);
+    if (propertiesDocked) { propertiesPanel.style.left = ''; propertiesPanel.style.top = ''; }
+    if (propertiesPanelCommand) propertiesPanelCommand.textContent = propertiesDocked ? uiText().propsHide : uiText().propsShow;
+    const done = root.querySelector<HTMLElement>('#properties-close');
+    if (done) done.textContent = uiText().propsDone;
+  };
+  const closeFloatingProperties = (): void => {
+    if (!propertiesFloating) return;
+    propertiesFloating = false;
+    const active = document.activeElement;
+    if (active instanceof HTMLElement && propertiesPanel?.contains(active)) active.blur();
+    applyPropertiesPanel();
+  };
+  const openFloatingProperties = (clientX: number, clientY: number): void => {
+    if (!propertiesPanel || propertiesDocked) return;
+    propertiesFloating = true;
+    applyPropertiesPanel();
+    const margin = 8;
+    const width = propertiesPanel.offsetWidth; const height = propertiesPanel.offsetHeight;
+    const left = Math.max(margin, Math.min(clientX + 16, window.innerWidth - width - margin));
+    const top = Math.max(margin, Math.min(clientY + 16, window.innerHeight - height - margin));
+    propertiesPanel.style.left = `${left}px`; propertiesPanel.style.top = `${top}px`;
+    propertiesPanel.querySelector<HTMLInputElement>('input, select')?.focus({ preventScroll: true });
+  };
+  const toggleDockedProperties = (): void => {
+    propertiesDocked = !propertiesDocked;
+    propertiesFloating = false;
+    applyPropertiesPanel();
+    try { localStorage.setItem(PROPERTIES_PANEL_KEY, propertiesDocked ? 'on' : 'off'); } catch { /* The panel still toggles for this session. */ }
+  };
+  root.querySelector('#properties-close')?.addEventListener('click', closeFloatingProperties);
+  // Закрытие плавающего окна: клик вне его, Esc, Enter в поле. Правки уже записаны при вводе.
+  window.addEventListener('pointerdown', (event) => {
+    if (propertiesFloating && !(event.target as Element).closest?.('#properties-panel')) closeFloatingProperties();
+  }, true);
+  propertiesPanel?.addEventListener('keydown', (event) => {
+    if (!propertiesFloating) return;
+    if (event.key === 'Enter' || event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); closeFloatingProperties(); }
+  });
 
   const wireColorsCommand = root.querySelector<HTMLButtonElement>('#wire-colors-command');
   let uniformWireColors = readUniformWireColors();
@@ -830,6 +881,7 @@ export function mountApp(root: HTMLElement): void {
     if (theme) theme.textContent = root.dataset.theme === 'dark' ? t.themeLight : t.themeDark;
     const grid = root.querySelector<HTMLButtonElement>('#grid-command');
     if (grid) grid.textContent = gridVisible ? t.gridHide : t.gridShow;
+    applyPropertiesPanel();
     updateWireColorsCommand();
     const sheetDialog = root.querySelector<HTMLDialogElement>('#sheet-dialog');
     if (sheetDialog) {
@@ -1361,11 +1413,18 @@ export function mountApp(root: HTMLElement): void {
   const renderSchema = (): void => {
     const { width, height } = schema.sheet;
     const totalHeight = fullSheet(schema.sheet).height;
-    for (const id of ['sheet-paper', 'sheet-grid', 'sheet-border']) {
+    for (const id of ['sheet-paper', 'sheet-border']) {
       const rect = root.querySelector<SVGRectElement>(`#${id}`);
       rect?.setAttribute('width', String(width));
-      rect?.setAttribute('height', String(id === 'sheet-grid' ? height : totalHeight));
+      rect?.setAttribute('height', String(totalHeight));
     }
+    /** Точки сетки только внутри рамки чертежа: на полях между краем листа и рамкой их нет (ни на экране, ни в печати). */
+    const gridMargin = stampMetrics(width, height).margin;
+    const gridRect = root.querySelector<SVGRectElement>('#sheet-grid');
+    gridRect?.setAttribute('x', String(gridMargin));
+    gridRect?.setAttribute('y', String(gridMargin));
+    gridRect?.setAttribute('width', String(Math.max(0, width - gridMargin * 2)));
+    gridRect?.setAttribute('height', String(Math.max(0, height - gridMargin * 2)));
     renderSheetFrame();
     rebuildWireTerminalMap();
     wireLayer.replaceChildren();
@@ -1847,7 +1906,6 @@ export function mountApp(root: HTMLElement): void {
     copy.setAttribute('preserveAspectRatio', 'xMidYMid meet');
     copy.removeAttribute('class');
     copy.querySelector('.viewport-backdrop')?.remove();
-    copy.querySelector('#sheet-grid')?.remove();
     copy.querySelector('#selection-layer')?.remove();
     copy.querySelector('#draft-layer')?.remove();
     copy.querySelector('#ghost-layer')?.remove();
@@ -1969,6 +2027,7 @@ export function mountApp(root: HTMLElement): void {
       case 'fit': root.querySelector<HTMLButtonElement>('[data-zoom="fit"]')?.click(); break;
       case 'theme': toggleTheme(); break;
       case 'grid': toggleGrid(); break;
+      case 'properties-panel': toggleDockedProperties(); break;
       case 'wire-colors': toggleWireColors(); break;
       case 'sheet': openSheetDialog(); break;
       case 'shortcuts': shortcutsDialog?.showModal(); break;
@@ -2103,6 +2162,16 @@ export function mountApp(root: HTMLElement): void {
     commitSchema(before); renderSchema();
     status.textContent = `Добавлен ${element.name}. Режим размещения продолжается; R — поворот, Esc — завершить.`;
   });
+  svg.addEventListener('dblclick', (event) => {
+    if (wireDrawing || placementType !== undefined || panTool || simMode !== 'edit') return;
+    // Элементы перерисовываются при каждом клике, поэтому ищем элемент под курсором, а не event.target.
+    const hit = document.elementsFromPoint(event.clientX, event.clientY).map((node) => getHit(node)).find((candidate) => candidate?.kind === 'element');
+    if (!hit) return;
+    selected.clear(); selected.set(selectionKey(hit), hit);
+    renderSchema();
+    event.preventDefault();
+    openFloatingProperties(event.clientX, event.clientY);
+  });
   svg.addEventListener('contextmenu', (event) => {
     if (!wireDrawing) return;
     event.preventDefault();
@@ -2148,8 +2217,13 @@ export function mountApp(root: HTMLElement): void {
       const item: Selectable = { kind: 'element', id: element.id };
       selected.clear(); selected.set(selectionKey(item), item);
       commitSchema(before);
+      // Одна вставка за выбор: после установки элемента режим размещения сразу завершается.
+      placementType = undefined; placementRotation = 0;
+      activePaletteCommand = undefined; renderPalette();
+      if (placeTypeSelect) placeTypeSelect.value = '';
+      svg.classList.remove('is-placing');
       renderSchema();
-      status.textContent = `Добавлен ${element.name}. Режим размещения продолжается; R — поворот, Esc — завершить.`;
+      status.textContent = `Добавлен ${element.name}.`;
       event.preventDefault();
       return;
     }
