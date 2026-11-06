@@ -99,6 +99,7 @@ kbd { padding: 2px 6px; border: 1px solid var(--border); border-radius: 4px; bac
 /* ── Нижняя строка состояния ────────────────────────────── */
 .app-footer { display: flex; height: 28px; flex: 0 0 auto; align-items: center; justify-content: space-between; gap: 18px; padding: 0 14px; border-top: 1px solid var(--border); background: var(--surface); color: var(--muted); font-size: 12px; }
 .status-bar { min-width: 0; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cursor-coords { flex: 0 0 auto; min-width: 132px; color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; white-space: pre; text-align: right; }
 .zoom-value { flex: 0 0 auto; min-width: 48px; color: var(--text); font-size: 12px; font-variant-numeric: tabular-nums; text-align: right; }
 .viewport-help { flex: 0 1 auto; overflow: hidden; color: var(--muted); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; opacity: .85; }
 

@@ -19,7 +19,7 @@ import type { EngineMemory, EngineState, PotentialLabel, TerminalKey, UserInputs
 import { canRedo, canUndo, commitHistory, createHistory, redoHistory, undoHistory } from './history';
 import { createElementSymbol } from './symbols';
 import { clampDeltaToSheet, clampElementPosition, clampPointToSheet, elementExtent } from './bounds';
-import { fitViewport, panBy, screenToSheet, snapPointToGrid, zoomAt } from './viewport';
+import { fitViewport, MAX_VIEWPORT_SCALE, MIN_VIEWPORT_SCALE, panBy, screenToSheet, snapPointToGrid, zoomAt } from './viewport';
 import type { Point, Viewport } from './viewport';
 import { detectBundleLayout, isWireInteriorPoint, offsetRoute, orthogonalize, simplifyRoute, snapDrawingPoint } from './wire-routing';
 import './viewport.css';
@@ -583,6 +583,7 @@ export function mountApp(root: HTMLElement): void {
       </div>
       <footer class="app-footer">
         <div id="status" class="status-bar" role="status" aria-live="polite">Выберите файл .cad, чтобы открыть схему.</div>
+        <output id="cursor-coords" class="cursor-coords" title="X / Y, мм">X: — Y: —</output>
         <output id="zoom-value" class="zoom-value" aria-live="polite" title="Масштаб">100%</output>
         <span class="viewport-help">Клик — выбрать · Перетащить — двигать · Рамка — пустое место · Пробел / средняя кнопка — панорама</span>
       </footer>
@@ -752,6 +753,7 @@ export function mountApp(root: HTMLElement): void {
   const sheetFrame = root.querySelector<SVGGElement>('#sheet-frame');
   const sheetStamp = root.querySelector<SVGGElement>('#sheet-stamp');
   const zoomValue = root.querySelector<HTMLOutputElement>('#zoom-value');
+  const cursorCoords = root.querySelector<HTMLOutputElement>('#cursor-coords');
   const status = root.querySelector<HTMLDivElement>('#status');
   const fileName = root.querySelector<HTMLSpanElement>('#file-name');
   const fileInput = root.querySelector<HTMLInputElement>('#cad-file');
@@ -786,7 +788,32 @@ export function mountApp(root: HTMLElement): void {
   const backdrop = svg.querySelector<SVGRectElement>('.viewport-backdrop');
   backdrop?.setAttribute('width', String(viewSize.x));
   backdrop?.setAttribute('height', String(viewSize.y));
-  let viewport: Viewport = fitViewport(fullSheet(schema.sheet), { width: viewSize.x, height: viewSize.y });
+  /** Вид (масштаб и центр в координатах листа) переживает перезагрузку страницы. */
+  const VIEWPORT_KEY = 'cadesimu-viewport';
+  const readSavedViewport = (): Viewport | undefined => {
+    try {
+      const raw = localStorage.getItem(VIEWPORT_KEY);
+      if (!raw) return undefined;
+      const saved = JSON.parse(raw) as { scale?: unknown; cx?: unknown; cy?: unknown };
+      const { scale, cx, cy } = saved;
+      if (typeof scale !== 'number' || typeof cx !== 'number' || typeof cy !== 'number') return undefined;
+      if (![scale, cx, cy].every(Number.isFinite) || scale < MIN_VIEWPORT_SCALE || scale > MAX_VIEWPORT_SCALE) return undefined;
+      return { scale, offsetX: viewSize.x / 2 - cx * scale, offsetY: viewSize.y / 2 - cy * scale };
+    } catch { return undefined; }
+  };
+  let viewport: Viewport = readSavedViewport() ?? fitViewport(fullSheet(schema.sheet), { width: viewSize.x, height: viewSize.y });
+  let viewportSaveTimer: ReturnType<typeof setTimeout> | undefined;
+  const saveViewportNow = (): void => {
+    if (viewportSaveTimer !== undefined) { clearTimeout(viewportSaveTimer); viewportSaveTimer = undefined; }
+    try {
+      const center = screenToSheet({ x: viewSize.x / 2, y: viewSize.y / 2 }, viewport);
+      localStorage.setItem(VIEWPORT_KEY, JSON.stringify({ scale: viewport.scale, cx: center.x, cy: center.y }));
+    } catch { /* The view simply is not restored next time. */ }
+  };
+  const scheduleViewportSave = (): void => {
+    if (viewportSaveTimer !== undefined) clearTimeout(viewportSaveTimer);
+    viewportSaveTimer = setTimeout(saveViewportNow, 250);
+  };
   let pointerSheetPosition: Point | undefined;
   let drag: DragState | undefined;
   let spaceDown = false;
@@ -1298,6 +1325,7 @@ export function mountApp(root: HTMLElement): void {
     if (stampEditor) closeStampEditor(true);
     sheet.setAttribute('transform', `translate(${viewport.offsetX} ${viewport.offsetY}) scale(${viewport.scale})`);
     zoomValue.value = `${Math.round(viewport.scale * 100)}%`;
+    scheduleViewportSave();
   };
   type DrawKind = Exclude<WireKind, 'junction'>;
   const activeWireKinds = (): DrawKind[] => {
@@ -1360,7 +1388,7 @@ export function mountApp(root: HTMLElement): void {
   };
   // Режим размещения включают и выключают в десятке мест через класс is-placing: следим за классом, а не за каждым местом.
   new MutationObserver(() => { if (!svg.classList.contains('is-placing')) ghostPoint = undefined; drawGhost(); }).observe(svg, { attributes: true, attributeFilter: ['class'] });
-  svg.addEventListener('pointerleave', () => { ghostLayer.replaceChildren(); });
+  svg.addEventListener('pointerleave', () => { ghostLayer.replaceChildren(); if (cursorCoords) cursorCoords.value = 'X: — Y: —'; });
   svg.addEventListener('pointerenter', (event) => moveGhost(event));
   const renderSheetFrame = (): void => {
     const { width, height } = schema.sheet;
@@ -2162,15 +2190,26 @@ export function mountApp(root: HTMLElement): void {
     commitSchema(before); renderSchema();
     status.textContent = `Добавлен ${element.name}. Режим размещения продолжается; R — поворот, Esc — завершить.`;
   });
-  svg.addEventListener('dblclick', (event) => {
-    if (wireDrawing || placementType !== undefined || panTool || simMode !== 'edit') return;
-    // Элементы перерисовываются при каждом клике, поэтому ищем элемент под курсором, а не event.target.
+  // Двойной клик определяем сами по двум нажатиям: после каждого клика элементы перерисовываются,
+  // и браузер теряет цель нажатия, поэтому штатный dblclick по элементам не приходит.
+  let lastElementPress: { time: number; x: number; y: number; id: number } | undefined;
+  svg.addEventListener('pointerdown', (event) => {
+    if (event.button !== 0 || wireDrawing || placementType !== undefined || panTool || simMode !== 'edit' || spaceDown) { lastElementPress = undefined; return; }
     const hit = document.elementsFromPoint(event.clientX, event.clientY).map((node) => getHit(node)).find((candidate) => candidate?.kind === 'element');
-    if (!hit) return;
-    selected.clear(); selected.set(selectionKey(hit), hit);
-    renderSchema();
-    event.preventDefault();
-    openFloatingProperties(event.clientX, event.clientY);
+    if (!hit) { lastElementPress = undefined; return; }
+    const now = performance.now();
+    const previous = lastElementPress;
+    if (previous && previous.id === hit.id && now - previous.time < 450 && Math.hypot(event.clientX - previous.x, event.clientY - previous.y) < 8) {
+      lastElementPress = undefined;
+      const { clientX, clientY } = event;
+      setTimeout(() => {
+        selected.clear(); selected.set(selectionKey(hit), hit);
+        renderSchema();
+        openFloatingProperties(clientX, clientY);
+      }, 40);
+      return;
+    }
+    lastElementPress = { time: now, x: event.clientX, y: event.clientY, id: hit.id };
   });
   svg.addEventListener('contextmenu', (event) => {
     if (!wireDrawing) return;
@@ -2353,6 +2392,7 @@ export function mountApp(root: HTMLElement): void {
   svg.addEventListener('pointermove', (event) => {
     const pointerScreen = svgPoint(event, svg, viewSize);
     pointerSheetPosition = screenToSheet(pointerScreen, viewport);
+    if (cursorCoords) cursorCoords.value = `X: ${pointerSheetPosition.x.toFixed(1)}  Y: ${pointerSheetPosition.y.toFixed(1)}`;
     if (!drag) moveGhost(event);
     if (!drag || drag.pointerId !== event.pointerId) {
       if (!drag && wireDrawing) {
@@ -2505,6 +2545,7 @@ export function mountApp(root: HTMLElement): void {
   });
   window.addEventListener('keyup', (event) => { if (event.code === 'Space') spaceDown = false; });
   window.addEventListener('pagehide', persistSchemaNow);
+  window.addEventListener('pagehide', saveViewportNow);
 
   if (typeof ResizeObserver !== 'undefined') {
     const observer = new ResizeObserver(([entry]) => {
