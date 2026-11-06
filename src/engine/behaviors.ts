@@ -151,6 +151,11 @@ const TABLE: readonly TypeBehavior[] = [
   { typeCode: 1057, links: inert() },
   { typeCode: 1058, links: inert() },
   { typeCode: 1059, links: inert() },
+  { typeCode: 1060, links: inert() },
+  { typeCode: 1061, links: inert() },
+  { typeCode: 1065, links: inert() },
+  { typeCode: 1066, links: inert() },
+  { typeCode: 1067, links: inert() },
   // Предохранители 5000–5004 всегда проводят (перегорание не моделируется); разъединители 5005–5009 включаются кликом, стартуют отключёнными; сопоставление клемм по порядку «верхний ряд, нижний ряд».
   { typeCode: 5000, links: switches([[0, 1]], 'always') },
   { typeCode: 5001, links: switches([[0, 2], [1, 3]], 'always') },

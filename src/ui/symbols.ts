@@ -985,9 +985,9 @@ function drawDrive(g: SVGGElement, element: SchemaElement): void {
 }
 
 /** Рамка блока (x −3..w − 3, y 3..h − 6) и выводы от клемм до рамки. */
-function drawBlockFrame(g: SVGGElement, element: SchemaElement): void {
+function drawBlockFrame(g: SVGGElement, element: SchemaElement, left = -3): void {
   const { w, h } = element.size;
-  g.append(rect(-3, 3, w, h - 9));
+  g.append(rect(left, 3, w, h - 9));
   for (const t of element.terminals) {
     g.append(path(t.offset.y > 0 ? `M ${t.offset.x} ${h - 6} V ${t.offset.y}` : `M ${t.offset.x} 0 V 3`));
   }
@@ -995,7 +995,7 @@ function drawBlockFrame(g: SVGGElement, element: SchemaElement): void {
 
 /** Control Variador 1056: рамка 54×33, 13 выводов и переключающий контакт у RA–RC. */
 function drawDriveControl(g: SVGGElement, element: SchemaElement): void {
-  drawBlockFrame(g, element);
+  drawBlockFrame(g, element, element.typeCode === 1061 ? -6 : -3);
   g.append(path('M 0 3 V 6 H 3 M 3 9 L 9 6 M 9 6 H 12 V 3'));
 }
 
@@ -1008,7 +1008,7 @@ function bridgeDiode(g: SVGGElement, x: number, y: number): void {
 /** Преобразователь для двигателя постоянного тока 1057–1059: рамка и диодный мост (4 диода у 1057/1058, 6 у 1059). */
 function drawDcDrive(g: SVGGElement, element: SchemaElement): void {
   drawBlockFrame(g, element);
-  const three = element.typeCode === 1059;
+  const three = element.typeCode === 1059 || element.typeCode === 1060;
   const left = element.typeCode === 1057 ? 0 : 3;
   const right = left + 12;
   const rows = three ? [12, 15, 18] : [12, 18];
@@ -1020,6 +1020,26 @@ function drawDcDrive(g: SVGGElement, element: SchemaElement): void {
     bridgeDiode(g, right - 3.3, y);
   }
   for (const [dx, bottom] of stubs) g.append(path(`M ${left + dx} 9 V ${bottom}`));
+}
+
+/** Транзистор контроллера шагового двигателя: база слева, коллектор вверх, эмиттер со стрелкой вниз; x это вывод Q или I над ним. */
+function stepperTransistor(g: SVGGElement, x: number): void {
+  g.append(path(`M ${x - 2.5} 9.1 H ${x - 1.4} M ${x - 1.4} 7.5 V 10.6 M ${x - 1.4} 8.4 L ${x} 7.5 V 6.2 M ${x - 1.4} 9.7 L ${x} 10.7 V 11.3`));
+  g.append(inkFill(`M ${x} 10.9 L ${x - 1.1} 10.6 L ${x - 0.4} 9.7 Z`));
+}
+
+/** Контроллер шагового двигателя 1065–1067: рамка 36×12, четыре транзистора, надпись UNIPOLAR, выводы L+ и L- сверху. */
+function drawStepperController(g: SVGGElement, element: SchemaElement): void {
+  g.append(rect(-3, 3, 36, 12));
+  for (const t of element.terminals) {
+    g.append(path(t.offset.y > 0 ? `M ${t.offset.x} 15 V ${t.offset.y}` : `M ${t.offset.x} 0 V 3`));
+  }
+  g.append(path('M 24 0 V 3 M 30 0 V 3'));
+  g.append(label('L+', 24.9, 1.7, { size: 2.3 }), label('L-', 30.9, 1.7, { size: 2.3 }));
+  for (const x of [0, 6, 12, 18]) stepperTransistor(g, x);
+  g.append(label('UNIPOLAR', 3.1, 13.4, { size: 2.3 }));
+  const names = element.typeCode === 1066 ? [['CW', -2], ['CCW', 3], ['PD', 10]] as const : element.typeCode === 1067 ? [['CK', -2], ['UD', 4], ['PD', 10]] as const : [];
+  for (const [text, x] of names) g.append(label(text, x, 4.8, { size: 2.3 }));
 }
 
 function drawBody(g: SVGGElement, element: SchemaElement, rotation: number): void {
@@ -1244,11 +1264,18 @@ function drawBody(g: SVGGElement, element: SchemaElement, rotation: number): voi
       drawDrive(g, element);
       break;
     case 1056:
+    case 1061:
       drawDriveControl(g, element);
+      break;
+    case 1065:
+    case 1066:
+    case 1067:
+      drawStepperController(g, element);
       break;
     case 1057:
     case 1058:
     case 1059:
+    case 1060:
       drawDcDrive(g, element);
       break;
     default:
@@ -1277,6 +1304,11 @@ const NAME_SPOTS: Readonly<Record<number, { x: number; y: number; anchor: 'start
   1057: { x: -4, y: 5.7, anchor: 'end' },
   1058: { x: -4, y: 5.7, anchor: 'end' },
   1059: { x: -4, y: 5.7, anchor: 'end' },
+  1060: { x: -4, y: 5.7, anchor: 'end' },
+  1061: { x: -7, y: 5.7, anchor: 'end' },
+  1065: { x: -4, y: 5.7, anchor: 'end' },
+  1066: { x: -4, y: 5.7, anchor: 'end' },
+  1067: { x: -4, y: 5.7, anchor: 'end' },
 };
 
 type LabelSpot = readonly [dx: number, dy: number, anchor: 'start' | 'middle' | 'end'];

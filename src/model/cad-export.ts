@@ -15,6 +15,16 @@ const DEFAULT_TAILS: Readonly<Record<number, string>> = {
   1062: '000/030/000/400',
   1063: '000/030/000/400',
   1056: '1-0-0-001-200-010-025-050-05-05-00-0',
+  1061: '0-050-230-0050-2000-05-05',
+  1065: 'L+-1-L--1-1',
+  1066: 'L+-1-L--1-1',
+  1067: 'L+-1-L--1-1',
+};
+
+/** Слоты флагов клемм у новых элементов, если они идут не подряд с нуля: у 1066/1067 слот 3 (I4) пуст, выходы Q1..Q4 лежат в слотах 4..7 (как в образце). */
+const SLOT_MAP: Readonly<Record<number, readonly number[]>> = {
+  1066: [0, 1, 2, 4, 5, 6, 7],
+  1067: [0, 1, 2, 4, 5, 6, 7],
 };
 
 /** Типы, у которых клеммы не помещаются в одну запись: сколько клемм в основной, остальные идут записью-продолжением -1 (как в образце). */
@@ -63,9 +73,10 @@ function elementRecords(element: SchemaElement, allocId: () => number): CadRecor
   if (!raw || total !== element.terminals.length) {
     // Число клемм изменилось: флаги пишем заново подряд, продолжения отбрасываем (клемм у них больше нет).
     record.nums.fill(0, 0, flagCountOf(record));
-    const slots = element.terminals.slice(0, Math.min(flagCountOf(record), SPLIT_AT[element.typeCode] ?? Infinity)).map((_, index) => index);
+    const sequential = element.terminals.slice(0, Math.min(flagCountOf(record), SPLIT_AT[element.typeCode] ?? Infinity)).map((_, index) => index);
+    const slots = !raw && SLOT_MAP[element.typeCode]?.length === element.terminals.length ? [...(SLOT_MAP[element.typeCode] ?? [])] : sequential;
     for (const slot of slots) record.nums[slot] = 1;
-    element.terminals.slice(0, slots.length).forEach((terminal, index) => { record.texts[2 + index] = terminal.label; });
+    element.terminals.slice(0, slots.length).forEach((terminal, index) => { record.texts[2 + (slots[index] ?? index)] = terminal.label; });
     continuations.length = 0;
     const split = SPLIT_AT[element.typeCode];
     if (!raw && split !== undefined && element.terminals.length > split) {

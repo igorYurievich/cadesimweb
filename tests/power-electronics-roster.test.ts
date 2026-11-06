@@ -13,9 +13,9 @@ import { fixture } from './helpers';
 
 /** Образец potencia_elementos.cad: по одной кнопке панели «Potencia: resistencias, arrancadores, variadores, controladores» (17 кнопок). */
 const SAMPLE = 'potencia_elementos.cad';
-/** Первые 12 кнопок панели в порядке панели (7 в части 1, ещё 5 в следующей). */
-const CODES = [1050, 1051, 1052, 1053, 1062, 1063, 1054, 1055, 1056, 1057, 1058, 1059];
-const TERMINALS: Record<number, number> = { 1050: 2, 1051: 6, 1052: 9, 1053: 7, 1062: 3, 1063: 4, 1054: 7, 1055: 8, 1056: 13, 1057: 5, 1058: 7, 1059: 6 };
+/** Все 17 кнопок панели в порядке панели. */
+const CODES = [1050, 1051, 1052, 1053, 1062, 1063, 1054, 1055, 1056, 1057, 1058, 1059, 1060, 1061, 1065, 1066, 1067];
+const TERMINALS: Record<number, number> = { 1050: 2, 1051: 6, 1052: 9, 1053: 7, 1062: 3, 1063: 4, 1054: 7, 1055: 8, 1056: 13, 1057: 5, 1058: 7, 1059: 6, 1060: 8, 1061: 7, 1065: 8, 1066: 7, 1067: 7 };
 const LABELS: Record<number, string[]> = {
   1050: ['1', '2'],
   1051: ['1', '3', '5', '2', '4', '6'],
@@ -29,17 +29,21 @@ const LABELS: Record<number, string[]> = {
   1057: ['L1', 'N', 'PE', 'M1', 'M2'],
   1058: ['L1', 'N', 'PE', 'M1', 'M2', 'F1', 'F2'],
   1059: ['L1', 'L2', 'L3', 'PE', 'M1', 'M2'],
+  1060: ['L1', 'L2', 'L3', 'PE', 'M1', 'M2', 'F1', 'F2'],
+  1061: ['RA', 'RC', 'IN', 'V+', '+', 'AI', '0V'],
+  1065: ['I1', 'I2', 'I3', 'I4', 'Q1', 'Q2', 'Q3', 'Q4'],
+  1066: ['I1', 'I2', 'I3', 'Q1', 'Q2', 'Q3', 'Q4'],
+  1067: ['I1', 'I2', 'I3', 'Q1', 'Q2', 'Q3', 'Q4'],
 };
-const SIZES: Record<number, [number, number]> = { 1050: [6, 18], 1051: [18, 18], 1052: [18, 21], 1053: [21, 27], 1062: [15, 27], 1063: [24, 27], 1054: [24, 33], 1055: [24, 33], 1056: [54, 33], 1057: [18, 33], 1058: [24, 33], 1059: [24, 33] };
+const SIZES: Record<number, [number, number]> = { 1050: [6, 18], 1051: [18, 18], 1052: [18, 21], 1053: [21, 27], 1062: [15, 27], 1063: [24, 27], 1054: [24, 33], 1055: [24, 33], 1056: [54, 33], 1057: [18, 33], 1058: [24, 33], 1059: [24, 33], 1060: [24, 33], 1061: [39, 33], 1065: [40, 24], 1066: [40, 24], 1067: [40, 24] };
 /** Типы образца, которых в ростере ещё нет: импорт их читает, но тип неизвестен. */
-const NOT_YET = [1060, 1061, 1065, 1066, 1067];
+const NOT_YET: number[] = [];
 
-describe('power electronics: panel roster (12 of 17)', () => {
-  it('the panel has 17 buttons and the first 12 map to .cad types in panel order', () => {
+describe('power electronics: panel roster (all 17)', () => {
+  it('the panel has 17 buttons and all 17 map to .cad types in panel order', () => {
     const items = catalog.inGroup('power-electronics');
     expect(items).toHaveLength(17);
-    expect(items.slice(0, 12).map((c) => cadTypeForCommand(c.id)?.code)).toEqual(CODES);
-    expect(items.slice(12).filter((c) => cadTypeForCommand(c.id))).toEqual([]);
+    expect(items.map((c) => cadTypeForCommand(c.id)?.code)).toEqual(CODES);
   });
 
   it('all part-1 codes are known and have engine behavior', () => {
@@ -47,13 +51,13 @@ describe('power electronics: panel roster (12 of 17)', () => {
       expect(isKnownCadType(code)).toBe(true);
       expect(getCadType(code).layout.kind === 'none').toBe(false);
     }
-    expect(CODES.map((code) => getCadType(code).family)).toEqual(['resistor', 'resistor', 'transformer', 'electronic-starter', 'control-unit', 'control-unit', 'drive', 'drive', 'control-unit', 'drive', 'drive', 'drive']);
+    expect(CODES.map((code) => getCadType(code).family)).toEqual(['resistor', 'resistor', 'transformer', 'electronic-starter', 'control-unit', 'control-unit', 'drive', 'drive', 'control-unit', 'drive', 'drive', 'drive', 'drive', 'control-unit', 'control-unit', 'control-unit', 'control-unit']);
     expect(missingBehaviors()).toEqual([]);
   });
 });
 
 describe('power electronics: sample file', () => {
-  it('the whole sample is read without warnings; the not yet implemented types are reported explicitly', () => {
+  it('the whole sample is read without warnings and every type of it is known', () => {
     const { schema, warnings, unknownTypes } = importCad(fixture(SAMPLE));
     expect(warnings).toEqual([]);
     expect(unknownTypes).toEqual(NOT_YET);
@@ -64,7 +68,7 @@ describe('power electronics: sample file', () => {
     expect(schema.sheet.cadFooter).toBeDefined();
   });
 
-  it('the 12 types have the expected frames, terminal counts and labels', () => {
+  it('the 17 types have the expected frames, terminal counts and labels', () => {
     const { schema } = importCad(fixture(SAMPLE));
     for (const code of CODES) {
       const e = schema.elements.find((item) => item.typeCode === code);
@@ -74,7 +78,7 @@ describe('power electronics: sample file', () => {
       expect(e?.labelOffset).toEqual({ x: -12, y: -3 });
       expect(invalidTerminalIndexes(code, e?.terminals.length ?? 0)).toEqual([]);
     }
-    expect(schema.elements.filter((e) => CODES.includes(e.typeCode)).map((e) => e.name)).toEqual(['-R', '-R', '-T', '-G', '-G', '-G', '-G', '-G', '-G', '-G', '-G', '-G']);
+    expect(schema.elements.filter((e) => CODES.includes(e.typeCode)).map((e) => e.name)).toEqual(['-R', '-R', '-T', ...Array(14).fill('-G')]);
   });
 
   it('terminal offsets follow the layouts taken from the screenshot', () => {
@@ -92,6 +96,11 @@ describe('power electronics: sample file', () => {
     expect(offsets(1057)).toEqual([[0, 0], [6, 0], [12, 0], [0, 30], [12, 30]]);
     expect(offsets(1058)).toEqual([[0, 0], [6, 0], [12, 0], [0, 30], [6, 30], [12, 30], [18, 30]]);
     expect(offsets(1059)).toEqual([[0, 0], [6, 0], [12, 0], [18, 0], [3, 30], [15, 30]]);
+    expect(offsets(1060)).toEqual([[0, 0], [6, 0], [12, 0], [18, 0], [0, 30], [6, 30], [12, 30], [18, 30]]);
+    expect(offsets(1061)).toEqual([[0, 0], [12, 0], [21, 0], [27, 0], [0, 30], [6, 30], [12, 30]]);
+    expect(offsets(1065)).toEqual([[0, 0], [6, 0], [12, 0], [18, 0], [0, 18], [6, 18], [12, 18], [18, 18]]);
+    expect(offsets(1066)).toEqual([[0, 0], [6, 0], [12, 0], [0, 18], [6, 18], [12, 18], [18, 18]]);
+    expect(offsets(1067)).toEqual(offsets(1066));
   });
 
   it('the autotransformer record has 11 texts, 24 numbers and 9 flags; position and size are read with the shift', () => {
@@ -233,6 +242,30 @@ describe('power electronics: Control Variador (1056) written as a new element', 
   });
 });
 
+describe('power electronics: stepper controllers and tails', () => {
+  it('1066 keeps the empty flag slot 3: Q1..Q4 are read from slots 4..7', () => {
+    const { schema } = importCad(fixture(SAMPLE));
+    const e = schema.elements.find((item) => item.typeCode === 1066)!;
+    expect(e.raw?.nums.slice(0, 8)).toEqual([1, 1, 1, 0, 1, 1, 1, 1]);
+    expect(e.raw?.tail).toBe('L+-1-L--1-1');
+  });
+
+  it('a new 1066 is written with the empty slot 3 and the tail of the sample, and reads back with 7 terminals', () => {
+    const xs = [0, 6, 12, 0, 6, 12, 18];
+    const ys = [0, 0, 0, 18, 18, 18, 18];
+    const control = el(1066, 30, 60, { id: 1, name: '-G1', terminals: LABELS[1066]!.map((label, i) => [xs[i]!, ys[i]!, label] as const) });
+    control.size = { w: 40, h: 24 };
+    const text = exportCad(schemaOf([], [control]));
+    const record = parseCad(text).records[0]!;
+    expect(record.nums.slice(0, 8)).toEqual([1, 1, 1, 0, 1, 1, 1, 1]);
+    expect(record.texts.slice(2, 10)).toEqual(['I1', 'I2', 'I3', '', 'Q1', 'Q2', 'Q3', 'Q4']);
+    expect(record.tail).toBe('L+-1-L--1-1');
+    const back = importCad(text);
+    expect(back.warnings).toEqual([]);
+    expect(back.schema.elements[0]?.terminals.map((t) => t.label)).toEqual(LABELS[1066]);
+  });
+});
+
 describe('power electronics: engine', () => {
   const inputs = { pressed: {}, toggled: {}, tripped: {} } as unknown as UserInputs;
 
@@ -262,7 +295,7 @@ describe('power electronics: engine', () => {
     const state = simulate(createEngineInput(schema));
     expect(state).toBeDefined();
     const result = computeSwitching(schema, inputs);
-    for (const code of [1052, 1053, 1062, 1063, 1054, 1055, 1056, 1057, 1058, 1059]) {
+    for (const code of CODES.filter((c) => c !== 1050 && c !== 1051)) {
       const e = schema.elements.find((item) => item.typeCode === code)!;
       expect(result.edges.filter((edge) => edge.element === e.id)).toEqual([]);
     }
