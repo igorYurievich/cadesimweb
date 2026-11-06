@@ -40,7 +40,8 @@ function readAutosavedSchema(): Schema | undefined {
     return saved ? parseSchemaJson(saved) : undefined;
   } catch { return undefined; }
 }
-const CAD_GRID_STEP = 6;
+/** Шаг сетки равен шагу привязки элементов и проводов (3): все клеммы лежат на узлах сетки. */
+const CAD_GRID_STEP = 3;
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const WIRE_COLORS = { phase: '#9e1b16', neutral: '#1749e8', protection: '#13852c', junction: '#263342' } as const;
 const POTENTIAL_COLORS: Record<PotentialLabel, string> = {
@@ -559,7 +560,7 @@ export function mountApp(root: HTMLElement): void {
         <section class="viewport-stage" aria-label="Поле схемы">
         <svg class="viewport-svg" viewBox="0 0 ${FALLBACK_VIEWPORT.width} ${FALLBACK_VIEWPORT.height}" preserveAspectRatio="none" role="img" aria-label="Поле схемы">
           <defs><pattern id="cad-grid" x="${-CAD_GRID_STEP / 2}" y="${-CAD_GRID_STEP / 2}" width="${CAD_GRID_STEP}" height="${CAD_GRID_STEP}" patternUnits="userSpaceOnUse">
-            <circle cx="${CAD_GRID_STEP / 2}" cy="${CAD_GRID_STEP / 2}" r="0.3" fill="#8b96a3" />
+            <circle cx="${CAD_GRID_STEP / 2}" cy="${CAD_GRID_STEP / 2}" r="0.24" fill="#7d8996" />
           </pattern></defs>
           <rect class="viewport-backdrop" x="0" y="0" width="${FALLBACK_VIEWPORT.width}" height="${FALLBACK_VIEWPORT.height}" />
           <g id="sheet-transform">
