@@ -256,6 +256,7 @@ const PLACE_LABEL_OFFSETS: Record<number, { x: number; y: number }> = {
 type Theme = 'light' | 'dark';
 const THEME_KEY = 'cadesimu-theme';
 const GRID_KEY = 'cadesimu-grid';
+const BETA_NOTICE_KEY = 'cadesimu-beta-notice-seen';
 const WIRE_COLOR_MODE_KEY = 'cadesimu-wire-colors';
 const INTERFACE_LANGUAGE_KEY = 'cadesimu-language';
 const INTERFACE_TEXT = {
@@ -270,7 +271,7 @@ const INTERFACE_TEXT = {
     sheetSize: 'Tamaño de hoja', format: 'Formato', custom: 'Personalizado', landscape: 'apaisado', portrait: 'vertical', width: 'Ancho, mm', height: 'Alto, mm', apply: 'Aplicar',
     themeLight: 'Tema claro', themeDark: 'Tema oscuro', gridHide: 'Ocultar cuadrícula', wireColorsPerPhase: 'Colores de cables: por fase', wireColorsUniform: 'Fases de cables: rojo / gris', gridShow: 'Mostrar cuadrícula', selectedMany: 'Selecciona un solo elemento para ver sus propiedades.', noWireProperties: 'Los cables no tienen propiedades editables.', missingElement: 'No se encontró el elemento.', name: 'Nombre', function: 'Función', terminals: 'Etiquetas de terminales', terminal: 'Terminal', lampColor: 'Color de lámpara', delay: 'Retardo, s',
     newTitle: '¿Crear un esquema nuevo?', newWarning: 'El esquema actual y su historial de cambios se borrarán.', create: 'Crear',
-    shortcutsTitle: 'Atajos de teclado', aboutText: 'Editor de esquemas eléctricos y simulador de lógica de relés.', author: 'Autor', version: 'Versión', close: 'Cerrar',
+    betaTitle: 'Versión beta', betaText: 'Esto es una versión beta. La lógica de todos los componentes aún no está terminada, por lo que la simulación puede comportarse de forma incorrecta.', betaOk: 'Entendido', shortcutsTitle: 'Atajos de teclado', aboutText: 'Editor de esquemas eléctricos y simulador de lógica de relés.', author: 'Autor', version: 'Versión', close: 'Cerrar',
     overload: 'Simular sobrecarga', reset: 'Restablecer entradas', green: 'Verde', red: 'Rojo', yellow: 'Amarillo', contactor1: 'Contactor 1 (KM1)', contactor2: 'Contactor 2 (KM2)',
   },
   en: {
@@ -284,7 +285,7 @@ const INTERFACE_TEXT = {
     sheetSize: 'Sheet size', format: 'Format', custom: 'Custom', landscape: 'landscape', portrait: 'portrait', width: 'Width, mm', height: 'Height, mm', apply: 'Apply',
     themeLight: 'Light theme', themeDark: 'Dark theme', gridHide: 'Hide grid', wireColorsPerPhase: 'Wire colors: per phase', wireColorsUniform: 'Phase wires: red / gray', gridShow: 'Show grid', selectedMany: 'Select one component to view its properties.', noWireProperties: 'Wires have no editable properties.', missingElement: 'Component not found.', name: 'Name', function: 'Function', terminals: 'Terminal labels', terminal: 'Terminal', lampColor: 'Lamp color', delay: 'Delay, s',
     newTitle: 'Create a new schematic?', newWarning: 'The current schematic and its undo history will be cleared.', create: 'Create',
-    shortcutsTitle: 'Keyboard shortcuts', aboutText: 'Electrical schematic editor and relay logic simulator.', author: 'Author', version: 'Version', close: 'Close',
+    betaTitle: 'Beta version', betaText: 'This is a beta version. The logic of all components is not finished yet, so the simulation may behave incorrectly.', betaOk: 'Got it', shortcutsTitle: 'Keyboard shortcuts', aboutText: 'Electrical schematic editor and relay logic simulator.', author: 'Author', version: 'Version', close: 'Close',
     overload: 'Simulate overload', reset: 'Reset inputs', green: 'Green', red: 'Red', yellow: 'Yellow', contactor1: 'Contactor 1 (KM1)', contactor2: 'Contactor 2 (KM2)',
   },
   it: {
@@ -298,7 +299,7 @@ const INTERFACE_TEXT = {
     sheetSize: 'Dimensioni foglio', format: 'Formato', custom: 'Personalizzato', landscape: 'orizzontale', portrait: 'verticale', width: 'Larghezza, mm', height: 'Altezza, mm', apply: 'Applica',
     themeLight: 'Tema chiaro', themeDark: 'Tema scuro', gridHide: 'Nascondi griglia', wireColorsPerPhase: 'Colori cavi: per fase', wireColorsUniform: 'Fasi dei cavi: rosso / grigio', gridShow: 'Mostra griglia', selectedMany: 'Seleziona un solo elemento per visualizzarne le proprietà.', noWireProperties: 'I cavi non hanno proprietà modificabili.', missingElement: 'Elemento non trovato.', name: 'Nome', function: 'Funzione', terminals: 'Etichette dei terminali', terminal: 'Terminale', lampColor: 'Colore lampada', delay: 'Ritardo, s',
     newTitle: 'Creare un nuovo schema?', newWarning: 'Lo schema attuale e la cronologia delle modifiche verranno eliminati.', create: 'Crea',
-    shortcutsTitle: 'Scorciatoie da tastiera', aboutText: 'Editor di schemi elettrici e simulatore di logica a relè.', author: 'Autore', version: 'Versione', close: 'Chiudi',
+    betaTitle: 'Versione beta', betaText: 'Questa è una versione beta. La logica di tutti i componenti non è ancora completata, quindi la simulazione può comportarsi in modo errato.', betaOk: 'Ho capito', shortcutsTitle: 'Scorciatoie da tastiera', aboutText: 'Editor di schemi elettrici e simulatore di logica a relè.', author: 'Autore', version: 'Versione', close: 'Chiudi',
     overload: 'Simula sovraccarico', reset: 'Azzera ingressi', green: 'Verde', red: 'Rosso', yellow: 'Giallo', contactor1: 'Contattore 1 (KM1)', contactor2: 'Contattore 2 (KM2)',
   },
   ru: {
@@ -312,7 +313,7 @@ const INTERFACE_TEXT = {
     sheetSize: 'Размер листа', format: 'Формат', custom: 'Пользовательский', landscape: 'альбомный', portrait: 'книжный', width: 'Ширина, мм', height: 'Высота, мм', apply: 'Применить',
     themeLight: 'Светлая тема', themeDark: 'Тёмная тема', gridHide: 'Скрыть сетку', wireColorsPerPhase: 'Цвета проводов: по фазам', wireColorsUniform: 'Фазы: красный / серый', gridShow: 'Показать сетку', selectedMany: 'Выберите один элемент, чтобы изменить его свойства.', noWireProperties: 'Для проводов нет редактируемых свойств.', missingElement: 'Элемент не найден.', name: 'Имя', function: 'Функция', terminals: 'Метки клемм', terminal: 'Клемма', lampColor: 'Цвет лампы', delay: 'Выдержка, с',
     newTitle: 'Создать новую схему?', newWarning: 'Текущая схема и история изменений будут очищены.', create: 'Создать',
-    shortcutsTitle: 'Горячие клавиши', aboutText: 'Редактор электрических схем и симулятор релейной логики.', author: 'Автор', version: 'Версия', close: 'Закрыть',
+    betaTitle: 'Бета-версия', betaText: 'Это бета-версия. Логика всех компонентов ещё не доработана, поэтому симуляция может работать некорректно.', betaOk: 'Понятно', shortcutsTitle: 'Горячие клавиши', aboutText: 'Редактор электрических схем и симулятор релейной логики.', author: 'Автор', version: 'Версия', close: 'Закрыть',
     overload: 'Имитировать перегрузку', reset: 'Сбросить входы', green: 'Зелёная', red: 'Красная', yellow: 'Жёлтая', contactor1: 'Контактор 1 (KM1)', contactor2: 'Контактор 2 (KM2)',
   },
 } satisfies Record<Lang, Record<string, string>>;
@@ -613,6 +614,11 @@ export function mountApp(root: HTMLElement): void {
         <dl><div><dt>Автор</dt><dd>IGOR LIPSKIY</dd></div><div><dt>Версия</dt><dd>0.1.0</dd></div></dl>
         <div class="dialog-actions"><button type="button" data-dialog-close="about-dialog">Закрыть</button></div>
       </dialog>
+      <dialog id="beta-dialog" class="app-dialog beta-dialog" aria-labelledby="beta-title">
+        <h2 id="beta-title">Бета-версия</h2>
+        <p id="beta-text">Это бета-версия. Логика всех компонентов ещё не доработана, поэтому симуляция может работать некорректно.</p>
+        <div class="dialog-actions"><button type="button" class="primary-action" id="beta-ok">Понятно</button></div>
+      </dialog>
       <div id="simulation-context-menu" class="simulation-context-menu" role="menu" hidden>
         <button type="button" id="simulate-overload" role="menuitem">Имитировать перегрузку</button>
         <button type="button" id="reset-simulation-inputs" role="menuitem">Reset</button>
@@ -814,6 +820,7 @@ export function mountApp(root: HTMLElement): void {
     const shortcutsDialog = root.querySelector<HTMLDialogElement>('#shortcuts-dialog'); if (shortcutsDialog) set('#shortcuts-title', t.shortcutsTitle);
     const aboutDialog = root.querySelector<HTMLDialogElement>('#about-dialog'); if (aboutDialog) { set('#about-dialog p', t.aboutText); const fields = aboutDialog.querySelectorAll('dt'); if (fields[0]) fields[0]!.textContent = t.author; if (fields[1]) fields[1]!.textContent = t.version; }
     for (const button of [...root.querySelectorAll<HTMLButtonElement>('[data-dialog-close]')]) button.textContent = t.close;
+    set('#beta-title', t.betaTitle); set('#beta-text', t.betaText); set('#beta-ok', t.betaOk);
     set('#simulate-overload', t.overload); set('#reset-simulation-inputs', t.reset);
     for (const option of [...root.querySelectorAll<HTMLOptionElement>('#palette-language option')]) option.selected = option.value === paletteLang;
     paletteLanguage.setAttribute('aria-label', t.languageNames);
@@ -1701,6 +1708,13 @@ export function mountApp(root: HTMLElement): void {
   const confirmNewDialog = root.querySelector<HTMLDialogElement>('#confirm-new-dialog');
   const shortcutsDialog = root.querySelector<HTMLDialogElement>('#shortcuts-dialog');
   const aboutDialog = root.querySelector<HTMLDialogElement>('#about-dialog');
+  // Предупреждение о бета-версии: показывается только при первом открытии сайта.
+  const betaDialog = root.querySelector<HTMLDialogElement>('#beta-dialog');
+  const betaAlreadySeen = (): boolean => { try { return localStorage.getItem(BETA_NOTICE_KEY) === '1'; } catch { return false; } };
+  const markBetaSeen = (): void => { try { localStorage.setItem(BETA_NOTICE_KEY, '1'); } catch { /* Notice may show again if storage is unavailable. */ } };
+  betaDialog?.addEventListener('close', markBetaSeen);
+  root.querySelector<HTMLButtonElement>('#beta-ok')?.addEventListener('click', () => betaDialog?.close());
+  if (betaDialog && !betaAlreadySeen()) betaDialog.showModal();
   const resetSchema = (): void => {
     schema = createEmptySchema(); history = createHistory(cloneSchema(schema)); selected.clear();
     resetSimulation();
