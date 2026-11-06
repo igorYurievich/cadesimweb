@@ -1,6 +1,7 @@
 # CADe SIMU Web
 CONTRASEÑA: igorsim
 WEBSITE: https://cadesimwebapp.netlify.app/
+
 Прототип веб-редактора и симулятора CADe SIMU. Исходный код приложения находится в `src/`, автоматизированные проверки — в `tests/`.
 
 ## Быстрая навигация
