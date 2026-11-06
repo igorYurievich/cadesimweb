@@ -279,7 +279,7 @@ const INTERFACE_TEXT = {
     file: 'Archivo', edit: 'Editar', view: 'Ver', elementsMenu: 'Elementos', optionalGroups: 'Mostrar categorías adicionales', extraGrafcet: 'GRAFCET', extraLadder: 'Ladder', extraLogic: 'Lógica', extraReal2d: 'Símbolos realistas · 2D', extraReal3d: 'Símbolos realistas · 3D', extraWiring: 'Cables y conexiones', extraPneumatics: 'Actuadores neumáticos', extraIoPlc: 'Entradas / salidas PLC', extraPowerElectronics: 'Electrónica de potencia', extraElectronicRelays: 'Relés electrónicos', language: 'Idioma', examples: 'Ejemplos', help: 'Ayuda',
     new: 'Nuevo esquema', open: 'Abrir .cad / .json', save: 'Guardar JSON', export: 'Exportar .cad', exportSvg: 'Exportar SVG', printPdf: 'Imprimir / PDF', sheet: 'Tamaño de hoja…',
     copy: 'Copiar', paste: 'Pegar', undo: 'Deshacer', redo: 'Rehacer', rotate: 'Girar', delete: 'Eliminar', zoomIn: 'Acercar', zoomOut: 'Alejar', fit: 'Ajustar vista', shortcuts: 'Atajos de teclado', about: 'Acerca de',
-    languageNames: 'Idioma de la interfaz y los elementos', wiresSimulation: 'Cables y simulación', wires: 'Cables', wireType: 'Tipo de cable', phase: 'Fase', neutral: 'Neutro', three: '3 fases (L1 L2 L3)', threeN: '3 fases + N', wire: 'Cable', done: 'Hecho', cancel: 'Cancelar', cursor: 'Cursor', hand: 'Mano',
+    languageNames: 'Idioma de la interfaz y los elementos', wiresSimulation: 'Cables y simulación', wires: 'Cables', wireType: 'Tipo de cable', phase: 'Fase', neutral: 'Neutro', three: '3 fases (L1 L2 L3)', threeN: '3 fases + N', wire: 'Cable', done: 'Hecho', cancel: 'Cancelar', cursor: 'Cursor', hand: 'Mano', node: 'Nodo (N)',
     simulation: 'Control de simulación', run: 'Iniciar', stop: 'Detener', stopTitle: 'Detención completa: reiniciar tiempo, memoria y botones pulsados', speed: 'Velocidad de simulación', editor: 'Editor', place: 'Colocar elemento', showAll: 'Mostrar todo',
     elements: 'Elementos', search: 'Buscar elementos…', properties: 'Propiedades', selectElement: 'Selecciona un elemento en la hoja para editar sus propiedades.', schematic: 'Área de trabajo del esquema', elementCount: '{count} elementos', running: 'Simulación en marcha',
     status: 'Selecciona un archivo .cad para abrir un esquema.', zoom: 'Zoom', helpCanvas: 'Clic: seleccionar · Arrastrar: mover · Marco: seleccionar área vacía · Espacio / botón central: desplazar',
@@ -293,7 +293,7 @@ const INTERFACE_TEXT = {
     file: 'File', edit: 'Edit', view: 'View', elementsMenu: 'Components', optionalGroups: 'Show additional categories', extraGrafcet: 'GRAFCET', extraLadder: 'Ladder', extraLogic: 'Logic', extraReal2d: 'Realistic symbols · 2D', extraReal3d: 'Realistic symbols · 3D', extraWiring: 'Wires and connections', extraPneumatics: 'Pneumatic actuators', extraIoPlc: 'PLC inputs / outputs', extraPowerElectronics: 'Power electronics', extraElectronicRelays: 'Electronic relays', language: 'Language', examples: 'Examples', help: 'Help',
     new: 'New schematic', open: 'Open .cad / .json', save: 'Save JSON', export: 'Export .cad', exportSvg: 'Export SVG', printPdf: 'Print / PDF', sheet: 'Sheet size…',
     copy: 'Copy', paste: 'Paste', undo: 'Undo', redo: 'Redo', rotate: 'Rotate', delete: 'Delete', zoomIn: 'Zoom in', zoomOut: 'Zoom out', fit: 'Fit view', shortcuts: 'Keyboard shortcuts', about: 'About',
-    languageNames: 'Interface and component language', wiresSimulation: 'Wires and simulation', wires: 'Wires', wireType: 'New wire type', phase: 'Phase', neutral: 'Neutral', three: '3 phases (L1 L2 L3)', threeN: '3 phases + N', wire: 'Wire', done: 'Done', cancel: 'Cancel', cursor: 'Cursor', hand: 'Pan',
+    languageNames: 'Interface and component language', wiresSimulation: 'Wires and simulation', wires: 'Wires', wireType: 'New wire type', phase: 'Phase', neutral: 'Neutral', three: '3 phases (L1 L2 L3)', threeN: '3 phases + N', wire: 'Wire', done: 'Done', cancel: 'Cancel', cursor: 'Cursor', hand: 'Pan', node: 'Node (N)',
     simulation: 'Simulation controls', run: 'Run', stop: 'Stop', stopTitle: 'Stop and reset time, memory, and pressed buttons', speed: 'Simulation speed', editor: 'Editor', place: 'Place component', showAll: 'Show all',
     elements: 'Components', search: 'Search components…', properties: 'Properties', selectElement: 'Select a component on the sheet to edit its properties.', schematic: 'Schematic workspace', elementCount: '{count} components', running: 'Simulation running',
     status: 'Choose a .cad file to open a schematic.', zoom: 'Zoom', helpCanvas: 'Click: select · Drag: move · Box: select empty area · Space / middle button: pan',
@@ -307,7 +307,7 @@ const INTERFACE_TEXT = {
     file: 'File', edit: 'Modifica', view: 'Visualizza', elementsMenu: 'Elementi', optionalGroups: 'Mostra categorie aggiuntive', extraGrafcet: 'GRAFCET', extraLadder: 'Ladder', extraLogic: 'Logica', extraReal2d: 'Simboli realistici · 2D', extraReal3d: 'Simboli realistici · 3D', extraWiring: 'Cavi e connessioni', extraPneumatics: 'Attuatori pneumatici', extraIoPlc: 'Ingressi / uscite PLC', extraPowerElectronics: 'Elettronica di potenza', extraElectronicRelays: 'Relè elettronici', language: 'Lingua', examples: 'Esempi', help: 'Aiuto',
     new: 'Nuovo schema', open: 'Apri .cad / .json', save: 'Salva JSON', export: 'Esporta .cad', exportSvg: 'Esporta SVG', printPdf: 'Stampa / PDF', sheet: 'Dimensioni foglio…',
     copy: 'Copia', paste: 'Incolla', undo: 'Annulla', redo: 'Ripeti', rotate: 'Ruota', delete: 'Elimina', zoomIn: 'Ingrandisci', zoomOut: 'Riduci', fit: 'Adatta vista', shortcuts: 'Scorciatoie da tastiera', about: 'Informazioni',
-    languageNames: 'Lingua dell’interfaccia e degli elementi', wiresSimulation: 'Cavi e simulazione', wires: 'Cavi', wireType: 'Tipo di cavo', phase: 'Fase', neutral: 'Neutro', three: '3 fasi (L1 L2 L3)', threeN: '3 fasi + N', wire: 'Cavo', done: 'Fine', cancel: 'Annulla', cursor: 'Cursore', hand: 'Mano',
+    languageNames: 'Lingua dell’interfaccia e degli elementi', wiresSimulation: 'Cavi e simulazione', wires: 'Cavi', wireType: 'Tipo di cavo', phase: 'Fase', neutral: 'Neutro', three: '3 fasi (L1 L2 L3)', threeN: '3 fasi + N', wire: 'Cavo', done: 'Fine', cancel: 'Annulla', cursor: 'Cursore', hand: 'Mano', node: 'Nodo (N)',
     simulation: 'Controlli simulazione', run: 'Avvia', stop: 'Arresta', stopTitle: 'Arresto completo: azzera tempo, memoria e pulsanti premuti', speed: 'Velocità simulazione', editor: 'Editor', place: 'Inserisci elemento', showAll: 'Mostra tutto',
     elements: 'Elementi', search: 'Cerca elementi…', properties: 'Proprietà', selectElement: 'Seleziona un elemento sul foglio per modificarne le proprietà.', schematic: 'Area di lavoro dello schema', elementCount: '{count} elementi', running: 'Simulazione in esecuzione',
     status: 'Seleziona un file .cad per aprire uno schema.', zoom: 'Zoom', helpCanvas: 'Clic: seleziona · Trascina: sposta · Riquadro: seleziona area vuota · Spazio / pulsante centrale: panoramica',
@@ -321,7 +321,7 @@ const INTERFACE_TEXT = {
     file: 'Файл', edit: 'Правка', view: 'Вид', elementsMenu: 'Элементы', optionalGroups: 'Показывать дополнительные категории', extraGrafcet: 'GRAFCET', extraLadder: 'Ladder', extraLogic: 'Логика', extraReal2d: 'Реалистичные символы · 2D', extraReal3d: 'Реалистичные символы · 3D', extraWiring: 'Провода и соединения', extraPneumatics: 'Пневматические актуаторы', extraIoPlc: 'Входы / выходы ПЛК', extraPowerElectronics: 'Силовая электроника', extraElectronicRelays: 'Электронные реле', language: 'Язык', examples: 'Примеры', help: 'Справка',
     new: 'Новая схема', open: 'Открыть .cad / .json', save: 'Сохранить JSON', export: 'Экспорт .cad', exportSvg: 'Экспорт SVG', printPdf: 'Печать / PDF', sheet: 'Размер листа…',
     copy: 'Копировать', paste: 'Вставить', undo: 'Отменить', redo: 'Повторить', rotate: 'Повернуть', delete: 'Удалить', zoomIn: 'Увеличить', zoomOut: 'Уменьшить', fit: 'Показать всё', shortcuts: 'Горячие клавиши', about: 'О программе',
-    languageNames: 'Язык интерфейса и названий элементов', wiresSimulation: 'Провода и симуляция', wires: 'Провода', wireType: 'Тип нового провода', phase: 'Фаза', neutral: 'Нейтраль', three: '3 фазы (L1 L2 L3)', threeN: '3 фазы + N', wire: 'Провод', done: 'Готово', cancel: 'Отмена', cursor: 'Курсор', hand: 'Рука',
+    languageNames: 'Язык интерфейса и названий элементов', wiresSimulation: 'Провода и симуляция', wires: 'Провода', wireType: 'Тип нового провода', phase: 'Фаза', neutral: 'Нейтраль', three: '3 фазы (L1 L2 L3)', threeN: '3 фазы + N', wire: 'Провод', done: 'Готово', cancel: 'Отмена', cursor: 'Курсор', hand: 'Рука', node: 'Узел (N)',
     simulation: 'Управление симуляцией', run: 'Запуск', stop: 'Стоп', stopTitle: 'Полная остановка: сброс времени, памяти и нажатых кнопок', speed: 'Скорость симуляции', editor: 'Редактор', place: 'Разместить элемент', showAll: 'Показать всё',
     elements: 'Элементы', search: 'Поиск элементов…', properties: 'Свойства', selectElement: 'Выберите элемент на листе, чтобы изменить его свойства.', schematic: 'Поле схемы', elementCount: '{count} элементов', running: 'Симуляция запущена',
     status: 'Выберите файл .cad, чтобы открыть схему.', zoom: 'Масштаб', helpCanvas: 'Клик — выбрать · Перетащить — двигать · Рамка — пустое место · Пробел / средняя кнопка — панорама',
@@ -462,7 +462,6 @@ export function mountApp(root: HTMLElement): void {
     <main class="app-shell">
       <header class="app-header">
         <div class="brand-lockup" title="Редактор и симулятор электрических схем">
-          <span class="brand-mark" aria-hidden="true">CS</span>
           <h1>CADe SIMU <span>Web</span></h1>
         </div>
         <nav class="app-menu" aria-label="Главное меню">
@@ -534,6 +533,7 @@ export function mountApp(root: HTMLElement): void {
           <span class="tool-sep" aria-hidden="true"></span>
           <button type="button" id="select-tool" class="icon-btn is-active" title="Курсор: выбор и перемещение элементов (V)" aria-label="Курсор" aria-pressed="true">↖</button>
           <button type="button" id="pan-tool" class="icon-btn" title="Рука: перемещение листа без выбора элементов (H)" aria-label="Рука" aria-pressed="false">✋</button>
+          <button type="button" id="node-tool" class="icon-btn" title="Узел: щёлкните по месту соединения проводов (N)" aria-label="Узел" aria-pressed="false">●</button>
         </div>
         <div class="tool-group simulation-controls" aria-label="Управление симуляцией">
           <button type="button" id="sim-run">▶ Запуск</button>
@@ -760,6 +760,7 @@ export function mountApp(root: HTMLElement): void {
   const wireKindSelect = root.querySelector<HTMLSelectElement>('#wire-kind');
   const drawWireButton = root.querySelector<HTMLButtonElement>('#draw-wire');
   const panToolButton = root.querySelector<HTMLButtonElement>('#pan-tool');
+  const nodeToolButton = root.querySelector<HTMLButtonElement>('#node-tool');
   const selectToolButton = root.querySelector<HTMLButtonElement>('#select-tool');
   const finishWireButton = root.querySelector<HTMLButtonElement>('#finish-wire');
   const undoButton = root.querySelector<HTMLButtonElement>('#undo');
@@ -819,13 +820,23 @@ export function mountApp(root: HTMLElement): void {
   let spaceDown = false;
   /** Инструмент «Рука»: левая кнопка мыши только двигает лист, элементы и провода не трогаются. */
   let panTool = false;
+  /** Инструмент «Узел»: клик по месту соединения проводов ставит точку соединения. */
+  let nodeTool = false;
+  const syncToolButtons = (): void => {
+    svg.classList.toggle('is-pan-tool', panTool);
+    svg.classList.toggle('is-node-tool', nodeTool);
+    panToolButton?.classList.toggle('is-active', panTool);
+    panToolButton?.setAttribute('aria-pressed', String(panTool));
+    nodeToolButton?.classList.toggle('is-active', nodeTool);
+    nodeToolButton?.setAttribute('aria-pressed', String(nodeTool));
+    selectToolButton?.classList.toggle('is-active', !panTool && !nodeTool);
+    selectToolButton?.setAttribute('aria-pressed', String(!panTool && !nodeTool));
+  };
+  const leaveNodeTool = (): void => { if (nodeTool) { nodeTool = false; syncToolButtons(); } };
   const setPanTool = (on: boolean): void => {
     panTool = on;
-    svg.classList.toggle('is-pan-tool', on);
-    panToolButton?.classList.toggle('is-active', on);
-    panToolButton?.setAttribute('aria-pressed', String(on));
-    selectToolButton?.classList.toggle('is-active', !on);
-    selectToolButton?.setAttribute('aria-pressed', String(!on));
+    if (on) nodeTool = false;
+    syncToolButtons();
     if (on) status.textContent = 'Рука: тяните лист левой кнопкой мыши. Нажмите ↖ или V, чтобы вернуться к курсору.';
   };
   const selected = new Map<string, Selectable>();
@@ -882,6 +893,8 @@ export function mountApp(root: HTMLElement): void {
     root.querySelector<HTMLButtonElement>('#select-tool')?.setAttribute('title', t.cursor);
     root.querySelector<HTMLButtonElement>('#pan-tool')?.setAttribute('aria-label', t.hand);
     root.querySelector<HTMLButtonElement>('#pan-tool')?.setAttribute('title', t.hand);
+    root.querySelector<HTMLButtonElement>('#node-tool')?.setAttribute('aria-label', t.node);
+    root.querySelector<HTMLButtonElement>('#node-tool')?.setAttribute('title', t.node);
     set('#sim-run', `▶ ${t.run}`); set('#sim-stop', `■ ${t.stop}`);
     root.querySelector<HTMLButtonElement>('#sim-stop')?.setAttribute('title', t.stopTitle);
     set('#sim-state', simMode === 'run' ? t.run : t.editor);
@@ -1565,6 +1578,7 @@ export function mountApp(root: HTMLElement): void {
         button.addEventListener('click', () => {
           if (!cadType) return;
           activePaletteCommand = item.id; placementType = cadType.code; placementRotation = 0;
+          leaveNodeTool();
           if (wireDrawing) cancelWireDrawing();
           svg.classList.add('is-placing'); renderPalette(); drawGhost();
           status.textContent = `Размещение: ${itemName} · щёлкните по листу или перетащите элемент; R — поворот, Esc — отмена.`;
@@ -1572,6 +1586,7 @@ export function mountApp(root: HTMLElement): void {
         button.addEventListener('dragstart', (event) => {
           if (!event.dataTransfer || !cadType) return;
           activePaletteCommand = item.id; placementType = cadType.code; placementRotation = 0;
+          leaveNodeTool();
           event.dataTransfer.setData('text/plain', String(item.id)); event.dataTransfer.effectAllowed = 'copy';
           svg.classList.add('is-placing');
         });
@@ -1610,6 +1625,7 @@ export function mountApp(root: HTMLElement): void {
     status.textContent = 'Рисование провода отменено.';
   };
   const startWireDrawing = (): void => {
+    leaveNodeTool();
     placementType = undefined; placementRotation = 0;
     const placeSelect = root.querySelector<HTMLSelectElement>('#place-type');
     if (placeSelect) placeSelect.value = '';
@@ -1813,6 +1829,7 @@ export function mountApp(root: HTMLElement): void {
 
   const placeTypeSelect = root.querySelector<HTMLSelectElement>('#place-type');
   placeTypeSelect?.addEventListener('change', () => {
+    if (placeTypeSelect.value) leaveNodeTool();
     if (wireDrawing) cancelWireDrawing();
     activePaletteCommand = undefined;
     placementType = placeTypeSelect.value ? Number(placeTypeSelect.value) : undefined;
@@ -2067,6 +2084,7 @@ export function mountApp(root: HTMLElement): void {
   panToolButton?.addEventListener('click', () => setPanTool(!panTool));
   /** Курсор: возвращает обычный режим выбора. Выключает «Руку» и прерывает рисование провода и размещение элемента. */
   const selectTool = (): void => {
+    leaveNodeTool();
     if (wireDrawing) cancelWireDrawing();
     if (placementType !== undefined) {
       placementType = undefined; placementRotation = 0;
@@ -2078,6 +2096,51 @@ export function mountApp(root: HTMLElement): void {
     status.textContent = 'Курсор: выбор и перемещение элементов.';
   };
   selectToolButton?.addEventListener('click', selectTool);
+  const setNodeTool = (on: boolean): void => {
+    if (!on) { leaveNodeTool(); status.textContent = 'Курсор: выбор и перемещение элементов.'; return; }
+    if (wireDrawing) cancelWireDrawing();
+    if (placementType !== undefined) {
+      placementType = undefined; placementRotation = 0; activePaletteCommand = undefined; renderPalette();
+      if (placeTypeSelect) placeTypeSelect.value = '';
+      svg.classList.remove('is-placing');
+    }
+    panTool = false; nodeTool = true; syncToolButtons();
+    status.textContent = 'Узел: щёлкните по месту, где провода соединяются или пересекаются. Esc или V — выйти.';
+  };
+  nodeToolButton?.addEventListener('click', () => setNodeTool(!nodeTool));
+  /** Точка (x, y) лежит на отрезке провода (включая концы). */
+  const wireTouchesPoint = (wire: WireSegment, point: Point, tolerance = 0.001): boolean => {
+    const { from, to } = wire;
+    const dx = to.x - from.x; const dy = to.y - from.y;
+    const lengthSq = dx * dx + dy * dy;
+    if (lengthSq === 0) return Math.hypot(point.x - from.x, point.y - from.y) <= tolerance;
+    const t = ((point.x - from.x) * dx + (point.y - from.y) * dy) / lengthSq;
+    if (t < -tolerance || t > 1 + tolerance) return false;
+    return Math.hypot(point.x - (from.x + t * dx), point.y - (from.y + t * dy)) <= tolerance;
+  };
+  const placeNodeAt = (raw: Point): void => {
+    const wires = schema.wires.filter((wire) => wire.kind !== 'junction');
+    // Кандидаты: ближайший узел сетки и концы проводов рядом с курсором (на случай проводов вне сетки).
+    const candidates: Point[] = [snapPointToGrid(raw, CAD_GRID_STEP)];
+    for (const wire of wires) for (const end of [wire.from, wire.to]) if (Math.hypot(end.x - raw.x, end.y - raw.y) <= CAD_GRID_STEP) candidates.push({ ...end });
+    let best: { point: Point; count: number; distance: number } | undefined;
+    for (const point of candidates) {
+      const count = wires.filter((wire) => wireTouchesPoint(wire, point)).length;
+      if (count < 2) continue;
+      const distance = Math.hypot(point.x - raw.x, point.y - raw.y);
+      if (!best || distance < best.distance) best = { point, count, distance };
+    }
+    if (!best) { status.textContent = 'Здесь нет соединения: узел ставится там, где сходятся или пересекаются минимум два провода.'; return; }
+    const { point } = best;
+    if (schema.wires.some((wire) => wire.kind === 'junction' && wire.from.x === point.x && wire.from.y === point.y)) {
+      status.textContent = 'В этой точке узел уже стоит.'; return;
+    }
+    const before = cloneSchema(schema);
+    const id = Math.max(0, ...schema.elements.map((element) => element.id), ...schema.wires.map((wire) => wire.id)) + 1;
+    schema.wires.push({ id, typeCode: 4001, kind: 'junction', from: { ...point }, to: { ...point }, thickness: 0, dot: true });
+    commitSchema(before); renderSchema();
+    status.textContent = `Узел поставлен: соединено проводов — ${best.count}.`;
+  };
   drawWireButton.addEventListener('click', () => wireDrawing ? cancelWireDrawing() : startWireDrawing());
   finishWireButton.addEventListener('click', finishWireDrawing);
   wireKindSelect.addEventListener('change', () => { if (wireDrawing) drawDraft(); });
@@ -2180,6 +2243,7 @@ export function mountApp(root: HTMLElement): void {
     const cadType = cadTypeForCommand(commandId);
     if (!cadType) return;
     event.preventDefault();
+    leaveNodeTool();
     placementType = cadType.code; activePaletteCommand = commandId; placementRotation = 0;
     const point = screenToSheet(svgPoint(event, svg, viewSize), viewport);
     const before = cloneSchema(schema);
@@ -2194,7 +2258,7 @@ export function mountApp(root: HTMLElement): void {
   // и браузер теряет цель нажатия, поэтому штатный dblclick по элементам не приходит.
   let lastElementPress: { time: number; x: number; y: number; id: number } | undefined;
   svg.addEventListener('pointerdown', (event) => {
-    if (event.button !== 0 || wireDrawing || placementType !== undefined || panTool || simMode !== 'edit' || spaceDown) { lastElementPress = undefined; return; }
+    if (event.button !== 0 || wireDrawing || placementType !== undefined || panTool || nodeTool || simMode !== 'edit' || spaceDown) { lastElementPress = undefined; return; }
     const hit = document.elementsFromPoint(event.clientX, event.clientY).map((node) => getHit(node)).find((candidate) => candidate?.kind === 'element');
     if (!hit) { lastElementPress = undefined; return; }
     const now = performance.now();
@@ -2221,6 +2285,11 @@ export function mountApp(root: HTMLElement): void {
     svg.focus({ preventScroll: true });
     const screen = svgPoint(event, svg, viewSize);
     pointerSheetPosition = screenToSheet(screen, viewport);
+    if (nodeTool && event.button === 0 && !spaceDown && simMode === 'edit') {
+      placeNodeAt(pointerSheetPosition);
+      event.preventDefault();
+      return;
+    }
     const stampKey = (event.target as Element).closest?.('[data-stamp-field]')?.getAttribute('data-stamp-field');
     if (stampKey && event.button === 0 && !panTool && !wireDrawing && placementType === undefined) {
       event.preventDefault();
@@ -2484,6 +2553,10 @@ export function mountApp(root: HTMLElement): void {
     if (!event.ctrlKey && !event.metaKey && !event.altKey && !editingField && event.key.toLowerCase() === 'h') {
       setPanTool(!panTool); event.preventDefault(); return;
     }
+    if (!event.ctrlKey && !event.metaKey && !event.altKey && !editingField && event.key.toLowerCase() === 'n') {
+      setNodeTool(!nodeTool); event.preventDefault(); return;
+    }
+    if (event.key === 'Escape' && nodeTool && !editingField) { selectTool(); event.preventDefault(); return; }
     if (!event.ctrlKey && !event.metaKey && !event.altKey && !editingField && event.key.toLowerCase() === 'v') {
       selectTool(); event.preventDefault(); return;
     }
