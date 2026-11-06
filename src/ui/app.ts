@@ -558,8 +558,8 @@ export function mountApp(root: HTMLElement): void {
         </aside>
         <section class="viewport-stage" aria-label="Поле схемы">
         <svg class="viewport-svg" viewBox="0 0 ${FALLBACK_VIEWPORT.width} ${FALLBACK_VIEWPORT.height}" preserveAspectRatio="none" role="img" aria-label="Поле схемы">
-          <defs><pattern id="cad-grid" width="${CAD_GRID_STEP}" height="${CAD_GRID_STEP}" patternUnits="userSpaceOnUse">
-            <path d="M ${CAD_GRID_STEP} 0 H 0 V ${CAD_GRID_STEP}" fill="none" stroke="#dfe5ec" stroke-width="0.28" />
+          <defs><pattern id="cad-grid" x="${-CAD_GRID_STEP / 2}" y="${-CAD_GRID_STEP / 2}" width="${CAD_GRID_STEP}" height="${CAD_GRID_STEP}" patternUnits="userSpaceOnUse">
+            <circle cx="${CAD_GRID_STEP / 2}" cy="${CAD_GRID_STEP / 2}" r="0.3" fill="#8b96a3" />
           </pattern></defs>
           <rect class="viewport-backdrop" x="0" y="0" width="${FALLBACK_VIEWPORT.width}" height="${FALLBACK_VIEWPORT.height}" />
           <g id="sheet-transform">
