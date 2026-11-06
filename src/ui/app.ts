@@ -64,6 +64,9 @@ function stampMetrics(width: number, height: number) {
 function fullSheet(sheet: { width: number; height: number }) {
   return { width: sheet.width, height: sheet.height + stampMetrics(sheet.width, sheet.height).footerHeight };
 }
+/** Ссылка на исходники: кликабельна в редакторе, в SVG и в PDF (Chrome сохраняет SVG-ссылки как аннотации). */
+const CADESIM_URL = 'https://github.com/igorYurievich/cadesimweb';
+const CADESIM_LINK_TEXT = 'Cadesim web';
 type StampKey = 'drawnDate' | 'author' | 'drawnSign' | 'checkedDate' | 'checkedName' | 'checkedSign' | 'entity' | 'title' | 'date' | 'number' | 'total' | 'fileName';
 /** Ячейки штампа во всю ширину листа: x0/x1 — доли ширины, r0/r1 — строки (из 3). */
 const STAMP_CELLS: ReadonlyArray<{ key?: StampKey; label?: string; x0: number; x1: number; r0: number; r1: number; hint?: string }> = [
@@ -1455,6 +1458,21 @@ export function mountApp(root: HTMLElement): void {
         text.textContent = fit(value, cw - 2.4, valueSize);
         add('rect', { x: String(cx), y: String(cy), width: String(cw), height: String(ch), fill: 'transparent', class: 'stamp-cell', 'data-stamp-field': cell.key });
       }
+    }
+    // Угловая ячейка штампа (над «Dibujado»): кликабельная ссылка на репозиторий.
+    {
+      const cw = 0.075 * stampWidth;
+      add('rect', { x: String(x), y: String(y), width: String(cw), height: String(rowH), fill: 'none', stroke: '#8793a1', 'stroke-width': '0.35', 'vector-effect': 'non-scaling-stroke' });
+      const linkSize = Math.min(labelSize * 1.15, (cw - 1) / (CADESIM_LINK_TEXT.length * 0.58));
+      const link = add('a', { href: CADESIM_URL, target: '_blank', rel: 'noopener noreferrer', class: 'stamp-link' });
+      link.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', CADESIM_URL);
+      const hit = document.createElementNS(SVG_NS, 'rect');
+      for (const [k, v] of Object.entries({ x: String(x), y: String(y), width: String(cw), height: String(rowH), fill: 'transparent' })) hit.setAttribute(k, v);
+      const label = document.createElementNS(SVG_NS, 'text');
+      for (const [k, v] of Object.entries({ x: String(x + cw / 2), y: String(y + rowH / 2 + linkSize * 0.35), 'font-family': 'Arial, sans-serif', 'font-size': String(linkSize), fill: '#1f5fbf', 'text-anchor': 'middle', 'text-decoration': 'underline' })) label.setAttribute(k, v);
+      label.textContent = CADESIM_LINK_TEXT;
+      const tip = document.createElementNS(SVG_NS, 'title'); tip.textContent = CADESIM_URL;
+      link.append(hit, label, tip);
     }
     add('rect', { x: String(x), y: String(y), width: String(stampWidth), height: String(stampHeight), fill: 'none', stroke: '#536273', 'stroke-width': '0.6', 'vector-effect': 'non-scaling-stroke', 'pointer-events': 'none' });
   };
