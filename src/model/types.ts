@@ -26,6 +26,10 @@ export interface Terminal {
 export interface CadRaw {
   texts: string[];
   nums: number[];
+  /** Текст после закрывающего «#» записи (смысл не разгадан), пишется обратно как есть. */
+  tail?: string;
+  /** Записи-продолжения (тип -1), идущие сразу за записью элемента: дополнительные клеммы того же элемента. */
+  continuations?: Array<{ id: number; type: number; texts: string[]; nums: number[]; tail?: string }>;
 }
 
 export type Rotation = 0 | 1 | 2 | 3;

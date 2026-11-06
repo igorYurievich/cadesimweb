@@ -1,35 +1,83 @@
 import { importCad } from './cad-import';
-import { CAD_NUM_FIELDS, CAD_TEXT_FIELDS, serializeCad } from './cad-format';
+import { CAD_NUM_FIELDS, CAD_TEXT_FIELDS, flagCountOf, serializeCad } from './cad-format';
 import type { CadFooter, CadRecord } from './cad-format';
 import type { Schema, SchemaElement, WireSegment } from './types';
 
-function emptyRecord(id: number, type: number): CadRecord {
-  return { id, type, texts: Array(CAD_TEXT_FIELDS).fill(''), nums: Array(CAD_NUM_FIELDS).fill(0) };
+function emptyRecord(id: number, type: number, extraFlags = 0): CadRecord {
+  return { id, type, texts: Array(CAD_TEXT_FIELDS + extraFlags).fill(''), nums: Array(CAD_NUM_FIELDS + extraFlags).fill(0) };
 }
 
-function elementRecord(element: SchemaElement): CadRecord {
-  const record = element.raw
-    ? { id: element.id, type: element.typeCode, texts: [...element.raw.texts], nums: [...element.raw.nums] }
-    : emptyRecord(element.id, element.typeCode);
-  record.texts.length = CAD_TEXT_FIELDS;
-  record.nums.length = CAD_NUM_FIELDS;
+/**
+ * Текст после закрывающего «#» у новых элементов (без исходной записи): так записан в образце potencias_electronicas.cad.
+ * Смысл строки не разгадан [вывод: параметры внутреннего рисунка], поэтому берём её как в образце.
+ */
+const DEFAULT_TAILS: Readonly<Record<number, string>> = { 1062: '000/030/000/400', 1063: '000/030/000/400' };
+
+/** Дополняет запись до минимума полей; лишние поля (11-е текстовое, 24-е число у 1052) остаются как есть. */
+function padRecord(record: CadRecord): void {
+  while (record.texts.length < CAD_TEXT_FIELDS) record.texts.push('');
+  while (record.nums.length < CAD_NUM_FIELDS) record.nums.push(0);
+}
+
+/** Сдвиг индексов после флагов: у записи с лишними флагами x, y, размер лежат правее. */
+const shiftOf = (record: CadRecord): number => record.nums.length - CAD_NUM_FIELDS;
+
+function slotsOf(record: Pick<CadRecord, 'nums'>): number[] {
+  const count = flagCountOf(record);
+  return record.nums.slice(0, count).flatMap((flag, index) => flag !== 0 ? [index] : []);
+}
+
+/** Записи элемента: основная и (если были) продолжения типа -1, как в исходном файле. */
+function elementRecords(element: SchemaElement): CadRecord[] {
+  const raw = element.raw;
+  const record: CadRecord = raw
+    ? { id: element.id, type: element.typeCode, texts: [...raw.texts], nums: [...raw.nums], ...(raw.tail !== undefined ? { tail: raw.tail } : {}) }
+    : emptyRecord(element.id, element.typeCode, Math.max(0, element.terminals.length - flagCountOf({ nums: Array(CAD_NUM_FIELDS).fill(0) })));
+  if (!raw && DEFAULT_TAILS[element.typeCode] !== undefined) record.tail = DEFAULT_TAILS[element.typeCode] as string;
+  padRecord(record);
+  const o = shiftOf(record);
   record.texts[0] = element.name;
   record.texts[1] = element.func;
-  record.nums[8] = element.position.x;
-  record.nums[9] = element.position.y;
-  record.nums[12] = element.labelOffset.x;
-  record.nums[13] = element.labelOffset.y;
-  record.nums[14] = element.size.w;
-  record.nums[15] = element.size.h;
-  record.nums[17] = element.rotation;
+  record.nums[8 + o] = element.position.x;
+  record.nums[9 + o] = element.position.y;
+  record.nums[12 + o] = element.labelOffset.x;
+  record.nums[13 + o] = element.labelOffset.y;
+  record.nums[14 + o] = element.size.w;
+  record.nums[15 + o] = element.size.h;
+  record.nums[17 + o] = element.rotation;
 
-  let slots = record.nums.slice(0, 8).flatMap((flag, index) => flag !== 0 ? [index] : []);
-  if (!element.raw || slots.length !== element.terminals.length) {
-    record.nums.fill(0, 0, 8);
-    slots = element.terminals.map((_, index) => index);
+  const continuations: CadRecord[] = (raw?.continuations ?? []).map((c) => ({
+    id: c.id, type: c.type, texts: [...c.texts], nums: [...c.nums], ...(c.tail !== undefined ? { tail: c.tail } : {}),
+  }));
+  continuations.forEach(padRecord);
+  const groups = [record, ...continuations];
+  const slotGroups = groups.map(slotsOf);
+  const total = slotGroups.reduce((sum, slots) => sum + slots.length, 0);
+  if (!raw || total !== element.terminals.length) {
+    // Число клемм изменилось: флаги пишем заново подряд, продолжения отбрасываем (клемм у них больше нет).
+    record.nums.fill(0, 0, flagCountOf(record));
+    const slots = element.terminals.slice(0, flagCountOf(record)).map((_, index) => index);
     for (const slot of slots) record.nums[slot] = 1;
+    element.terminals.slice(0, slots.length).forEach((terminal, index) => { record.texts[2 + index] = terminal.label; });
+    continuations.length = 0;
+  } else {
+    let index = 0;
+    groups.forEach((group, g) => {
+      for (const slot of slotGroups[g] ?? []) {
+        group.texts[2 + slot] = element.terminals[index]?.label ?? '';
+        index += 1;
+      }
+    });
   }
-  element.terminals.forEach((terminal, index) => { record.texts[2 + (slots[index] ?? index)] = terminal.label; });
+
+  // Продолжение стоит в том же месте и той же рамки, что и сам элемент: двигаем вместе с ним.
+  for (const c of continuations) {
+    const co = shiftOf(c);
+    c.nums[8 + co] = element.position.x;
+    c.nums[9 + co] = element.position.y;
+    c.nums[14 + co] = element.size.w;
+    c.nums[15 + co] = element.size.h;
+  }
 
   const parameterStart = 2 + element.terminals.length;
   if (element.typeCode === 9008 && element.params.color !== undefined) {
@@ -39,15 +87,14 @@ function elementRecord(element: SchemaElement): CadRecord {
     if (element.params.scale !== undefined) record.texts[parameterStart] = String(element.params.scale);
     if (element.params.time !== undefined) record.texts[parameterStart + 1] = String(element.params.time);
   }
-  return record;
+  return [record, ...continuations];
 }
 
 function wireRecord(wire: WireSegment): CadRecord {
   const record = wire.raw
-    ? { id: wire.id, type: wire.typeCode, texts: [...wire.raw.texts], nums: [...wire.raw.nums] }
+    ? { id: wire.id, type: wire.typeCode, texts: [...wire.raw.texts], nums: [...wire.raw.nums], ...(wire.raw.tail !== undefined ? { tail: wire.raw.tail } : {}) }
     : emptyRecord(wire.id, wire.typeCode);
-  record.texts.length = CAD_TEXT_FIELDS;
-  record.nums.length = CAD_NUM_FIELDS;
+  padRecord(record);
   record.nums[8] = wire.from.x;
   record.nums[9] = wire.from.y;
   record.nums[10] = wire.to.x;
@@ -106,19 +153,20 @@ function legacyFramePlacement(schema: Schema): { offsetY: number; height: number
 export function exportCad(schema: Schema): string {
   const placement = legacyFramePlacement(schema);
   const records = [
-    ...schema.elements.map(elementRecord),
+    ...schema.elements.flatMap(elementRecords),
     ...schema.wires.map(wireRecord),
   ];
   for (const record of records) {
-    if (record.texts.some((value) => value.includes('#') || value.includes('*'))) {
+    if (record.texts.some((value) => value.includes('#') || value.includes('*')) || (record.tail ?? '').match(/[#*$]/)) {
       throw new Error(`Объект ${record.id}: символы # и * нельзя записать в текстовые поля .cad.`);
     }
     if (record.nums.some((value) => !Number.isFinite(value))) {
       throw new Error(`Объект ${record.id}: .cad не поддерживает бесконечные и пустые числовые значения.`);
     }
     if (placement.offsetY && record.type !== 20000) {
-      record.nums[9] = (record.nums[9] ?? 0) + placement.offsetY;
-      if ([4000, 4001, 4009, 4010].includes(record.type)) record.nums[11] = (record.nums[11] ?? 0) + placement.offsetY;
+      const o = shiftOf(record);
+      record.nums[9 + o] = (record.nums[9 + o] ?? 0) + placement.offsetY;
+      if ([4000, 4001, 4009, 4010].includes(record.type)) record.nums[11 + o] = (record.nums[11 + o] ?? 0) + placement.offsetY;
     }
   }
   const footer = footerFor(schema);

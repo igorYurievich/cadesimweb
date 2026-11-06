@@ -27,12 +27,13 @@ describe('motors: panel roster', () => {
     expect(missingBehaviors()).toEqual([]);
   });
 
-  it('the sample file imports with the expected terminals; only the actuator record (10550) is not read', () => {
+  it('the sample file imports with the expected terminals; the actuator record (10550) is read but its type is unknown', () => {
     const { schema, warnings, unknownTypes } = importCad(fixture('motores-elementos.cad'));
-    // У линейного привода запись длиннее обычной (11 текстовых полей, 24 числа): парсер на ней останавливается, двигатели до неё читаются.
-    expect(unknownTypes).toEqual([]);
-    expect(warnings.map((w) => w.code)).toEqual(['bad-record']);
-    expect(warnings[0]?.message).toContain('*82*10550');
+    // У линейного привода запись длиннее обычной (11 текстовых полей, 24 числа, хвост «-MI»): после расширения парсера (FORMATO_CAD.md §3)
+    // она читается без предупреждений, но тип 10550 в таблице нет: клеммы расставлены по умолчанию, элемент в ростер не входит.
+    expect(unknownTypes).toEqual([10550]);
+    expect(warnings).toEqual([]);
+    expect(schema.elements.some((item) => item.typeCode === 10550)).toBe(true);
     for (const code of MOTOR_CODES) {
       const e = schema.elements.find((item) => item.typeCode === code);
       expect(e?.terminals.length).toBe(TERMINALS[code]);

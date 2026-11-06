@@ -6,7 +6,8 @@
  * Грамматика (выведена из четырёх образцов Actividad 1.x):
  *
  *   файл    = "CADe_SIMU" запись* подвал
- *   запись  = "*" id "*" тип ("#" текст){10} "*" число ("*" число){22} "#"
+ *   запись  = "*" id "*" тип ("#" текст){10,} "*" число ("*" число){22,} "#" хвост
+ *   хвост   = текст без "#", "*" и "$" (чаще пустой)
  *   подвал  = "$$$" ("*" число)+ "&&&" ("*" поле)* "$$$&&&"
  *
  * Всё, что идёт после первого подвала, это остаток предыдущего, более длинного
@@ -16,18 +17,33 @@
  */
 
 export const CAD_HEADER = 'CADe_SIMU';
+/** Минимум текстовых и числовых полей записи; у части элементов их больше (см. FORMATO_CAD.md §3). */
 export const CAD_TEXT_FIELDS = 10;
 export const CAD_NUM_FIELDS = 23;
+/** Чисел в записи после флагов клемм: x y, конец, смещение подписи, размер, поворот и остальное. Флагов = чисел − 15. */
+export const CAD_NUMS_AFTER_FLAGS = 15;
+
+/** Сколько флагов клемм в записи (8 у обычных, 9 у автотрансформатора 1052). */
+export function flagCountOf(record: Pick<CadRecord, 'nums'>): number {
+  return Math.max(0, record.nums.length - CAD_NUMS_AFTER_FLAGS);
+}
+
+/** Запись-продолжение: тип -1 сразу после записи элемента, у которого клемм больше, чем слотов флагов в одной записи. */
+export function isContinuationType(type: number): boolean {
+  return type < 0;
+}
 
 /** Одна запись файла: элемент, провод, соединение или служебный объект. */
 export interface CadRecord {
   id: number;
   /** Код типа в файле: 1000 = мотор, 4000 = провод фазы и т. д. */
   type: number;
-  /** 10 текстовых полей: имя, функция, метки клемм и параметры. */
+  /** Не меньше 10 текстовых полей: имя, функция, метки клемм и параметры (у 1052 их 11). */
   texts: string[];
-  /** 23 числа: флаги клемм, координаты, смещения, размеры, кэш связей. */
+  /** Не меньше 23 чисел: флаги клемм, координаты, смещения, размеры, кэш связей (у 1052 их 24). */
   nums: number[];
+  /** Текст после закрывающего «#» записи (до следующей «*» или подвала). Нужен для 1062, 1063, 1056 и других; смысл не разгадан. */
+  tail?: string;
 }
 
 /** Подвал: настройки листа и штамп. Поля хранятся как есть, с пробелами-заполнителями. */
@@ -67,13 +83,13 @@ export class CadParseError extends Error {
   }
 }
 
-/** Запись начинается на "*" сразу после предыдущей записи или заголовка. */
+/** Запись начинается на "*" сразу после предыдущей записи или заголовка. Полей может быть больше минимума, после "#" возможен хвост. */
 const RECORD_RE = new RegExp(
-  '\\*(-?\\d+)\\*(\\d+)((?:#[^#*]*){' +
+  '\\*(-?\\d+)\\*(-?\\d+)((?:#[^#*]*){' +
     CAD_TEXT_FIELDS +
-    '})\\*(-?\\d+(?:\\.\\d+)?(?:\\*-?\\d+(?:\\.\\d+)?){' +
+    ',})\\*(-?\\d+(?:\\.\\d+)?(?:\\*-?\\d+(?:\\.\\d+)?){' +
     (CAD_NUM_FIELDS - 1) +
-    '})#',
+    ',})#([^#*$]*)',
   'y',
 );
 
@@ -138,7 +154,8 @@ export function parseCad(text: string): CadFile {
       });
     }
     seen.add(id);
-    records.push({ id, type: Number(m[2]), texts, nums });
+    const tail = m[5] as string;
+    records.push(tail === '' ? { id, type: Number(m[2]), texts, nums } : { id, type: Number(m[2]), texts, nums, tail });
     pos = RECORD_RE.lastIndex;
   }
 
@@ -198,13 +215,13 @@ function parseFooter(
 export function serializeCad(file: Pick<CadFile, 'records' | 'footer'>): string {
   const parts: string[] = [CAD_HEADER];
   for (const r of file.records) {
-    if (r.texts.length !== CAD_TEXT_FIELDS || r.nums.length !== CAD_NUM_FIELDS) {
+    if (r.texts.length < CAD_TEXT_FIELDS || r.nums.length < CAD_NUM_FIELDS) {
       throw new CadParseError(
-        `Запись ${r.id}: нужно ${CAD_TEXT_FIELDS} текстовых и ${CAD_NUM_FIELDS} числовых полей, а не ${r.texts.length} и ${r.nums.length}.`,
+        `Запись ${r.id}: нужно не меньше ${CAD_TEXT_FIELDS} текстовых и ${CAD_NUM_FIELDS} числовых полей, а не ${r.texts.length} и ${r.nums.length}.`,
       );
     }
     parts.push(
-      `*${r.id}*${r.type}${r.texts.map((t) => '#' + t).join('')}*${r.nums.join('*')}#`,
+      `*${r.id}*${r.type}${r.texts.map((t) => '#' + t).join('')}*${r.nums.join('*')}#${r.tail ?? ''}`,
     );
   }
   if (file.footer) {

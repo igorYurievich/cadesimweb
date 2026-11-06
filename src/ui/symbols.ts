@@ -910,6 +910,80 @@ function drawAuxContact(g: SVGGElement, element: SchemaElement): void {
   g.append(dashed(`M ${right + 0.3} 6 H ${linkTo}`, '1.2 0.9'));
 }
 
+// ── Силовая электроника (часть 1): резисторы, автотрансформатор, электронный пускатель, блоки управления, преобразователь ──
+// Размеры сняты со скриншота оригинала (5 px на единицу сетки) и ждут проверки автора. Выводы идут от клемм (y = 0 и y = h − 3)
+// до рамки на 3 единицы; рамка лежит между x = −3 и x = w − 3, y = 3 и y = h − 6.
+
+/** Резистор: прямоугольник 3×9 на каждом выводе (1050: один, 1051: три). */
+function drawResistor(g: SVGGElement, element: SchemaElement): void {
+  const gap = rowGapOf(element);
+  for (const x of columns(element)) {
+    g.append(path(`M ${x} 0 V ${G} M ${x} ${gap - G} V ${gap}`));
+    g.append(rect(x - 1.5, G, 3, gap - 2 * G));
+  }
+}
+
+/** Автотрансформатор III: три чёрные обмотки 3×12, отвод справа на середине каждой (клеммы 3 6 9 на y = 9). */
+function drawAutotransformer(g: SVGGElement): void {
+  for (const x of [0, 6, 12]) {
+    g.append(path(`M ${x} 0 V 3 M ${x} 15 V 18`));
+    g.append(shape('rect', { x: x - 1.5, y: 3, width: 3, height: 12, fill: INK, stroke: INK, 'stroke-width': 0.3, 'vector-effect': 'non-scaling-stroke' }));
+    g.append(path(`M ${x + 1.5} 9 H ${x + 3}`));
+  }
+}
+
+/** Диод-тиристор в рамке пускателя: треугольник вершиной вниз, анодная линия слева и катодная черта. */
+function drawStarterDiode(g: SVGGElement): void {
+  g.append(path('M 6 6 V 18'));
+  g.append(inkFill('M 3 9 H 9 L 6 15 Z'));
+  g.append(path('M 0 12 H 4.5 M 3 15 H 9'));
+}
+
+/** Электронный пускатель c.a. 1053: рамка, диод внутри, три вывода сверху, три снизу и PE справа. */
+function drawElectronicStarter(g: SVGGElement): void {
+  g.append(rect(-3, 3, 18, 18));
+  g.append(path('M 0 0 V 3 M 6 0 V 3 M 12 0 V 3 M 0 21 V 24 M 6 21 V 24 M 12 21 V 24 M 15 12 H 18'));
+  drawStarterDiode(g);
+}
+
+/** Индикатор READY / RUN: квадратик 2×3 и подпись справа от него. */
+function indicator(name: string, y: number): SVGGElement {
+  const g = group(`indicator indicator-${name.toLowerCase()}`);
+  g.append(rect(-1, y, 2, 3));
+  g.append(label(name, 2, y + 1.5, { size: 2.3 }));
+  return g;
+}
+
+/** Блок управления пускателем/инвертором 1062, 1063: рамка, выводы по клеммам и два индикатора READY, RUN. */
+function drawControlUnit(g: SVGGElement, element: SchemaElement): void {
+  const { w, h } = element.size;
+  g.append(rect(-3, 3, w, h - 9));
+  for (const t of element.terminals) {
+    const bottom = t.offset.y > 0;
+    g.append(path(bottom ? `M ${t.offset.x} ${h - 6} V ${t.offset.y}` : `M ${t.offset.x} 0 V 3`));
+  }
+  g.append(indicator('READY', 6), indicator('RUN', 15));
+}
+
+/** Преобразователь частоты c.a. II 1054: рамка и три секции внутри: выпрямитель (диод), конденсатор, транзистор. */
+function drawDrive(g: SVGGElement, element: SchemaElement): void {
+  const { w, h } = element.size;
+  g.append(rect(-3, 3, w, h - 9));
+  for (const t of element.terminals) {
+    g.append(path(t.offset.y > 0 ? `M ${t.offset.x} ${h - 6} V ${t.offset.y}` : `M ${t.offset.x} 0 V 3`));
+  }
+  g.append(rect(3, 6, 12, 18));
+  g.append(path('M 3 12 H 15 M 3 18 H 15'));
+  // Выпрямитель: малый диод по центру верхней секции.
+  g.append(path('M 9 7.4 V 10.6 M 8 9.9 H 10'));
+  g.append(inkFill('M 8 8.2 H 10 L 9 9.8 Z'));
+  // Конденсатор: две пластины и выводы.
+  g.append(path('M 6 15 H 8 M 10 15 H 12 M 8 13.4 V 16.6 M 10 13.4 V 16.6'));
+  // Транзистор: база, коллектор и эмиттер со стрелкой.
+  g.append(path('M 9 19.4 V 22.6 M 9 20.5 L 10.4 19.2 M 9 21.5 L 10.5 22.6'));
+  g.append(inkFill('M 10.8 23 L 9.7 22.5 L 10.4 21.8 Z'));
+}
+
 function drawBody(g: SVGGElement, element: SchemaElement, rotation: number): void {
   const { w, h } = element.size;
   const xs = columns(element);
@@ -1113,6 +1187,23 @@ function drawBody(g: SVGGElement, element: SchemaElement, rotation: number): voi
     case 9013:
       drawSignal(g, element);
       break;
+    case 1050:
+    case 1051:
+      drawResistor(g, element);
+      break;
+    case 1052:
+      drawAutotransformer(g);
+      break;
+    case 1053:
+      drawElectronicStarter(g);
+      break;
+    case 1062:
+    case 1063:
+      drawControlUnit(g, element);
+      break;
+    case 1054:
+      drawDrive(g, element);
+      break;
     default:
       g.append(shape('rect', { x: 0.8, y: 0.8, width: Math.max(2, w - 1.6), height: Math.max(2, h - 1.6), fill: '#fff', stroke: INK, 'stroke-width': 0.7, 'stroke-dasharray': '2 1', 'vector-effect': 'non-scaling-stroke' }));
       g.append(label(String(element.typeCode), w / 2, h / 2, { size: 2.4, anchor: 'middle', upright: rotation }));
@@ -1126,6 +1217,14 @@ const NAME_SPOTS: Readonly<Record<number, { x: number; y: number; anchor: 'start
   1011: { x: -2, y: 16, anchor: 'end' },
   1012: { x: -2, y: 16, anchor: 'end' },
   1009: { x: -6.5, y: 7.5, anchor: 'end' },
+  // Силовая электроника: имя (-R, -T, -G) слева от первого вывода, у верха рамки (смещение подписи в записи −12, −3; позиции сняты со скриншота).
+  1050: { x: -4, y: 5.7, anchor: 'end' },
+  1051: { x: -4, y: 5.7, anchor: 'end' },
+  1052: { x: -4, y: 5.7, anchor: 'end' },
+  1053: { x: -4, y: 5.7, anchor: 'end' },
+  1062: { x: -4, y: 5.7, anchor: 'end' },
+  1063: { x: -4, y: 5.7, anchor: 'end' },
+  1054: { x: -4, y: 5.7, anchor: 'end' },
 };
 
 type LabelSpot = readonly [dx: number, dy: number, anchor: 'start' | 'middle' | 'end'];
@@ -1140,6 +1239,8 @@ const SIDE_LABELS: Readonly<Record<number, ReadonlyArray<LabelSpot | undefined>>
   1011: [LEFT, BELOW, LEFT, BELOW, LEFT, BELOW],     // 1 2 3 4 5 6
   1012: [LEFT, LEFT, BELOW, BELOW],                  // 1 2 3 4
   1008: [undefined, undefined, undefined, [-1.2, -1.7, 'end']],  // U2 слева от вывода: справа стоит конденсатор
+  1052: [undefined, undefined, undefined, undefined, undefined, undefined, RIGHT, RIGHT, RIGHT],  // отводы 3 6 9 справа от конца линии (3 и 6 частично скрыты соседней обмоткой, как в оригинале)
+  1053: [undefined, undefined, undefined, undefined, undefined, undefined, [-2, -1.8, 'start']],  // PE над выводом справа
 };
 
 /** Подписи клемм: верхний ряд — под клеммой справа от вывода, нижний — над клеммой. Колодка подписана выше. */

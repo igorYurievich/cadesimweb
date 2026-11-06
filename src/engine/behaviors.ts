@@ -137,6 +137,15 @@ const TABLE: readonly TypeBehavior[] = [
   { typeCode: 3018, links: inert() },
   { typeCode: 3019, links: inert() },
   { typeCode: 3020, links: inert() },
+  // Силовая электроника, часть 1: резисторы 1050/1051 проводят между парами клемм (сопротивление не моделируется, падения напряжения нет);
+  // автотрансформатор, электронный пускатель, блоки управления и преобразователь 1052–1054, 1062, 1063 пока только символы.
+  { typeCode: 1050, links: switches([[0, 1]], 'always') },
+  { typeCode: 1051, links: switches([[0, 3], [1, 4], [2, 5]], 'always') },
+  { typeCode: 1052, links: inert() },
+  { typeCode: 1053, links: inert() },
+  { typeCode: 1062, links: inert() },
+  { typeCode: 1063, links: inert() },
+  { typeCode: 1054, links: inert() },
   // Предохранители 5000–5004 всегда проводят (перегорание не моделируется); разъединители 5005–5009 включаются кликом, стартуют отключёнными; сопоставление клемм по порядку «верхний ряд, нижний ряд».
   { typeCode: 5000, links: switches([[0, 1]], 'always') },
   { typeCode: 5001, links: switches([[0, 2], [1, 3]], 'always') },

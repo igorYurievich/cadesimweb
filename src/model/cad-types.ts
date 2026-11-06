@@ -36,6 +36,10 @@ export type CadFamily =
   | 'power-supply'
   | 'fuse'
   | 'surge-limiter'
+  | 'resistor'
+  | 'electronic-starter'
+  | 'drive'
+  | 'control-unit'
   | 'battery'
   | 'outlet'
   | 'wire'
@@ -267,6 +271,18 @@ const TABLE: readonly CadTypeInfo[] = [
   { code: 4001, family: 'junction', label: 'Conexión (точка)', layout: { kind: 'none' }, commandIds: [32889], confidence: 'probable', note: 'Нулевая длина; у видимых точек размер 3×3.' },
 
   { code: 20000, family: 'system', label: 'Служебный объект «XXX»', layout: { kind: 'none' }, commandIds: [], confidence: 'unknown', note: 'Есть во всех образцах на (42, 486), вне листа. Назначение неизвестно: сохраняется при записи, на листе не показывается.' },
+  // ── Силовая электроника (панель «Potencia: resistencias, arrancadores, variadores, controladores», 17 кнопок; в ростере первые 7) ──
+  // Образец: potencias_electronicas.cad (tests/fixtures/potencia_elementos.cad), по одной кнопке панели. Типы 1050..1056, 1062, 1063 идут не подряд:
+  // в панели они стоят в порядке 1050 1051 1052 1053 1062 1063 1054 1055 1056 ... (порядок записей образца = порядок панели).
+  // Смещения клемм у типов с layout «points» сняты со скриншота оригинала (шаг сетки 3, масштаб 5 px на единицу) и ждут проверки автора по образцу с проводами.
+  { code: 1050, family: 'resistor', label: 'Resistencia I (-R)', layout: ROWS2, commandIds: [33002], confidence: 'confirmed', note: '6×18: клеммы 1 сверху и 2 снизу, ряды через 15 (h − 3). Прямоугольник 3×9 между выводами.' },
+  { code: 1051, family: 'resistor', label: 'Resistencia III (-R)', layout: ROWS2, commandIds: [33003], confidence: 'confirmed', note: '18×18: три резистора, клеммы 1 3 5 сверху и 2 4 6 снизу, ряды через 15.' },
+  { code: 1052, family: 'transformer', label: 'Autotransformador III (-T)', layout: { kind: 'points', points: [{ x: 0, y: 0 }, { x: 6, y: 0 }, { x: 12, y: 0 }, { x: 0, y: 18 }, { x: 6, y: 18 }, { x: 12, y: 18 }, { x: 3, y: 9 }, { x: 9, y: 9 }, { x: 15, y: 9 }] }, commandIds: [33004], confidence: 'probable', note: '18×21, девять клемм: 1 4 7 сверху, 2 5 8 снизу, 3 6 9 отводы справа от каждой обмотки на y = 9. Запись длиннее обычной: 11 текстовых полей и 24 числа (9 флагов). Три чёрные обмотки; смещения сняты со скриншота.' },
+  { code: 1053, family: 'electronic-starter', label: 'Arrancador electrónico c.a. (-G)', layout: { kind: 'points', points: [{ x: 0, y: 0 }, { x: 6, y: 0 }, { x: 12, y: 0 }, { x: 0, y: 24 }, { x: 6, y: 24 }, { x: 12, y: 24 }, { x: 18, y: 12 }] }, commandIds: [33005], confidence: 'probable', note: '21×27: клеммы 1 3 5 сверху, 2 4 6 снизу, PE справа (18, 12). Рамка x −3..15, y 3..21; внутри тиристор. Только символ. Смещения сняты со скриншота.' },
+  { code: 1062, family: 'control-unit', label: 'Control arrancador electrónico c.a. (-G)', layout: { kind: 'points', points: [{ x: 0, y: 0 }, { x: 9, y: 0 }, { x: 9, y: 24 }] }, commandIds: [33089], confidence: 'probable', note: '15×27: IN A1 сверху (0 и 9), A2 снизу справа (9, 24); индикаторы READY и RUN. После записи идёт текст 000/030/000/400, смысл не разгадан. Только символ. Смещения сняты со скриншота.' },
+  { code: 1063, family: 'control-unit', label: 'Control inversor electrónico c.a. (-G)', layout: { kind: 'points', points: [{ x: 0, y: 0 }, { x: 9, y: 0 }, { x: 18, y: 0 }, { x: 18, y: 24 }] }, commandIds: [33262], confidence: 'probable', note: '24×27: I1 I2 A1 сверху (0, 9, 18), A2 снизу справа (18, 24); индикаторы READY и RUN. Хвост записи 000/030/000/400, как у 1062. Только символ. Смещения сняты со скриншота.' },
+  { code: 1054, family: 'drive', label: 'Variador velocidad c.a. II (-G)', layout: { kind: 'points', points: [{ x: 0, y: 0 }, { x: 6, y: 0 }, { x: 12, y: 0 }, { x: 0, y: 30 }, { x: 6, y: 30 }, { x: 12, y: 30 }, { x: 18, y: 30 }] }, commandIds: [33006], confidence: 'probable', note: '24×33: L1 N PE сверху (0, 6, 12), U V W PE снизу (0..18, y = 30); внутри три секции: выпрямитель, конденсатор, транзистор. Только символ. Смещения сняты со скриншота.' },
+
 ];
 
 const BY_CODE = new Map<number, CadTypeInfo>(TABLE.map((t) => [t.code, t]));

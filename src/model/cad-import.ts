@@ -1,7 +1,8 @@
 /**
  * Импорт .cad в модель схемы (Schema).
  * Поля записи (индексы в CadRecord.nums), выведенные из образцов:
- *   0..7   флаги клемм (1 = клемма есть), метки клемм в texts[2..9]
+ *   0..7   флаги клемм (1 = клемма есть), метки клемм в texts[2..9]; у записи с 24 числами (1052) флагов 9
+ *          и все индексы ниже сдвинуты на +1 (см. offsetOf)
  *   8, 9   x, y позиции; у провода это начало (x1, y1)
  *   10, 11 у провода конец (x2, y2); у элементов обычно 0, 0 (смысл ненулевых значений неизвестен)
  *   12, 13 смещение подписи; у точки соединения тоже
@@ -12,11 +13,11 @@
  * texts: [0] имя, [1] функция, [2..] метки клемм, затем параметры элемента.
  */
 
-import { parseCad } from './cad-format';
+import { CAD_NUM_FIELDS, flagCountOf, isContinuationType, parseCad } from './cad-format';
 import type { CadFooter, CadRecord, CadWarning } from './cad-format';
 import { getCadType, isKnownCadType, isWireType, wireKindOf } from './cad-types';
 import { buildTerminals } from './geometry';
-import type { Rotation, Schema, SchemaElement, SheetInfo, WireSegment } from './types';
+import type { CadRaw, Rotation, Schema, SchemaElement, SheetInfo, WireSegment } from './types';
 import { createEmptySchema } from './types';
 
 export interface ImportResult {
@@ -27,21 +28,27 @@ export interface ImportResult {
   unknownTypes: number[];
 }
 
-const FLAG_COUNT = 8;
+/** Сдвиг индексов после флагов: у записи с лишними флагами x, y, размер и остальное лежат правее. */
+function offsetOf(r: CadRecord): number {
+  return r.nums.length - CAD_NUM_FIELDS;
+}
 
+/** Число с индексом i по таблице выше; i >= 8 читается со сдвигом записи, флаги (i < 8) не сдвигаются. */
 function num(r: CadRecord, i: number): number {
-  return r.nums[i] ?? 0;
+  return r.nums[i >= 8 ? i + offsetOf(r) : i] ?? 0;
+}
+
+/** Слоты (номера флагов) клемм записи. */
+function flagSlots(r: CadRecord): number[] {
+  const slots: number[] = [];
+  const count = flagCountOf(r);
+  for (let i = 0; i < count; i += 1) if ((r.nums[i] ?? 0) !== 0) slots.push(i);
+  return slots;
 }
 
 function toRotation(n: number): Rotation {
   const k = ((Math.round(n) % 4) + 4) % 4;
   return k as Rotation;
-}
-
-function terminalCount(r: CadRecord): number {
-  let n = 0;
-  for (let i = 0; i < FLAG_COUNT; i += 1) if (num(r, i) !== 0) n += 1;
-  return n;
 }
 
 function toWire(r: CadRecord, kind: NonNullable<ReturnType<typeof wireKindOf>>): WireSegment {
@@ -53,21 +60,23 @@ function toWire(r: CadRecord, kind: NonNullable<ReturnType<typeof wireKindOf>>):
     to: { x: num(r, 10), y: num(r, 11) },
     thickness: num(r, 18),
     dot: kind === 'junction' && num(r, 14) > 0,
-    raw: { texts: [...r.texts], nums: [...r.nums] },
+    raw: rawOf(r),
   };
 }
 
-function toElement(r: CadRecord): SchemaElement {
+function toElement(r: CadRecord, continuations: readonly CadRecord[] = []): SchemaElement {
   const info = getCadType(r.type);
   const size = { w: num(r, 14), h: num(r, 15) };
   const rotation = toRotation(num(r, 17));
-  const count = terminalCount(r);
   // Метка клеммы лежит в текстовом поле того же номера, что и её флаг: флаг i → texts[2 + i].
   // Обычно флаги идут подряд с нуля, но у счётчика 9016 флаги 0..3 и 6, а между метками стоят параметры.
-  const slots: number[] = [];
-  for (let i = 0; i < FLAG_COUNT; i += 1) if (num(r, i) !== 0) slots.push(i);
-  const labels = slots.map((i) => r.texts[2 + i] ?? '');
-  const terminals = buildTerminals(info, count, size, rotation, labels);
+  const slots = flagSlots(r);
+  // Записи-продолжения (тип -1) дают дополнительные клеммы того же элемента, метки по их слотам флагов.
+  const labels = [
+    ...slots.map((i) => r.texts[2 + i] ?? ''),
+    ...continuations.flatMap((c) => flagSlots(c).map((i) => c.texts[2 + i] ?? '')),
+  ];
+  const terminals = buildTerminals(info, labels.length, size, rotation, labels);
 
   // Всё остальное в текстовых полях после имени и функции (кроме меток клемм) считаем параметрами.
   const labelFields = new Set(slots.map((i) => 2 + i));
@@ -92,8 +101,23 @@ function toElement(r: CadRecord): SchemaElement {
     labelOffset: { x: num(r, 12), y: num(r, 13) },
     terminals,
     params,
-    raw: { texts: [...r.texts], nums: [...r.nums] },
+    raw: rawOf(r, continuations),
   };
+}
+
+function rawOf(r: CadRecord, continuations: readonly CadRecord[] = []): CadRaw {
+  const raw: CadRaw = { texts: [...r.texts], nums: [...r.nums] };
+  if (r.tail !== undefined) raw.tail = r.tail;
+  if (continuations.length > 0) {
+    raw.continuations = continuations.map((c) => ({
+      id: c.id,
+      type: c.type,
+      texts: [...c.texts],
+      nums: [...c.nums],
+      ...(c.tail !== undefined ? { tail: c.tail } : {}),
+    }));
+  }
+  return raw;
 }
 
 /** Штамп: в подвале 10 текстовых полей с пробелами-заполнителями. */
@@ -141,15 +165,26 @@ export function importCad(text: string): ImportResult {
     return { ...record, id };
   });
 
+  // Запись с отрицательным типом (-1) продолжает элемент, записанный прямо перед ней: у Control Variador 1056
+  // клемм 13, а в одной записи их слотов 8 (FORMATO_CAD.md §3). Отдельным элементом она не становится.
+  const pending: Array<{ record: CadRecord; continuations: CadRecord[] }> = [];
+  let previous: { record: CadRecord; continuations: CadRecord[] } | undefined;
   for (const r of records) {
     const kind = isWireType(r.type) ? wireKindOf(r.type) : undefined;
     if (kind) {
       wires.push(toWire(r, kind));
+      previous = undefined;
+      continue;
+    }
+    if (isContinuationType(r.type) && previous) {
+      previous.continuations.push(r);
       continue;
     }
     if (!isKnownCadType(r.type)) unknown.add(r.type);
-    elements.push(toElement(r));
+    previous = { record: r, continuations: [] };
+    pending.push(previous);
   }
+  for (const item of pending) elements.push(toElement(item.record, item.continuations));
 
   const schema: Schema = {
     formatVersion: 1,
