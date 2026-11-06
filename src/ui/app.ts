@@ -49,6 +49,9 @@ const POTENTIAL_COLORS: Record<PotentialLabel, string> = {
 /** Цвет проводов без потенциала: спокойный, чтобы подсветка под напряжением читалась сразу. */
 const IDLE_WIRE_COLORS = { phase: '#7a8798', neutral: '#6f93c9', protection: '#6fae86', junction: '#5b6878' } as const;
 const CONFLICT_COLOR = '#e5322d';
+/** Единый режим: любой провод под напряжением красный, без — серый (фазы L1/L2/L3 не различаются цветом). */
+const UNIFORM_LIVE_COLOR = '#d92d27';
+const UNIFORM_IDLE_COLOR = '#7a8798';
 /** Нижняя полоса листа под штамп: она вне поля рисования. */
 function stampMetrics(width: number, height: number) {
   const margin = Math.min(5, width * 0.03, height * 0.03);
@@ -253,6 +256,7 @@ const PLACE_LABEL_OFFSETS: Record<number, { x: number; y: number }> = {
 type Theme = 'light' | 'dark';
 const THEME_KEY = 'cadesimu-theme';
 const GRID_KEY = 'cadesimu-grid';
+const WIRE_COLOR_MODE_KEY = 'cadesimu-wire-colors';
 const INTERFACE_LANGUAGE_KEY = 'cadesimu-language';
 const INTERFACE_TEXT = {
   es: {
@@ -264,7 +268,7 @@ const INTERFACE_TEXT = {
     elements: 'Elementos', search: 'Buscar elementos…', properties: 'Propiedades', selectElement: 'Selecciona un elemento en la hoja para editar sus propiedades.', schematic: 'Área de trabajo del esquema', elementCount: '{count} elementos', running: 'Simulación en marcha',
     status: 'Selecciona un archivo .cad para abrir un esquema.', zoom: 'Zoom', helpCanvas: 'Clic: seleccionar · Arrastrar: mover · Marco: seleccionar área vacía · Espacio / botón central: desplazar',
     sheetSize: 'Tamaño de hoja', format: 'Formato', custom: 'Personalizado', landscape: 'apaisado', portrait: 'vertical', width: 'Ancho, mm', height: 'Alto, mm', apply: 'Aplicar',
-    themeLight: 'Tema claro', themeDark: 'Tema oscuro', gridHide: 'Ocultar cuadrícula', gridShow: 'Mostrar cuadrícula', selectedMany: 'Selecciona un solo elemento para ver sus propiedades.', noWireProperties: 'Los cables no tienen propiedades editables.', missingElement: 'No se encontró el elemento.', name: 'Nombre', function: 'Función', terminals: 'Etiquetas de terminales', terminal: 'Terminal', lampColor: 'Color de lámpara', delay: 'Retardo, s',
+    themeLight: 'Tema claro', themeDark: 'Tema oscuro', gridHide: 'Ocultar cuadrícula', wireColorsPerPhase: 'Colores de cables: por fase', wireColorsUniform: 'Colores de cables: rojo / gris', gridShow: 'Mostrar cuadrícula', selectedMany: 'Selecciona un solo elemento para ver sus propiedades.', noWireProperties: 'Los cables no tienen propiedades editables.', missingElement: 'No se encontró el elemento.', name: 'Nombre', function: 'Función', terminals: 'Etiquetas de terminales', terminal: 'Terminal', lampColor: 'Color de lámpara', delay: 'Retardo, s',
     newTitle: '¿Crear un esquema nuevo?', newWarning: 'El esquema actual y su historial de cambios se borrarán.', create: 'Crear',
     shortcutsTitle: 'Atajos de teclado', aboutText: 'Editor de esquemas eléctricos y simulador de lógica de relés.', author: 'Autor', version: 'Versión', close: 'Cerrar',
     overload: 'Simular sobrecarga', reset: 'Restablecer entradas', green: 'Verde', red: 'Rojo', yellow: 'Amarillo', contactor1: 'Contactor 1 (KM1)', contactor2: 'Contactor 2 (KM2)',
@@ -278,7 +282,7 @@ const INTERFACE_TEXT = {
     elements: 'Components', search: 'Search components…', properties: 'Properties', selectElement: 'Select a component on the sheet to edit its properties.', schematic: 'Schematic workspace', elementCount: '{count} components', running: 'Simulation running',
     status: 'Choose a .cad file to open a schematic.', zoom: 'Zoom', helpCanvas: 'Click: select · Drag: move · Box: select empty area · Space / middle button: pan',
     sheetSize: 'Sheet size', format: 'Format', custom: 'Custom', landscape: 'landscape', portrait: 'portrait', width: 'Width, mm', height: 'Height, mm', apply: 'Apply',
-    themeLight: 'Light theme', themeDark: 'Dark theme', gridHide: 'Hide grid', gridShow: 'Show grid', selectedMany: 'Select one component to view its properties.', noWireProperties: 'Wires have no editable properties.', missingElement: 'Component not found.', name: 'Name', function: 'Function', terminals: 'Terminal labels', terminal: 'Terminal', lampColor: 'Lamp color', delay: 'Delay, s',
+    themeLight: 'Light theme', themeDark: 'Dark theme', gridHide: 'Hide grid', wireColorsPerPhase: 'Wire colors: per phase', wireColorsUniform: 'Wire colors: red / gray', gridShow: 'Show grid', selectedMany: 'Select one component to view its properties.', noWireProperties: 'Wires have no editable properties.', missingElement: 'Component not found.', name: 'Name', function: 'Function', terminals: 'Terminal labels', terminal: 'Terminal', lampColor: 'Lamp color', delay: 'Delay, s',
     newTitle: 'Create a new schematic?', newWarning: 'The current schematic and its undo history will be cleared.', create: 'Create',
     shortcutsTitle: 'Keyboard shortcuts', aboutText: 'Electrical schematic editor and relay logic simulator.', author: 'Author', version: 'Version', close: 'Close',
     overload: 'Simulate overload', reset: 'Reset inputs', green: 'Green', red: 'Red', yellow: 'Yellow', contactor1: 'Contactor 1 (KM1)', contactor2: 'Contactor 2 (KM2)',
@@ -292,7 +296,7 @@ const INTERFACE_TEXT = {
     elements: 'Elementi', search: 'Cerca elementi…', properties: 'Proprietà', selectElement: 'Seleziona un elemento sul foglio per modificarne le proprietà.', schematic: 'Area di lavoro dello schema', elementCount: '{count} elementi', running: 'Simulazione in esecuzione',
     status: 'Seleziona un file .cad per aprire uno schema.', zoom: 'Zoom', helpCanvas: 'Clic: seleziona · Trascina: sposta · Riquadro: seleziona area vuota · Spazio / pulsante centrale: panoramica',
     sheetSize: 'Dimensioni foglio', format: 'Formato', custom: 'Personalizzato', landscape: 'orizzontale', portrait: 'verticale', width: 'Larghezza, mm', height: 'Altezza, mm', apply: 'Applica',
-    themeLight: 'Tema chiaro', themeDark: 'Tema scuro', gridHide: 'Nascondi griglia', gridShow: 'Mostra griglia', selectedMany: 'Seleziona un solo elemento per visualizzarne le proprietà.', noWireProperties: 'I cavi non hanno proprietà modificabili.', missingElement: 'Elemento non trovato.', name: 'Nome', function: 'Funzione', terminals: 'Etichette dei terminali', terminal: 'Terminale', lampColor: 'Colore lampada', delay: 'Ritardo, s',
+    themeLight: 'Tema chiaro', themeDark: 'Tema scuro', gridHide: 'Nascondi griglia', wireColorsPerPhase: 'Colori cavi: per fase', wireColorsUniform: 'Colori cavi: rosso / grigio', gridShow: 'Mostra griglia', selectedMany: 'Seleziona un solo elemento per visualizzarne le proprietà.', noWireProperties: 'I cavi non hanno proprietà modificabili.', missingElement: 'Elemento non trovato.', name: 'Nome', function: 'Funzione', terminals: 'Etichette dei terminali', terminal: 'Terminale', lampColor: 'Colore lampada', delay: 'Ritardo, s',
     newTitle: 'Creare un nuovo schema?', newWarning: 'Lo schema attuale e la cronologia delle modifiche verranno eliminati.', create: 'Crea',
     shortcutsTitle: 'Scorciatoie da tastiera', aboutText: 'Editor di schemi elettrici e simulatore di logica a relè.', author: 'Autore', version: 'Versione', close: 'Chiudi',
     overload: 'Simula sovraccarico', reset: 'Azzera ingressi', green: 'Verde', red: 'Rosso', yellow: 'Giallo', contactor1: 'Contattore 1 (KM1)', contactor2: 'Contattore 2 (KM2)',
@@ -306,7 +310,7 @@ const INTERFACE_TEXT = {
     elements: 'Элементы', search: 'Поиск элементов…', properties: 'Свойства', selectElement: 'Выберите элемент на листе, чтобы изменить его свойства.', schematic: 'Поле схемы', elementCount: '{count} элементов', running: 'Симуляция запущена',
     status: 'Выберите файл .cad, чтобы открыть схему.', zoom: 'Масштаб', helpCanvas: 'Клик — выбрать · Перетащить — двигать · Рамка — пустое место · Пробел / средняя кнопка — панорама',
     sheetSize: 'Размер листа', format: 'Формат', custom: 'Пользовательский', landscape: 'альбомный', portrait: 'книжный', width: 'Ширина, мм', height: 'Высота, мм', apply: 'Применить',
-    themeLight: 'Светлая тема', themeDark: 'Тёмная тема', gridHide: 'Скрыть сетку', gridShow: 'Показать сетку', selectedMany: 'Выберите один элемент, чтобы изменить его свойства.', noWireProperties: 'Для проводов нет редактируемых свойств.', missingElement: 'Элемент не найден.', name: 'Имя', function: 'Функция', terminals: 'Метки клемм', terminal: 'Клемма', lampColor: 'Цвет лампы', delay: 'Выдержка, с',
+    themeLight: 'Светлая тема', themeDark: 'Тёмная тема', gridHide: 'Скрыть сетку', wireColorsPerPhase: 'Цвета проводов: по фазам', wireColorsUniform: 'Цвета проводов: красный / серый', gridShow: 'Показать сетку', selectedMany: 'Выберите один элемент, чтобы изменить его свойства.', noWireProperties: 'Для проводов нет редактируемых свойств.', missingElement: 'Элемент не найден.', name: 'Имя', function: 'Функция', terminals: 'Метки клемм', terminal: 'Клемма', lampColor: 'Цвет лампы', delay: 'Выдержка, с',
     newTitle: 'Создать новую схему?', newWarning: 'Текущая схема и история изменений будут очищены.', create: 'Создать',
     shortcutsTitle: 'Горячие клавиши', aboutText: 'Редактор электрических схем и симулятор релейной логики.', author: 'Автор', version: 'Версия', close: 'Закрыть',
     overload: 'Имитировать перегрузку', reset: 'Сбросить входы', green: 'Зелёная', red: 'Красная', yellow: 'Жёлтая', contactor1: 'Контактор 1 (KM1)', contactor2: 'Контактор 2 (KM2)',
@@ -315,6 +319,11 @@ const INTERFACE_TEXT = {
 
 function readGridVisible(): boolean {
   try { return localStorage.getItem(GRID_KEY) !== 'off'; } catch { return true; }
+}
+
+/** По умолчанию включён единый режим: красный — под напряжением, серый — нет. */
+function readUniformWireColors(): boolean {
+  try { return localStorage.getItem(WIRE_COLOR_MODE_KEY) !== 'phase'; } catch { return true; }
 }
 
 function readTheme(): Theme {
@@ -464,6 +473,7 @@ export function mountApp(root: HTMLElement): void {
             <button type="button" class="menu-command" data-command="fit">Показать всё <kbd>Ctrl+0</kbd></button>
             <button type="button" class="menu-command" data-command="grid" id="grid-command"></button>
             <button type="button" class="menu-command" data-command="theme" id="theme-command"></button>
+            <button type="button" class="menu-command" data-command="wire-colors" id="wire-colors-command"></button>
           </div></details>
           <details class="menu-group optional-groups-menu"><summary>Элементы</summary><div class="menu-popover">
             <p class="menu-heading optional-groups-heading">Показывать дополнительные категории</p>
@@ -636,6 +646,19 @@ export function mountApp(root: HTMLElement): void {
   };
   applyGrid();
 
+  const wireColorsCommand = root.querySelector<HTMLButtonElement>('#wire-colors-command');
+  let uniformWireColors = readUniformWireColors();
+  const updateWireColorsCommand = (): void => {
+    // Подпись показывает действующий режим; клик переключает на другой.
+    if (wireColorsCommand) wireColorsCommand.textContent = `${uniformWireColors ? uiText().wireColorsUniform : uiText().wireColorsPerPhase} ✓`;
+  };
+  const toggleWireColors = (): void => {
+    uniformWireColors = !uniformWireColors;
+    updateWireColorsCommand();
+    applySimulationVisuals();
+    try { localStorage.setItem(WIRE_COLOR_MODE_KEY, uniformWireColors ? 'uniform' : 'phase'); } catch { /* Mode still works for this session. */ }
+  };
+
   const svg = root.querySelector<SVGSVGElement>('.viewport-svg');
   const sheet = root.querySelector<SVGGElement>('#sheet-transform');
   const wireLayer = root.querySelector<SVGGElement>('#wire-layer');
@@ -774,6 +797,7 @@ export function mountApp(root: HTMLElement): void {
     if (theme) theme.textContent = root.dataset.theme === 'dark' ? t.themeLight : t.themeDark;
     const grid = root.querySelector<HTMLButtonElement>('#grid-command');
     if (grid) grid.textContent = gridVisible ? t.gridHide : t.gridShow;
+    updateWireColorsCommand();
     const sheetDialog = root.querySelector<HTMLDialogElement>('#sheet-dialog');
     if (sheetDialog) {
       set('#sheet-title', t.sheetSize);
@@ -855,7 +879,9 @@ export function mountApp(root: HTMLElement): void {
       }
       const ordered = POTENTIAL_ORDER.filter((potential) => potentials.has(potential));
       const energized = ordered.length > 0;
-      const color = ordered.length > 1 ? CONFLICT_COLOR : ordered[0] ? POTENTIAL_COLORS[ordered[0]] : wire.kind === 'junction' ? IDLE_WIRE_COLORS.junction : IDLE_WIRE_COLORS[wire.kind];
+      const idleColor = uniformWireColors ? UNIFORM_IDLE_COLOR : wire.kind === 'junction' ? IDLE_WIRE_COLORS.junction : IDLE_WIRE_COLORS[wire.kind];
+      const liveColor = ordered[0] ? (uniformWireColors ? UNIFORM_LIVE_COLOR : POTENTIAL_COLORS[ordered[0]]) : idleColor;
+      const color = ordered.length > 1 ? CONFLICT_COLOR : liveColor;
       const isDot = wire.kind === 'junction';
       lineOrDot.classList.toggle('is-energized', energized);
       lineOrDot.style.filter = '';
@@ -1879,6 +1905,7 @@ export function mountApp(root: HTMLElement): void {
       case 'fit': root.querySelector<HTMLButtonElement>('[data-zoom="fit"]')?.click(); break;
       case 'theme': toggleTheme(); break;
       case 'grid': toggleGrid(); break;
+      case 'wire-colors': toggleWireColors(); break;
       case 'sheet': openSheetDialog(); break;
       case 'shortcuts': shortcutsDialog?.showModal(); break;
       case 'about': aboutDialog?.showModal(); break;
