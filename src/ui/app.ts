@@ -1357,7 +1357,14 @@ export function mountApp(root: HTMLElement): void {
     if (kinds.length === 1) return [{ route, kind: kinds[0] as DrawKind }];
     const layout = detectBundleLayout(route, schema);
     const side = (layout.side * (bundleFlipped ? -1 : 1)) as 1 | -1;
-    return kinds.map((kind, index) => ({ route: offsetRoute(route, side * layout.spacing * index), kind }));
+    // Порядок на экране слева направо (или сверху вниз): сначала все фазы, нейтраль последней,
+    // независимо от того, в какую сторону от щелчка уходит пучок.
+    const lanes = kinds.map((_, index) => offsetRoute(route, side * layout.spacing * index));
+    const firstStart = route[0] as Point; const firstEnd = route[1] as Point;
+    const vertical = firstStart.x === firstEnd.x;
+    const laneKey = (lane: Point[]): number => { const start = lane[0] as Point; return vertical ? start.x : start.y; };
+    lanes.sort((a, b) => laneKey(a) - laneKey(b));
+    return kinds.map((kind, index) => ({ route: lanes[index] as Point[], kind }));
   };
   const insideSheet = (route: readonly Point[]): boolean => route.every((p) => p.x >= 0 && p.y >= 0 && p.x <= schema.sheet.width && p.y <= schema.sheet.height);
   const drawDraft = (): void => {
@@ -2118,7 +2125,8 @@ export function mountApp(root: HTMLElement): void {
     if (t < -tolerance || t > 1 + tolerance) return false;
     return Math.hypot(point.x - (from.x + t * dx), point.y - (from.y + t * dy)) <= tolerance;
   };
-  const placeNodeAt = (raw: Point): void => {
+  /** Куда встанет узел при щелчке в точке raw: ближайшая точка, где сходятся минимум два провода. */
+  const findNodePoint = (raw: Point): { point: Point; count: number; distance: number } | undefined => {
     const wires = schema.wires.filter((wire) => wire.kind !== 'junction');
     // Кандидаты: ближайший узел сетки и концы проводов рядом с курсором (на случай проводов вне сетки).
     const candidates: Point[] = [snapPointToGrid(raw, CAD_GRID_STEP)];
@@ -2130,6 +2138,22 @@ export function mountApp(root: HTMLElement): void {
       const distance = Math.hypot(point.x - raw.x, point.y - raw.y);
       if (!best || distance < best.distance) best = { point, count, distance };
     }
+    return best;
+  };
+  /** Метка инструмента «Узел» под курсором: кольцо на узле сетки; закрашено и синее там, где узел можно поставить. */
+  const drawNodeCursor = (raw: Point | undefined): void => {
+    ghostLayer.replaceChildren();
+    if (!nodeTool || !raw || wireDrawing) return;
+    const target = findNodePoint(raw);
+    const point = target?.point ?? snapPointToGrid(raw, CAD_GRID_STEP);
+    const ring = document.createElementNS(SVG_NS, 'circle');
+    ring.setAttribute('cx', String(point.x)); ring.setAttribute('cy', String(point.y)); ring.setAttribute('r', target ? '2.2' : '1.8');
+    ring.setAttribute('fill', target ? '#1f6fe0' : 'none'); ring.setAttribute('fill-opacity', '0.35');
+    ring.setAttribute('stroke', target ? '#1f6fe0' : '#7d8996'); ring.setAttribute('stroke-width', '0.5');
+    ghostLayer.append(ring);
+  };
+  const placeNodeAt = (raw: Point): void => {
+    const best = findNodePoint(raw);
     if (!best) { status.textContent = 'Здесь нет соединения: узел ставится там, где сходятся или пересекаются минимум два провода.'; return; }
     const { point } = best;
     if (schema.wires.some((wire) => wire.kind === 'junction' && wire.from.x === point.x && wire.from.y === point.y)) {
@@ -2463,6 +2487,7 @@ export function mountApp(root: HTMLElement): void {
     pointerSheetPosition = screenToSheet(pointerScreen, viewport);
     if (cursorCoords) cursorCoords.value = `X: ${pointerSheetPosition.x.toFixed(1)}  Y: ${pointerSheetPosition.y.toFixed(1)}`;
     if (!drag) moveGhost(event);
+    if (nodeTool && !drag) drawNodeCursor(pointerSheetPosition);
     if (!drag || drag.pointerId !== event.pointerId) {
       if (!drag && wireDrawing) {
         const raw = clampPointToSheet(screenToSheet(svgPoint(event, svg, viewSize), viewport), schema.sheet);
