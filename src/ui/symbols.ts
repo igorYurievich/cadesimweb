@@ -984,6 +984,44 @@ function drawDrive(g: SVGGElement, element: SchemaElement): void {
   g.append(inkFill('M 10.8 23 L 9.7 22.5 L 10.4 21.8 Z'));
 }
 
+/** Рамка блока (x −3..w − 3, y 3..h − 6) и выводы от клемм до рамки. */
+function drawBlockFrame(g: SVGGElement, element: SchemaElement): void {
+  const { w, h } = element.size;
+  g.append(rect(-3, 3, w, h - 9));
+  for (const t of element.terminals) {
+    g.append(path(t.offset.y > 0 ? `M ${t.offset.x} ${h - 6} V ${t.offset.y}` : `M ${t.offset.x} 0 V 3`));
+  }
+}
+
+/** Control Variador 1056: рамка 54×33, 13 выводов и переключающий контакт у RA–RC. */
+function drawDriveControl(g: SVGGElement, element: SchemaElement): void {
+  drawBlockFrame(g, element);
+  g.append(path('M 0 3 V 6 H 3 M 3 9 L 9 6 M 9 6 H 12 V 3'));
+}
+
+/** Диод моста: треугольник вправо и катодная черта. */
+function bridgeDiode(g: SVGGElement, x: number, y: number): void {
+  g.append(inkFill(`M ${x} ${y - 1} L ${x} ${y + 1} L ${x + 1.8} ${y} Z`));
+  g.append(path(`M ${x + 1.8} ${y - 1} V ${y + 1}`));
+}
+
+/** Преобразователь для двигателя постоянного тока 1057–1059: рамка и диодный мост (4 диода у 1057/1058, 6 у 1059). */
+function drawDcDrive(g: SVGGElement, element: SchemaElement): void {
+  drawBlockFrame(g, element);
+  const three = element.typeCode === 1059;
+  const left = element.typeCode === 1057 ? 0 : 3;
+  const right = left + 12;
+  const rows = three ? [12, 15, 18] : [12, 18];
+  const stubs: Array<[number, number]> = three ? [[4.5, 12], [6, 15], [7.2, 18]] : [[4.5, 12], [7.2, 18]];
+  g.append(path(`M ${left} 12 V 21 M ${right} 12 V 21`));
+  for (const y of rows) {
+    g.append(path(`M ${left} ${y} H ${right}`));
+    bridgeDiode(g, left + 1.2, y);
+    bridgeDiode(g, right - 3.3, y);
+  }
+  for (const [dx, bottom] of stubs) g.append(path(`M ${left + dx} 9 V ${bottom}`));
+}
+
 function drawBody(g: SVGGElement, element: SchemaElement, rotation: number): void {
   const { w, h } = element.size;
   const xs = columns(element);
@@ -1202,7 +1240,16 @@ function drawBody(g: SVGGElement, element: SchemaElement, rotation: number): voi
       drawControlUnit(g, element);
       break;
     case 1054:
+    case 1055:
       drawDrive(g, element);
+      break;
+    case 1056:
+      drawDriveControl(g, element);
+      break;
+    case 1057:
+    case 1058:
+    case 1059:
+      drawDcDrive(g, element);
       break;
     default:
       g.append(shape('rect', { x: 0.8, y: 0.8, width: Math.max(2, w - 1.6), height: Math.max(2, h - 1.6), fill: '#fff', stroke: INK, 'stroke-width': 0.7, 'stroke-dasharray': '2 1', 'vector-effect': 'non-scaling-stroke' }));
@@ -1225,6 +1272,11 @@ const NAME_SPOTS: Readonly<Record<number, { x: number; y: number; anchor: 'start
   1062: { x: -4, y: 5.7, anchor: 'end' },
   1063: { x: -4, y: 5.7, anchor: 'end' },
   1054: { x: -4, y: 5.7, anchor: 'end' },
+  1055: { x: -4, y: 5.7, anchor: 'end' },
+  1056: { x: -4, y: 5.7, anchor: 'end' },
+  1057: { x: -4, y: 5.7, anchor: 'end' },
+  1058: { x: -4, y: 5.7, anchor: 'end' },
+  1059: { x: -4, y: 5.7, anchor: 'end' },
 };
 
 type LabelSpot = readonly [dx: number, dy: number, anchor: 'start' | 'middle' | 'end'];

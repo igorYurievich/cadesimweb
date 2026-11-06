@@ -11,7 +11,14 @@ function emptyRecord(id: number, type: number, extraFlags = 0): CadRecord {
  * Текст после закрывающего «#» у новых элементов (без исходной записи): так записан в образце potencias_electronicas.cad.
  * Смысл строки не разгадан [вывод: параметры внутреннего рисунка], поэтому берём её как в образце.
  */
-const DEFAULT_TAILS: Readonly<Record<number, string>> = { 1062: '000/030/000/400', 1063: '000/030/000/400' };
+const DEFAULT_TAILS: Readonly<Record<number, string>> = {
+  1062: '000/030/000/400',
+  1063: '000/030/000/400',
+  1056: '1-0-0-001-200-010-025-050-05-05-00-0',
+};
+
+/** Типы, у которых клеммы не помещаются в одну запись: сколько клемм в основной, остальные идут записью-продолжением -1 (как в образце). */
+const SPLIT_AT: Readonly<Record<number, number>> = { 1056: 7 };
 
 /** Дополняет запись до минимума полей; лишние поля (11-е текстовое, 24-е число у 1052) остаются как есть. */
 function padRecord(record: CadRecord): void {
@@ -28,11 +35,11 @@ function slotsOf(record: Pick<CadRecord, 'nums'>): number[] {
 }
 
 /** Записи элемента: основная и (если были) продолжения типа -1, как в исходном файле. */
-function elementRecords(element: SchemaElement): CadRecord[] {
+function elementRecords(element: SchemaElement, allocId: () => number): CadRecord[] {
   const raw = element.raw;
   const record: CadRecord = raw
     ? { id: element.id, type: element.typeCode, texts: [...raw.texts], nums: [...raw.nums], ...(raw.tail !== undefined ? { tail: raw.tail } : {}) }
-    : emptyRecord(element.id, element.typeCode, Math.max(0, element.terminals.length - flagCountOf({ nums: Array(CAD_NUM_FIELDS).fill(0) })));
+    : emptyRecord(element.id, element.typeCode, Math.max(0, Math.min(element.terminals.length, SPLIT_AT[element.typeCode] ?? Infinity) - 8));
   if (!raw && DEFAULT_TAILS[element.typeCode] !== undefined) record.tail = DEFAULT_TAILS[element.typeCode] as string;
   padRecord(record);
   const o = shiftOf(record);
@@ -56,10 +63,18 @@ function elementRecords(element: SchemaElement): CadRecord[] {
   if (!raw || total !== element.terminals.length) {
     // Число клемм изменилось: флаги пишем заново подряд, продолжения отбрасываем (клемм у них больше нет).
     record.nums.fill(0, 0, flagCountOf(record));
-    const slots = element.terminals.slice(0, flagCountOf(record)).map((_, index) => index);
+    const slots = element.terminals.slice(0, Math.min(flagCountOf(record), SPLIT_AT[element.typeCode] ?? Infinity)).map((_, index) => index);
     for (const slot of slots) record.nums[slot] = 1;
     element.terminals.slice(0, slots.length).forEach((terminal, index) => { record.texts[2 + index] = terminal.label; });
     continuations.length = 0;
+    const split = SPLIT_AT[element.typeCode];
+    if (!raw && split !== undefined && element.terminals.length > split) {
+      const rest = element.terminals.slice(split);
+      const extra = emptyRecord(allocId(), -1);
+      rest.slice(0, flagCountOf(extra)).forEach((terminal, index) => { extra.nums[index] = 1; extra.texts[2 + index] = terminal.label; });
+      for (let i = 8; i < extra.nums.length; i += 1) extra.nums[i] = record.nums[i + o] ?? 0;
+      continuations.push(extra);
+    }
   } else {
     let index = 0;
     groups.forEach((group, g) => {
@@ -152,8 +167,15 @@ function legacyFramePlacement(schema: Schema): { offsetY: number; height: number
 /** Convert the editor model to .cad and verify it by importing the result back. */
 export function exportCad(schema: Schema): string {
   const placement = legacyFramePlacement(schema);
+  // Свободные id для новых записей-продолжений (-1): у каждой записи файла свой id.
+  let nextId = 1 + Math.max(
+    0,
+    ...schema.elements.flatMap((element) => [element.id, ...(element.raw?.continuations ?? []).map((c) => c.id)]),
+    ...schema.wires.map((wire) => wire.id),
+  );
+  const allocId = (): number => nextId++;
   const records = [
-    ...schema.elements.flatMap(elementRecords),
+    ...schema.elements.flatMap((element) => elementRecords(element, allocId)),
     ...schema.wires.map(wireRecord),
   ];
   for (const record of records) {
