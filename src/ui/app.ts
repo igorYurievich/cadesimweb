@@ -1847,6 +1847,7 @@ export function mountApp(root: HTMLElement): void {
     copy.setAttribute('preserveAspectRatio', 'xMidYMid meet');
     copy.removeAttribute('class');
     copy.querySelector('.viewport-backdrop')?.remove();
+    copy.querySelector('#sheet-grid')?.remove();
     copy.querySelector('#selection-layer')?.remove();
     copy.querySelector('#draft-layer')?.remove();
     copy.querySelector('#ghost-layer')?.remove();
@@ -1887,18 +1888,18 @@ export function mountApp(root: HTMLElement): void {
     }
     const width = schema.sheet.width;
     const height = fullSheet(schema.sheet).height;
-    const orientation = width >= height ? 'landscape' : 'portrait';
-    const printWidth = orientation === 'landscape' ? '281mm' : '194mm';
-    const printHeight = orientation === 'landscape' ? '194mm' : '281mm';
+    const printWidth = `${Math.round(width * 100) / 100}mm`;
+    const printHeight = `${Math.round(height * 100) / 100}mm`;
     const svgMarkup = new XMLSerializer().serializeToString(createSheetExportSvg());
     const title = outputBaseName();
     printWindow.document.open();
     printWindow.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${title}</title><style>
-      @page { size: A4 ${orientation}; margin: 8mm; }
+      @page { size: ${printWidth} ${printHeight}; margin: 0; }
       html, body { margin: 0; padding: 0; }
+      @media print { html, body { width: ${printWidth}; height: ${printHeight}; overflow: hidden; } }
       .page { position: relative; width: ${printWidth}; height: ${printHeight}; overflow: hidden; break-inside: avoid; page-break-inside: avoid; }
       .page > svg { position: absolute; inset: 0; display: block; width: 100%; height: 100%; color: #263342; }
-      @media screen { html, body { width: 100%; height: 100%; } body { display: grid; place-items: center; background: #e8edf3; } .page { width: min(92vw, 1100px); height: min(88vh, 780px); padding: 16px; background: #fff; box-shadow: 0 2px 12px #18243333; } }
+      @media screen { body { background: #e8edf3; padding: 16px; } .page { background: #fff; box-shadow: 0 2px 12px #18243333; margin: 0 auto; } }
     </style></head><body><div class="page">${svgMarkup}</div></body></html>`);
     printWindow.document.close();
     printWindow.addEventListener('afterprint', () => printWindow.close(), { once: true });
