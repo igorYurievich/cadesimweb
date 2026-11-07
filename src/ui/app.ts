@@ -161,7 +161,7 @@ export function mountApp(root: HTMLElement): void {
     <main class="app-shell">
       <header class="app-header">
         <div class="brand-lockup" title="Редактор и симулятор электрических схем">
-          <h1>CADe SIMU <span>Web</span></h1>
+          <h1>Web Cade</h1>
         </div>
         <nav class="app-menu" aria-label="Главное меню">
           <details class="menu-group"><summary>Файл</summary><div class="menu-popover">
@@ -325,12 +325,13 @@ export function mountApp(root: HTMLElement): void {
       </dialog>
       <dialog id="about-dialog" class="app-dialog about-dialog" aria-labelledby="about-title">
         <div class="about-mark" aria-hidden="true">CS</div>
-        <h2 id="about-title">CADe SIMU Web</h2>
+        <h2 id="about-title">Web Cade</h2>
         <p>Редактор электрических схем и симулятор релейной логики.</p>
-        <p id="about-bio">Автор — IGOR LIPSKIY, студент 2 курса Sistemas Electrotécnicos y Automatizados центра IES Lagunas.</p>
+        <p id="about-bio">Автор — Igor Lipskiy Vyatchin, студент 2 курса Sistemas Electrotécnicos y Automatizados центра IES Lagunas.</p>
         <p id="about-noncommercial">Проект некоммерческий: ничего здесь не продаётся и продавать никто не будет.</p>
         <p class="about-contact"><span id="about-contact-label">По любым вопросам:</span> <a href="mailto:igoryurievich1@gmail.com">igoryurievich1@gmail.com</a></p>
-        <dl><div><dt>Автор</dt><dd>IGOR LIPSKIY</dd></div><div><dt>Версия</dt><dd>0.1.0</dd></div></dl>
+        <p class="about-repository"><a href="https://github.com/igorYurievich/cadesimweb" target="_blank" rel="noopener noreferrer">GitHub: github.com/igorYurievich/cadesimweb</a></p>
+        <dl><div><dt>Автор</dt><dd>Igor Lipskiy Vyatchin</dd></div><div><dt>Версия</dt><dd>0.1.0</dd></div></dl>
         <div class="dialog-actions"><button type="button" data-dialog-close="about-dialog">Закрыть</button></div>
       </dialog>
       <dialog id="access-dialog" class="app-dialog access-dialog" aria-labelledby="access-title">

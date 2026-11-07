@@ -7,6 +7,7 @@ import type { Selectable } from './constants';
 import { clampDeltaToSheet, clampElementPosition, clampPointToSheet, elementExtent } from './bounds';
 import { cloneSchema, selectionKey } from './helpers';
 import { screenToSheet, snapPointToGrid } from './viewport';
+import { CAD_GRID_STEP } from './constants';
 
 export interface SelectionClipboard { elements: SchemaElement[]; wires: WireSegment[]; anchor: Point }
 export interface SelectionCommandsSetup {
@@ -115,5 +116,42 @@ export function setupSelectionCommands(ctx: AppContext, deps: SelectionCommandsS
     }
     deps.commitSchema(before); deps.renderSchema();
   };
-  return { copySelection, pasteSelection, deleteSelected, rotateSelection };
+  const nudgeSelection = (dx: number, dy: number): void => {
+    if (!deps.selected.size || deps.simulationMode() !== 'edit') return;
+    const { schema } = ctx;
+    const bounds = { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity };
+    const include = (x: number, y: number): void => {
+      bounds.minX = Math.min(bounds.minX, x); bounds.minY = Math.min(bounds.minY, y);
+      bounds.maxX = Math.max(bounds.maxX, x); bounds.maxY = Math.max(bounds.maxY, y);
+    };
+    for (const item of deps.selected.values()) {
+      if (item.kind === 'element') {
+        const element = schema.elements.find((candidate) => candidate.id === item.id); if (!element) continue;
+        const extent = elementExtent(element);
+        include(element.position.x + Math.min(extent.minX, element.labelOffset.x), element.position.y + Math.min(extent.minY, element.labelOffset.y));
+        include(element.position.x + extent.maxX, element.position.y + extent.maxY);
+      } else {
+        const wire = schema.wires.find((candidate) => candidate.id === item.id); if (!wire) continue;
+        include(wire.from.x, wire.from.y); include(wire.to.x, wire.to.y);
+      }
+    }
+    if (!Number.isFinite(bounds.minX)) return;
+    const delta = clampDeltaToSheet({ x: dx, y: dy }, bounds, schema.sheet, CAD_GRID_STEP);
+    if (!delta.x && !delta.y) return;
+    const before = cloneSchema(schema);
+    for (const item of deps.selected.values()) {
+      if (item.kind === 'element') {
+        const element = schema.elements.find((candidate) => candidate.id === item.id);
+        if (element) element.position = { x: element.position.x + delta.x, y: element.position.y + delta.y };
+      } else {
+        const wire = schema.wires.find((candidate) => candidate.id === item.id);
+        if (wire) {
+          wire.from = { x: wire.from.x + delta.x, y: wire.from.y + delta.y };
+          wire.to = { x: wire.to.x + delta.x, y: wire.to.y + delta.y };
+        }
+      }
+    }
+    deps.commitSchema(before); deps.renderSchema();
+  };
+  return { copySelection, pasteSelection, deleteSelected, rotateSelection, nudgeSelection };
 }

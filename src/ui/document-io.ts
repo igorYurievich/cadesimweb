@@ -16,6 +16,7 @@ export interface DocumentOpenSetup {
   clearPlacement(): void; clearWireDrawing(): void; placeTypeSelect: HTMLSelectElement | null;
   persistSchemaNow(): void; viewSize(): Point;
   setViewport(value: Viewport): void; drawViewport(): void; renderSchema(): void;
+  beforeOpenDocument?(name: string): void;
 }
 
 export function setupDocumentOpen(ctx: AppContext, deps: DocumentOpenSetup): (text: string, name: string) => void {
@@ -37,6 +38,7 @@ export function setupDocumentOpen(ctx: AppContext, deps: DocumentOpenSetup): (te
       deps.svg.classList.remove('is-drawing-wire');
       if (deps.placeTypeSelect) deps.placeTypeSelect.value = '';
       deps.svg.classList.remove('is-placing'); deps.selected.clear();
+      deps.beforeOpenDocument?.(name);
       ctx.schema = openedSchema;
       ctx.schema.sheet.fileName = name;
       const contentBounds = schemaBounds(ctx.schema);

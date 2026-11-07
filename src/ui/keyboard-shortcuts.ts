@@ -1,3 +1,5 @@
+import { CAD_GRID_STEP } from './constants';
+
 export interface KeyboardShortcutsSetup {
   root: HTMLElement; simulationContextMenu: HTMLElement; fileInput: HTMLInputElement;
   spaceDown(value: boolean): void; panTool(): boolean; setPanTool(value: boolean): void;
@@ -7,6 +9,7 @@ export interface KeyboardShortcutsSetup {
   finishWireDrawing(): void; cancelPlacement(): void; cancelWireDrawing(): void;
   placing(): boolean;
   selectedCount(): number; clearSelection(): void; deleteSelected(): void; rotateSelection(): void;
+  nudgeSelection(dx: number, dy: number): void;
 }
 
 export function setupKeyboardShortcuts(deps: KeyboardShortcutsSetup): void {
@@ -34,8 +37,14 @@ export function setupKeyboardShortcuts(deps: KeyboardShortcutsSetup): void {
       deps.selectTool(); event.preventDefault(); return;
     }
     const modifier = event.ctrlKey || event.metaKey;
-    if (modifier && !editingField && event.key.toLowerCase() === 'c') { deps.copySelection(); event.preventDefault(); return; }
-    if (modifier && !editingField && event.key.toLowerCase() === 'v') { deps.pasteSelection(); event.preventDefault(); return; }
+    if (modifier && !editingField && event.code === 'KeyC') { deps.copySelection(); event.preventDefault(); return; }
+    if (modifier && !editingField && event.code === 'KeyV') { deps.pasteSelection(); event.preventDefault(); return; }
+    if (!editingField && !modifier && !event.altKey && deps.selectedCount()) {
+      const step = CAD_GRID_STEP;
+      const movement: Record<string, [number, number]> = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] };
+      const delta = movement[event.code];
+      if (delta) { deps.nudgeSelection(delta[0], delta[1]); event.preventDefault(); return; }
+    }
     if (modifier && !event.shiftKey && !editingField && event.key.toLowerCase() === 's') { deps.saveJson(); event.preventDefault(); return; }
     if (modifier && !editingField && event.key.toLowerCase() === 'n') { deps.requestNewSchema(); event.preventDefault(); return; }
     if (modifier && !editingField && event.key.toLowerCase() === 'o') { deps.fileInput.click(); event.preventDefault(); return; }
@@ -55,7 +64,7 @@ export function setupKeyboardShortcuts(deps: KeyboardShortcutsSetup): void {
       else if (deps.selectedCount()) deps.clearSelection();
     }
     if (!editingField && (event.key === 'Delete' || event.key === 'Backspace')) { deps.deleteSelected(); event.preventDefault(); }
-    if ((!editingField || placementSelectFocused) && event.key.toLowerCase() === 'r') { deps.rotateSelection(); event.preventDefault(); }
+    if ((!editingField || placementSelectFocused) && event.code === 'KeyR') { deps.rotateSelection(); event.preventDefault(); }
   });
   window.addEventListener('keyup', (event) => { if (event.code === 'Space') deps.spaceDown(false); });
 }

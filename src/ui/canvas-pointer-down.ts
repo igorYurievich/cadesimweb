@@ -111,6 +111,7 @@ export function setupCanvasPointerDown(ctx: AppContext, deps: CanvasPointerDownS
     } else {
       const { schema } = ctx;
       const target = event.target instanceof Element ? event.target : null;
+      const toggleSelection = event.ctrlKey || event.metaKey;
       const endpoint = target?.closest<SVGCircleElement>('[data-wire-end]');
       const sheetPoint = screenToSheet(screen, deps.viewport());
       if (endpoint) {
@@ -118,6 +119,11 @@ export function setupCanvasPointerDown(ctx: AppContext, deps: CanvasPointerDownS
         const wire = schema.wires.find((candidate) => candidate.id === wireId);
         if (wire) {
           const item: Selectable = { kind: 'wire', id: wireId };
+          if (toggleSelection) {
+            const key = selectionKey(item);
+            if (deps.selected.has(key)) deps.selected.delete(key); else deps.selected.set(key, item);
+            deps.renderSchema(); event.preventDefault(); return;
+          }
           if (!deps.selected.has(selectionKey(item))) { deps.selected.clear(); deps.selected.set(selectionKey(item), item); }
           deps.setDragSnapshot(cloneSchema(schema));
           deps.setDrag({ mode: 'resize', pointerId: event.pointerId, wireId, end, original: { ...wire[end] } });
@@ -127,6 +133,10 @@ export function setupCanvasPointerDown(ctx: AppContext, deps: CanvasPointerDownS
         const hit = getSelectionHit(event.target);
         if (hit) {
           const key = selectionKey(hit);
+          if (toggleSelection) {
+            if (deps.selected.has(key)) deps.selected.delete(key); else deps.selected.set(key, hit);
+            deps.renderSchema(); event.preventDefault(); return;
+          }
           if (event.shiftKey) { if (deps.selected.has(key)) deps.selected.delete(key); else deps.selected.set(key, hit); }
           else if (!deps.selected.has(key)) { deps.selected.clear(); deps.selected.set(key, hit); }
           deps.renderSchema();
@@ -135,8 +145,9 @@ export function setupCanvasPointerDown(ctx: AppContext, deps: CanvasPointerDownS
             deps.setDrag({ mode: 'move', pointerId: event.pointerId, start: sheetPoint, objects: selectedObjects(schema, deps.selected) });
           }
         } else {
-          if (!event.shiftKey) deps.selected.clear();
-          deps.setDrag({ mode: 'marquee', pointerId: event.pointerId, start: sheetPoint, current: sheetPoint, additive: event.shiftKey });
+          const additive = event.shiftKey || toggleSelection;
+          if (!additive) deps.selected.clear();
+          deps.setDrag({ mode: 'marquee', pointerId: event.pointerId, start: sheetPoint, current: sheetPoint, additive });
           deps.renderSchema();
         }
       }

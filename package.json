@@ -2,8 +2,8 @@
   "name": "cadesimu-web",
   "version": "0.1.0",
   "private": true,
-  "description": "CADe SIMU Web: modern electrical schematic editor and relay-logic simulator",
-  "author": "IGOR LIPSKIY",
+  "description": "Web Cade: modern electrical schematic editor and relay-logic simulator",
+  "author": "Igor Lipskiy Vyatchin",
   "type": "module",
   "scripts": {
     "dev": "vite",
