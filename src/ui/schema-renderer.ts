@@ -50,9 +50,26 @@ export function setupSchemaRenderer(ctx: AppContext, deps: SchemaRendererSetup):
       if (deps.selected.has(selectionKey({ kind: 'element', id: element.id }))) symbol.classList.add('is-selected-element');
       deps.elementLayer.append(symbol);
       if (deps.selected.has(selectionKey({ kind: 'element', id: element.id }))) {
+        const hitAreas = [...symbol.querySelectorAll<SVGElement>('.hit-area')];
+        const originalDisplay = hitAreas.map((node) => node.getAttribute('display'));
+        let bounds: DOMRect | SVGRect;
+        try {
+          for (const node of hitAreas) node.setAttribute('display', 'none');
+          bounds = symbol.getBBox();
+        } catch {
+          bounds = { x: -1.5, y: -1.5, width: Math.max(3, element.size.w + 3), height: Math.max(3, element.size.h + 3) } as SVGRect;
+        } finally {
+          hitAreas.forEach((node, index) => {
+            const display = originalDisplay[index];
+            if (display === null || display === undefined) node.removeAttribute('display');
+            else node.setAttribute('display', display);
+          });
+        }
         const box = document.createElementNS(SVG_NS, 'rect');
-        box.setAttribute('x', String(element.position.x - 1.5)); box.setAttribute('y', String(element.position.y - 1.5));
-        box.setAttribute('width', String(Math.max(3, element.size.w + 3))); box.setAttribute('height', String(Math.max(3, element.size.h + 3)));
+        box.setAttribute('x', String(bounds.x - 1.5)); box.setAttribute('y', String(bounds.y - 1.5));
+        box.setAttribute('width', String(Math.max(3, bounds.width + 3))); box.setAttribute('height', String(Math.max(3, bounds.height + 3)));
+        const transform = symbol.getAttribute('transform');
+        if (transform) box.setAttribute('transform', transform);
         box.setAttribute('class', 'element-selection-box'); box.setAttribute('data-box-for', String(element.id)); deps.selectionLayer.append(box);
       }
     }

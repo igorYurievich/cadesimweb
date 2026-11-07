@@ -18,7 +18,7 @@ export function setupMovePreview(ctx: AppContext, deps: MovePreviewSetup) {
         if (!element) continue;
         deps.elementLayer.querySelector(`[data-element-id="${id}"]`)?.setAttribute('transform', `translate(${element.position.x} ${element.position.y}) rotate(${element.rotation * 90})`);
         const box = deps.selectionLayer.querySelector(`[data-box-for="${id}"]`);
-        box?.setAttribute('x', String(element.position.x - 1.5)); box?.setAttribute('y', String(element.position.y - 1.5));
+        box?.setAttribute('transform', `translate(${element.position.x} ${element.position.y}) rotate(${element.rotation * 90})`);
       } else {
         const id = object.item.id;
         const wire = ctx.schema.wires.find((candidate) => candidate.id === id);

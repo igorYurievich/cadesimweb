@@ -22,7 +22,6 @@ import { setupCanvasPointerMove, setupCanvasPointerEnd } from './canvas-pointer-
 import { setupCanvasPointerDown } from './canvas-pointer-down';
 import { setupCanvasDoubleClick } from './canvas-double-click';
 import { setupSimulationContextMenuEvents, setupWireContextMenu } from './context-menu-events';
-import { setupDocumentLifecycle } from './document-lifecycle';
 import { setupViewportControls } from './viewport-controls';
 import { setupDocumentOpen, setupDocumentInputEvents } from './document-io';
 import { setupNodeTool } from './node-tool';
@@ -56,6 +55,23 @@ function readAutosavedSchema(): Schema | undefined {
   try {
     const saved = localStorage.getItem(AUTOSAVE_KEY);
     return saved ? parseSchemaJson(saved) : undefined;
+  } catch { return undefined; }
+}
+const DOCUMENT_TABS_KEY = 'cadesimu-web:documents:v1';
+interface DocumentTab { id: string; name: string; schema: Schema; history: ReturnType<typeof createHistory<Schema>>; viewport: Viewport; }
+function readSavedDocuments(): { activeId: string; tabs: Array<{ id: string; name: string; schema: Schema }> } | undefined {
+  try {
+    const raw = localStorage.getItem(DOCUMENT_TABS_KEY); if (!raw) return undefined;
+    const saved = JSON.parse(raw) as { activeId?: unknown; tabs?: unknown };
+    if (!Array.isArray(saved.tabs)) return undefined;
+    const tabs = saved.tabs.flatMap((item): Array<{ id: string; name: string; schema: Schema }> => {
+      try {
+        if (!item || typeof item.id !== 'string' || typeof item.name !== 'string' || typeof item.schema !== 'string') return [];
+        return [{ id: item.id, name: item.name, schema: parseSchemaJson(item.schema) }];
+      } catch { return []; }
+    });
+    if (!tabs.length) return undefined;
+    return { activeId: tabs.some((tab) => tab.id === saved.activeId) ? String(saved.activeId) : tabs[0]!.id, tabs };
   } catch { return undefined; }
 }
 /** Шаг сетки равен шагу привязки элементов и проводов (3): все клеммы лежат на узлах сетки. */
@@ -138,15 +154,19 @@ function readTheme(): Theme {
 
 /** Mount the SVG viewer for a CADe SIMU sheet. */
 export function mountApp(root: HTMLElement): void {
+  const savedDocuments = readSavedDocuments();
   const autosavedSchema = readAutosavedSchema();
-  let schema: Schema = autosavedSchema ?? createEmptySchema();
+  let schema: Schema = savedDocuments?.tabs.find((tab) => tab.id === savedDocuments.activeId)?.schema ?? autosavedSchema ?? createEmptySchema();
   let history = createHistory(cloneSchema(schema));
   const ctx = createAppContext(root, () => schema, (next) => { schema = next; }, () => history, (next) => { history = next; });
+  let syncActiveDocument = (): void => {};
+  let persistDocuments = (): void => {};
   let autosaveTimer: ReturnType<typeof setTimeout> | undefined;
   const persistSchemaNow = (): void => {
     if (autosaveTimer !== undefined) clearTimeout(autosaveTimer);
     autosaveTimer = undefined;
     try { localStorage.setItem(AUTOSAVE_KEY, serializeSchemaJson(ctx.schema)); } catch { /* Editor remains usable when storage is unavailable. */ }
+    syncActiveDocument(); persistDocuments();
   };
   const persistSchema = (): void => {
     if (autosaveTimer !== undefined) return;
@@ -258,6 +278,7 @@ export function mountApp(root: HTMLElement): void {
           <div id="palette-groups" class="palette-groups"></div>
         </aside>
         <section class="viewport-stage" aria-label="Поле схемы">
+        <nav id="document-tabs" class="document-tabs" aria-label="Открытые схемы"></nav>
         <svg class="viewport-svg" viewBox="0 0 ${FALLBACK_VIEWPORT.width} ${FALLBACK_VIEWPORT.height}" preserveAspectRatio="none" role="img" aria-label="Поле схемы">
           <defs><pattern id="cad-grid" x="${-CAD_GRID_STEP / 2}" y="${-CAD_GRID_STEP / 2}" width="${CAD_GRID_STEP}" height="${CAD_GRID_STEP}" patternUnits="userSpaceOnUse">
             <circle cx="${CAD_GRID_STEP / 2}" cy="${CAD_GRID_STEP / 2}" r="0.24" fill="#7d8996" />
@@ -286,11 +307,6 @@ export function mountApp(root: HTMLElement): void {
         <output id="zoom-value" class="zoom-value" aria-live="polite" title="Масштаб">100%</output>
         <span class="viewport-help">Клик — выбрать · Перетащить — двигать · Рамка — пустое место · Пробел / средняя кнопка — панорама</span>
       </footer>
-      <dialog id="confirm-new-dialog" class="app-dialog" aria-labelledby="confirm-new-title">
-        <h2 id="confirm-new-title">Создать новую схему?</h2>
-        <p>Текущая схема будет очищена, а её историю отмены нельзя будет восстановить.</p>
-        <div class="dialog-actions"><button type="button" data-dialog-close="confirm-new-dialog">Отмена</button><button type="button" class="primary-action" id="confirm-new">Создать</button></div>
-      </dialog>
       <dialog id="sheet-dialog" class="app-dialog sheet-dialog" aria-labelledby="sheet-title">
         <h2 id="sheet-title">Размер листа</h2>
         <div class="sheet-fields">
@@ -455,6 +471,12 @@ export function mountApp(root: HTMLElement): void {
     } catch { return undefined; }
   };
   let viewport: Viewport = readSavedViewport() ?? fitViewport(fullSheet(schema.sheet), { width: viewSize.x, height: viewSize.y });
+  let documents: DocumentTab[] = savedDocuments?.tabs.map((tab) => ({
+    ...tab, history: createHistory(cloneSchema(tab.schema)),
+    viewport: tab.id === savedDocuments.activeId ? viewport : fitViewport(fullSheet(tab.schema.sheet), { width: viewSize.x, height: viewSize.y }),
+  })) ?? [{ id: crypto.randomUUID(), name: schema.sheet.fileName || 'Новая схема', schema, history, viewport }];
+  let activeDocumentId = savedDocuments?.activeId ?? documents[0]!.id;
+  const documentTabBar = root.querySelector<HTMLElement>('#document-tabs');
   let viewportSaveTimer: ReturnType<typeof setTimeout> | undefined;
   const saveViewportNow = (): void => {
     if (viewportSaveTimer !== undefined) { clearTimeout(viewportSaveTimer); viewportSaveTimer = undefined; }
@@ -547,6 +569,76 @@ export function mountApp(root: HTMLElement): void {
   svg.addEventListener('pointerenter', (event) => moveGhost(event));
   const renderSheetFrame = setupSheetFrame(ctx, sheetFrame, sheetStamp);
   const renderSchema = setupSchemaRenderer(ctx, { root, svg, wireLayer, elementLayer, selectionLayer, selected, drag: () => drag, renderSheetFrame, drawDraft, simulation, updateHistoryButtons, renderProperties: () => renderProperties(), persistSchema });
+  const activeDocument = (): DocumentTab => documents.find((tab) => tab.id === activeDocumentId) ?? documents[0]!;
+  const renderDocumentTabs = (): void => {
+    if (!documentTabBar) return;
+    documentTabBar.replaceChildren();
+    for (const document of documents) {
+      const tab = documentTabBar.ownerDocument.createElement('div');
+      tab.className = `document-tab${document.id === activeDocumentId ? ' is-active' : ''}`;
+      const select = documentTabBar.ownerDocument.createElement('button');
+      select.type = 'button'; select.className = 'document-tab-select'; select.dataset.documentTab = document.id;
+      select.textContent = document.name || 'Новая схема'; select.title = document.name || 'Новая схема';
+      const close = documentTabBar.ownerDocument.createElement('button');
+      close.type = 'button'; close.className = 'document-tab-close'; close.dataset.closeDocument = document.id;
+      close.setAttribute('aria-label', `Закрыть схему «${document.name || 'Новая схема'}»`); close.title = 'Закрыть схему'; close.textContent = '×';
+      tab.append(select, close); documentTabBar.append(tab);
+    }
+    const add = documentTabBar.ownerDocument.createElement('button');
+    add.type = 'button'; add.id = 'new-document-tab'; add.className = 'document-tab-add'; add.title = 'Новая схема'; add.setAttribute('aria-label', 'Новая схема'); add.textContent = '+';
+    documentTabBar.append(add);
+  };
+  syncActiveDocument = (): void => {
+    const current = activeDocument();
+    current.schema = schema; current.history = history; current.viewport = viewport;
+    current.name = schema.sheet.fileName || current.name || 'Новая схема';
+  };
+  persistDocuments = (): void => {
+    try {
+      localStorage.setItem(DOCUMENT_TABS_KEY, JSON.stringify({ activeId: activeDocumentId, tabs: documents.map((tab) => ({ id: tab.id, name: tab.name, schema: serializeSchemaJson(tab.schema) })) }));
+    } catch { /* The current document remains available even when storage is full. */ }
+    renderDocumentTabs();
+  };
+  const activateDocument = (id: string, skipSavingCurrent = false): void => {
+    if (id === activeDocumentId) return;
+    if (!skipSavingCurrent) { syncActiveDocument(); persistDocuments(); }
+    simulation.stopSimulation();
+    const target = documents.find((tab) => tab.id === id); if (!target) return;
+    activeDocumentId = target.id; schema = target.schema; history = target.history; viewport = target.viewport;
+    selected.clear(); fileInput.value = ''; fileName.textContent = schema.sheet.fileName || target.name;
+    placementType = undefined; placementRotation = 0; activePaletteCommand = undefined; wireDrawing = false; draftPoints = []; draftCursor = undefined;
+    if (placeTypeSelect) placeTypeSelect.value = ''; svg.classList.remove('is-placing', 'is-drawing-wire');
+    simulation.resetSimulation(); renderSchema(); drawViewport(); updateHistoryButtons(); refreshInterface();
+    status.textContent = `Открыта схема «${target.name}».`; renderDocumentTabs();
+  };
+  const createDocumentTab = (name = 'Новая схема'): void => {
+    if (documents.length) { syncActiveDocument(); persistDocuments(); }
+    simulation.stopSimulation();
+    const nextSchema = createEmptySchema();
+    const tab: DocumentTab = { id: crypto.randomUUID(), name, schema: nextSchema, history: createHistory(cloneSchema(nextSchema)), viewport: fitViewport(fullSheet(nextSchema.sheet), { width: viewSize.x, height: viewSize.y }) };
+    documents.push(tab); activeDocumentId = tab.id; schema = tab.schema; history = tab.history; viewport = tab.viewport;
+    selected.clear(); fileInput.value = ''; fileName.textContent = name;
+    placementType = undefined; placementRotation = 0; activePaletteCommand = undefined; wireDrawing = false; draftPoints = []; draftCursor = undefined;
+    if (placeTypeSelect) placeTypeSelect.value = ''; svg.classList.remove('is-placing', 'is-drawing-wire');
+    simulation.resetSimulation(); renderSchema(); drawViewport(); updateHistoryButtons(); refreshInterface();
+    status.textContent = 'Новая схема создана.'; persistSchemaNow(); renderDocumentTabs();
+  };
+  const closeDocumentTab = (id: string): void => {
+    const index = documents.findIndex((tab) => tab.id === id); if (index < 0) return;
+    syncActiveDocument(); documents.splice(index, 1);
+    if (!documents.length) { activeDocumentId = ''; createDocumentTab(); return; }
+    if (activeDocumentId === id) { activeDocumentId = ''; activateDocument(documents[Math.min(index, documents.length - 1)]!.id, true); }
+    else { persistDocuments(); }
+  };
+  documentTabBar?.addEventListener('click', (event) => {
+    const target = event.target as Element;
+    const close = target.closest<HTMLButtonElement>('[data-close-document]');
+    if (close?.dataset.closeDocument) { event.stopPropagation(); closeDocumentTab(close.dataset.closeDocument); return; }
+    const tab = target.closest<HTMLButtonElement>('[data-document-tab]');
+    if (tab?.dataset.documentTab) activateDocument(tab.dataset.documentTab);
+    else if (target.closest('#new-document-tab')) createDocumentTab();
+  });
+  renderDocumentTabs();
   const { renderPalette } = setupPalette(ctx, {
     search: paletteSearch, language: paletteLanguage, count: paletteCount, groups: paletteGroups, svg, status,
     paletteLang: () => paletteLang, setPaletteLang: (value) => { paletteLang = value; }, visibleOptionalGroups,
@@ -613,7 +705,7 @@ export function mountApp(root: HTMLElement): void {
     status.textContent = bundle.length > 1 ? `Добавлено проводов: ${bundle.length}. Следующий клик — начало нового.` : 'Провод добавлен. Следующий клик — начало нового, Esc — выйти.';
   };
 
-  const { copySelection, pasteSelection, deleteSelected, rotateSelection } = setupSelectionCommands(ctx, { selected, clipboard: () => clipboard, setClipboard: (value) => { clipboard = value; }, status, simulationMode: () => simulation.mode, pointer: () => pointerSheetPosition, viewSize: () => viewSize, viewport: () => viewport, updateHistoryButtons, commitSchema, renderSchema, placementType: () => placementType, placementRotation: () => placementRotation, setPlacementRotation: (value) => { placementRotation = value; }, drawGhost });
+  const { copySelection, pasteSelection, deleteSelected, rotateSelection, nudgeSelection } = setupSelectionCommands(ctx, { selected, clipboard: () => clipboard, setClipboard: (value) => { clipboard = value; }, status, simulationMode: () => simulation.mode, pointer: () => pointerSheetPosition, viewSize: () => viewSize, viewport: () => viewport, updateHistoryButtons, commitSchema, renderSchema, placementType: () => placementType, placementRotation: () => placementRotation, setPlacementRotation: (value) => { placementRotation = value; }, drawGhost });
 
   const placeTypeSelect = root.querySelector<HTMLSelectElement>('#place-type');
   placeTypeSelect?.addEventListener('change', () => {
@@ -627,12 +719,7 @@ export function mountApp(root: HTMLElement): void {
     if (placementType !== undefined) status.textContent = `Размещение: ${getCadType(placementType).label} · щёлкните по листу; R — поворот; Esc — отмена.`;
     else status.textContent = 'Режим выбора. Выберите объект или рамкой выделите область.';
   });
-  const confirmNewDialog = root.querySelector<HTMLDialogElement>('#confirm-new-dialog');
   setupAccess(ctx);
-  const { resetSchema, requestNewSchema } = setupDocumentLifecycle(ctx, { selected, simulation, setPlacementType: (value) => { placementType = value; }, clearActivePaletteCommand: () => { activePaletteCommand = undefined; }, setPlacementRotation: (value) => { placementRotation = value; }, setWireDrawing: (value) => { wireDrawing = value; }, clearDraft: () => { draftPoints = []; draftCursor = undefined; }, placeTypeSelect, fileInput, fileName, status, persistSchemaNow, viewport: () => viewport, setViewport: (value) => { viewport = value; }, viewSize: () => viewSize, drawViewport, renderSchema, confirmNewDialog });
-  root.querySelector<HTMLButtonElement>('#confirm-new')?.addEventListener('click', () => {
-    confirmNewDialog?.close(); resetSchema();
-  });
   root.querySelectorAll<HTMLButtonElement>('[data-dialog-close]').forEach((button) => {
     button.addEventListener('click', () => root.querySelector<HTMLDialogElement>(`#${button.dataset.dialogClose}`)?.close());
   });
@@ -644,7 +731,7 @@ export function mountApp(root: HTMLElement): void {
   setupSimulationContextMenuEvents(svg, simulationContextMenu, simulation);
   const exportActions = setupExport(ctx, svg, status);
   setupMenus(ctx, {
-    fileInput, status, undoButton, redoButton, exportActions, requestNewSchema, copySelection, pasteSelection,
+    fileInput, status, undoButton, redoButton, exportActions, requestNewSchema: createDocumentTab, copySelection, pasteSelection,
     rotateSelection, deleteSelected, toggleTheme, toggleGrid, toggleDockedProperties, toggleWireColors,
     commitSchema, renderSchema, setViewport: (value) => { viewport = value; }, viewSize, drawViewport,
   });
@@ -669,7 +756,7 @@ export function mountApp(root: HTMLElement): void {
   simulation.updateSimulationControls();
   drawViewport();
 
-  const openDocumentText = setupDocumentOpen(ctx, { svg, fileName, status, selected, simulation, clearPlacement: () => { placementType = undefined; placementRotation = 0; }, clearWireDrawing: () => { wireDrawing = false; draftPoints = []; draftCursor = undefined; }, placeTypeSelect, persistSchemaNow, viewSize: () => viewSize, setViewport: (value) => { viewport = value; }, drawViewport, renderSchema });
+  const openDocumentText = setupDocumentOpen(ctx, { svg, fileName, status, selected, simulation, clearPlacement: () => { placementType = undefined; placementRotation = 0; }, clearWireDrawing: () => { wireDrawing = false; draftPoints = []; draftCursor = undefined; }, placeTypeSelect, persistSchemaNow, viewSize: () => viewSize, setViewport: (value) => { viewport = value; }, drawViewport, renderSchema, beforeOpenDocument: (name) => createDocumentTab(name) });
   setupDocumentInputEvents(root, fileInput, openDocumentText, simulation.stopSimulation);
 
   setupPaletteDrop(ctx, { svg, viewSize: () => viewSize, viewport: () => viewport, placementType: () => placementType, setPlacementType: (value) => { placementType = value; }, setActiveCommand: (value) => { activePaletteCommand = value; }, setPlacementRotation: (value) => { placementRotation = value; }, leaveNodeTool, moveGhost, selected, commitSchema, renderSchema, status });
@@ -688,7 +775,7 @@ export function mountApp(root: HTMLElement): void {
   const releaseAllMomentary = (): void => { for (const id of [...simulation.heldInputs]) simulation.releaseMomentary(id); };
   window.addEventListener('pointerup', releaseAllMomentary);
   window.addEventListener('pointercancel', releaseAllMomentary);
-  setupKeyboardShortcuts({ root, simulationContextMenu, fileInput, spaceDown: (value) => { spaceDown = value; }, panTool: () => panTool, setPanTool, nodeTool: () => nodeTool, setNodeTool, selectTool, copySelection, pasteSelection, saveJson: exportActions.saveJson, requestNewSchema, undo: (redo) => { if (redo) { if (canRedo(history)) restoreHistory(redoHistory(history)); } else if (wireDrawing && draftPoints.length) { draftPoints.pop(); draftCursor = undefined; drawDraft(); updateHistoryButtons(); } else if (canUndo(history)) restoreHistory(undoHistory(history)); }, wireDrawing: () => wireDrawing, changeWireRoute: (key) => { if (key === 'Tab') elbowVerticalFirst = !elbowVerticalFirst; else bundleFlipped = !bundleFlipped; drawDraft(); }, finishWireDrawing, cancelPlacement: () => { placementType = undefined; placementRotation = 0; activePaletteCommand = undefined; renderPalette(); if (placeTypeSelect) placeTypeSelect.value = ''; svg.classList.remove('is-placing'); status.textContent = 'Режим размещения завершён.'; }, cancelWireDrawing: () => { if (draftPoints.length) { draftPoints = []; draftCursor = undefined; drawDraft(); updateHistoryButtons(); } else cancelWireDrawing(); }, placing: () => placementType !== undefined, selectedCount: () => selected.size, clearSelection: () => { selected.clear(); renderSchema(); }, deleteSelected, rotateSelection });
+  setupKeyboardShortcuts({ root, simulationContextMenu, fileInput, spaceDown: (value) => { spaceDown = value; }, panTool: () => panTool, setPanTool, nodeTool: () => nodeTool, setNodeTool, selectTool, copySelection, pasteSelection, saveJson: exportActions.saveJson, requestNewSchema: createDocumentTab, undo: (redo) => { if (redo) { if (canRedo(history)) restoreHistory(redoHistory(history)); } else if (wireDrawing && draftPoints.length) { draftPoints.pop(); draftCursor = undefined; drawDraft(); updateHistoryButtons(); } else if (canUndo(history)) restoreHistory(undoHistory(history)); }, wireDrawing: () => wireDrawing, changeWireRoute: (key) => { if (key === 'Tab') elbowVerticalFirst = !elbowVerticalFirst; else bundleFlipped = !bundleFlipped; drawDraft(); }, finishWireDrawing, cancelPlacement: () => { placementType = undefined; placementRotation = 0; activePaletteCommand = undefined; renderPalette(); if (placeTypeSelect) placeTypeSelect.value = ''; svg.classList.remove('is-placing'); status.textContent = 'Режим размещения завершён.'; }, cancelWireDrawing: () => { if (draftPoints.length) { draftPoints = []; draftCursor = undefined; drawDraft(); updateHistoryButtons(); } else cancelWireDrawing(); }, placing: () => placementType !== undefined, selectedCount: () => selected.size, clearSelection: () => { selected.clear(); renderSchema(); }, deleteSelected, rotateSelection, nudgeSelection });
   window.addEventListener('pagehide', persistSchemaNow);
   window.addEventListener('pagehide', saveViewportNow);
 
