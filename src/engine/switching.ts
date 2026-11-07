@@ -36,7 +36,10 @@ export function auxContactActive(
 ): boolean {
   if (ON_DELAY_CONTACT_TYPES.has(element.typeCode) && element.name !== '') {
     const timer = schema.elements.find((candidate) => candidate.typeCode === 9004 && candidate.name === element.name);
-    if (timer) return timers[timer.id]?.phase === 'done';
+    if (timer) {
+      const phase = timers[timer.id]?.phase;
+      return phase === 'done' || phase === 'releasing';
+    }
   }
   return element.name !== '' && (coils[element.name] ?? false);
 }

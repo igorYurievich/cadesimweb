@@ -5,6 +5,9 @@ import type { NetState, TerminalKey, TimerState } from './types';
 import { isEnergized } from './loads';
 import { terminalKey } from './types';
 
+/** Короткий импульс таймированных контактов, чтобы схема успела переключить реле. */
+export const TIMER_CONTACT_RELEASE_SECONDS = 0.2;
+
 /** Обновляет таймеры 9004. Время не запускает системные таймеры и берётся только из входа. */
 export function advanceTimers(
   schema: Schema,
@@ -27,7 +30,17 @@ export function advanceTimers(
     const powered = Boolean(a && b && isEnergized(a, b).energized);
 
     if (!powered) {
-      result[element.id] = { phase: 'idle', elapsed: 0, lastTime: now };
+      if (prior?.phase === 'done') {
+        result[element.id] = { phase: 'releasing', elapsed: prior.elapsed, releaseElapsed: 0, lastTime: now };
+      } else if (prior?.phase === 'releasing') {
+        const lastTime = Number.isFinite(prior.lastTime) ? prior.lastTime as number : now;
+        const releaseElapsed = Math.max(0, prior.releaseElapsed ?? 0) + Math.max(0, now - lastTime);
+        result[element.id] = releaseElapsed >= TIMER_CONTACT_RELEASE_SECONDS
+          ? { phase: 'idle', elapsed: 0, lastTime: now }
+          : { phase: 'releasing', elapsed: prior.elapsed, releaseElapsed, lastTime: now };
+      } else {
+        result[element.id] = { phase: 'idle', elapsed: 0, lastTime: now };
+      }
       continue;
     }
 
@@ -39,6 +52,10 @@ export function advanceTimers(
     }
     if (prior?.phase === 'done') {
       result[element.id] = { phase: 'done', elapsed: Math.max(duration, prior.elapsed), lastTime: now };
+      continue;
+    }
+    if (prior?.phase === 'releasing') {
+      result[element.id] = { phase: 'counting', elapsed: 0, lastTime: now };
       continue;
     }
     if (prior?.phase === 'counting') {

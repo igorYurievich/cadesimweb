@@ -105,11 +105,13 @@ export interface EngineMemory {
 }
 
 export interface TimerState {
-  phase: 'idle' | 'counting' | 'done';
+  phase: 'idle' | 'counting' | 'done' | 'releasing';
   /** Сколько секунд прошло с начала выдержки. */
   elapsed: number;
   /** Последнее симулируемое время, использованное для расчёта. */
   lastTime?: number;
+  /** Время отпускания контактов после снятия питания с уже сработавшего таймера. */
+  releaseElapsed?: number;
 }
 
 export interface EngineOptions {

@@ -7,6 +7,13 @@
 import type { CadTypeInfo } from './cad-types';
 import type { Point, Rotation, Schema, SchemaElement, Size, Terminal, WireSegment } from './types';
 
+/** Номинальное число выводов клемм питания; в старых .cad размер рамки у повёрнутых источников может быть неверным. */
+const STRIP_TERMINAL_COUNTS: Readonly<Record<number, number>> = {
+  3000: 1, 3001: 1, 3002: 1, 3003: 2, 3011: 3,
+  3004: 3, 3005: 4, 3006: 4, 3007: 5,
+  3008: 1, 3009: 1, 3010: 2,
+};
+
 /** Поворот на k·90° по часовой стрелке на экране (ось y вниз). Проверен для 0 и 3. */
 export function rotateOffset(p: Point, k: Rotation): Point {
   // "+ 0" превращает -0 в 0: иначе сравнение через Object.is видит разные числа.
@@ -42,7 +49,7 @@ export function baseTerminalOffsets(info: CadTypeInfo, count: number, size: Size
   if (layout.kind === 'none') return [];
   if (layout.kind === 'points') return layout.points.map((point) => ({ ...point }));
   if (layout.kind === 'strip') {
-    const n = Math.round(size.w / layout.pitchX);
+    const n = STRIP_TERMINAL_COUNTS[info.code] ?? Math.round(size.w / layout.pitchX);
     return Array.from({ length: n }, (_, i) => ({ x: i * layout.pitchX, y: 0 }));
   }
   if (count <= 0) return [];

@@ -30,7 +30,7 @@ export function relayCoilNames(schema: Schema): string[] {
   return names;
 }
 
-/** Пересчитывает по одной катушке за раз; это фиксирует исход взаимных гонок. */
+/** Пересчитывает по одной катушке за раз; таймеры обновляет между устойчивыми состояниями схемы. */
 export function solveRelayLoop(
   schema: Schema,
   inputs: UserInputs,
@@ -53,30 +53,39 @@ export function solveRelayLoop(
   const coils: Record<string, boolean> = {};
   for (const name of names) coils[name] = initialCoils[name] ?? false;
 
-  let pass: RelayPassResult;
+  let pass: RelayPassResult | undefined;
   let iterations = 0;
   let stable = false;
   let timers: Record<number, TimerState> = { ...initialTimers };
 
-  do {
-    pass = solvePass(schema, inputs, coils, timers);
-    iterations += 1;
+  // Settle contactors before advancing time. A timer contact can remove power
+  // from its own coil; resetting that timer during this same relay transition
+  // would reopen its NO contact before the opposite contactor seals in.
+  const settleRelays = (): boolean => {
+    while (iterations < limit) {
+      pass = solvePass(schema, inputs, coils, timers);
+      iterations += 1;
+      const nextName = names.find((name) => (pass!.coils[name] ?? false) !== (coils[name] ?? false));
+      if (nextName === undefined) {
+        // Keep a canonical name order in serialized state.
+        for (const name of names) coils[name] = pass!.coils[name] ?? false;
+        return true;
+      }
+      coils[nextName] = pass.coils[nextName] ?? false;
+    }
+    return false;
+  };
 
+  stable = settleRelays();
+  if (stable && pass) {
     const nextTimers = advanceTimers(schema, pass.nets, pass.terminalNet, time, timers);
     const timersChanged = JSON.stringify(nextTimers) !== JSON.stringify(timers);
     timers = nextTimers;
-
-    const nextName = names.find((name) => (pass.coils[name] ?? false) !== (coils[name] ?? false));
-    if (nextName === undefined && !timersChanged) {
-      stable = true;
-      // Keep a canonical name order in serialized state.
-      for (const name of names) coils[name] = pass.coils[name] ?? false;
-      break;
-    }
-
-    // Update one coil or timer state, then recalculate the whole circuit.
-    if (nextName !== undefined) coils[nextName] = pass.coils[nextName] ?? false;
-  } while (iterations < limit);
+    // Recalculate timed contacts after elapsed time changes, but advance timers
+    // only once per simulation frame so the handoff is resolved atomically.
+    if (timersChanged) stable = settleRelays();
+  }
+  pass ??= solvePass(schema, inputs, coils, timers);
 
   if (!stable) {
     const fault: Fault = {

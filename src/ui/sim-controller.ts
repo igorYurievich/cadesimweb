@@ -97,6 +97,42 @@ export function setupSimulation(ctx: AppContext, deps: SimulationSetup): Simulat
   const applySimulationVisuals = (): void => {
     const result = simResult;
     const nets = new Map((result?.nets ?? []).map((net) => [net.id, net] as const));
+    const motorCurrentGroups = new Set<number>();
+    if (result) {
+      const parent = new Map(result.nets.map((net) => [net.id, net.id] as const));
+      const root = (id: number): number => {
+        let current = id;
+        while (parent.get(current) !== undefined && parent.get(current) !== current) current = parent.get(current)!;
+        return current;
+      };
+      const join = (a: number, b: number): void => { const ra = root(a); const rb = root(b); if (ra !== rb) parent.set(ra, rb); };
+      // Главный трёхполюсный контактор замыкает каждую пару клемм синхронно.
+      for (const contactor of ctx.schema.elements) {
+        if (contactor.typeCode !== 2001 || !result.contacts[contactor.id]) continue;
+        for (const link of getBehavior(contactor.typeCode).links) {
+          if (link.kind !== 'switch') continue;
+          const [a, b] = link.terminals;
+          const na = result.terminalNet[terminalKey(contactor.id, a!)];
+          const nb = result.terminalNet[terminalKey(contactor.id, b!)];
+          if (na !== undefined && nb !== undefined) join(na, nb);
+        }
+      }
+      for (const motor of ctx.schema.elements) {
+        if (motor.typeCode !== 1001 || !result.motors[motor.id]?.running) continue;
+        // В звезде W2/U2/V2 и звёздная перемычка соединены замкнутыми KM3,
+        // но эта плавающая точка не имеет метки фазы.
+        const bottomNets = [5, 6, 4].map((index) => result.terminalNet[terminalKey(motor.id, index)]);
+        const starRoot = bottomNets[0];
+        const isStar = starRoot !== undefined
+          && bottomNets.every((id) => id !== undefined && root(id) === root(starRoot))
+          && !result.nets.some((net) => root(net.id) === root(starRoot) && net.potentials.some((potential) => PHASE_LABELS.includes(potential)));
+        if (!isStar) continue;
+        const currentNets = new Set(result.nets.filter((net) => root(net.id) === root(starRoot)).map((net) => net.id));
+        for (const [group, keys] of wireTerminalKeys) {
+          if ([...keys].some((key) => currentNets.has(result.terminalNet[key] ?? -1))) motorCurrentGroups.add(group);
+        }
+      }
+    }
     for (const wire of ctx.schema.wires) {
       const lineOrDot = deps.wireLayer.querySelector<SVGElement>(`[data-wire-id="${wire.id}"]`);
       if (!lineOrDot) continue;
@@ -107,11 +143,12 @@ export function setupSimulation(ctx: AppContext, deps: SimulationSetup): Simulat
         for (const potential of nets.get(netId ?? -1)?.potentials ?? []) potentials.add(potential);
       }
       const ordered = POTENTIAL_ORDER.filter((potential) => potentials.has(potential));
-      const energized = ordered.length > 0;
+      const carriesMotorCurrent = group !== undefined && motorCurrentGroups.has(group);
+      const energized = ordered.length > 0 || carriesMotorCurrent;
       const idleColor = wire.kind === 'junction' ? IDLE_WIRE_COLORS.junction : IDLE_WIRE_COLORS[wire.kind];
       const first = ordered[0];
       const liveColor = first ? (deps.uniformWireColors() && PHASE_LABELS.includes(first) ? UNIFORM_LIVE_COLOR : POTENTIAL_COLORS[first]) : idleColor;
-      const color = ordered.length > 1 ? CONFLICT_COLOR : liveColor;
+      const color = ordered.length > 1 ? CONFLICT_COLOR : carriesMotorCurrent ? UNIFORM_LIVE_COLOR : liveColor;
       const isDot = wire.kind === 'junction';
       lineOrDot.classList.toggle('is-energized', energized);
       lineOrDot.style.filter = '';
@@ -123,7 +160,7 @@ export function setupSimulation(ctx: AppContext, deps: SimulationSetup): Simulat
         // Без свечения: цвет показывает потенциал, толщина остаётся одной и той же.
         lineOrDot.setAttribute('stroke-width', String(base));
       }
-      lineOrDot.setAttribute('aria-label', energized ? `Провод под напряжением: ${ordered.join(', ')}` : 'Провод без потенциала');
+      lineOrDot.setAttribute('aria-label', ordered.length ? `Провод под напряжением: ${ordered.join(', ')}` : carriesMotorCurrent ? 'Провод с током в режиме «звезда»' : 'Провод без потенциала');
     }
     for (const element of ctx.schema.elements) {
       const symbol = deps.elementLayer.querySelector<SVGGElement>(`[data-element-id="${element.id}"]`);
@@ -140,7 +177,13 @@ export function setupSimulation(ctx: AppContext, deps: SimulationSetup): Simulat
       symbol.classList.toggle('is-sim-closed', result?.contacts[element.id] ?? false);
       // Вспомогательные контакты: общий признак срабатывания (катушка или таймер с тем же именем) для НО и НЗ полюсов.
       const auxSwitches = element.typeCode >= 7000 && element.typeCode <= 7015 && getBehavior(element.typeCode).links.some((link) => link.kind === 'switch');
-      symbol.classList.toggle('is-aux-active', auxSwitches && result !== undefined && auxContactActive(element, ctx.schema, result.coils, result.memory.timers));
+      const timedSinglePoleActive = element.typeCode === 7004
+        ? result?.contacts[element.id]
+        : element.typeCode === 7005
+          ? result !== undefined && !result.contacts[element.id]
+          : undefined;
+      const auxActive = timedSinglePoleActive ?? (result !== undefined && auxContactActive(element, ctx.schema, result.coils, result.memory.timers));
+      symbol.classList.toggle('is-aux-active', auxSwitches && result !== undefined && auxActive);
       symbol.classList.toggle('is-coil-energized', element.typeCode === 9000 || element.typeCode === 9004 ? (result?.coils[element.name] ?? false) : false);
       symbol.classList.toggle('is-lamp-lit', element.typeCode === 9008 ? (result?.lamps[element.id] ?? false) : false);
       if (element.typeCode === 9004) {
@@ -148,11 +191,12 @@ export function setupSimulation(ctx: AppContext, deps: SimulationSetup): Simulat
         const timer = result?.memory.timers[element.id];
         const total = Math.max(0, Number(element.params.time ?? 0));
         const formatTime = (value: number): string => (Number.isInteger(value) ? String(value) : value.toFixed(1).replace('.', ','));
-        const shown = timer?.phase === 'done' ? total : Math.min(total, Math.max(0, timer?.elapsed ?? 0));
+        const timerDone = timer?.phase === 'done' || timer?.phase === 'releasing';
+        const shown = timerDone ? total : Math.min(total, Math.max(0, timer?.elapsed ?? 0));
         const readoutText = result === undefined ? '' : `${timer?.phase === 'counting' ? shown.toFixed(1).replace('.', ',') : formatTime(shown)} / ${formatTime(total)} с`;
         if (readout && readout.textContent !== readoutText) readout.textContent = readoutText;
         symbol.classList.toggle('is-timer-counting', timer?.phase === 'counting');
-        symbol.classList.toggle('is-timer-done', timer?.phase === 'done');
+        symbol.classList.toggle('is-timer-done', timerDone);
       }
       const motor = result?.motors[element.id];
       symbol.classList.toggle('is-motor-running', motor?.running ?? false);
