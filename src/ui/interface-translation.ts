@@ -74,6 +74,8 @@ export function setupInterfaceTranslation(deps: InterfaceTranslationSetup): () =
     set('.viewport-help', t.helpCanvas);
     deps.root.querySelector<HTMLElement>('.brand-lockup')?.setAttribute('title', t.aboutText);
     const wireSelect = deps.root.querySelector<HTMLSelectElement>('#wire-kind'); if (wireSelect) wireSelect.setAttribute('aria-label', t.wireType);
+    const wireThicknessSelect = deps.root.querySelector<HTMLSelectElement>('#wire-thickness');
+    if (wireThicknessSelect) { wireThicknessSelect.setAttribute('aria-label', t.wireThickness); wireThicknessSelect.title = t.wireThickness; }
     const toolbar = deps.root.querySelector<HTMLElement>('.viewport-toolbar'); toolbar?.setAttribute('aria-label', t.wiresSimulation);
     deps.root.querySelector<HTMLElement>('.wire-controls')?.setAttribute('aria-label', t.wires);
     deps.root.querySelector<HTMLElement>('.simulation-controls')?.setAttribute('aria-label', t.simulation);

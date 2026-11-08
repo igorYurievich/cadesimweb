@@ -245,6 +245,7 @@ export function mountApp(root: HTMLElement): void {
       <section class="viewport-toolbar" aria-label="Провода и симуляция">
         <div class="tool-group wire-controls" aria-label="Провода">
           <select id="wire-kind" aria-label="Тип нового провода"><option value="phase">Фаза</option><option value="neutral">Нейтраль</option><option value="protection">PE</option><option value="three">3 фазы (L1 L2 L3)</option><option value="threeN">3 фазы + N</option></select>
+          <select id="wire-thickness" aria-label="Толщина провода" title="Толщина провода"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select>
           <button type="button" id="draw-wire" title="Провод (C)">Провод</button>
           <button type="button" id="finish-wire" disabled>Готово</button>
           <span class="tool-sep" aria-hidden="true"></span>
@@ -420,6 +421,7 @@ export function mountApp(root: HTMLElement): void {
   const fileName = root.querySelector<HTMLSpanElement>('#file-name');
   const fileInput = root.querySelector<HTMLInputElement>('#cad-file');
   const wireKindSelect = root.querySelector<HTMLSelectElement>('#wire-kind');
+  const wireThicknessSelect = root.querySelector<HTMLSelectElement>('#wire-thickness');
   const drawWireButton = root.querySelector<HTMLButtonElement>('#draw-wire');
   const panToolButton = root.querySelector<HTMLButtonElement>('#pan-tool');
   const nodeToolButton = root.querySelector<HTMLButtonElement>('#node-tool');
@@ -440,7 +442,7 @@ export function mountApp(root: HTMLElement): void {
   const simulationContextMenu = root.querySelector<HTMLDivElement>('#simulation-context-menu');
   const overloadAction = root.querySelector<HTMLButtonElement>('#simulate-overload');
   const resetInputsAction = root.querySelector<HTMLButtonElement>('#reset-simulation-inputs');
-  if (!svg || !sheet || !wireLayer || !elementLayer || !selectionLayer || !draftLayer || !sheetFrame || !sheetStamp || !zoomValue || !status || !fileName || !fileInput || !wireKindSelect || !drawWireButton || !finishWireButton || !undoButton || !redoButton || !paletteGroups || !paletteSearch || !paletteLanguage || !paletteCount || !propertyFields || !runButton || !stopButton || !simStateValue || !simulationMessage || !simulationContextMenu || !overloadAction || !resetInputsAction || !speedButton) throw new Error('Не удалось создать поле SVG.');
+  if (!svg || !sheet || !wireLayer || !elementLayer || !selectionLayer || !draftLayer || !sheetFrame || !sheetStamp || !zoomValue || !status || !fileName || !fileInput || !wireKindSelect || !wireThicknessSelect || !drawWireButton || !finishWireButton || !undoButton || !redoButton || !paletteGroups || !paletteSearch || !paletteLanguage || !paletteCount || !propertyFields || !runButton || !stopButton || !simStateValue || !simulationMessage || !simulationContextMenu || !overloadAction || !resetInputsAction || !speedButton) throw new Error('Не удалось создать поле SVG.');
   fileName.textContent = schema.sheet.fileName || 'Новая схема';
   if (autosavedSchema) status.textContent = 'Автосохранённая схема восстановлена.';
   svg.setAttribute('tabindex', '0');
@@ -558,7 +560,7 @@ export function mountApp(root: HTMLElement): void {
     return kinds.map((kind, index) => ({ route: lanes[index] as Point[], kind }));
   };
   const insideSheet = (route: readonly Point[]): boolean => route.every((p) => p.x >= 0 && p.y >= 0 && p.x <= schema.sheet.width && p.y <= schema.sheet.height);
-  const drawDraft = setupWireDraft({ layer: draftLayer, isDrawing: () => wireDrawing, points: () => draftPoints, cursor: () => draftCursor, buildRoutes: buildBundleRoutes });
+  const drawDraft = setupWireDraft({ layer: draftLayer, isDrawing: () => wireDrawing, points: () => draftPoints, cursor: () => draftCursor, buildRoutes: buildBundleRoutes, thickness: () => Number(wireThicknessSelect.value) });
   const { layer: ghostLayer, draw: drawGhost, move: moveGhost } = setupPlacementGhost(ctx, { svg, after: draftLayer, viewSize: () => viewSize, viewport: () => viewport, placementType: () => placementType, rotation: () => placementRotation, wireDrawing: () => wireDrawing });
   svg.addEventListener('pointerleave', () => { ghostLayer.replaceChildren(); if (cursorCoords) cursorCoords.value = 'X: — Y: —'; });
   svg.addEventListener('pointerenter', (event) => moveGhost(event));
@@ -684,7 +686,7 @@ export function mountApp(root: HTMLElement): void {
       for (let i = 1; i < route.length; i += 1) {
         const from = route[i - 1]; const to = route[i];
         if (!from || !to || (from.x === to.x && from.y === to.y)) continue;
-        schema.wires.push({ id: id++, typeCode, kind, from: { ...from }, to: { ...to }, thickness: 1, dot: false });
+        schema.wires.push({ id: id++, typeCode, kind, from: { ...from }, to: { ...to }, thickness: Number(wireThicknessSelect.value), dot: false });
       }
       const junctionPoints = new Map<string, Point>();
       for (const point of route) {
@@ -750,6 +752,7 @@ export function mountApp(root: HTMLElement): void {
     wireKindSelect.dispatchEvent(new Event('change', { bubbles: true }));
   };
   wireKindSelect.addEventListener('change', () => { if (wireDrawing) drawDraft(); });
+  wireThicknessSelect.addEventListener('change', () => { if (wireDrawing) drawDraft(); });
   undoButton.addEventListener('click', () => {
     if (wireDrawing && draftPoints.length) { draftPoints.pop(); draftCursor = undefined; drawDraft(); updateHistoryButtons(); return; }
     if (canUndo(history)) restoreHistory(undoHistory(history));

@@ -51,6 +51,15 @@ export function setupExport(ctx: AppContext, svg: SVGSVGElement, status: HTMLEle
     copy.querySelector('#draft-layer')?.remove();
     copy.querySelector('#ghost-layer')?.remove();
     copy.querySelector('#sheet-transform')?.removeAttribute('transform');
+    const wiresById = new Map(ctx.schema.wires.map((wire) => [String(wire.id), wire]));
+    for (const line of [...copy.querySelectorAll<SVGLineElement>('#wire-layer line[data-wire-id]')]) {
+      const wire = wiresById.get(line.getAttribute('data-wire-id') ?? '');
+      if (!wire || wire.kind === 'junction') continue;
+      // Screen lines use non-scaling CSS pixels; export maps each thickness step to 0.4 mm
+      // so the printed result keeps a comparable visual weight at sheet scale.
+      line.setAttribute('stroke-width', String(Math.max(1, wire.thickness || 1) * 0.4));
+      line.removeAttribute('vector-effect');
+    }
     copy.querySelectorAll('.schematic-element').forEach((element) => {
       element.setAttribute('color', '#263342');
       element.classList.remove('is-selected-element');

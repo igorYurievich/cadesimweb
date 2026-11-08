@@ -6,7 +6,7 @@ type DrawKind = Exclude<WireKind, 'junction'>;
 interface DraftRoute { route: Point[]; kind: DrawKind }
 export interface WireDraftSetup {
   layer: SVGGElement; isDrawing(): boolean; points(): Point[]; cursor(): Point | undefined;
-  buildRoutes(points: readonly Point[]): DraftRoute[];
+  buildRoutes(points: readonly Point[]): DraftRoute[]; thickness(): number;
 }
 
 export function setupWireDraft(deps: WireDraftSetup): () => void {
@@ -22,7 +22,7 @@ export function setupWireDraft(deps: WireDraftSetup): () => void {
       const line = document.createElementNS(SVG_NS, 'line');
       line.setAttribute('x1', String(route[i - 1]?.x)); line.setAttribute('y1', String(route[i - 1]?.y));
       line.setAttribute('x2', String(route[i]?.x)); line.setAttribute('y2', String(route[i]?.y));
-      line.setAttribute('stroke', WIRE_COLORS[kind]); line.setAttribute('stroke-width', '1.5');
+      line.setAttribute('stroke', WIRE_COLORS[kind]); line.setAttribute('stroke-width', String(Math.max(1, deps.thickness()) * 1.35));
       line.setAttribute('stroke-dasharray', '3 2'); line.setAttribute('vector-effect', 'non-scaling-stroke');
       line.setAttribute('class', 'wire-draft'); deps.layer.append(line);
     }

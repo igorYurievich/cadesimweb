@@ -3,6 +3,7 @@ import { terminalKey } from '@engine/types';
 import type { EngineMemory, EngineState, PotentialLabel, TerminalKey, UserInputs } from '@engine/types';
 import { POSITION_SPECS, currentPosition, getBehavior } from '@engine/behaviors';
 import { auxContactActive } from '@engine/switching';
+import { resolveThermalState } from '@engine/thermal';
 import { buildWireLinks, pointOnSegment } from '@engine/wire-links';
 import { terminalPosition } from '@model/geometry';
 import type { AppContext } from './context';
@@ -96,6 +97,7 @@ export function setupSimulation(ctx: AppContext, deps: SimulationSetup): Simulat
   };
   const applySimulationVisuals = (): void => {
     const result = simResult;
+    const thermalState = resolveThermalState(ctx.schema, simInputs);
     const nets = new Map((result?.nets ?? []).map((net) => [net.id, net] as const));
     const motorCurrentGroups = new Set<number>();
     const autotransformerCurrentGroups = new Set<number>();
@@ -201,6 +203,8 @@ export function setupSimulation(ctx: AppContext, deps: SimulationSetup): Simulat
       const symbol = deps.elementLayer.querySelector<SVGGElement>(`[data-element-id="${element.id}"]`);
       if (!symbol) continue;
       const tripped = Boolean(simInputs.tripped[element.id] || result?.tripped[element.id]);
+      const thermalContactTripped = [8016, 8017, 8018, 8019].includes(element.typeCode)
+        && (Boolean(simInputs.tripped[element.id]) || (element.name !== '' && thermalState.trippedNames.has(element.name)));
       const defaultClosed = armedByDefaultTypes.has(element.typeCode);
       const manuallyOpen = result !== undefined && latchedTypes.has(element.typeCode) && !(simInputs.toggled[element.id] ?? defaultClosed);
       // У выключателя с фиксацией лопасть рисуется по тому же классу, что и у нажатой кнопки.
@@ -208,6 +212,7 @@ export function setupSimulation(ctx: AppContext, deps: SimulationSetup): Simulat
       if (POSITION_SPECS[element.typeCode]) symbol.setAttribute('data-position', String(currentPosition(element.typeCode, simInputs.positions?.[element.id])));
       symbol.classList.toggle('is-sim-open', manuallyOpen || tripped);
       symbol.classList.toggle('is-sim-tripped', tripped);
+      symbol.classList.toggle('is-thermal-tripped', thermalContactTripped);
       symbol.classList.toggle('is-sim-fault-glow', Boolean(simInputs.tripped[element.id]));
       symbol.classList.toggle('is-sim-closed', result?.contacts[element.id] ?? false);
       // Вспомогательные контакты: общий признак срабатывания (катушка или таймер с тем же именем) для НО и НЗ полюсов.

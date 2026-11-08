@@ -198,6 +198,11 @@ kbd { padding: 2px 6px; border: 1px solid var(--border); border-radius: 4px; bac
 .is-sim-active.is-aux-active .contact.by-aux:not(.rest-closed) .blade-closed { display: inline; }
 .is-sim-active.is-aux-active .contact.by-aux.rest-closed .blade-closed { display: none; }
 .is-sim-active.is-aux-active .contact.by-aux.rest-closed .blade-open { display: inline; }
+/* Вспомогательные контакты теплового реле переключаются по состоянию защиты: НЗ открывается, НО замыкается. */
+.is-sim-active.is-thermal-tripped .contact.by-trip:not(.rest-closed) .blade-open { display: none; }
+.is-sim-active.is-thermal-tripped .contact.by-trip:not(.rest-closed) .blade-closed { display: inline; }
+.is-sim-active.is-thermal-tripped .contact.by-trip.rest-closed .blade-closed { display: none; }
+.is-sim-active.is-thermal-tripped .contact.by-trip.rest-closed .blade-open { display: inline; }
 .fuse-closed { display: none; }
 .is-sim-active:not(.is-sim-open) .fuse-open { display: none; }
 .is-sim-active:not(.is-sim-open) .fuse-closed { display: inline; }

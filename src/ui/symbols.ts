@@ -81,24 +81,30 @@ interface ContactOptions {
   control?: Control;
   /** Метка расцепителя (чёрная точка на лопасти) у автоматов. */
   blob?: boolean;
+  /** У контактов теплового реле замкнутая НО лопасть изображается прямой. */
+  straightClosed?: boolean;
+  /** У разомкнутого НЗ термореле — чистая диагональ без ступеньки. */
+  straightOpenNc?: boolean;
 }
 
 /** Один полюс контакта в колонке x. Два положения лопасти лежат в отдельных группах. */
 function contactColumn(x: number, _rowGap: number, opts: ContactOptions = {}): SVGGElement {
-  const { nc = false, control = 'engine', blob = false } = opts;
+  const { nc = false, control = 'engine', blob = false, straightClosed = false, straightOpenNc = false } = opts;
   const bottom = ZONE - G;
   const stubs = path(`M ${x} 0 V ${G} M ${x} ${bottom} V ${ZONE}`);
   const open = group('blade-open');
   const closed = group('blade-closed');
   if (!nc) {
     open.append(path(`M ${x - 3} ${G} L ${x} ${bottom}`));
-    closed.append(path(`M ${x} ${G} H ${x - 1} L ${x} ${bottom}`));
+    closed.append(path(straightClosed ? `M ${x} ${G} V ${bottom}` : `M ${x} ${G} H ${x - 1} L ${x} ${bottom}`));
     if (blob) {
       open.append(circle(x - 2.1, G + 1.2, 0.75, { fill: INK, 'stroke-width': 0.2 }));
       closed.append(circle(x - 0.85, G + 1.7, 0.75, { fill: INK, 'stroke-width': 0.2 }));
     }
   } else {
-    open.append(path(`M ${x} ${G} H ${x + 3} L ${x + 1.9} ${bottom - 1.6}`));
+    open.append(path(straightOpenNc
+      ? `M ${x} ${bottom} L ${x + 3} ${G}`
+      : `M ${x} ${G} H ${x + 3} L ${x + 1.9} ${bottom - 1.6}`));
     closed.append(path(`M ${x} ${G} H ${x + 3} L ${x} ${bottom}`));
   }
   const col = group(`contact by-${control}${nc ? ' rest-closed' : ''}${!nc && control === 'open' ? ' rest-closed' : ''}`, stubs, open, closed);
@@ -526,7 +532,7 @@ function thermalTripMark(x: number): SVGPathElement {
 /** Тепловой контакт 8016 (НО) и 8017 (НЗ): одна колонка, «π» слева, пунктир к лопасти, метка срабатывания справа. */
 function drawThermalSingle(g: SVGGElement, element: SchemaElement, nc: boolean): void {
   const x = columns(element)[0] ?? 0;
-  g.append(contactColumn(x, rowGapOf(element), { nc, control: 'trip' }));
+  g.append(contactColumn(x, rowGapOf(element), { nc, control: 'trip', straightClosed: !nc, straightOpenNc: nc }));
   g.append(dashed(`M ${x - 4.7} 6 H ${nc ? x + 1.5 : x - 1.5}`, '1.6 1.2'));
   g.append(path(`M ${x - 6.7} 7.8 V 6 H ${x - 5.1} V 7.8`, 0.8));
   g.append(thermalTripMark(x));
@@ -549,8 +555,8 @@ function drawThermalAux(g: SVGGElement, element: SchemaElement): void {
   const rowGap = rowGapOf(element);
   const nc = xs[0] ?? 0;
   const no = xs[1] ?? nc + 9;
-  g.append(contactColumn(nc, rowGap, { nc: true, control: 'trip' }));
-  g.append(contactColumn(no, rowGap, { control: 'trip' }));
+  g.append(contactColumn(nc, rowGap, { nc: true, control: 'trip', straightOpenNc: true }));
+  g.append(contactColumn(no, rowGap, { control: 'trip', straightClosed: true }));
   g.append(dashed(`M ${nc - 4.7} 6 H ${no - 1.5}`, '1.6 1.2'));
   g.append(path(`M ${nc - 6.7} 7.8 V 6 H ${nc - 5.1} V 7.8`, 0.8));
   g.append(path(`M ${no + 3.8} 4 V 5 H ${no + 5.2} V 7 H ${no + 3.8} V 7.8`, 0.8));
