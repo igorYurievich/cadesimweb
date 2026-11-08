@@ -14,6 +14,9 @@ export interface InterfaceTranslationSetup {
 export function setupInterfaceTranslation(deps: InterfaceTranslationSetup): () => void {
   const translate = (): void => {
     const t = deps.uiText();
+    const language = deps.paletteLang();
+    deps.root.lang = language;
+    deps.root.dir = language === 'ar' ? 'rtl' : 'ltr';
     const set = (selector: string, value: string): void => { const el = deps.root.querySelector<HTMLElement>(selector); if (el) el.textContent = value; };
     const setButton = (selector: string, value: string): void => {
       const el = deps.root.querySelector<HTMLButtonElement>(selector);
@@ -25,7 +28,7 @@ export function setupInterfaceTranslation(deps: InterfaceTranslationSetup): () =
     const summaries = [...deps.root.querySelectorAll<HTMLElement>('.app-menu > .menu-group > summary')];
     [t.file, t.edit, t.view, t.elementsMenu, t.language, t.examples, t.help].forEach((value, index) => { if (summaries[index]) summaries[index]!.textContent = value; });
     const commandLabels: Array<[string, string]> = [
-      ['new', t.new], ['open', t.open], ['save-json', t.save], ['export-cad', t.export], ['export-svg', t.exportSvg], ['print-pdf', t.printPdf], ['sheet', t.sheet],
+      ['new', t.new], ['open', t.open], ['save-json', t.save], ['export-cad', t.export], ['export-svg', t.exportSvg], ['export-png', t.exportPng], ['print-pdf', t.printPdf], ['sheet', t.sheet],
       ['copy-selection', t.copy], ['paste-selection', t.paste], ['undo', t.undo], ['redo', t.redo], ['rotate', t.rotate], ['delete', t.delete],
       ['zoom-in', t.zoomIn], ['zoom-out', t.zoomOut], ['fit', t.fit], ['shortcuts', t.shortcuts], ['about', t.about],
     ];
@@ -44,6 +47,7 @@ export function setupInterfaceTranslation(deps: InterfaceTranslationSetup): () =
     const options: Record<string, string> = { phase: t.phase, neutral: t.neutral, protection: 'PE', three: t.three, threeN: t.threeN };
     for (const option of [...deps.root.querySelectorAll<HTMLOptionElement>('#wire-kind option')]) option.textContent = options[option.value] ?? option.textContent;
     set('#draw-wire', deps.wireDrawing() ? t.cancel : t.wire);
+    deps.root.querySelector<HTMLButtonElement>('#draw-wire')?.setAttribute('title', `${deps.wireDrawing() ? t.cancel : t.wire} (C)`);
     set('#finish-wire', t.done);
     deps.root.querySelector<HTMLButtonElement>('#undo')?.setAttribute('aria-label', t.undo);
     deps.root.querySelector<HTMLButtonElement>('#undo')?.setAttribute('title', t.undo);
@@ -96,12 +100,18 @@ export function setupInterfaceTranslation(deps: InterfaceTranslationSetup): () =
     }
     const newDialog = deps.root.querySelector<HTMLDialogElement>('#confirm-new-dialog');
     if (newDialog) { set('#confirm-new-title', t.newTitle); set('#confirm-new-dialog p', t.newWarning); setButton('#confirm-new', t.create); }
-    const shortcutsDialog = deps.root.querySelector<HTMLDialogElement>('#shortcuts-dialog'); if (shortcutsDialog) set('#shortcuts-title', t.shortcutsTitle);
+    const shortcutsDialog = deps.root.querySelector<HTMLDialogElement>('#shortcuts-dialog'); if (shortcutsDialog) {
+      set('#shortcuts-title', t.shortcutsTitle);
+      const shortcutLabels: Array<[string, string]> = [
+        ['#shortcut-new', t.shortcutNew], ['#shortcut-open', t.shortcutOpen], ['#shortcut-copy-paste', t.shortcutCopyPaste],
+        ['#shortcut-undo-redo', t.shortcutUndoRedo], ['#shortcut-rotate', t.shortcutRotate], ['#shortcut-delete', t.shortcutDelete],
+        ['#shortcut-wire', t.shortcutWire], ['#shortcut-wire-type', t.shortcutWireType], ['#shortcut-finish', t.shortcutFinish],
+        ['#shortcut-cursor-pan', t.shortcutCursorPan], ['#shortcut-panning', t.shortcutPanning], ['#shortcut-zoom', t.shortcutZoom], ['#shortcut-fit', t.shortcutFit],
+      ];
+      for (const [selector, label] of shortcutLabels) set(selector, label);
+    }
     const aboutDialog = deps.root.querySelector<HTMLDialogElement>('#about-dialog'); if (aboutDialog) { set('#about-dialog p', t.aboutText); set('#about-bio', t.aboutBio); set('#about-noncommercial', t.aboutNonCommercial); set('#about-contact-label', t.aboutContact); const fields = aboutDialog.querySelectorAll('dt'); if (fields[0]) fields[0]!.textContent = t.author; if (fields[1]) fields[1]!.textContent = t.version; }
     for (const button of [...deps.root.querySelectorAll<HTMLButtonElement>('[data-dialog-close]')]) button.textContent = t.close;
-    set('#access-title', t.accessTitle); set('#access-text', t.accessText); set('#access-error', t.accessWrong); set('#access-submit', t.accessEnter);
-    deps.root.querySelector<HTMLInputElement>('#access-input')?.setAttribute('placeholder', t.accessPlaceholder);
-    deps.root.querySelector<HTMLInputElement>('#access-input')?.setAttribute('aria-label', t.accessPlaceholder);
     set('#beta-title', t.betaTitle); set('#beta-text', t.betaText); set('#beta-ok', t.betaOk);
     set('#simulate-overload', t.overload); set('#reset-simulation-inputs', t.reset);
     for (const option of [...deps.root.querySelectorAll<HTMLOptionElement>('#palette-language option')]) option.selected = option.value === deps.paletteLang();

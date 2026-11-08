@@ -105,6 +105,10 @@ export function setupCanvasPointerDown(ctx: AppContext, deps: CanvasPointerDownS
         }
       }
     }
+    // During simulation, left-clicks may operate simulation inputs but must not start editing or dragging schematic objects.
+    if (event.button === 0 && deps.simulation.mode !== 'edit' && !deps.spaceDown()) {
+      event.preventDefault(); return;
+    }
     if (event.button === 1 || deps.spaceDown()) {
       deps.setDrag({ mode: 'pan', pointerId: event.pointerId, last: screen });
       deps.svg.classList.add('is-panning'); event.preventDefault();

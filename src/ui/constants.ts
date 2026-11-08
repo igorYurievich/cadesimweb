@@ -242,12 +242,6 @@ export const GRID_KEY = 'cadesimu-grid';
 
 export const BETA_NOTICE_KEY = 'cadesimu-beta-notice-seen';
 
-export const ACCESS_KEY = 'cadesimu-access-granted';
-
-export const ACCESS_SHA256 = 'c1546794387364043df9cbe3899a9a106711a4997f9148091bd74a0b0c0c30cf';
-
-export const ACCESS_FNV = '65cf4547';
-
 export const WIRE_COLOR_MODE_KEY = 'cadesimu-wire-colors';
 
 export const INTERFACE_LANGUAGE_KEY = 'cadesimu-language';

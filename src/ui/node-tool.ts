@@ -19,12 +19,40 @@ export function setupNodeTool(ctx: AppContext, deps: NodeToolSetup) {
     if (t < -tolerance || t > 1 + tolerance) return false;
     return Math.hypot(point.x - (from.x + t * dx), point.y - (from.y + t * dy)) <= tolerance;
   };
+  const hasJunctionAt = (point: Point): boolean => ctx.schema.wires.some((wire) =>
+    wire.kind === 'junction' && wire.dot && Math.hypot(wire.from.x - point.x, wire.from.y - point.y) <= 0.01,
+  );
   const findNodePoint = (raw: Point): { point: Point; count: number; distance: number } | undefined => {
     const wires = ctx.schema.wires.filter((wire) => wire.kind !== 'junction');
     const candidates: Point[] = [snapPointToGrid(raw, CAD_GRID_STEP)];
-    for (const wire of wires) for (const end of [wire.from, wire.to]) if (Math.hypot(end.x - raw.x, end.y - raw.y) <= CAD_GRID_STEP) candidates.push({ ...end });
+    const nearbyWires = wires.filter((wire) =>
+      Math.max(wire.from.x, wire.to.x) >= raw.x - CAD_GRID_STEP
+      && Math.min(wire.from.x, wire.to.x) <= raw.x + CAD_GRID_STEP
+      && Math.max(wire.from.y, wire.to.y) >= raw.y - CAD_GRID_STEP
+      && Math.min(wire.from.y, wire.to.y) <= raw.y + CAD_GRID_STEP,
+    );
+    for (const wire of nearbyWires) for (const end of [wire.from, wire.to]) {
+      if (Math.hypot(end.x - raw.x, end.y - raw.y) <= CAD_GRID_STEP) candidates.push({ ...end });
+    }
+    for (let i = 0; i < nearbyWires.length; i++) for (let j = i + 1; j < nearbyWires.length; j++) {
+      const first = nearbyWires[i]!; const second = nearbyWires[j]!;
+      const rx = first.to.x - first.from.x; const ry = first.to.y - first.from.y;
+      const sx = second.to.x - second.from.x; const sy = second.to.y - second.from.y;
+      const denominator = rx * sy - ry * sx;
+      if (Math.abs(denominator) < 1e-9) continue;
+      const qx = second.from.x - first.from.x; const qy = second.from.y - first.from.y;
+      const t = (qx * sy - qy * sx) / denominator;
+      const u = (qx * ry - qy * rx) / denominator;
+      if (t >= -1e-9 && t <= 1 + 1e-9 && u >= -1e-9 && u <= 1 + 1e-9) {
+        candidates.push({ x: first.from.x + t * rx, y: first.from.y + t * ry });
+      }
+    }
+    const nearbyCandidates = candidates.filter((point, index) =>
+      Math.hypot(point.x - raw.x, point.y - raw.y) <= CAD_GRID_STEP
+      && candidates.findIndex((other) => Math.abs(other.x - point.x) < 1e-8 && Math.abs(other.y - point.y) < 1e-8) === index,
+    );
     let best: { point: Point; count: number; distance: number } | undefined;
-    for (const point of candidates) {
+    for (const point of nearbyCandidates) {
       const count = wires.filter((wire) => wireTouchesPoint(wire, point)).length;
       if (count < 2) continue;
       const distance = Math.hypot(point.x - raw.x, point.y - raw.y);
@@ -36,17 +64,18 @@ export function setupNodeTool(ctx: AppContext, deps: NodeToolSetup) {
     deps.layer.replaceChildren();
     if (!deps.active() || !raw || deps.wireDrawing()) return;
     const target = findNodePoint(raw); const point = target?.point ?? snapPointToGrid(raw, CAD_GRID_STEP);
+    const placeable = !!target && !hasJunctionAt(target.point);
     const ring = document.createElementNS(SVG_NS, 'circle');
     ring.setAttribute('cx', String(point.x)); ring.setAttribute('cy', String(point.y)); ring.setAttribute('r', target ? '2.2' : '1.8');
-    ring.setAttribute('fill', target ? '#1f6fe0' : 'none'); ring.setAttribute('fill-opacity', '0.35');
-    ring.setAttribute('stroke', target ? '#1f6fe0' : '#7d8996'); ring.setAttribute('stroke-width', '0.5');
+    ring.setAttribute('fill', placeable ? '#1f6fe0' : 'none'); ring.setAttribute('fill-opacity', '0.35');
+    ring.setAttribute('stroke', placeable ? '#1f6fe0' : '#7d8996'); ring.setAttribute('stroke-width', '0.5');
     deps.layer.append(ring);
   };
   const placeNodeAt = (raw: Point): void => {
     const best = findNodePoint(raw);
     if (!best) { deps.status.textContent = 'Здесь нет соединения: узел ставится там, где сходятся или пересекаются минимум два провода.'; return; }
     const { point } = best;
-    if (ctx.schema.wires.some((wire) => wire.kind === 'junction' && wire.from.x === point.x && wire.from.y === point.y)) {
+    if (hasJunctionAt(point)) {
       deps.status.textContent = 'В этой точке узел уже стоит.'; return;
     }
     const before = cloneSchema(ctx.schema);

@@ -97,6 +97,7 @@ export function setupMenus(ctx: AppContext, deps: MenuSetup): void {
       case 'save-json': deps.exportActions.saveJson(); break;
       case 'export-cad': deps.exportActions.exportCadFile(); break;
       case 'export-svg': deps.exportActions.exportSvgFile(); break;
+      case 'export-png': deps.exportActions.exportPngFile(); break;
       case 'print-pdf': deps.exportActions.printPdf(); break;
       case 'undo': deps.undoButton.click(); break;
       case 'redo': deps.redoButton.click(); break;

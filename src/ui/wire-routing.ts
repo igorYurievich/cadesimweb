@@ -2,9 +2,11 @@ import { terminalPosition } from '@model/geometry';
 import type { Point, Schema, WireSegment } from '@model/types';
 
 export type SnapTarget = 'terminal' | 'wire' | 'grid';
+/** Keep the snap zone well below half a grid cell so the midpoint between neighboring wires stays free. */
+export const WIRE_SNAP_TOLERANCE = 1.2;
 
 /** Snap near a terminal first, then project onto an existing orthogonal wire. */
-export function snapDrawingPoint(point: Point, schema: Schema, tolerance = 4.5): { point: Point; target: SnapTarget } {
+export function snapDrawingPoint(point: Point, schema: Schema, tolerance = WIRE_SNAP_TOLERANCE): { point: Point; target: SnapTarget } {
   let best: { point: Point; distance: number } | undefined;
   for (const element of schema.elements) {
     if (element.typeCode === 20000) continue;
@@ -30,7 +32,7 @@ export function snapDrawingPoint(point: Point, schema: Schema, tolerance = 4.5):
     }
     if (!projected) continue;
     const distance = Math.hypot(point.x - projected.x, point.y - projected.y);
-    if (distance <= 3 && (!wireBest || distance < wireBest.distance)) wireBest = { point: projected, distance };
+    if (distance <= tolerance && (!wireBest || distance < wireBest.distance)) wireBest = { point: projected, distance };
   }
   return wireBest ? { point: { ...wireBest.point }, target: 'wire' } : { point: { ...point }, target: 'grid' };
 }

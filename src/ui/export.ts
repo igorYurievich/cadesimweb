@@ -8,6 +8,7 @@ export interface ExportActions {
   saveJson(): void;
   exportCadFile(): void;
   exportSvgFile(): void;
+  exportPngFile(): void;
   printPdf(): void;
 }
 
@@ -45,6 +46,7 @@ export function setupExport(ctx: AppContext, svg: SVGSVGElement, status: HTMLEle
     copy.setAttribute('preserveAspectRatio', 'xMidYMid meet');
     copy.removeAttribute('class');
     copy.querySelector('.viewport-backdrop')?.remove();
+    copy.querySelector('#sheet-grid')?.remove();
     copy.querySelector('#selection-layer')?.remove();
     copy.querySelector('#draft-layer')?.remove();
     copy.querySelector('#ghost-layer')?.remove();
@@ -77,6 +79,51 @@ export function setupExport(ctx: AppContext, svg: SVGSVGElement, status: HTMLEle
     const serialized = new XMLSerializer().serializeToString(createSheetExportSvg());
     downloadText(`<?xml version="1.0" encoding="UTF-8"?>\n${serialized}`, `${outputBaseName()}.svg`, 'image/svg+xml;charset=utf-8');
   };
+  const exportPngFile = (): void => {
+    const width = ctx.schema.sheet.width;
+    const height = fullSheet(ctx.schema.sheet).height;
+    const targetScale = 300 / 25.4;
+    const maxPixels = 32_000_000;
+    const maxDimension = 12_000;
+    const scale = Math.min(
+      targetScale,
+      maxDimension / width,
+      maxDimension / height,
+      Math.sqrt(maxPixels / (width * height)),
+    );
+    const svgMarkup = new XMLSerializer().serializeToString(createSheetExportSvg());
+    const svgUrl = URL.createObjectURL(new Blob([svgMarkup], { type: 'image/svg+xml;charset=utf-8' }));
+    const image = new Image();
+    image.onload = () => {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.round(width * scale);
+        canvas.height = Math.round(height * scale);
+        const context = canvas.getContext('2d');
+        if (!context) throw new Error('Не удалось создать изображение.');
+        context.fillStyle = '#fff';
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob((blob) => {
+          URL.revokeObjectURL(svgUrl);
+          if (!blob) { status.textContent = 'Не удалось создать PNG.'; return; }
+          const pngUrl = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = pngUrl; link.download = `${outputBaseName()}.png`; link.click();
+          setTimeout(() => URL.revokeObjectURL(pngUrl), 1000);
+          status.textContent = `Схема экспортирована в ${outputBaseName()}.png.`;
+        }, 'image/png');
+      } catch (error) {
+        URL.revokeObjectURL(svgUrl);
+        status.textContent = `Не удалось экспортировать PNG: ${error instanceof Error ? error.message : String(error)}`;
+      }
+    };
+    image.onerror = () => {
+      URL.revokeObjectURL(svgUrl);
+      status.textContent = 'Не удалось подготовить схему для экспорта в PNG.';
+    };
+    image.src = svgUrl;
+  };
   const printPdf = (): void => {
     const printWindow = window.open('', '_blank');
     if (!printWindow) {
@@ -87,7 +134,9 @@ export function setupExport(ctx: AppContext, svg: SVGSVGElement, status: HTMLEle
     const height = fullSheet(ctx.schema.sheet).height;
     const printWidth = `${Math.round(width * 100) / 100}mm`;
     const printHeight = `${Math.round(height * 100) / 100}mm`;
-    const svgMarkup = new XMLSerializer().serializeToString(createSheetExportSvg());
+    const printSvg = createSheetExportSvg();
+    printSvg.querySelector('#sheet-grid')?.remove();
+    const svgMarkup = new XMLSerializer().serializeToString(printSvg);
     const title = outputBaseName();
     // Chrome не делает кликабельными SVG-ссылки при печати в PDF, поэтому поверх ячейки штампа кладём HTML-ссылку (размеры в мм, как во viewBox).
     const stamp = stampMetrics(ctx.schema.sheet.width, ctx.schema.sheet.height);
@@ -107,5 +156,5 @@ export function setupExport(ctx: AppContext, svg: SVGSVGElement, status: HTMLEle
     printWindow.addEventListener('afterprint', () => printWindow.close(), { once: true });
     setTimeout(() => { printWindow.focus(); printWindow.print(); }, 350);
   };
-  return { saveJson, exportCadFile, exportSvgFile, printPdf };
+  return { saveJson, exportCadFile, exportSvgFile, exportPngFile, printPdf };
 }

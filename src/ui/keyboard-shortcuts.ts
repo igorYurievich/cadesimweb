@@ -6,6 +6,7 @@ export interface KeyboardShortcutsSetup {
   nodeTool(): boolean; setNodeTool(value: boolean): void; selectTool(): void;
   copySelection(): void; pasteSelection(): void; saveJson(): void; requestNewSchema(): void;
   undo(redo: boolean): void; wireDrawing(): boolean; changeWireRoute(key: string): void;
+  toggleWireDrawing(): void; cycleWireKind(direction: -1 | 1): void;
   finishWireDrawing(): void; cancelPlacement(): void; cancelWireDrawing(): void;
   placing(): boolean;
   selectedCount(): number; clearSelection(): void; deleteSelected(): void; rotateSelection(): void;
@@ -26,6 +27,9 @@ export function setupKeyboardShortcuts(deps: KeyboardShortcutsSetup): void {
     if (!deps.simulationContextMenu.hidden && event.key === 'Escape') {
       deps.simulationContextMenu.hidden = true; event.preventDefault(); return;
     }
+    if (!event.ctrlKey && !event.metaKey && !event.altKey && !editingField && event.code === 'KeyC' && !event.repeat) {
+      deps.toggleWireDrawing(); event.preventDefault(); return;
+    }
     if (!event.ctrlKey && !event.metaKey && !event.altKey && !editingField && event.key.toLowerCase() === 'h') {
       deps.setPanTool(!deps.panTool()); event.preventDefault(); return;
     }
@@ -37,6 +41,12 @@ export function setupKeyboardShortcuts(deps: KeyboardShortcutsSetup): void {
       deps.selectTool(); event.preventDefault(); return;
     }
     const modifier = event.ctrlKey || event.metaKey;
+    const wireTypeSelectFocused = select && event.target.id === 'wire-kind';
+    if (deps.wireDrawing() && (!editingField || wireTypeSelectFocused) && !modifier && !event.altKey) {
+      const wireDirection = event.code === 'ArrowLeft' || event.code === 'ArrowUp' ? -1
+        : event.code === 'ArrowRight' || event.code === 'ArrowDown' ? 1 : 0;
+      if (wireDirection) { deps.cycleWireKind(wireDirection); event.preventDefault(); return; }
+    }
     if (modifier && !editingField && event.code === 'KeyC') { deps.copySelection(); event.preventDefault(); return; }
     if (modifier && !editingField && event.code === 'KeyV') { deps.pasteSelection(); event.preventDefault(); return; }
     if (!editingField && !modifier && !event.altKey && deps.selectedCount()) {

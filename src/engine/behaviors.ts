@@ -3,7 +3,7 @@
 import { allCadTypes } from '../model/cad-types';
 
 export type ControlMode = 'pressed' | 'toggled' | 'coil-name' | 'thermal' | 'position' | 'always';
-export type BehaviorLinkKind = 'switch' | 'load' | 'source-strip' | 'none';
+export type BehaviorLinkKind = 'switch' | 'transfer' | 'load' | 'source-strip' | 'none';
 
 /** Индексы относятся к SchemaElement.terminals, метки клемм на них не влияют. */
 export interface BehaviorLink {
@@ -140,11 +140,13 @@ const TABLE: readonly TypeBehavior[] = [
   // Силовая электроника, часть 1: резисторы 1050/1051 проводят между парами клемм (сопротивление не моделируется, падения напряжения нет).
   { typeCode: 1050, links: switches([[0, 1]], 'always') },
   { typeCode: 1051, links: switches([[0, 3], [1, 4], [2, 5]], 'always') },
-  // Автотрансформатор III: фазу подаём с 1/4/7 на отводы 3/6/9.
-  // Выводы 2/5/8 относятся к общей точке обмоток; соединять их идеальными
-  // проводами с фазами нельзя — в булевой модели это создало бы ложное КЗ.
-  // Падение напряжения и ток обмотки не моделируются.
-  { typeCode: 1052, links: switches([[0, 6], [1, 7], [2, 8]], 'always') },
+  // Автотрансформатор III: направленная передача 1/4/7 -> отводы 3/6/9.
+  // Выводы 2/5/8 — общая точка, ток на ней показывается визуально без слияния фаз.
+  { typeCode: 1052, links: [
+    { terminals: [0, 6], kind: 'transfer', control: 'always' },
+    { terminals: [1, 7], kind: 'transfer', control: 'always' },
+    { terminals: [2, 8], kind: 'transfer', control: 'always' },
+  ] },
   { typeCode: 1053, links: inert() },
   { typeCode: 1062, links: inert() },
   { typeCode: 1063, links: inert() },

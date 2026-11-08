@@ -8,8 +8,9 @@
  */
 
 import rawCatalog from '../data/components.json';
+import { translateCatalogName } from './catalog-localization';
 
-export type Lang = 'es' | 'en' | 'it' | 'ru';
+export type Lang = 'es' | 'en' | 'it' | 'ru' | 'fr' | 'ar';
 
 /** Версия продукта, в которую входит элемент. */
 export type Release = 'v1' | 'v2';
@@ -377,9 +378,13 @@ export function buildCatalog(raw: RawCatalog): Catalog {
         if (existing.names.en === null && en !== null) existing.names.en = en;
         if (existing.names.it === null && it !== null) existing.names.it = it;
         if (!existing.names.ru) existing.names.ru = ru ?? translateRussian(es ?? en ?? it ?? '', id);
+        const sourceName = (es?.trim() ? es : en ?? it) ?? '';
+        if (existing.names.fr === null && sourceName) existing.names.fr = translateCatalogName(sourceName, 'fr');
+        if (existing.names.ar === null && sourceName) existing.names.ar = translateCatalogName(sourceName, 'ar');
         continue;
       }
-      byId.set(id, { id, names: { es, en, it, ru: ru ?? translateRussian(es ?? en ?? it ?? '', id) }, groups: [def.key], release: 'v2' });
+      const sourceName = (es?.trim() ? es : en ?? it) ?? '';
+      byId.set(id, { id, names: { es, en, it, ru: ru ?? translateRussian(sourceName, id), fr: sourceName ? translateCatalogName(sourceName, 'fr') : null, ar: sourceName ? translateCatalogName(sourceName, 'ar') : null }, groups: [def.key], release: 'v2' });
     }
     groups.push(group);
   }

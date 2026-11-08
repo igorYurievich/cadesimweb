@@ -6,7 +6,7 @@ import { EXAMPLES } from '../data/examples';
 import type { Schema, SchemaElement, WireKind, WireSegment } from '@model/types';
 import { canRedo, canUndo, createHistory, redoHistory, undoHistory } from './history';
 import { createAppContext } from './context';
-import { setupAccess } from './access';
+import { setupBetaNotice } from './beta-notice';
 import { setupExport } from './export';
 import { setupMenus } from './menus';
 import { setupSimulation, setupSimulationSpeedControl } from './sim-controller';
@@ -190,6 +190,7 @@ export function mountApp(root: HTMLElement): void {
             <button type="button" class="menu-command" data-command="save-json">Сохранить JSON <kbd>Ctrl+S</kbd></button>
             <button type="button" class="menu-command" data-command="export-cad">Экспорт .cad</button>
             <button type="button" class="menu-command" data-command="export-svg">Экспорт SVG</button>
+            <button type="button" class="menu-command" data-command="export-png">Экспорт PNG</button>
             <button type="button" class="menu-command" data-command="print-pdf">Печать / PDF</button>
             <button type="button" class="menu-command" data-command="sheet">Размер листа (Ajustar hoja)…</button>
           </div></details>
@@ -227,7 +228,7 @@ export function mountApp(root: HTMLElement): void {
           </div></details>
           <details class="menu-group language-menu"><summary>Язык</summary><div class="menu-popover">
             <label class="menu-language">Язык названий элементов
-              <select id="palette-language" aria-label="Язык названий"><option value="es">ES — Español</option><option value="en">EN — English</option><option value="it">IT — Italiano</option><option value="ru">RU — Русский</option></select>
+              <select id="palette-language" aria-label="Язык названий"><option value="es">ES — Español</option><option value="en">EN — English</option><option value="it">IT — Italiano</option><option value="ru">RU — Русский</option><option value="fr">FR — Français</option><option value="ar">AR — العربية (الفصحى)</option></select>
             </label>
           </div></details>
           <details class="menu-group"><summary>Примеры</summary><div class="menu-popover">
@@ -244,7 +245,7 @@ export function mountApp(root: HTMLElement): void {
       <section class="viewport-toolbar" aria-label="Провода и симуляция">
         <div class="tool-group wire-controls" aria-label="Провода">
           <select id="wire-kind" aria-label="Тип нового провода"><option value="phase">Фаза</option><option value="neutral">Нейтраль</option><option value="protection">PE</option><option value="three">3 фазы (L1 L2 L3)</option><option value="threeN">3 фазы + N</option></select>
-          <button type="button" id="draw-wire">Провод</button>
+          <button type="button" id="draw-wire" title="Провод (C)">Провод</button>
           <button type="button" id="finish-wire" disabled>Готово</button>
           <span class="tool-sep" aria-hidden="true"></span>
           <button type="button" id="undo" class="icon-btn" title="Отменить (Ctrl+Z)" aria-label="Отменить" disabled>↶</button>
@@ -325,17 +326,19 @@ export function mountApp(root: HTMLElement): void {
       <dialog id="shortcuts-dialog" class="app-dialog shortcuts-dialog" aria-labelledby="shortcuts-title">
         <h2 id="shortcuts-title">Горячие клавиши</h2>
         <dl>
-          <div><dt>Новая схема</dt><dd><kbd>Ctrl</kbd> + <kbd>N</kbd></dd></div>
-          <div><dt>Открыть файл .cad</dt><dd><kbd>Ctrl</kbd> + <kbd>O</kbd></dd></div>
-          <div><dt>Копировать / вставить выделенное</dt><dd><kbd>Ctrl</kbd> + <kbd>C</kbd> / <kbd>V</kbd></dd></div>
-          <div><dt>Отменить / повторить</dt><dd><kbd>Ctrl</kbd> + <kbd>Z</kbd> / <kbd>Y</kbd></dd></div>
-          <div><dt>Повернуть</dt><dd><kbd>R</kbd></dd></div>
-          <div><dt>Удалить выбранное</dt><dd><kbd>Delete</kbd></dd></div>
-          <div><dt>Завершить провод / отменить действие</dt><dd><kbd>Enter</kbd> / <kbd>Esc</kbd></dd></div>
-          <div><dt>Курсор / Рука</dt><dd><kbd>V</kbd> / <kbd>H</kbd></dd></div>
-          <div><dt>Панорамирование</dt><dd><kbd>Space</kbd> + перетаскивание</dd></div>
-          <div><dt>Масштаб</dt><dd><kbd>+</kbd> / <kbd>−</kbd></dd></div>
-          <div><dt>Показать всё</dt><dd><kbd>Ctrl</kbd> + <kbd>0</kbd></dd></div>
+          <div><dt id="shortcut-new">Новая схема</dt><dd><kbd>Ctrl</kbd> + <kbd>N</kbd></dd></div>
+          <div><dt id="shortcut-open">Открыть файл .cad</dt><dd><kbd>Ctrl</kbd> + <kbd>O</kbd></dd></div>
+          <div><dt id="shortcut-copy-paste">Копировать / вставить выделенное</dt><dd><kbd>Ctrl</kbd> + <kbd>C</kbd> / <kbd>V</kbd></dd></div>
+          <div><dt id="shortcut-undo-redo">Отменить / повторить</dt><dd><kbd>Ctrl</kbd> + <kbd>Z</kbd> / <kbd>Y</kbd></dd></div>
+          <div><dt id="shortcut-rotate">Повернуть</dt><dd><kbd>R</kbd></dd></div>
+          <div><dt id="shortcut-delete">Удалить выбранное</dt><dd><kbd>Delete</kbd></dd></div>
+          <div><dt id="shortcut-wire">Режим провода</dt><dd><kbd>C</kbd></dd></div>
+          <div><dt id="shortcut-wire-type">Переключить тип провода</dt><dd><kbd>↑</kbd> / <kbd>↓</kbd> / <kbd>←</kbd> / <kbd>→</kbd></dd></div>
+          <div><dt id="shortcut-finish">Завершить провод / отменить действие</dt><dd><kbd>Enter</kbd> / <kbd>Esc</kbd></dd></div>
+          <div><dt id="shortcut-cursor-pan">Курсор / Рука</dt><dd><kbd>V</kbd> / <kbd>H</kbd></dd></div>
+          <div><dt id="shortcut-panning">Панорамирование</dt><dd><kbd>Space</kbd> + перетаскивание</dd></div>
+          <div><dt id="shortcut-zoom">Масштаб</dt><dd><kbd>+</kbd> / <kbd>−</kbd></dd></div>
+          <div><dt id="shortcut-fit">Показать всё</dt><dd><kbd>Ctrl</kbd> + <kbd>0</kbd></dd></div>
         </dl>
         <div class="dialog-actions"><button type="button" data-dialog-close="shortcuts-dialog">Закрыть</button></div>
       </dialog>
@@ -349,15 +352,6 @@ export function mountApp(root: HTMLElement): void {
         <p class="about-repository"><a href="https://github.com/igorYurievich/cadesimweb" target="_blank" rel="noopener noreferrer">GitHub: github.com/igorYurievich/cadesimweb</a></p>
         <dl><div><dt>Автор</dt><dd>Igor Lipskiy Vyatchin</dd></div><div><dt>Версия</dt><dd>0.1.0</dd></div></dl>
         <div class="dialog-actions"><button type="button" data-dialog-close="about-dialog">Закрыть</button></div>
-      </dialog>
-      <dialog id="access-dialog" class="app-dialog access-dialog" aria-labelledby="access-title">
-        <form method="dialog" id="access-form" autocomplete="off">
-          <h2 id="access-title">Доступ</h2>
-          <p id="access-text">Введите пароль, чтобы продолжить.</p>
-          <input type="password" id="access-input" placeholder="Пароль" aria-label="Пароль" autocomplete="off" />
-          <p id="access-error" class="access-error" role="alert" hidden>Неверный пароль</p>
-          <div class="dialog-actions"><button type="submit" class="primary-action" id="access-submit">Войти</button></div>
-        </form>
       </dialog>
       <dialog id="beta-dialog" class="app-dialog beta-dialog" aria-labelledby="beta-title">
         <h2 id="beta-title">Бета-версия</h2>
@@ -504,7 +498,7 @@ export function mountApp(root: HTMLElement): void {
   let paletteLang: Lang = (() => {
     try {
       const saved = localStorage.getItem(INTERFACE_LANGUAGE_KEY);
-      return saved === 'es' || saved === 'en' || saved === 'it' || saved === 'ru' ? saved : 'es';
+      return saved === 'es' || saved === 'en' || saved === 'it' || saved === 'ru' || saved === 'fr' || saved === 'ar' ? saved : 'es';
     } catch { return 'es'; }
   })();
   let placementRotation: 0 | 1 | 2 | 3 = 0;
@@ -544,6 +538,7 @@ export function mountApp(root: HTMLElement): void {
     return [value as DrawKind];
   };
   let elbowVerticalFirst = false;
+  let elbowPreferenceChosen = false;
   let bundleFlipped = false;
   /** Маршруты всех проводов пучка; для одного провода — единственный маршрут. */
   const buildBundleRoutes = (points: readonly Point[]): Array<{ route: Point[]; kind: DrawKind }> => {
@@ -663,10 +658,12 @@ export function mountApp(root: HTMLElement): void {
     svg.classList.remove('is-placing');
     selected.clear();
     wireDrawing = true; draftPoints = []; draftCursor = undefined;
+    elbowVerticalFirst = false; elbowPreferenceChosen = false;
     svg.classList.add('is-drawing-wire');
     renderSchema();
-    status.textContent = 'Провод: клик — начало, второй клик — конец. Shift+клик — добавить излом, Tab — другой угол, F — сторона пучка, Esc/ПКМ — отмена.';
+    status.textContent = 'Провод: клик — начало, второй клик — конец. Shift+клик — добавить излом; ↑/↓/←/→ — тип провода; C — выйти; Tab — другой угол, F — сторона пучка.';
   };
+  const toggleWireDrawing = (): void => { if (wireDrawing) cancelWireDrawing(); else startWireDrawing(); };
   const finishWireDrawing = (): void => {
     if (draftPoints.length < 2) { draftPoints = []; draftCursor = undefined; drawDraft(); updateHistoryButtons(); return; }
     let bundle = buildBundleRoutes(draftPoints);
@@ -719,7 +716,7 @@ export function mountApp(root: HTMLElement): void {
     if (placementType !== undefined) status.textContent = `Размещение: ${getCadType(placementType).label} · щёлкните по листу; R — поворот; Esc — отмена.`;
     else status.textContent = 'Режим выбора. Выберите объект или рамкой выделите область.';
   });
-  setupAccess(ctx);
+  setupBetaNotice(ctx);
   root.querySelectorAll<HTMLButtonElement>('[data-dialog-close]').forEach((button) => {
     button.addEventListener('click', () => root.querySelector<HTMLDialogElement>(`#${button.dataset.dialogClose}`)?.close());
   });
@@ -742,8 +739,16 @@ export function mountApp(root: HTMLElement): void {
   nodeToolButton?.addEventListener('click', () => setNodeTool(!nodeTool));
   /** Точка (x, y) лежит на отрезке провода (включая концы). */
   const { drawNodeCursor, placeNodeAt } = setupNodeTool(ctx, { layer: ghostLayer, active: () => nodeTool, wireDrawing: () => wireDrawing, status, commitSchema, renderSchema });
-  drawWireButton.addEventListener('click', () => wireDrawing ? cancelWireDrawing() : startWireDrawing());
+  drawWireButton.addEventListener('click', toggleWireDrawing);
   finishWireButton.addEventListener('click', finishWireDrawing);
+  const cycleWireKind = (direction: -1 | 1): void => {
+    const options = [...wireKindSelect.options].filter((option) => !option.disabled);
+    if (!options.length) return;
+    const current = options.findIndex((option) => option.value === wireKindSelect.value);
+    const next = (current + direction + options.length) % options.length;
+    wireKindSelect.value = options[next]!.value;
+    wireKindSelect.dispatchEvent(new Event('change', { bubbles: true }));
+  };
   wireKindSelect.addEventListener('change', () => { if (wireDrawing) drawDraft(); });
   undoButton.addEventListener('click', () => {
     if (wireDrawing && draftPoints.length) { draftPoints.pop(); draftCursor = undefined; drawDraft(); updateHistoryButtons(); return; }
@@ -769,13 +774,26 @@ export function mountApp(root: HTMLElement): void {
    * Раньше каждое движение мыши пересоздавало все ~300 символов, и крупные трёхфазные элементы «тормозили».
    */
   const { schedule: scheduleMovePreview, cancel: cancelMovePreview } = setupMovePreview(ctx, { drag: () => drag, wireLayer, elementLayer, selectionLayer });
-  setupCanvasPointerMove(ctx, { svg, viewSize: () => viewSize, viewport: () => viewport, setViewport: (value) => { viewport = value; }, drag: () => drag, setPointerSheetPosition: (value) => { pointerSheetPosition = value; }, setDraftCursor: (value) => { draftCursor = value; }, cursorCoords, nodeTool: () => nodeTool, drawNodeCursor, moveGhost, wireDrawing: () => wireDrawing, drawDraft, drawViewport, scheduleMovePreview, renderSchema });
+  setupCanvasPointerMove(ctx, { svg, viewSize: () => viewSize, viewport: () => viewport, setViewport: (value) => { viewport = value; }, drag: () => drag, setPointerSheetPosition: (value) => { pointerSheetPosition = value; }, setDraftCursor: (value) => {
+    if (value === undefined) elbowPreferenceChosen = false;
+    else if (wireDrawing && !elbowPreferenceChosen) {
+      const anchor = draftPoints[draftPoints.length - 1];
+      if (anchor) {
+        const dx = Math.abs(value.x - anchor.x); const dy = Math.abs(value.y - anchor.y);
+        if (Math.max(dx, dy) >= CAD_GRID_STEP / 2) {
+          elbowVerticalFirst = dy > dx;
+          elbowPreferenceChosen = true;
+        }
+      }
+    }
+    draftCursor = value;
+  }, cursorCoords, nodeTool: () => nodeTool, drawNodeCursor, moveGhost, wireDrawing: () => wireDrawing, drawDraft, drawViewport, scheduleMovePreview, renderSchema });
   const endInteraction = setupCanvasPointerEnd(ctx, { svg, viewSize: () => viewSize, viewport: () => viewport, drag: () => drag, setDrag: (value) => { drag = value; }, dragSnapshot: () => dragSnapshot, setDragSnapshot: (value) => { dragSnapshot = value; }, selected, cancelMovePreview, commitSchema, renderSchema });
   svg.addEventListener('pointerup', endInteraction); svg.addEventListener('pointercancel', endInteraction);
   const releaseAllMomentary = (): void => { for (const id of [...simulation.heldInputs]) simulation.releaseMomentary(id); };
   window.addEventListener('pointerup', releaseAllMomentary);
   window.addEventListener('pointercancel', releaseAllMomentary);
-  setupKeyboardShortcuts({ root, simulationContextMenu, fileInput, spaceDown: (value) => { spaceDown = value; }, panTool: () => panTool, setPanTool, nodeTool: () => nodeTool, setNodeTool, selectTool, copySelection, pasteSelection, saveJson: exportActions.saveJson, requestNewSchema: createDocumentTab, undo: (redo) => { if (redo) { if (canRedo(history)) restoreHistory(redoHistory(history)); } else if (wireDrawing && draftPoints.length) { draftPoints.pop(); draftCursor = undefined; drawDraft(); updateHistoryButtons(); } else if (canUndo(history)) restoreHistory(undoHistory(history)); }, wireDrawing: () => wireDrawing, changeWireRoute: (key) => { if (key === 'Tab') elbowVerticalFirst = !elbowVerticalFirst; else bundleFlipped = !bundleFlipped; drawDraft(); }, finishWireDrawing, cancelPlacement: () => { placementType = undefined; placementRotation = 0; activePaletteCommand = undefined; renderPalette(); if (placeTypeSelect) placeTypeSelect.value = ''; svg.classList.remove('is-placing'); status.textContent = 'Режим размещения завершён.'; }, cancelWireDrawing: () => { if (draftPoints.length) { draftPoints = []; draftCursor = undefined; drawDraft(); updateHistoryButtons(); } else cancelWireDrawing(); }, placing: () => placementType !== undefined, selectedCount: () => selected.size, clearSelection: () => { selected.clear(); renderSchema(); }, deleteSelected, rotateSelection, nudgeSelection });
+  setupKeyboardShortcuts({ root, simulationContextMenu, fileInput, spaceDown: (value) => { spaceDown = value; }, panTool: () => panTool, setPanTool, nodeTool: () => nodeTool, setNodeTool, selectTool, copySelection, pasteSelection, saveJson: exportActions.saveJson, requestNewSchema: createDocumentTab, undo: (redo) => { if (redo) { if (canRedo(history)) restoreHistory(redoHistory(history)); } else if (wireDrawing && draftPoints.length) { draftPoints.pop(); draftCursor = undefined; elbowPreferenceChosen = false; drawDraft(); updateHistoryButtons(); } else if (canUndo(history)) restoreHistory(undoHistory(history)); }, wireDrawing: () => wireDrawing, changeWireRoute: (key) => { if (key === 'Tab') { elbowVerticalFirst = !elbowVerticalFirst; elbowPreferenceChosen = true; } else bundleFlipped = !bundleFlipped; drawDraft(); }, toggleWireDrawing, cycleWireKind, finishWireDrawing, cancelPlacement: () => { placementType = undefined; placementRotation = 0; activePaletteCommand = undefined; renderPalette(); if (placeTypeSelect) placeTypeSelect.value = ''; svg.classList.remove('is-placing'); status.textContent = 'Режим размещения завершён.'; }, cancelWireDrawing: () => { if (draftPoints.length) { draftPoints = []; draftCursor = undefined; elbowPreferenceChosen = false; drawDraft(); updateHistoryButtons(); } else cancelWireDrawing(); }, placing: () => placementType !== undefined, selectedCount: () => selected.size, clearSelection: () => { selected.clear(); renderSchema(); }, deleteSelected, rotateSelection, nudgeSelection });
   window.addEventListener('pagehide', persistSchemaNow);
   window.addEventListener('pagehide', saveViewportNow);
 

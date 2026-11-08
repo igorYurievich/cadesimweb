@@ -98,6 +98,7 @@ export function setupSimulation(ctx: AppContext, deps: SimulationSetup): Simulat
     const result = simResult;
     const nets = new Map((result?.nets ?? []).map((net) => [net.id, net] as const));
     const motorCurrentGroups = new Set<number>();
+    const autotransformerCurrentGroups = new Set<number>();
     if (result) {
       const parent = new Map(result.nets.map((net) => [net.id, net.id] as const));
       const root = (id: number): number => {
@@ -132,6 +133,33 @@ export function setupSimulation(ctx: AppContext, deps: SimulationSetup): Simulat
           if ([...keys].some((key) => currentNets.has(result.terminalNet[key] ?? -1))) motorCurrentGroups.add(group);
         }
       }
+
+      // У автотрансформатора выводы 2/5/8 образуют общую точку без отдельной
+      // метки фазы. При пуске через AT ток обмоток есть, но потенциалы L1/L2/L3
+      // туда переносить нельзя: это ошибочно выглядело бы как короткое замыкание.
+      const motorRunning = ctx.schema.elements.some((element) =>
+        (element.typeCode === 1000 || element.typeCode === 1001) && Boolean(result.motors[element.id]?.running));
+      if (motorRunning) {
+        for (const transformer of ctx.schema.elements) {
+          if (transformer.typeCode !== 1052) continue;
+          const inputPhases = [0, 1, 2].map((index) => {
+            const netId = result.terminalNet[terminalKey(transformer.id, index)];
+            return nets.get(netId ?? -1)?.potentials.filter((potential) => PHASE_LABELS.includes(potential)) ?? [];
+          });
+          const hasThreeInputPhases = inputPhases.every((phases) => phases.length === 1)
+            && new Set(inputPhases.map((phases) => phases[0])).size === 3;
+          if (!hasThreeInputPhases) continue;
+
+          const starNets = new Set([3, 4, 5]
+            .map((index) => result.terminalNet[terminalKey(transformer.id, index)])
+            .filter((id): id is number => id !== undefined));
+          for (const [group, keys] of wireTerminalKeys) {
+            if (![...keys].some((key) => starNets.has(result.terminalNet[key] ?? -1))) continue;
+            motorCurrentGroups.add(group);
+            autotransformerCurrentGroups.add(group);
+          }
+        }
+      }
     }
     for (const wire of ctx.schema.wires) {
       const lineOrDot = deps.wireLayer.querySelector<SVGElement>(`[data-wire-id="${wire.id}"]`);
@@ -144,6 +172,7 @@ export function setupSimulation(ctx: AppContext, deps: SimulationSetup): Simulat
       }
       const ordered = POTENTIAL_ORDER.filter((potential) => potentials.has(potential));
       const carriesMotorCurrent = group !== undefined && motorCurrentGroups.has(group);
+      const carriesAutotransformerCurrent = group !== undefined && autotransformerCurrentGroups.has(group);
       const energized = ordered.length > 0 || carriesMotorCurrent;
       const idleColor = wire.kind === 'junction' ? IDLE_WIRE_COLORS.junction : IDLE_WIRE_COLORS[wire.kind];
       const first = ordered[0];
@@ -160,7 +189,13 @@ export function setupSimulation(ctx: AppContext, deps: SimulationSetup): Simulat
         // Без свечения: цвет показывает потенциал, толщина остаётся одной и той же.
         lineOrDot.setAttribute('stroke-width', String(base));
       }
-      lineOrDot.setAttribute('aria-label', ordered.length ? `Провод под напряжением: ${ordered.join(', ')}` : carriesMotorCurrent ? 'Провод с током в режиме «звезда»' : 'Провод без потенциала');
+      lineOrDot.setAttribute('aria-label', ordered.length
+        ? `Провод под напряжением: ${ordered.join(', ')}`
+        : carriesAutotransformerCurrent
+          ? 'Провод с током через автотрансформатор'
+          : carriesMotorCurrent
+            ? 'Провод с током в режиме «звезда»'
+            : 'Провод без потенциала');
     }
     for (const element of ctx.schema.elements) {
       const symbol = deps.elementLayer.querySelector<SVGGElement>(`[data-element-id="${element.id}"]`);

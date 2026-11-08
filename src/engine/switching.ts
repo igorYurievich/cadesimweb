@@ -13,11 +13,20 @@ export interface ClosedEdge {
   element: number;
 }
 
+/** Направленная передача потенциала между клеммами (например, через обмотку). */
+export interface PotentialTransfer {
+  from: TerminalRef;
+  to: TerminalRef;
+  element: number;
+}
+
 export interface SwitchingResult {
   /** По id элемента: true, если у него замкнут хотя бы один внутренний контакт. */
   contacts: Record<number, boolean>;
   /** Каждая фактически замкнутая пара клемм, по одному ребру на полюс. */
   edges: ClosedEdge[];
+  /** Передачи потенциала в указанном направлении, не соединяющие сети напрямую. */
+  transfers: PotentialTransfer[];
   warnings: string[];
 }
 
@@ -83,6 +92,7 @@ export function computeSwitching(
 ): SwitchingResult {
   const contacts: Record<number, boolean> = {};
   const edges: ClosedEdge[] = [];
+  const transfers: PotentialTransfer[] = [];
   const warnings: string[] = [];
 
   for (const element of schema.elements) {
@@ -94,6 +104,17 @@ export function computeSwitching(
     let hasSwitch = false;
     let anyClosed = false;
     for (const link of behavior.links) {
+      if (link.kind === 'transfer') {
+        const [from, to] = link.terminals;
+        if (from === undefined || to === undefined || !element.terminals[from] || !element.terminals[to]) {
+          warnings.push(`invalid-terminal-index: элемент ${element.id}, тип ${element.typeCode}, индексы ${link.terminals.join('-')}`);
+          continue;
+        }
+        if (controlActive(element, link, inputs, coils, thermal, schema, timers)) {
+          transfers.push({ from: { element: element.id, index: from }, to: { element: element.id, index: to }, element: element.id });
+        }
+        continue;
+      }
       if (link.kind !== 'switch') continue;
       hasSwitch = true;
       const [a, b] = link.terminals;
@@ -114,5 +135,5 @@ export function computeSwitching(
     if (hasSwitch) contacts[element.id] = anyClosed;
   }
 
-  return { contacts, edges, warnings };
+  return { contacts, edges, transfers, warnings };
 }

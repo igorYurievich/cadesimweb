@@ -62,7 +62,7 @@ export function solvePass(
   const thermal = resolveThermalState(schema, inputs);
   const switching = computeSwitching(schema, inputs, coils, thermal, timers);
   const sourceResult = findSources(schema, graph.terminalNet);
-  const nets = propagatePotentials(graph.nets, graph.terminalNet, sourceResult.sources, switching.edges);
+  const nets = propagatePotentials(graph.nets, graph.terminalNet, sourceResult.sources, switching.edges, switching.transfers);
   const loads = evaluateLoads(schema, nets, graph.terminalNet);
   const netById = new Map(nets.map((net) => [net.id, net] as const));
   const nextCoils: Record<string, boolean> = {};
