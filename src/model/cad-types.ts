@@ -28,6 +28,7 @@ export type CadFamily =
   | 'relay-coil'
   | 'lamp'
   | 'signal'
+  | 'text'
   | 'terminal-strip'
   | 'ground'
   | 'transformer'
@@ -71,6 +72,8 @@ export interface CadTypeInfo {
   family: CadFamily;
   label: string;
   layout: CadLayout;
+  /** Фиксированное количество выводов у типа; лишние флаги в некорректных .cad-записях игнорируются. */
+  terminalCount?: number;
   /** Команды каталога (id), которым соответствует тип. Пусто, если неизвестно. */
   commandIds: number[];
   confidence: Confidence;
@@ -98,6 +101,7 @@ const CRUCE_POINTS = { kind: 'points', points: [{ x: 0, y: 0 }, { x: 6, y: 0 }, 
 const ROWS2_GAP12 = { kind: 'rows', rows: 2, pitchX: 6, rowGap: 12 } as const;
 
 const TABLE: readonly CadTypeInfo[] = [
+  { code: 8, family: 'text', label: 'Texto', layout: { kind: 'none' }, commandIds: [], confidence: 'confirmed', note: 'Texto libre de CADe_SIMU; el contenido se guarda al final de la grabación.' },
   { code: 1000, family: 'motor', label: 'Motor trifásico', layout: { kind: 'rows', rows: 1, pitchX: 6 }, commandIds: [32828], confidence: 'confirmed', note: 'U1 V1 W1 PE в один ряд' },
 
   { code: 1001, family: 'motor', label: 'Motor trifásico YD', layout: ROWS2, commandIds: [32829], confidence: 'confirmed', note: 'Клеммы U1 V1 W1 PE сверху и W2 U2 V2 снизу (Actividad 1.8, пуск звезда–треугольник); образец motores-elementos.cad подтверждает: это вторая кнопка панели «Motores».' },
@@ -122,11 +126,11 @@ const TABLE: readonly CadTypeInfo[] = [
   // Образец: elementos_contactores.cad, по одной кнопке панели в порядке панели (id записей 51..60).
   // Силовые контакты контактора идут по имени катушки (-KM), выключатели переключаются кликом (-S).
   // Все метки клемм в файле заданы: верхний ряд 1 3 5 7, затем нижний 2 4 6 8; рамка высотой 15.
-  { code: 2006, family: 'contactor', label: 'Contactor I (-KM)', layout: ROWS2, commandIds: [32899], confidence: 'confirmed', note: '6×15: один силовой полюс 1-2.' },
-  { code: 2000, family: 'contactor', label: 'Contactor II (-KM)', layout: ROWS2, commandIds: [32834], confidence: 'confirmed', note: '12×15: два полюса 1-2, 3-4.' },
-  { code: 2001, family: 'contactor', label: 'Contactor III (-KM)', layout: ROWS2, commandIds: [32833], confidence: 'confirmed', note: '18×15: три полюса 1-2, 3-4, 5-6.' },
-  { code: 2002, family: 'contactor', label: 'Contactor IIII (-KM)', layout: ROWS2, commandIds: [32835], confidence: 'confirmed', note: '24×15: четыре полюса 1-2, 3-4, 5-6, 7-8.' },
-  { code: 2008, family: 'contactor', label: 'Contactor III, символ с дугой (-KM)', layout: ROWS2_GAP12, commandIds: [33219], confidence: 'confirmed', note: 'Второй «Contactor III» (33219): те же три полюса, но на верхнем выводе каждого полюса дуга (знак функции контактора). Рамка 18×30, а клеммы стоят через 12, как у остальных: правило «высота − 3» здесь не работает.' },
+  { code: 2006, family: 'contactor', label: 'Contactor I (-KM)', layout: ROWS2, terminalCount: 2, commandIds: [32899], confidence: 'confirmed', note: '6×15: один силовой полюс 1-2.' },
+  { code: 2000, family: 'contactor', label: 'Contactor II (-KM)', layout: ROWS2, terminalCount: 4, commandIds: [32834], confidence: 'confirmed', note: '12×15: два полюса 1-2, 3-4.' },
+  { code: 2001, family: 'contactor', label: 'Contactor III (-KM)', layout: ROWS2, terminalCount: 6, commandIds: [32833], confidence: 'confirmed', note: '18×15: три полюса 1-2, 3-4, 5-6.' },
+  { code: 2002, family: 'contactor', label: 'Contactor IIII (-KM)', layout: ROWS2, terminalCount: 8, commandIds: [32835], confidence: 'confirmed', note: '24×15: четыре полюса 1-2, 3-4, 5-6, 7-8.' },
+  { code: 2008, family: 'contactor', label: 'Contactor III, símbolo con arco (-KM)', layout: ROWS2_GAP12, terminalCount: 6, commandIds: [33219], confidence: 'confirmed', note: 'Второй «Contactor III» (33219): те же три полюса, но на верхнем выводе каждого полюса дуга (знак функции контактора). Рамка 18×30, а клеммы стоят через 12, как у остальных: правило «высота − 3» здесь не работает.' },
   { code: 2007, family: 'switch', label: 'Interruptor I (-S)', layout: ROWS2, commandIds: [32900], confidence: 'confirmed', note: '6×15: один полюс 1-2, привод «V» слева.' },
   { code: 2003, family: 'switch', label: 'Interruptor II (-S)', layout: ROWS2, commandIds: [32836], confidence: 'confirmed', note: '12×15: два полюса.' },
   { code: 2004, family: 'switch', label: 'Interruptor III (-S)', layout: ROWS2, commandIds: [32837], confidence: 'confirmed', note: '18×15: три полюса.' },
@@ -205,10 +209,10 @@ const TABLE: readonly CadTypeInfo[] = [
   { code: 7005, family: 'aux-contact', label: 'Contacto temporizado a la conexión NC', layout: ROWS2, commandIds: [32934], confidence: 'confirmed', note: '6×15: клеммы 55 56; размыкается после выдержки таймера 9004.' },
   { code: 7006, family: 'aux-contact', label: 'Contacto temporizado a la conexión NA+NC', layout: ROWS2_P9, commandIds: [32935], confidence: 'confirmed', note: '15×15: клеммы 55 57 / 56 58 (шаг 9): 55-56 замкнут до выдержки (звезда в Actividad 1.8), 57-58 замыкается после выдержки (треугольник). Выдержку задаёт таймер 9004 с тем же именем.' },
   { code: 7007, family: 'aux-contact', label: 'Contacto temporizado a la conexión CON', layout: CON_POINTS, commandIds: [32936], confidence: 'confirmed', note: '12×15: клеммы 55 (общий), 56 (НЗ), 58 (НО); переключается после выдержки таймера 9004.' },
-  { code: 7008, family: 'aux-contact', label: 'Contacto temporizado a la deconexión NA', layout: ROWS2, commandIds: [32941], confidence: 'probable', note: '6×15: клеммы 67 68. Только символ: катушки реле с выдержкой на отключение в ростере пока нет.' },
-  { code: 7009, family: 'aux-contact', label: 'Contacto temporizado a la deconexión NC', layout: ROWS2, commandIds: [32942], confidence: 'probable', note: '6×15: клеммы 55 56. Только символ.' },
-  { code: 7010, family: 'aux-contact', label: 'Contacto temporizado a la deconexión NA+NC', layout: ROWS2_P9, commandIds: [32943], confidence: 'probable', note: '15×15: клеммы 55 57 / 56 58. Только символ.' },
-  { code: 7011, family: 'aux-contact', label: 'Contacto temporizado a la deconexión CON', layout: CON_POINTS, commandIds: [32944], confidence: 'probable', note: '12×15: клеммы 55 56 58. Только символ.' },
+  { code: 7008, family: 'aux-contact', label: 'Contacto temporizado a la deconexión NA', layout: ROWS2, commandIds: [32941], confidence: 'probable', note: '6×15: клеммы 67 68; замыкается по завершении импульсного отсчёта катушки 9005 с тем же именем.' },
+  { code: 7009, family: 'aux-contact', label: 'Contacto temporizado a la deconexión NC', layout: ROWS2, commandIds: [32942], confidence: 'probable', note: '6×15: клеммы 55 56; НЗ контакт переключается по завершении отсчёта катушки 9005.' },
+  { code: 7010, family: 'aux-contact', label: 'Contacto temporizado a la deconexión NA+NC', layout: ROWS2_P9, commandIds: [32943], confidence: 'probable', note: '15×15: клеммы 55 57 / 56 58; НЗ и НО переключаются по завершении отсчёта катушки 9005.' },
+  { code: 7011, family: 'aux-contact', label: 'Contacto temporizado a la deconexión CON', layout: CON_POINTS, commandIds: [32944], confidence: 'probable', note: '12×15: клеммы 55 56 58; переключается по завершении отсчёта катушки 9005.' },
   { code: 7012, family: 'aux-contact', label: 'Contacto temporizado a la conexión deconexión NA', layout: ROWS2, commandIds: [32945], confidence: 'probable', note: '6×15: клеммы 67 68. Только символ.' },
   { code: 7013, family: 'aux-contact', label: 'Contacto temporizado a la conexión deconexión NC', layout: ROWS2, commandIds: [32946], confidence: 'probable', note: '6×15: клеммы 55 56. Только символ.' },
   { code: 7014, family: 'aux-contact', label: 'Contacto temporizado a la conexión deconexión NA+NC', layout: ROWS2_P9, commandIds: [32947], confidence: 'probable', note: '15×15: клеммы 55 57 / 56 58. Только символ.' },
@@ -251,7 +255,7 @@ const TABLE: readonly CadTypeInfo[] = [
   { code: 9001, family: 'relay-coil', label: 'Bobina biestable contactor, relé', layout: BISTABLE_POINTS, commandIds: [32956], confidence: 'confirmed', note: 'Клеммы A1 B1 сверху, A2 снизу по центру; внутри две косые линии. Только символ.' },
   { code: 9002, family: 'relay-coil', label: 'Telerruptor', layout: ROWS2, commandIds: [32964], confidence: 'confirmed', note: 'Клеммы A1 A2; слева отсек со знаком «<». Только символ.' },
   { code: 9003, family: 'relay-coil', label: 'Bobina electroválvula', layout: ROWS2, commandIds: [32951], confidence: 'confirmed', note: 'Клеммы A1 A2, имя -EV; косая черта в корпусе и клапан справа. Только символ.' },
-  { code: 9005, family: 'relay-coil', label: 'Temporizador a la desconexión', layout: ROWS2, commandIds: [32953], confidence: 'confirmed', note: 'Клеммы A1 A2 + параметры 0 и 1; слева залитый отсек. Только символ.' },
+  { code: 9005, family: 'relay-coil', label: 'Temporizador a la desconexión', layout: ROWS2, commandIds: [32953], confidence: 'confirmed', note: 'Клеммы A1 A2 + параметры масштаба и времени; импульс запускает сохраняющийся отсчёт, после завершения которого переключаются контакты 7008–7011 с тем же именем.' },
   { code: 9006, family: 'relay-coil', label: 'Temporizador a la conexión desconexión', layout: ROWS2, commandIds: [32954], confidence: 'confirmed', note: 'Клеммы A1 A2 + параметры 0 и 1; слева залитый отсек со знаком выдержки. Только символ.' },
   { code: 9007, family: 'relay-coil', label: 'Relé intermitente', layout: ROWS2, commandIds: [32955], confidence: 'confirmed', note: 'Клеммы A1 A2 + параметры 0 и 1; слева отсек со знаком «5». Только символ.' },
   { code: 9015, family: 'relay-coil', label: 'Generador de pulsos', layout: ROWS2, commandIds: [33223], confidence: 'probable', note: 'Клеммы A1 A2 + четыре параметра (0 1 0 1); слева отсек со знаком «E». Соответствие 9015 ↔ «Generador de pulsos» и 9014 ↔ «Interruptor horario» выведено из порядка и вида символов. Только символ.' },

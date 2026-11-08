@@ -179,7 +179,8 @@ const TABLE: readonly TypeBehavior[] = [
   { typeCode: 6004, links: switches([[0, 4], [1, 5], [2, 6], [3, 7]], 'toggled', { defaultClosed: true, opensWhenTripped: true }) },
   { typeCode: 6005, links: switches([[0, 2], [1, 3]], 'toggled', { defaultClosed: true, opensWhenTripped: true }) },
   { typeCode: 6006, links: switches([[0, 4], [1, 5], [2, 6], [3, 7]], 'toggled', { defaultClosed: true, opensWhenTripped: true }) },
-  { typeCode: 6007, links: switches([[0, 3], [1, 4], [2, 5]], 'toggled', { defaultClosed: true, opensWhenTripped: true }) },
+  // Тепловое реле не размыкает силовые полюса: срабатывание меняет только связанные вспомогательные контакты.
+  { typeCode: 6007, links: switches([[0, 3], [1, 4], [2, 5]], 'always') },
   { typeCode: 6008, links: switches([[0, 2], [1, 3]], 'toggled', { defaultClosed: true, opensWhenTripped: true }) },
   { typeCode: 6009, links: switches([[0, 3], [1, 4], [2, 5]], 'toggled', { defaultClosed: true, opensWhenTripped: true }) },
   { typeCode: 6010, links: switches([[0, 1]], 'toggled', { defaultClosed: true, opensWhenTripped: true }) },
@@ -188,7 +189,7 @@ const TABLE: readonly TypeBehavior[] = [
   // Ограничители перенапряжения: символы, проводимость и срабатывание не моделируются.
   { typeCode: 6013, links: inert() },
   { typeCode: 6014, links: inert() },
-  // Вспомогательные контакты: мгновенные 7000–7003 следуют за катушкой с тем же именем, 7004–7007 ждут таймер 9004 (см. switching.ts).
+  // Вспомогательные контакты: мгновенные 7000–7003 следуют за катушкой с тем же именем, 7004–7007 ждут 9004, 7008–7011 ждут 9005.
   // Порядок клемм: NA+NC — 11 13 / 12 14 (НЗ 0-2, НО 1-3); CON — общий 0, НЗ 1, НО 2.
   { typeCode: 7000, links: switches([[0, 1]], 'coil-name') },
   { typeCode: 7001, links: switches([[0, 1]], 'coil-name', { normallyClosed: true }) },
@@ -199,11 +200,11 @@ const TABLE: readonly TypeBehavior[] = [
   // Звезда–треугольник: клеммы по порядку 55 57 56 58; 55-56 НЗ (звезда), 57-58 НО (треугольник).
   { typeCode: 7006, links: [...switches([[0, 2]], 'coil-name', { normallyClosed: true }), ...switches([[1, 3]], 'coil-name')] },
   { typeCode: 7007, links: [...switches([[0, 1]], 'coil-name', { normallyClosed: true }), ...switches([[0, 2]], 'coil-name')] },
-  // Выдержка на отключение и на включение-отключение: катушек этих реле в ростере пока нет, поэтому только символы.
-  { typeCode: 7008, links: inert() },
-  { typeCode: 7009, links: inert() },
-  { typeCode: 7010, links: inert() },
-  { typeCode: 7011, links: inert() },
+  // Таймер 9005 фиксирует импульс и после выдержки переключает связанные контакты.
+  { typeCode: 7008, links: switches([[0, 1]], 'coil-name') },
+  { typeCode: 7009, links: switches([[0, 1]], 'coil-name', { normallyClosed: true }) },
+  { typeCode: 7010, links: [...switches([[0, 2]], 'coil-name', { normallyClosed: true }), ...switches([[1, 3]], 'coil-name')] },
+  { typeCode: 7011, links: [...switches([[0, 1]], 'coil-name', { normallyClosed: true }), ...switches([[0, 2]], 'coil-name')] },
   { typeCode: 7012, links: inert() },
   { typeCode: 7013, links: inert() },
   { typeCode: 7014, links: inert() },

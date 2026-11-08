@@ -59,8 +59,10 @@ function elementRecords(element: SchemaElement, allocId: () => number): CadRecor
   record.nums[9 + o] = element.position.y;
   record.nums[12 + o] = element.labelOffset.x;
   record.nums[13 + o] = element.labelOffset.y;
-  record.nums[14 + o] = element.size.w;
-  record.nums[15 + o] = element.size.h;
+  if (element.typeCode !== 8) {
+    record.nums[14 + o] = element.size.w;
+    record.nums[15 + o] = element.size.h;
+  }
   record.nums[17 + o] = element.rotation;
 
   const continuations: CadRecord[] = (raw?.continuations ?? []).map((c) => ({
@@ -109,7 +111,7 @@ function elementRecords(element: SchemaElement, allocId: () => number): CadRecor
   if (element.typeCode === 9008 && element.params.color !== undefined) {
     record.texts[parameterStart] = String(element.params.color);
   }
-  if (element.typeCode === 9004) {
+  if (element.typeCode === 9004 || element.typeCode === 9005) {
     if (element.params.scale !== undefined) record.texts[parameterStart] = String(element.params.scale);
     if (element.params.time !== undefined) record.texts[parameterStart + 1] = String(element.params.time);
   }

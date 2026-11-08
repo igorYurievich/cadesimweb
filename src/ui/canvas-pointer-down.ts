@@ -90,8 +90,10 @@ export function setupCanvasPointerDown(ctx: AppContext, deps: CanvasPointerDownS
         }
         if (element && deps.simulation.isMaintainedType(element.typeCode)) {
           const next = !(deps.simulation.inputs.toggled[element.id] ?? false); deps.simulation.inputs.toggled[element.id] = next;
-          if (element.name.trim() !== '') for (const twin of schema.elements) {
-            if (twin.id !== element.id && twin.typeCode === element.typeCode && twin.name === element.name) deps.simulation.inputs.toggled[twin.id] = next;
+          const deviceName = element.name.trim().toLocaleUpperCase();
+          if (deviceName !== '') for (const twin of schema.elements) {
+            if (twin.id !== element.id && deps.simulation.isMaintainedType(twin.typeCode)
+              && twin.name.trim().toLocaleUpperCase() === deviceName) deps.simulation.inputs.toggled[twin.id] = next;
           }
           deps.simulation.applySimulationInput(); event.preventDefault(); return;
         }

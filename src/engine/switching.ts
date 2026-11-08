@@ -32,6 +32,8 @@ export interface SwitchingResult {
 
 /** Контакты, которые срабатывают после выдержки таймера 9004 с тем же именем. */
 export const ON_DELAY_CONTACT_TYPES: ReadonlySet<number> = new Set([7004, 7005, 7006, 7007]);
+/** Контакты срабатывают после импульсного отсчёта таймера отключения 9005. */
+export const OFF_DELAY_CONTACT_TYPES: ReadonlySet<number> = new Set([7008, 7009, 7010, 7011]);
 
 /**
  * Включено ли управление вспомогательного контакта: катушка с тем же именем, а для контактов с выдержкой
@@ -50,7 +52,26 @@ export function auxContactActive(
       return phase === 'done' || phase === 'releasing';
     }
   }
+  if (OFF_DELAY_CONTACT_TYPES.has(element.typeCode) && element.name !== '') {
+    const timer = schema.elements.find((candidate) => candidate.typeCode === 9005 && candidate.name === element.name);
+    if (timer) return timers[timer.id]?.phase === 'done';
+  }
   return element.name !== '' && (coils[element.name] ?? false);
+}
+
+/** Сработало ли мгновенное вспомогательное реле от одноимённой кнопки/привода, а не от катушки. */
+export function auxContactActuatorActive(element: SchemaElement, schema: Schema, inputs: UserInputs): boolean {
+  if (element.typeCode < 7000 || element.typeCode > 7003) return false;
+  const name = element.name.trim().toLocaleUpperCase();
+  if (!name) return false;
+  return schema.elements.some((candidate) => {
+    if (candidate.id === element.id || candidate.name.trim().toLocaleUpperCase() !== name) return false;
+    const type = candidate.typeCode;
+    const momentary = (type >= 8000 && type <= 8007) || (type >= 8012 && type <= 8015);
+    const maintained = type >= 8008 && type <= 8011;
+    return (momentary && Boolean(inputs.pressed[candidate.id]))
+      || (maintained && Boolean(inputs.toggled[candidate.id]));
+  });
 }
 
 function controlActive(element: SchemaElement, link: BehaviorLink, inputs: UserInputs, coils: Readonly<Record<string, boolean>>, thermal: ThermalState, schema: Schema, timers: Readonly<Record<number, TimerState>>): boolean {
@@ -69,7 +90,7 @@ function controlActive(element: SchemaElement, link: BehaviorLink, inputs: UserI
         && Boolean(inputs.pressed[candidate.id]));
     }
     case 'toggled': return inputs.toggled[element.id] ?? link.defaultClosed ?? false;
-    case 'coil-name': return auxContactActive(element, schema, coils, timers);
+    case 'coil-name': return auxContactActive(element, schema, coils, timers) || auxContactActuatorActive(element, schema, inputs);
     case 'thermal': return (inputs.tripped[element.id] ?? false) || (element.name !== '' && thermal.trippedNames.has(element.name));
     case 'position': return currentPosition(element.typeCode, inputs.positions?.[element.id]) === link.position;
     case 'always': return true;

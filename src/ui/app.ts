@@ -2,6 +2,7 @@ import { getCadType } from '@model/cad-types';
 import type { GroupKey, Lang } from '@model/catalog';
 import { createEmptySchema } from '@model/index';
 import { parseSchemaJson, serializeSchemaJson } from '@model/schema-json';
+import { schemaBounds } from '@model/geometry';
 import { EXAMPLES } from '../data/examples';
 import type { Schema, SchemaElement, WireKind, WireSegment } from '@model/types';
 import { canRedo, canUndo, createHistory, redoHistory, undoHistory } from './history';
@@ -192,6 +193,7 @@ export function mountApp(root: HTMLElement): void {
             <button type="button" class="menu-command" data-command="export-svg">Экспорт SVG</button>
             <button type="button" class="menu-command" data-command="export-png">Экспорт PNG</button>
             <button type="button" class="menu-command" data-command="print-pdf">Печать / PDF</button>
+            <button type="button" class="menu-command" data-command="fit-sheet">Подогнать лист</button>
             <button type="button" class="menu-command" data-command="sheet">Размер листа (Ajustar hoja)…</button>
           </div></details>
           <details class="menu-group"><summary>Правка</summary><div class="menu-popover">
@@ -287,9 +289,9 @@ export function mountApp(root: HTMLElement): void {
           </pattern></defs>
           <rect class="viewport-backdrop" x="0" y="0" width="${FALLBACK_VIEWPORT.width}" height="${FALLBACK_VIEWPORT.height}" />
           <g id="sheet-transform">
-            <rect id="sheet-paper" x="0" y="0" width="279" height="210" fill="#fff" />
-            <rect id="sheet-grid" x="0" y="0" width="279" height="210" fill="url(#cad-grid)" />
-            <rect id="sheet-border" x="0" y="0" width="279" height="210" fill="none" stroke="#aeb8c4" stroke-width="0.8" />
+            <rect id="sheet-paper" x="0" y="0" width="297" height="210" fill="#fff" />
+            <rect id="sheet-grid" x="0" y="0" width="297" height="210" fill="url(#cad-grid)" />
+            <rect id="sheet-border" x="0" y="0" width="297" height="210" fill="none" stroke="#aeb8c4" stroke-width="0.8" />
             <g id="wire-layer" />
             <g id="element-layer" />
             <g id="selection-layer" />
@@ -314,7 +316,7 @@ export function mountApp(root: HTMLElement): void {
         <div class="sheet-fields">
           <label class="property-field">Формат
             <select id="sheet-format">
-              <option value="custom">Пользовательский</option><option value="279x210">A4 — альбомный</option><option value="210x279">A4 — книжный</option><option value="420x297">A3 — альбомный</option><option value="297x420">A3 — книжный</option>
+              <option value="custom">Пользовательский</option><option value="297x210">A4 — альбомный</option><option value="210x297">A4 — книжный</option><option value="420x297">A3 — альбомный</option><option value="297x420">A3 — книжный</option>
             </select>
           </label>
           <div class="sheet-size-row">
@@ -516,6 +518,7 @@ export function mountApp(root: HTMLElement): void {
   const simulation = setupSimulation(ctx, {
     wireLayer, elementLayer, simulationMessage, runButton, stopButton, simStateValue, simulationContextMenu, overloadAction, status,
     uiText: () => uiText(), renderSchema: () => renderSchema(), uniformWireColors: () => uniformWireColors,
+    clearSelection: () => { selected.clear(); renderSchema(); },
   });
   translateInterface();
 
@@ -570,25 +573,37 @@ export function mountApp(root: HTMLElement): void {
   const renderDocumentTabs = (): void => {
     if (!documentTabBar) return;
     documentTabBar.replaceChildren();
+    const tabList = documentTabBar.ownerDocument.createElement('div');
+    tabList.className = 'document-tab-list';
     for (const document of documents) {
       const tab = documentTabBar.ownerDocument.createElement('div');
       tab.className = `document-tab${document.id === activeDocumentId ? ' is-active' : ''}`;
       const select = documentTabBar.ownerDocument.createElement('button');
       select.type = 'button'; select.className = 'document-tab-select'; select.dataset.documentTab = document.id;
-      select.textContent = document.name || 'Новая схема'; select.title = document.name || 'Новая схема';
+      const documentName = document.schema.sheet.fileName || uiText().new;
+      select.textContent = documentName; select.title = documentName;
       const close = documentTabBar.ownerDocument.createElement('button');
       close.type = 'button'; close.className = 'document-tab-close'; close.dataset.closeDocument = document.id;
-      close.setAttribute('aria-label', `Закрыть схему «${document.name || 'Новая схема'}»`); close.title = 'Закрыть схему'; close.textContent = '×';
-      tab.append(select, close); documentTabBar.append(tab);
+      close.setAttribute('aria-label', `${uiText().close} «${documentName}»`); close.title = uiText().close; close.textContent = '×';
+      tab.append(select, close); tabList.append(tab);
     }
+    documentTabBar.append(tabList);
     const add = documentTabBar.ownerDocument.createElement('button');
-    add.type = 'button'; add.id = 'new-document-tab'; add.className = 'document-tab-add'; add.title = 'Новая схема'; add.setAttribute('aria-label', 'Новая схема'); add.textContent = '+';
+    add.type = 'button'; add.id = 'new-document-tab'; add.className = 'document-tab-add'; add.title = uiText().new; add.setAttribute('aria-label', uiText().new); add.textContent = '+';
     documentTabBar.append(add);
+    const activeTab = tabList.querySelector<HTMLElement>('.document-tab.is-active');
+    if (activeTab) {
+      const tabLeft = activeTab.getBoundingClientRect().left - tabList.getBoundingClientRect().left + tabList.scrollLeft;
+      if (tabLeft < tabList.scrollLeft) tabList.scrollLeft = tabLeft;
+      else if (tabLeft + activeTab.offsetWidth > tabList.scrollLeft + tabList.clientWidth) {
+        tabList.scrollLeft = tabLeft + activeTab.offsetWidth - tabList.clientWidth;
+      }
+    }
   };
   syncActiveDocument = (): void => {
     const current = activeDocument();
     current.schema = schema; current.history = history; current.viewport = viewport;
-    current.name = schema.sheet.fileName || current.name || 'Новая схема';
+    current.name = schema.sheet.fileName || uiText().new;
   };
   persistDocuments = (): void => {
     try {
@@ -608,7 +623,7 @@ export function mountApp(root: HTMLElement): void {
     simulation.resetSimulation(); renderSchema(); drawViewport(); updateHistoryButtons(); refreshInterface();
     status.textContent = `Открыта схема «${target.name}».`; renderDocumentTabs();
   };
-  const createDocumentTab = (name = 'Новая схема'): void => {
+  const createDocumentTab = (name = uiText().new): void => {
     if (documents.length) { syncActiveDocument(); persistDocuments(); }
     simulation.stopSimulation();
     const nextSchema = createEmptySchema();
@@ -729,10 +744,48 @@ export function mountApp(root: HTMLElement): void {
   resetInputsAction.addEventListener('click', () => { simulationContextMenu.hidden = true; simulation.resetSimulationInputs(); });
   setupSimulationContextMenuEvents(svg, simulationContextMenu, simulation);
   const exportActions = setupExport(ctx, svg, status);
+  const autoFitSheet = (): void => {
+    const bounds = schemaBounds(schema);
+    if (!bounds) return;
+    let minX = bounds.minX; let minY = bounds.minY;
+    let maxX = bounds.maxX; let maxY = bounds.maxY;
+    const include = (x: number, y: number): void => {
+      minX = Math.min(minX, x); minY = Math.min(minY, y);
+      maxX = Math.max(maxX, x); maxY = Math.max(maxY, y);
+    };
+    for (const element of schema.elements) {
+      if (element.typeCode === 20000) continue;
+      include(element.position.x + element.size.w, element.position.y + element.size.h);
+      include(element.position.x + element.labelOffset.x, element.position.y + element.labelOffset.y);
+      for (const terminal of element.terminals) include(element.position.x + terminal.offset.x, element.position.y + terminal.offset.y);
+    }
+    for (const wire of schema.wires) {
+      include(wire.from.x, wire.from.y); include(wire.to.x, wire.to.y);
+    }
+    const margin = 24;
+    const deltaX = margin - minX; const deltaY = margin - minY;
+    const roundUpToGrid = (value: number): number => Math.ceil(value / 3) * 3;
+    const width = Math.max(30, roundUpToGrid(maxX - minX + margin * 2));
+    const height = Math.max(30, roundUpToGrid(maxY - minY + margin * 2));
+    const before = cloneSchema(schema);
+    for (const element of schema.elements) {
+      if (element.typeCode === 20000) continue;
+      element.position.x += deltaX; element.position.y += deltaY;
+    }
+    for (const wire of schema.wires) {
+      wire.from.x += deltaX; wire.from.y += deltaY;
+      wire.to.x += deltaX; wire.to.y += deltaY;
+    }
+    schema.sheet.width = width; schema.sheet.height = height;
+    commitSchema(before);
+    viewport = fitViewport(fullSheet(schema.sheet), { width: viewSize.x, height: viewSize.y });
+    drawViewport(); renderSchema();
+    status.textContent = uiText().fitSheetDone;
+  };
   setupMenus(ctx, {
     fileInput, status, undoButton, redoButton, exportActions, requestNewSchema: createDocumentTab, copySelection, pasteSelection,
     rotateSelection, deleteSelected, toggleTheme, toggleGrid, toggleDockedProperties, toggleWireColors,
-    commitSchema, renderSchema, setViewport: (value) => { viewport = value; }, viewSize, drawViewport,
+    commitSchema, renderSchema, setViewport: (value) => { viewport = value; }, viewSize, drawViewport, autoFitSheet,
   });
   root.querySelector<HTMLButtonElement>('#rotate-selection')?.addEventListener('click', rotateSelection);
   root.querySelector<HTMLButtonElement>('#delete-selection')?.addEventListener('click', deleteSelected);

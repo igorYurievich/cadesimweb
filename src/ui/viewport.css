@@ -53,14 +53,15 @@ button:focus-visible, select:focus-visible, summary:focus-visible { outline: 2px
 .brand-lockup { display: flex; flex: 0 0 auto; align-items: center; gap: 10px; }
 .app-header h1 { margin: 0; font-size: 14px; font-weight: 700; letter-spacing: -.01em; white-space: nowrap; }
 .app-header h1 span { color: var(--muted); font-weight: 500; }
-.document-tabs { position: absolute; z-index: 4; top: 0; left: 0; display: flex; max-width: 100%; min-height: 38px; align-items: stretch; gap: 4px; padding: 0 6px 0 0; overflow-x: auto; border: 1px solid var(--border); border-top: 0; border-left: 0; border-radius: 0; background: color-mix(in srgb, var(--surface) 94%, transparent); box-shadow: 0 3px 12px #0002; }
-.document-tab { display: flex; min-width: 0; max-width: 240px; align-items: stretch; border: 1px solid var(--border); border-bottom: 0; border-radius: 0; background: var(--surface-soft); }
+.document-tabs { position: absolute; z-index: 4; top: 0; left: 0; display: flex; width: 100%; height: 38px; align-items: stretch; gap: 4px; padding: 0 6px 0 0; overflow: hidden; border: 1px solid var(--border); border-top: 0; border-left: 0; border-radius: 0; background: color-mix(in srgb, var(--surface) 94%, transparent); box-shadow: 0 3px 12px #0002; }
+.document-tab-list { display: flex; min-width: 0; flex: 1 1 auto; align-items: stretch; gap: 4px; overflow-x: auto; overflow-y: hidden; scrollbar-width: thin; }
+.document-tab { display: flex; min-width: 100px; max-width: 240px; flex: 0 0 auto; align-items: stretch; border: 1px solid var(--border); border-bottom: 0; border-radius: 0; background: var(--surface-soft); }
 .document-tab.is-active { border-color: var(--border-strong); background: var(--surface); box-shadow: inset 0 2px 0 var(--accent); }
 .document-tab-select { min-width: 72px; padding: 0 11px; overflow: hidden; border: 0; background: transparent; color: var(--muted); font: inherit; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
 .document-tab.is-active .document-tab-select { color: var(--text); font-weight: 650; }
 .document-tab-close, .document-tab-add { width: 28px; flex: 0 0 auto; border: 0; border-radius: 0; background: transparent; color: var(--muted); font-size: 17px; cursor: pointer; }
 .document-tab-close:hover, .document-tab-add:hover { background: var(--surface-hover); color: var(--text); }
-.document-tab-add { align-self: center; height: 28px; margin-left: 2px; border: 1px solid var(--border); font-size: 20px; line-height: 1; }
+.document-tab-add { position: relative; z-index: 1; align-self: center; height: 28px; margin-left: 2px; border: 1px solid var(--border); background: var(--surface); font-size: 20px; line-height: 1; }
 .app-menu { display: flex; align-items: center; gap: 2px; }
 .menu-group { position: relative; display: flex; align-items: center; }
 .menu-group > summary { padding: 6px 10px; border-radius: 6px; color: var(--text); font-size: 13px; list-style: none; cursor: pointer; user-select: none; }
@@ -181,6 +182,7 @@ kbd { padding: 2px 6px; border: 1px solid var(--border); border-radius: 4px; bac
 /* Символы: серые в покое, красные под напряжением (как в CADe_SIMU). */
 .schematic-element { color: #7b8189; }
 .schematic-element.is-powered { color: #e3181f; }
+.schematic-element.is-thermal-relay-tripped { color: #e3181f; }
 .schematic-element.is-sim-active.is-sim-open { color: #8b9097; }
 .schematic-element.is-sim-fault-glow { filter: drop-shadow(0 0 2px #d3483e); }
 
@@ -214,6 +216,8 @@ kbd { padding: 2px 6px; border: 1px solid var(--border); border-radius: 4px; bac
 .is-sim-pressed .contact.by-pressed:not(.rest-closed) .blade-closed { display: inline; }
 .is-sim-pressed .contact.by-pressed.rest-closed .blade-closed { display: none; }
 .is-sim-pressed .contact.by-pressed.rest-closed .blade-open { display: inline; }
+.actuator-roller { transform-box: fill-box; transform-origin: center; transition: transform 100ms ease-out; }
+.is-sim-pressed .actuator-roller { transform: translateX(1px) scaleX(0.82); }
 /* Conmutador: видна только группа лопастей текущей позиции (data-position ставит app.ts). */
 .sel-pos { display: none; }
 .schematic-element[data-position="0"] .sel-pos-0,
@@ -232,7 +236,7 @@ kbd { padding: 2px 6px; border: 1px solid var(--border); border-radius: 4px; bac
 .schematic-element .lamp-glass { fill: #f6f7f8; stroke: #7b8794; filter: none; }
 .schematic-element.is-lamp-lit .lamp-glass { filter: drop-shadow(0 0 2.8px currentColor); }
 .schematic-element.is-lamp-lit .lamp-glass.lamp-c0 { fill: #43df70; stroke: #16843a; filter: drop-shadow(0 0 3px #29dc5a); }
-.schematic-element.is-lamp-lit .lamp-glass.lamp-c1 { fill: #ff3b30; stroke: #a8120b; filter: drop-shadow(0 0 3px #ff4a3d); }
+.schematic-element.is-lamp-lit .lamp-glass.lamp-c1 { fill: #eb7c76; stroke: #7b8794; filter: drop-shadow(0 0 1.8px #e99a95); }
 .schematic-element.is-lamp-lit .lamp-glass.lamp-c2 { fill: #ffe600; stroke: #b88a00; filter: drop-shadow(0 0 3px #ffd400); }
 .motor-rotor { opacity: 0; transform-box: fill-box; transform-origin: center; }
 .schematic-element.is-motor-running .motor-body > circle { fill: #bdbdbd; }

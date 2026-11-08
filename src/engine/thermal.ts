@@ -15,8 +15,8 @@ export function resolveThermalState(schema: Schema, inputs: UserInputs): Thermal
   const trippedNames = new Set<string>();
   for (const element of schema.elements) {
     if (element.typeCode !== 6007) continue;
-    // Открытый вручную FG размыкает и его силовые полюса, и связанный НЗ
-    // вспомогательный контакт в цепи управления.
+    // Ручное срабатывание FG меняет состояние связанных вспомогательных
+    // контактов в цепи управления; силовые полюса остаются проводящими.
     const isTripped = (inputs.tripped[element.id] ?? false) || (inputs.toggled[element.id] === false);
     tripped[element.id] = isTripped;
     if (isTripped && element.name !== '') trippedNames.add(element.name);

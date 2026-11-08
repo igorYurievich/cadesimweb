@@ -25,6 +25,7 @@ export interface MenuSetup {
   setViewport(viewport: Viewport): void;
   viewSize: Point;
   drawViewport(): void;
+  autoFitSheet(): void;
 }
 
 export function setupMenus(ctx: AppContext, deps: MenuSetup): void {
@@ -111,6 +112,7 @@ export function setupMenus(ctx: AppContext, deps: MenuSetup): void {
       case 'properties-panel': deps.toggleDockedProperties(); break;
       case 'wire-colors': deps.toggleWireColors(); break;
       case 'sheet': openSheetDialog(); break;
+      case 'fit-sheet': deps.autoFitSheet(); break;
       case 'shortcuts': root.querySelector<HTMLDialogElement>('#shortcuts-dialog')?.showModal(); break;
       case 'about': root.querySelector<HTMLDialogElement>('#about-dialog')?.showModal(); break;
     }

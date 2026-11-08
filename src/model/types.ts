@@ -88,7 +88,7 @@ export interface SheetInfo {
   checkedName?: string;
   checkedDate?: string;
   checkedSign?: string;
-  /** Размер листа, мм (в .cad у A4 горизонтально 279 × 210). */
+  /** Размер листа, мм (A4 горизонтально: 297 × 210). */
   width: number;
   height: number;
   /** Подвал .cad как есть, чтобы сохранить неразобранные настройки. */
@@ -115,8 +115,8 @@ export function createEmptySchema(): Schema {
       date: '',
       fileName: '',
       number: '',
-      width: 420,
-      height: 297,
+      width: 297,
+      height: 210,
     },
   };
 }

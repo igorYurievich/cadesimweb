@@ -132,7 +132,7 @@ export function setupPropertyFields(ctx: AppContext, deps: PropertyFieldsSetup):
       });
       colorField.append(select); deps.propertyFields.append(colorField);
     }
-    if (element.typeCode === 9004) {
+    if (element.typeCode === 9004 || element.typeCode === 9005) {
       addField(deps.uiText().delay, String(element.params.time ?? 0), (value) => {
         const time = Number(value);
         if (Number.isFinite(time) && time >= 0) {

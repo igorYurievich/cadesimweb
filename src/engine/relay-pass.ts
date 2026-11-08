@@ -62,7 +62,38 @@ export function solvePass(
   const thermal = resolveThermalState(schema, inputs);
   const switching = computeSwitching(schema, inputs, coils, thermal, timers);
   const sourceResult = findSources(schema, graph.terminalNet);
-  const nets = propagatePotentials(graph.nets, graph.terminalNet, sourceResult.sources, switching.edges, switching.transfers);
+  let nets = propagatePotentials(graph.nets, graph.terminalNet, sourceResult.sources, switching.edges, switching.transfers);
+  const initialMotors = evaluateMotors(schema, nets, graph.terminalNet, switching.edges);
+  // В сбалансированном режиме «звезда» общая точка U2/V2/W2 имеет потенциал
+  // нейтрали. Добавляем этот опорный потенциал после проверки трёх фаз и
+  // замкнутой звёздной цепи; он позволяет движку запитывать подключённые нагрузки,
+  // не протаскивая L1/L2/L3 в общую точку и не создавая ложное КЗ.
+  const potentialParent = new Map(nets.map((net) => [net.id, net.id] as const));
+  const potentialRoot = (id: number): number => {
+    let current = id;
+    while ((potentialParent.get(current) ?? current) !== current) current = potentialParent.get(current) as number;
+    return current;
+  };
+  for (const edge of switching.edges) {
+    const a = graph.terminalNet[terminalKey(edge.a.element, edge.a.index)];
+    const b = graph.terminalNet[terminalKey(edge.b.element, edge.b.index)];
+    if (a === undefined || b === undefined) continue;
+    const ra = potentialRoot(a); const rb = potentialRoot(b);
+    if (ra !== rb) potentialParent.set(ra, rb);
+  }
+  const starSources: import('./sources').PotentialSource[] = [];
+  for (const motor of schema.elements) {
+    if (motor.typeCode !== 1001 || !initialMotors[motor.id]?.running) continue;
+    const lower = [5, 6, 4].map((index) => graph.terminalNet[terminalKey(motor.id, index)]);
+    const starNet = lower[0];
+    if (starNet === undefined || lower.some((id) => id === undefined || potentialRoot(id) !== potentialRoot(starNet))) continue;
+    const starRoot = potentialRoot(starNet);
+    if (nets.some((net) => potentialRoot(net.id) === starRoot && net.potentials.some((potential) => potential === 'L1' || potential === 'L2' || potential === 'L3'))) continue;
+    starSources.push({ terminal: { element: motor.id, index: 5 }, net: starNet, potential: 'N' });
+  }
+  if (starSources.length > 0) {
+    nets = propagatePotentials(graph.nets, graph.terminalNet, [...sourceResult.sources, ...starSources], switching.edges, switching.transfers);
+  }
   const loads = evaluateLoads(schema, nets, graph.terminalNet);
   const netById = new Map(nets.map((net) => [net.id, net] as const));
   const nextCoils: Record<string, boolean> = {};

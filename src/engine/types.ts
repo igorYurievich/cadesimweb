@@ -112,6 +112,8 @@ export interface TimerState {
   lastTime?: number;
   /** Время отпускания контактов после снятия питания с уже сработавшего таймера. */
   releaseElapsed?: number;
+  /** Питание катушки при последнем расчёте; нужно таймеру 9005 для фиксации нового импульса. */
+  powered?: boolean;
 }
 
 export interface EngineOptions {

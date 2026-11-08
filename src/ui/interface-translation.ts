@@ -28,7 +28,7 @@ export function setupInterfaceTranslation(deps: InterfaceTranslationSetup): () =
     const summaries = [...deps.root.querySelectorAll<HTMLElement>('.app-menu > .menu-group > summary')];
     [t.file, t.edit, t.view, t.elementsMenu, t.language, t.examples, t.help].forEach((value, index) => { if (summaries[index]) summaries[index]!.textContent = value; });
     const commandLabels: Array<[string, string]> = [
-      ['new', t.new], ['open', t.open], ['save-json', t.save], ['export-cad', t.export], ['export-svg', t.exportSvg], ['export-png', t.exportPng], ['print-pdf', t.printPdf], ['sheet', t.sheet],
+      ['new', t.new], ['open', t.open], ['save-json', t.save], ['export-cad', t.export], ['export-svg', t.exportSvg], ['export-png', t.exportPng], ['print-pdf', t.printPdf], ['fit-sheet', t.fitSheet], ['sheet', t.sheet],
       ['copy-selection', t.copy], ['paste-selection', t.paste], ['undo', t.undo], ['redo', t.redo], ['rotate', t.rotate], ['delete', t.delete],
       ['zoom-in', t.zoomIn], ['zoom-out', t.zoomOut], ['fit', t.fit], ['shortcuts', t.shortcuts], ['about', t.about],
     ];
@@ -93,7 +93,7 @@ export function setupInterfaceTranslation(deps: InterfaceTranslationSetup): () =
     if (sheetDialog) {
       set('#sheet-title', t.sheetSize);
       const formatLabel = sheetDialog.querySelector('label'); if (formatLabel?.firstChild) formatLabel.firstChild.textContent = `${t.format} `;
-      const formatOptions: Record<string, string> = { custom: t.custom, '279x210': `A4 — ${t.landscape}`, '210x279': `A4 — ${t.portrait}`, '420x297': `A3 — ${t.landscape}`, '297x420': `A3 — ${t.portrait}` };
+      const formatOptions: Record<string, string> = { custom: t.custom, '297x210': `A4 — ${t.landscape}`, '210x297': `A4 — ${t.portrait}`, '420x297': `A3 — ${t.landscape}`, '297x420': `A3 — ${t.portrait}` };
       for (const option of [...sheetDialog.querySelectorAll<HTMLOptionElement>('option')]) option.textContent = formatOptions[option.value] ?? option.textContent;
       const labels = [...sheetDialog.querySelectorAll('label.property-field')];
       if (labels[1]?.firstChild) labels[1]!.firstChild!.textContent = `${t.width}`;

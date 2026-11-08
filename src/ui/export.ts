@@ -1,7 +1,8 @@
 import { exportCad } from '@model/cad-export';
 import { serializeSchemaJson } from '@model/schema-json';
+import { POSITION_SPECS, currentPosition } from '@engine/behaviors';
 import type { AppContext } from './context';
-import { CADESIM_LINK_TEXT, CADESIM_URL, SVG_NS } from './constants';
+import { CADESIM_LINK_TEXT, CADESIM_URL, IDLE_WIRE_COLORS, SVG_NS } from './constants';
 import { fullSheet, stampMetrics } from './helpers';
 
 export interface ExportActions {
@@ -51,17 +52,35 @@ export function setupExport(ctx: AppContext, svg: SVGSVGElement, status: HTMLEle
     copy.querySelector('#draft-layer')?.remove();
     copy.querySelector('#ghost-layer')?.remove();
     copy.querySelector('#sheet-transform')?.removeAttribute('transform');
+    // Направление вращения на символе зависит от временной анимации и не является
+    // характеристикой самого двигателя в схеме, поэтому в печать/экспорт его не включаем.
+    copy.querySelectorAll('.motor-rotor').forEach((rotor) => rotor.remove());
     const wiresById = new Map(ctx.schema.wires.map((wire) => [String(wire.id), wire]));
     for (const line of [...copy.querySelectorAll<SVGLineElement>('#wire-layer line[data-wire-id]')]) {
       const wire = wiresById.get(line.getAttribute('data-wire-id') ?? '');
       if (!wire || wire.kind === 'junction') continue;
+      line.classList.remove('is-energized');
+      line.style.removeProperty('filter');
       // Screen lines use non-scaling CSS pixels; export maps each thickness step to 0.4 mm
       // so the printed result keeps a comparable visual weight at sheet scale.
       line.setAttribute('stroke-width', String(Math.max(1, wire.thickness || 1) * 0.4));
       line.removeAttribute('vector-effect');
+      line.setAttribute('stroke', wire.kind === 'phase' ? '#566170' : IDLE_WIRE_COLORS[wire.kind]);
     }
+    copy.querySelectorAll<SVGCircleElement>('#wire-layer circle[data-wire-id]').forEach((dot) => {
+      dot.classList.remove('is-energized');
+      dot.setAttribute('fill', '#566170');
+    });
     copy.querySelectorAll('.schematic-element').forEach((element) => {
-      element.setAttribute('color', '#263342');
+      const model = ctx.schema.elements.find((candidate) => String(candidate.id) === element.getAttribute('data-element-id'));
+      for (const className of [...element.classList]) if (className.startsWith('is-')) element.classList.remove(className);
+      element.removeAttribute('style');
+      element.removeAttribute('data-position');
+      if (model && POSITION_SPECS[model.typeCode]) {
+        element.setAttribute('data-position', String(currentPosition(model.typeCode, undefined)));
+      }
+      // Встроенный стиль важнее CSS редактора, где для удобства холста задан серый посветлее.
+      (element as SVGElement).style.setProperty('color', '#4b5563');
       element.classList.remove('is-selected-element');
     });
     copy.querySelectorAll('.is-selected-wire, .is-selected-junction').forEach((wire) => wire.classList.remove('is-selected-wire', 'is-selected-junction'));
@@ -73,7 +92,7 @@ export function setupExport(ctx: AppContext, svg: SVGSVGElement, status: HTMLEle
       try {
         for (const rule of [...sheetStyle.cssRules]) {
           const selectorText = 'selectorText' in rule ? String(rule.selectorText) : '';
-          if (/(schematic-element|\.contact|\.blade-|is-sim|lamp-glass)/.test(selectorText)) relevantRules.push(rule.cssText);
+          if (/(schematic-element|\.contact|\.blade-|is-sim|lamp-glass|\.mp-open|\.mp-closed)/.test(selectorText)) relevantRules.push(rule.cssText);
         }
       } catch { /* Cross-origin style sheets are not needed for the inline SVG artwork. */ }
     }

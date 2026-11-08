@@ -2,7 +2,7 @@ import { createEmptyInputs, createEmptyMemory, simulate } from '@engine/simulate
 import { terminalKey } from '@engine/types';
 import type { EngineMemory, EngineState, PotentialLabel, TerminalKey, UserInputs } from '@engine/types';
 import { POSITION_SPECS, currentPosition, getBehavior } from '@engine/behaviors';
-import { auxContactActive } from '@engine/switching';
+import { auxContactActive, auxContactActuatorActive } from '@engine/switching';
 import { resolveThermalState } from '@engine/thermal';
 import { buildWireLinks, pointOnSegment } from '@engine/wire-links';
 import { terminalPosition } from '@model/geometry';
@@ -53,6 +53,7 @@ export interface SimulationSetup {
   runButton: HTMLButtonElement; stopButton: HTMLButtonElement; simStateValue: HTMLElement;
   simulationContextMenu: HTMLElement; overloadAction: HTMLButtonElement; status: HTMLElement;
   uiText(): InterfaceText; renderSchema(): void; uniformWireColors(): boolean;
+  clearSelection(): void;
 }
 
 export function setupSimulation(ctx: AppContext, deps: SimulationSetup): SimulationController {
@@ -120,8 +121,33 @@ export function setupSimulation(ctx: AppContext, deps: SimulationSetup): Simulat
           if (na !== undefined && nb !== undefined) join(na, nb);
         }
       }
+      // У работающего двигателя метки потенциалов не переходят через обмотки.
+      // Для отображения тока продолжаем цветовой путь через замкнутые полюса
+      // тепловых реле (например, от U2/V2/W2 к входам контактора K2).
+      for (const relay of ctx.schema.elements) {
+        if (relay.typeCode !== 6007 || !result.contacts[relay.id] || result.tripped[relay.id]) continue;
+        for (const link of getBehavior(relay.typeCode).links) {
+          if (link.kind !== 'switch') continue;
+          const [a, b] = link.terminals;
+          const na = result.terminalNet[terminalKey(relay.id, a!)];
+          const nb = result.terminalNet[terminalKey(relay.id, b!)];
+          if (na !== undefined && nb !== undefined) join(na, nb);
+        }
+      }
       for (const motor of ctx.schema.elements) {
         if (motor.typeCode !== 1001 || !result.motors[motor.id]?.running) continue;
+        // У мотора Y/Δ ток протекает через обмотки, но движок не переносит
+        // потенциал между верхними и нижними клеммами. Поэтому отдельно
+        // подсвечиваем подключённые к U2/V2/W2 провода, если в их сети нет метки.
+        const bottomTerminalNets = new Set([4, 5, 6]
+          .map((index) => result.terminalNet[terminalKey(motor.id, index)])
+          .filter((id): id is number => id !== undefined));
+        for (const [group, keys] of wireTerminalKeys) {
+          if ([...keys].some((key) => {
+            const netId = result.terminalNet[key];
+            return netId !== undefined && bottomTerminalNets.has(netId) && !(nets.get(netId)?.potentials.length);
+          })) motorCurrentGroups.add(group);
+        }
         // В звезде W2/U2/V2 и звёздная перемычка соединены замкнутыми KM3,
         // но эта плавающая точка не имеет метки фазы.
         const bottomNets = [5, 6, 4].map((index) => result.terminalNet[terminalKey(motor.id, index)]);
@@ -210,8 +236,11 @@ export function setupSimulation(ctx: AppContext, deps: SimulationSetup): Simulat
       // У выключателя с фиксацией лопасть рисуется по тому же классу, что и у нажатой кнопки.
       symbol.classList.toggle('is-sim-pressed', (simInputs.pressed[element.id] ?? false) || (maintainedTypes.has(element.typeCode) && simInputs.toggled[element.id] === true));
       if (POSITION_SPECS[element.typeCode]) symbol.setAttribute('data-position', String(currentPosition(element.typeCode, simInputs.positions?.[element.id])));
-      symbol.classList.toggle('is-sim-open', manuallyOpen || tripped);
+      // Тепловое реле отображает состояние цветом, не поворачивая силовые лопасти.
+      // Электрически контакты при срабатывании по-прежнему размыкаются в движке.
+      symbol.classList.toggle('is-sim-open', element.typeCode !== 6007 && (manuallyOpen || tripped));
       symbol.classList.toggle('is-sim-tripped', tripped);
+      symbol.classList.toggle('is-thermal-relay-tripped', element.typeCode === 6007 && tripped);
       symbol.classList.toggle('is-thermal-tripped', thermalContactTripped);
       symbol.classList.toggle('is-sim-fault-glow', Boolean(simInputs.tripped[element.id]));
       symbol.classList.toggle('is-sim-closed', result?.contacts[element.id] ?? false);
@@ -222,11 +251,14 @@ export function setupSimulation(ctx: AppContext, deps: SimulationSetup): Simulat
         : element.typeCode === 7005
           ? result !== undefined && !result.contacts[element.id]
           : undefined;
-      const auxActive = timedSinglePoleActive ?? (result !== undefined && auxContactActive(element, ctx.schema, result.coils, result.memory.timers));
+      const auxActive = timedSinglePoleActive ?? (result !== undefined && (
+        auxContactActive(element, ctx.schema, result.coils, result.memory.timers)
+        || auxContactActuatorActive(element, ctx.schema, simInputs)
+      ));
       symbol.classList.toggle('is-aux-active', auxSwitches && result !== undefined && auxActive);
-      symbol.classList.toggle('is-coil-energized', element.typeCode === 9000 || element.typeCode === 9004 ? (result?.coils[element.name] ?? false) : false);
+      symbol.classList.toggle('is-coil-energized', element.typeCode === 9000 || element.typeCode === 9004 ? (result?.coils[element.name] ?? false) : element.typeCode === 9005 ? (result?.memory.timers[element.id]?.powered ?? false) : false);
       symbol.classList.toggle('is-lamp-lit', element.typeCode === 9008 ? (result?.lamps[element.id] ?? false) : false);
-      if (element.typeCode === 9004) {
+      if (element.typeCode === 9004 || element.typeCode === 9005) {
         const readout = symbol.querySelector<SVGTextElement>('.timer-readout');
         const timer = result?.memory.timers[element.id];
         const total = Math.max(0, Number(element.params.time ?? 0));
@@ -261,7 +293,7 @@ export function setupSimulation(ctx: AppContext, deps: SimulationSetup): Simulat
       symbol.classList.toggle('is-sim-active', result !== undefined);
       const powered = element.terminals.some((_, index) => (nets.get(result?.terminalNet[terminalKey(element.id, index)] ?? -1)?.potentials.length ?? 0) > 0);
       // Выключенный/сработавший аппарат защиты не подсвечивается красным: остаётся серым.
-      symbol.classList.toggle('is-powered', powered && !(latchedTypes.has(element.typeCode) && (manuallyOpen || tripped)));
+      symbol.classList.toggle('is-powered', element.typeCode !== 6007 && powered && !(latchedTypes.has(element.typeCode) && (manuallyOpen || tripped)));
       if (motor?.running) {
         // Постоянная скорость: менять animation-duration на лету нельзя — браузер пересчитывает фазу и стрелка «дёргается».
         symbol.style.setProperty('--motor-period', '0.9s');
@@ -325,6 +357,7 @@ export function setupSimulation(ctx: AppContext, deps: SimulationSetup): Simulat
     if (simMode === 'run') return;
     for (const element of ctx.schema.elements) if (startsOpen(element.typeCode) && simInputs.toggled[element.id] === undefined) simInputs.toggled[element.id] = false;
     simMode = 'run'; lastFrameTime = undefined; evaluateSimulation();
+    deps.clearSelection();
     animationFrame = requestAnimationFrame(simulationTick);
   };
   /** Полная остановка: время в 0, память, нажатые кнопки и результат расчёта сброшены, схема возвращается в редактор. */

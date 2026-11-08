@@ -218,7 +218,7 @@ function drawIndicator(g: SVGGElement): void {
 /** Одиночный контакт панели «Accionamientos» (кнопка, грибок, выключатель с фиксацией, концевик). */
 function drawSingleActuated(g: SVGGElement, element: SchemaElement, nc: boolean, actuator: ActuatorKind): void {
   const x = columns(element)[0] ?? 0;
-  g.append(contactColumn(x, rowGapOf(element), { nc, control: 'engine' }));
+  g.append(contactColumn(x, rowGapOf(element), { nc, control: 'engine', straightOpenNc: nc }));
   g.append(ACTUATORS[actuator](x, nc));
 }
 
@@ -228,7 +228,7 @@ function drawPushPair(g: SVGGElement, element: SchemaElement, actuator: Actuator
   const rowGap = rowGapOf(element);
   const nc = xs[0] ?? 0;
   const no = xs[1] ?? nc + 9;
-  g.append(contactColumn(nc, rowGap, { nc: true, control: 'pressed' }));
+  g.append(contactColumn(nc, rowGap, { nc: true, control: 'pressed', straightOpenNc: true }));
   g.append(contactColumn(no, rowGap, { control: 'pressed' }));
   g.append(dashed(`M ${nc + 1.5} 6 H ${no - 1.5}`, '1.5 1.1'));
   g.append(ACTUATORS[actuator](nc, true));
@@ -247,7 +247,8 @@ function drawPushChangeover(g: SVGGElement, element: SchemaElement, actuator: Ac
 /** Привод конечного выключателя: пунктир к контакту и ролик на конце. */
 export function limitActuator(x: number, nc: boolean, to = nc ? x + 1.5 : x - 1.5): SVGGElement {
   const midX = to;
-  return group('actuator', dashed(`M ${x - 5} 6 H ${midX}`, '1.5 1.1'), circle(x - 6.4, 6, 1.4, { 'stroke-width': 0.8 }), path(`M ${x - 6.4} 4.6 V 3.2`, 0.7));
+  return group('actuator', dashed(`M ${x - 5} 6 H ${midX}`, '1.5 1.1'),
+    group('actuator-roller', circle(x - 6.4, 6, 1.4, { 'stroke-width': 0.8 }), path(`M ${x - 6.4} 4.6 V 3.2`, 0.7)));
 }
 
 /** Привод ручного выключателя (Interruptor): скоба слева, «V» и линия к середине лопасти первого полюса. */
@@ -589,7 +590,7 @@ function drawLamp(g: SVGGElement, element: SchemaElement): void {
   g.append(path(`M ${x} 0 V ${mid - r} M ${x} ${mid + r} V ${rowGap}`));
   g.append(circle(x, mid, r, { class: `lamp-glass lamp-c${index}`, fill: '#f6f7f8', stroke: '#7b8794' }));
   const d = r * Math.SQRT1_2;
-  g.append(path(`M ${x - d} ${mid - d} L ${x + d} ${mid + d} M ${x + d} ${mid - d} L ${x - d} ${mid + d}`, 0.7));
+  g.append(path(`M ${x - d} ${mid - d} L ${x + d} ${mid + d} M ${x + d} ${mid - d} L ${x - d} ${mid + d}`, 0.7, { stroke: '#7b8189' }));
 }
 
 /** Катушки и реле панели «Bobinas…» с обычным корпусом 8×4: отличаются значком в левом отсеке. Только символы. */
@@ -613,6 +614,11 @@ function drawCoilVariant(g: SVGGElement, element: SchemaElement): void {
       break;
     case 9005: // на отключение: залитый отсек
       g.append(solid());
+      {
+        const readout = label('', x + 2, rowGapOf(element) + 4.2, { size: 2.4, halo: true });
+        readout.setAttribute('class', 'timer-readout');
+        g.append(readout);
+      }
       break;
     case 9006: // на включение и отключение: залитый отсек со знаком выдержки
       g.append(solid(), path(`M ${x - 3.4} ${mid - 1.1} H ${x - 1.6} M ${x - 2.5} ${mid - 1.1} V ${mid + 1.1} M ${x - 3.4} ${mid + 1.1} H ${x - 1.6}`, 0.6, { stroke: '#fff' }));
@@ -900,13 +906,13 @@ function drawAuxContact(g: SVGGElement, element: SchemaElement): void {
   } else if (kind === 'nono') {
     const nc = xs[0] ?? 0;
     const no = xs[1] ?? nc + 9;
-    g.append(contactColumn(nc, rowGap, { nc: true, control: 'aux' }));
+    g.append(contactColumn(nc, rowGap, { nc: true, control: 'aux', straightOpenNc: true }));
     g.append(contactColumn(no, rowGap, { control: 'aux' }));
     left = nc;
     linkTo = no - 1.5;
   } else {
     const x = xs[0] ?? 0;
-    g.append(contactColumn(x, rowGap, { nc: kind === 'nc', control: 'aux' }));
+    g.append(contactColumn(x, rowGap, { nc: kind === 'nc', control: 'aux', straightOpenNc: kind === 'nc' }));
     linkTo = kind === 'nc' ? x + 1.5 : x - 1.5;
   }
   if (timing === 'instant') return;
@@ -1053,6 +1059,13 @@ function drawBody(g: SVGGElement, element: SchemaElement, rotation: number): voi
   const xs = columns(element);
   const rowGap = rowGapOf(element);
   switch (element.typeCode) {
+    case 8: {
+      const text = String(element.params.text ?? element.raw?.tail ?? '');
+      const annotation = shape('text', { x: 0, y: 0, fill: NAME_COLOR, 'font-size': 2.8, 'font-weight': 700, 'font-family': 'Arial, Helvetica, sans-serif' });
+      annotation.textContent = text;
+      g.append(annotation);
+      break;
+    }
     case 1000:
     case 1001:
     case 1002:
@@ -1402,7 +1415,9 @@ export function createElementSymbol(element: SchemaElement): SVGGElement | null 
     9012: { x: -2, y: -1, w: 12, h: 14 },
     9013: { x: -3, y: -1, w: 13, h: 14 },
   };
-  const frameHit = FRAME_HIT[element.typeCode];
+  const frameHit = element.typeCode === 8
+    ? { x: 0, y: -element.size.h, w: Math.max(element.size.w, 3), h: Math.max(element.size.h, 3) }
+    : FRAME_HIT[element.typeCode];
   root.append(frameHit
     ? shape('rect', { class: 'hit-area', x: frameHit.x, y: frameHit.y, width: frameHit.w, height: frameHit.h, fill: '#000', 'fill-opacity': 0, stroke: 'none' })
     : shape('rect', { class: 'hit-area', x: hitLeft, y: -1, width: hitRight - hitLeft, height: hitBottom + 2, fill: '#000', 'fill-opacity': 0, stroke: 'none' }));

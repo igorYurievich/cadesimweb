@@ -66,11 +66,16 @@ function toWire(r: CadRecord, kind: NonNullable<ReturnType<typeof wireKindOf>>):
 
 function toElement(r: CadRecord, continuations: readonly CadRecord[] = []): SchemaElement {
   const info = getCadType(r.type);
-  const size = { w: num(r, 14), h: num(r, 15) };
+  const size = r.type === 8
+    ? { w: Math.abs(num(r, 10) - num(r, 8)), h: Math.abs(num(r, 11) - num(r, 9)) }
+    : { w: num(r, 14), h: num(r, 15) };
   const rotation = toRotation(num(r, 17));
   // Метка клеммы лежит в текстовом поле того же номера, что и её флаг: флаг i → texts[2 + i].
   // Обычно флаги идут подряд с нуля, но у счётчика 9016 флаги 0..3 и 6, а между метками стоят параметры.
-  const slots = flagSlots(r);
+  const flaggedSlots = flagSlots(r);
+  // Для контактной группы код типа задаёт реальную топологию. В старых/повреждённых
+  // .cad-записях после клемм может оставаться мусор в дополнительных слотах флагов.
+  const slots = info.terminalCount === undefined ? flaggedSlots : flaggedSlots.slice(0, info.terminalCount);
   // Записи-продолжения (тип -1) дают дополнительные клеммы того же элемента, метки по их слотам флагов.
   const labels = [
     ...slots.map((i) => r.texts[2 + i] ?? ''),
@@ -79,11 +84,12 @@ function toElement(r: CadRecord, continuations: readonly CadRecord[] = []): Sche
   const terminals = buildTerminals(info, labels.length, size, rotation, labels);
 
   // Всё остальное в текстовых полях после имени и функции (кроме меток клемм) считаем параметрами.
-  const labelFields = new Set(slots.map((i) => 2 + i));
+  const labelFields = new Set(flaggedSlots.map((i) => 2 + i));
   const extra = r.texts.filter((t, i) => i >= 2 && !labelFields.has(i) && t !== '');
   const params: SchemaElement['params'] = {};
   if (info.family === 'lamp' && extra[0] !== undefined) params.color = Number(extra[0]);
-  if (info.code === 9004) {
+  if (r.type === 8) params.text = r.tail ?? r.texts.find((value) => value.trim() !== '') ?? '';
+  if (info.code === 9004 || info.code === 9005) {
     // Порядок и смысл (шкала, значение) подтверждены только по двум образцам: 0/5 и 0/10.
     if (extra[0] !== undefined) params.scale = Number(extra[0]);
     if (extra[1] !== undefined) params.time = Number(extra[1]);
