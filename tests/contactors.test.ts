@@ -25,7 +25,8 @@ describe('contactors: panel roster', () => {
       expect(isKnownCadType(code)).toBe(true);
       expect(getCadType(code).confidence).toBe('confirmed');
     }
-    expect(missingBehaviors()).toEqual([]);
+    // Type 8 is a text annotation and intentionally has no engine behavior.
+    expect(missingBehaviors()).toEqual([8]);
   });
 });
 

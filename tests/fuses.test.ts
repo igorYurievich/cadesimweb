@@ -27,7 +27,8 @@ describe('fuses: panel roster', () => {
       expect(isKnownCadType(code)).toBe(true);
       expect(getCadType(code).family).toBe('fuse');
     }
-    expect(missingBehaviors()).toEqual([]);
+    // Type 8 is a text annotation and intentionally has no engine behavior.
+    expect(missingBehaviors()).toEqual([8]);
   });
 
   it('the sample file imports without unknown types and with the expected terminals', () => {

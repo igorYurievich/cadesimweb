@@ -24,7 +24,8 @@ describe('motors: panel roster', () => {
       expect(isKnownCadType(code)).toBe(true);
       expect(getCadType(code).family).toBe('motor');
     }
-    expect(missingBehaviors()).toEqual([]);
+    // Type 8 is a text annotation and intentionally has no engine behavior.
+    expect(missingBehaviors()).toEqual([8]);
   });
 
   it('the sample file imports with the expected terminals; the actuator record (10550) is read but its type is unknown', () => {

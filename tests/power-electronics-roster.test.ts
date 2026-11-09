@@ -52,7 +52,8 @@ describe('power electronics: panel roster (all 17)', () => {
       expect(getCadType(code).layout.kind === 'none').toBe(false);
     }
     expect(CODES.map((code) => getCadType(code).family)).toEqual(['resistor', 'resistor', 'transformer', 'electronic-starter', 'control-unit', 'control-unit', 'drive', 'drive', 'control-unit', 'drive', 'drive', 'drive', 'drive', 'control-unit', 'control-unit', 'control-unit', 'control-unit']);
-    expect(missingBehaviors()).toEqual([]);
+    // Type 8 is a text annotation and intentionally has no engine behavior.
+    expect(missingBehaviors()).toEqual([8]);
   });
 });
 

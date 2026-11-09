@@ -17,7 +17,9 @@ export function lineElement(wire: WireSegment): SVGLineElement {
   line.setAttribute('x2', String(wire.to.x));
   line.setAttribute('y2', String(wire.to.y));
   line.setAttribute('stroke', IDLE_WIRE_COLORS[wire.kind]);
-  line.setAttribute('stroke-width', String(Math.max(1, wire.thickness || 1) * 1.35));
+  const strokeWidth = Math.max(1, wire.thickness || 1) * 1.35;
+  line.setAttribute('stroke-width', String(strokeWidth));
+  line.style.setProperty('--wire-stroke-width', `${strokeWidth}px`);
   line.setAttribute('stroke-linecap', 'square');
   line.setAttribute('vector-effect', 'non-scaling-stroke');
   line.setAttribute('data-wire-id', String(wire.id));

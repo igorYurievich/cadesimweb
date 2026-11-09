@@ -42,7 +42,8 @@ describe('accionamientos: sample import', () => {
   it('all 24 codes are known and have a behavior', () => {
     for (const code of ALL) expect(isKnownCadType(code)).toBe(true);
     expect(unknownTypes).toEqual([]);
-    expect(missingBehaviors()).toEqual([]);
+    // Type 8 is a text annotation and intentionally has no engine behavior.
+    expect(missingBehaviors()).toEqual([8]);
   });
 
   it('terminal labels, frame sizes and indexes match the sample', () => {

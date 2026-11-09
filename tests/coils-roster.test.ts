@@ -18,7 +18,8 @@ describe('coils and signaling: panel roster', () => {
 
   it('all codes are known and have engine behavior', () => {
     for (const code of COIL_CODES) expect(isKnownCadType(code)).toBe(true);
-    expect(missingBehaviors()).toEqual([]);
+    // Type 8 is a text annotation and intentionally has no engine behavior.
+    expect(missingBehaviors()).toEqual([8]);
   });
 
   it('the sample file imports without unknown types and with the expected terminals', () => {

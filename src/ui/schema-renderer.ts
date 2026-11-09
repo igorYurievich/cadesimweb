@@ -11,7 +11,7 @@ export interface SchemaRendererSetup {
   root: HTMLElement; svg: SVGSVGElement; wireLayer: SVGGElement; elementLayer: SVGGElement;
   selectionLayer: SVGGElement; selected: Map<string, Selectable>; drag(): DragState | undefined;
   renderSheetFrame(): void; drawDraft(): void; simulation: SimulationController;
-  updateHistoryButtons(): void; renderProperties(): void; persistSchema(): void;
+  updateHistoryButtons(): void; renderProperties(): void; persistSchema(): void; syncSelectedWireThickness(): void;
 }
 
 export function setupSchemaRenderer(ctx: AppContext, deps: SchemaRendererSetup): () => void {
@@ -95,6 +95,6 @@ export function setupSchemaRenderer(ctx: AppContext, deps: SchemaRendererSetup):
     }
     deps.drawDraft(); deps.updateHistoryButtons();
     deps.svg.setAttribute('aria-label', schema.sheet.fileName ? `Схема ${schema.sheet.fileName}` : 'Поле схемы');
-    deps.simulation.applySimulationVisuals(); deps.renderProperties(); deps.persistSchema();
+    deps.simulation.applySimulationVisuals(); deps.renderProperties(); deps.syncSelectedWireThickness(); deps.persistSchema();
   };
 }

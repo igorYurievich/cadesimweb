@@ -24,6 +24,9 @@ describe('Actividad 1.5 — arranque secuencial temporizado (5.8c)', () => {
     state = scenario.advance(0.1);
     expect(motors.map((id) => state.motors[id]?.running)).toEqual([true, true, false]);
     expect(state.memory.timers[timer1]?.phase).toBe('done');
+    // The second stage is powered by the contact that closes when timer1
+    // expires, so its own countdown begins on the following simulation pass.
+    state = scenario.advance(0);
     expect(state.memory.timers[timer2]?.phase).toBe('counting');
 
     state = scenario.advance(9.9);
@@ -42,11 +45,17 @@ describe('Actividad 1.5 — arranque secuencial temporizado (5.8c)', () => {
     scenario.release('S1');
     scenario.advance(6);
     expect(scenario.state.memory.timers[timer1]?.phase).toBe('done');
+    scenario.advance(0);
     expect(scenario.state.memory.timers[timer2]?.phase).toBe('counting');
 
     const stopped = scenario.press('S2');
-    expect(stopped.memory.timers[timer1]?.phase).toBe('idle');
+    // Timer1 briefly releases its completed contact after losing power.
+    expect(stopped.memory.timers[timer1]?.phase).toBe('releasing');
     expect(stopped.memory.timers[timer2]?.phase).toBe('idle');
     expect(Object.values(stopped.motors).some((motor) => motor.running)).toBe(false);
+
+    const reset = scenario.advance(0.2);
+    expect(reset.memory.timers[timer1]?.phase).toBe('idle');
+    expect(reset.memory.timers[timer2]?.phase).toBe('idle');
   });
 });

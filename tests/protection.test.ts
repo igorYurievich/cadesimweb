@@ -18,7 +18,8 @@ describe('protection: panel roster', () => {
 
   it('all protection codes are known and have engine behavior', () => {
     for (const code of PROTECTION_CODES) expect(isKnownCadType(code)).toBe(true);
-    expect(missingBehaviors()).toEqual([]);
+    // Type 8 is a text annotation and intentionally has no engine behavior.
+    expect(missingBehaviors()).toEqual([8]);
     expect(getCadType(6013).family).toBe('surge-limiter');
   });
 

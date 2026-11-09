@@ -252,7 +252,7 @@ export function mountApp(root: HTMLElement): void {
       <section class="viewport-toolbar" aria-label="Провода и симуляция">
         <div class="tool-group wire-controls" aria-label="Провода">
           <select id="wire-kind" aria-label="Тип нового провода"><option value="phase">Фаза</option><option value="neutral">Нейтраль</option><option value="protection">PE</option><option value="three">3 фазы (L1 L2 L3)</option><option value="threeN">3 фазы + N</option></select>
-          <select id="wire-thickness" aria-label="Толщина провода" title="Толщина провода"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select>
+          <select id="wire-thickness" aria-label="Толщина провода" title="Толщина провода"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="" hidden>—</option></select>
           <button type="button" id="draw-wire" title="Провод (C)">Провод</button>
           <span class="tool-sep" aria-hidden="true"></span>
           <button type="button" id="undo" class="icon-btn" title="Отменить (Ctrl+Z)" aria-label="Отменить" disabled>↶</button>
@@ -646,7 +646,14 @@ export function mountApp(root: HTMLElement): void {
   svg.addEventListener('pointerleave', () => { ghostLayer.replaceChildren(); if (cursorCoords) cursorCoords.value = 'X: — Y: —'; });
   svg.addEventListener('pointerenter', (event) => moveGhost(event));
   const renderSheetFrame = setupSheetFrame(ctx, sheetFrame, sheetStamp);
-  const renderSchema = setupSchemaRenderer(ctx, { root, svg, wireLayer, elementLayer, selectionLayer, selected, drag: () => drag, renderSheetFrame, drawDraft, simulation, updateHistoryButtons, renderProperties: () => renderProperties(), persistSchema });
+  const syncSelectedWireThickness = (): void => {
+    const selectedWireIds = [...selected.values()].filter((item) => item.kind === 'wire').map((item) => item.id);
+    const selectedWires = schema.wires.filter((wire) => selectedWireIds.includes(wire.id) && wire.kind !== 'junction');
+    if (!selectedWires.length) return;
+    const firstThickness = selectedWires[0]?.thickness;
+    wireThicknessSelect.value = selectedWires.every((wire) => wire.thickness === firstThickness) ? String(firstThickness) : '';
+  };
+  const renderSchema = setupSchemaRenderer(ctx, { root, svg, wireLayer, elementLayer, selectionLayer, selected, drag: () => drag, renderSheetFrame, drawDraft, simulation, updateHistoryButtons, renderProperties: () => renderProperties(), persistSchema, syncSelectedWireThickness });
   const activeDocument = (): DocumentTab => documents.find((tab) => tab.id === activeDocumentId) ?? documents[0]!;
   const renderDocumentTabs = (): void => {
     if (!documentTabBar) return;
@@ -881,7 +888,20 @@ export function mountApp(root: HTMLElement): void {
     wireKindSelect.dispatchEvent(new Event('change', { bubbles: true }));
   };
   wireKindSelect.addEventListener('change', () => { if (wireDrawing) drawDraft(); });
-  wireThicknessSelect.addEventListener('change', () => { if (wireDrawing) drawDraft(); });
+  wireThicknessSelect.addEventListener('change', () => {
+    const thickness = Number(wireThicknessSelect.value);
+    if (!Number.isInteger(thickness) || thickness < 1 || thickness > 4) return;
+    const selectedWires = [...selected.values()].filter((item) => item.kind === 'wire')
+      .map((item) => schema.wires.find((wire) => wire.id === item.id))
+      .filter((wire): wire is NonNullable<typeof wire> => wire !== undefined && wire.kind !== 'junction');
+    if (selectedWires.length) {
+      const before = cloneSchema(schema);
+      for (const wire of selectedWires) wire.thickness = thickness;
+      commitSchema(before);
+      renderSchema();
+    }
+    if (wireDrawing) drawDraft();
+  });
   undoButton.addEventListener('click', () => {
     if (wireDrawing && draftPoints.length) { draftPoints.pop(); draftCursor = undefined; drawDraft(); updateHistoryButtons(); return; }
     if (canUndo(history)) restoreHistory(undoHistory(history));

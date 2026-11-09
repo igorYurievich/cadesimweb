@@ -16,10 +16,11 @@ describe('cad-types: table', () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
-  it('confirmed types always have a catalog command', () => {
+  it('confirmed component types have a catalog command; text annotations do not', () => {
     for (const t of allCadTypes()) {
-      if (t.confidence === 'confirmed') expect(t.commandIds.length).toBeGreaterThan(0);
+      if (t.confidence === 'confirmed' && t.code !== 8) expect(t.commandIds.length).toBeGreaterThan(0);
     }
+    expect(getCadType(8).commandIds).toHaveLength(0);
   });
 
   it('unknown confidence never carries a command id', () => {
