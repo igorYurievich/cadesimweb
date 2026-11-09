@@ -21,7 +21,7 @@ export const CAD_EXPORT_WARNING_KEY = 'cadesimu-web:cad-export-warning-dismissed
 
 export const OPTIONAL_GROUP_STORAGE_KEY = 'cadesimu-visible-optional-groups:v1';
 
-export const OPTIONAL_PALETTE_GROUPS = ['grafcet', 'ladder', 'logic', 'realistic-2d', 'realistic-3d', 'wiring', 'pneumatics', 'io-plc', 'power-electronics', 'electronic-relays'] as const satisfies readonly GroupKey[];
+export const OPTIONAL_PALETTE_GROUPS = ['grafcet', 'ladder', 'logic', 'realistic-2d', 'realistic-3d', 'wiring', 'pneumatics', 'io-plc', 'power-electronics', 'electronic-relays', 'sensors'] as const satisfies readonly GroupKey[];
 
 export const CAD_GRID_STEP = 3;
 

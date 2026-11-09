@@ -137,10 +137,10 @@ describe('cad-import: Actividad 1.5 excerpt', () => {
     expect(pos(q, 4)).toEqual({ x: 18, y: 93 });
   });
 
-  it('shows a visible junction dot only when the record has a size', () => {
-    const dots = excerpt.schema.wires.filter((w) => w.kind === 'junction');
-    expect(dots).toHaveLength(1);
-    expect(dots[0]?.dot).toBe(true);
+  it('shows imported junction records even when their size fields are zero', () => {
+    const dots = full.schema.wires.filter((w) => w.kind === 'junction');
+    expect(dots).toHaveLength(3);
+    expect(dots.every((dot) => dot.dot)).toBe(true);
   });
 
   it('single-pole contactor and timed contact fall to a 12-high column', () => {

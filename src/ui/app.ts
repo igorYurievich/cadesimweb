@@ -232,6 +232,7 @@ export function mountApp(root: HTMLElement): void {
               <label class="menu-toggle"><input type="checkbox" data-optional-group="io-plc"><span data-extra-label="extraIoPlc">Входы / выходы ПЛК</span></label>
               <label class="menu-toggle"><input type="checkbox" data-optional-group="power-electronics"><span data-extra-label="extraPowerElectronics">Силовая электроника</span></label>
               <label class="menu-toggle"><input type="checkbox" data-optional-group="electronic-relays"><span data-extra-label="extraElectronicRelays">Электронные реле</span></label>
+              <label class="menu-toggle"><input type="checkbox" data-optional-group="sensors"><span data-extra-label="extraSensors">Датчики</span></label>
             </div>
           </div></details>
           <details class="menu-group language-menu"><summary>Язык</summary><div class="menu-popover">
@@ -909,6 +910,7 @@ export function mountApp(root: HTMLElement): void {
   redoButton.addEventListener('click', () => { if (canRedo(history)) restoreHistory(redoHistory(history)); });
   runButton.addEventListener('click', () => {
     if (wireDrawing) cancelWireDrawing();
+    if (nodeTool) leaveNodeTool();
     simulation.startSimulation();
   });
   stopButton.addEventListener('click', simulation.stopSimulation);

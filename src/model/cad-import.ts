@@ -59,7 +59,9 @@ function toWire(r: CadRecord, kind: NonNullable<ReturnType<typeof wireKindOf>>):
     from: { x: num(r, 8), y: num(r, 9) },
     to: { x: num(r, 10), y: num(r, 11) },
     thickness: num(r, 18),
-    dot: kind === 'junction' && num(r, 14) > 0,
+    // CADe_SIMU 4.2 writes ordinary junction records with zero size fields;
+    // the type code itself identifies a visible connection dot.
+    dot: kind === 'junction',
     raw: rawOf(r),
   };
 }
