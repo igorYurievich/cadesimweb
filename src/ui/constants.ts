@@ -26,13 +26,13 @@ export const CAD_GRID_STEP = 3;
 
 export const SVG_NS = 'http://www.w3.org/2000/svg';
 
-export const WIRE_COLORS = { phase: '#9e1b16', neutral: '#1749e8', protection: '#13852c', junction: '#263342' } as const;
+export const WIRE_COLORS = { phase: '#9e1b16', neutral: '#7a8798', protection: '#7a8798', junction: '#263342' } as const;
 
 export const POTENTIAL_COLORS: Record<PotentialLabel, string> = {
-  L1: '#b4541a', L2: '#1b2430', L3: '#8e99a8', N: '#1f6fe0', PE: '#1fa355', '+': '#d93a3a', '-': '#2f5fb8',
+  L1: '#b4541a', L2: '#1b2430', L3: '#8e99a8', N: '#1f6fe0', PE: '#1fa355', '+': '#d93a3a', '-': '#1b2430',
 };
 
-export const IDLE_WIRE_COLORS = { phase: '#7a8798', neutral: '#6f93c9', protection: '#6fae86', junction: '#5b6878' } as const;
+export const IDLE_WIRE_COLORS = { phase: '#7a8798', neutral: '#7a8798', protection: '#7a8798', junction: '#5b6878' } as const;
 
 export const CONFLICT_COLOR = '#e5322d';
 
@@ -57,9 +57,9 @@ export const STAMP_CELLS: ReadonlyArray<{ key?: StampKey; label?: string; x0: nu
 
 export const POTENTIAL_ORDER: readonly PotentialLabel[] = ['L1', 'L2', 'L3', 'N', 'PE', '+', '-'];
 
-export const latchedTypes = new Set([2003, 2004, 2005, 2007, 5005, 5006, 5007, 5008, 5009, 6000, 6001, 6002, 6003, 6004, 6005, 6006, 6007, 6008, 6009, 6010, 6011, 6012]);
+export const latchedTypes = new Set([2003, 2004, 2005, 2007, 5000, 5001, 5002, 5003, 5004, 5005, 5006, 5007, 5008, 5009, 6000, 6001, 6002, 6003, 6004, 6005, 6006, 6007, 6008, 6009, 6010, 6011, 6012]);
 
-export const armedByDefaultTypes = new Set([6007]);
+export const armedByDefaultTypes = new Set([5000, 5001, 5002, 5003, 5004, 6007]);
 
 export const startsOpen = (typeCode: number): boolean => latchedTypes.has(typeCode) && !armedByDefaultTypes.has(typeCode);
 

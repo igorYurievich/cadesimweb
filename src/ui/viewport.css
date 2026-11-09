@@ -132,7 +132,10 @@ kbd { padding: 2px 6px; border: 1px solid var(--border); border-radius: 4px; bac
 .palette-group-toggle:hover { background: var(--surface-hover); }
 .palette-count-badge { min-width: 24px; margin-left: auto; padding: 1px 7px; border-radius: 999px; background: var(--surface-hover); color: var(--muted); font-size: 11px; font-weight: 600; text-align: center; }
 .palette-items { display: grid; gap: 2px; padding: 2px 0 8px 22px; }
-.palette-item { min-height: 30px; padding: 5px 9px; border: 1px solid transparent; border-radius: 6px; background: transparent; color: var(--text); font: inherit; font-size: 12px; text-align: left; cursor: grab; }
+.palette-item { display: flex; align-items: center; justify-content: space-between; gap: 6px; width: 100%; min-height: 30px; padding: 5px 9px; border: 1px solid transparent; border-radius: 6px; background: transparent; color: var(--text); font: inherit; font-size: 12px; text-align: left; cursor: grab; }
+.palette-item-label { min-width: 0; }
+.palette-verified-badge { display: inline-grid; flex: 0 0 17px; width: 17px; height: 17px; place-items: center; border: 1px solid #39a96b; border-radius: 999px; background: #e4f7ec; color: #177342; font-size: 11px; font-weight: 800; line-height: 1; }
+#app[data-theme="dark"] .palette-verified-badge { border-color: #388d60; background: #173a29; color: #79dfa3; }
 .palette-item:hover:not(:disabled), .palette-item[aria-pressed="true"] { border-color: var(--border); background: var(--accent-soft); }
 .palette-item[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); font-weight: 600; }
 .palette-item:disabled { color: var(--muted); opacity: .55; cursor: not-allowed; }
@@ -168,7 +171,7 @@ kbd { padding: 2px 6px; border: 1px solid var(--border); border-radius: 4px; bac
 .shortcuts-dialog dl > div { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding-bottom: 7px; border-bottom: 1px solid var(--border); }
 .shortcuts-dialog dt { color: var(--muted); font-size: 11px; }
 .shortcuts-dialog dd { display: flex; gap: 4px; margin: 0; }
-.about-dialog { text-align: center; }
+.about-dialog { max-height: min(90vh, 760px); overflow-y: auto; text-align: center; }
 .about-dialog .about-mark { display: grid; width: 52px; height: 52px; place-items: center; margin: 0 auto 12px; border-radius: 15px; background: linear-gradient(145deg, #1786d1, #1355a0); color: #fff; font-size: 18px; font-weight: 750; box-shadow: 0 4px 12px #11578b33; }
 .about-dialog dl { display: grid; gap: 8px; margin: 18px auto 0; max-width: 260px; }
 .about-dialog dl > div { display: flex; justify-content: space-between; gap: 10px; padding-bottom: 7px; border-bottom: 1px solid var(--border); }
@@ -182,6 +185,8 @@ kbd { padding: 2px 6px; border: 1px solid var(--border); border-radius: 4px; bac
 /* Символы: серые в покое, красные под напряжением (как в CADe_SIMU). */
 .schematic-element { color: #7b8189; }
 .schematic-element.is-powered { color: #e3181f; }
+.schematic-element.is-power-supply-active { color: #626a73; }
+.schematic-element.is-power-supply-active .symbol-body > rect:first-child { fill: #c6c9cd; }
 .schematic-element.is-thermal-relay-tripped { color: #e3181f; }
 .schematic-element.is-sim-active.is-sim-open { color: #8b9097; }
 .schematic-element.is-sim-fault-glow { filter: drop-shadow(0 0 2px #d3483e); }
@@ -206,6 +211,10 @@ kbd { padding: 2px 6px; border: 1px solid var(--border); border-radius: 4px; bac
 .is-sim-active.is-thermal-tripped .contact.by-trip.rest-closed .blade-closed { display: none; }
 .is-sim-active.is-thermal-tripped .contact.by-trip.rest-closed .blade-open { display: inline; }
 .fuse-closed { display: none; }
+.fuse-manual .fuse-open { display: none; }
+.fuse-manual .fuse-closed { display: inline; }
+.is-sim-active.is-sim-open .fuse-manual .fuse-open { display: inline; }
+.is-sim-active.is-sim-open .fuse-manual .fuse-closed { display: none; }
 .is-sim-active:not(.is-sim-open) .fuse-open { display: none; }
 .is-sim-active:not(.is-sim-open) .fuse-closed { display: inline; }
 .mp-open { display: none; }

@@ -110,7 +110,7 @@ export function createEmptySchema(): Schema {
     wires: [],
     sheet: {
       title: '',
-      author: 'Igor Lipskiy Vyatchin',
+      author: '',
       entity: '',
       date: '',
       fileName: '',

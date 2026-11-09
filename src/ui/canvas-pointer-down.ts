@@ -1,4 +1,4 @@
-import { POSITION_SPECS, nextPosition } from '@engine/behaviors';
+import { POSITION_SPECS, currentPosition, nextPosition } from '@engine/behaviors';
 import type { AppContext } from './context';
 import type { Point } from './viewport';
 import type { DragState, Selectable, StampKey } from './constants';
@@ -78,14 +78,56 @@ export function setupCanvasPointerDown(ctx: AppContext, deps: CanvasPointerDownS
       if (hit?.kind === 'element') {
         const element = schema.elements.find((candidate) => candidate.id === hit.id);
         if (element && deps.simulation.isMomentaryType(element.typeCode)) {
+          const deviceName = element.name.trim().toLocaleUpperCase();
+          if (deviceName !== '') {
+            const sameName = (candidate: typeof element): boolean => candidate.id !== element.id
+              && candidate.name.trim().toLocaleUpperCase() === deviceName;
+            const groupIsLatched = schema.elements.some((candidate) => {
+              if (!sameName(candidate)) return false;
+              const position = POSITION_SPECS[candidate.typeCode];
+              return (deps.simulation.isMaintainedType(candidate.typeCode) && deps.simulation.inputs.toggled[candidate.id] === true)
+                || (position !== undefined && (deps.simulation.inputs.positions?.[candidate.id] ?? position.rest) !== position.rest)
+                || (candidate.typeCode === 6007 && (Boolean(deps.simulation.inputs.tripped[candidate.id]) || deps.simulation.inputs.toggled[candidate.id] === false))
+                || ([8016, 8017, 8018, 8019].includes(candidate.typeCode) && Boolean(deps.simulation.inputs.tripped[candidate.id]));
+            });
+            if (groupIsLatched) {
+              const positions = (deps.simulation.inputs.positions ??= {});
+              for (const twin of schema.elements) {
+                if (!sameName(twin)) continue;
+                if (deps.simulation.isMaintainedType(twin.typeCode)) deps.simulation.inputs.toggled[twin.id] = false;
+                const position = POSITION_SPECS[twin.typeCode];
+                if (position) positions[twin.id] = position.rest;
+                if (twin.typeCode === 6007) {
+                  delete deps.simulation.inputs.tripped[twin.id];
+                  deps.simulation.inputs.toggled[twin.id] = true;
+                }
+                if ([8016, 8017, 8018, 8019].includes(twin.typeCode)) delete deps.simulation.inputs.tripped[twin.id];
+              }
+              deps.simulation.applySimulationInput();
+            }
+          }
           deps.simulation.pressMomentary(element.id); deps.svg.setPointerCapture(event.pointerId); event.preventDefault(); return;
         }
         if (element && POSITION_SPECS[element.typeCode]) {
           const positions = (deps.simulation.inputs.positions ??= {});
-          const next = nextPosition(element.typeCode, positions[element.id]); positions[element.id] = next;
-          if (element.name.trim() !== '') for (const twin of schema.elements) {
-            if (twin.id !== element.id && twin.typeCode === element.typeCode && twin.name === element.name) positions[twin.id] = next;
+          const spec = POSITION_SPECS[element.typeCode]!;
+          let current = currentPosition(element.typeCode, positions[element.id]);
+          const deviceName = element.name.trim().toLocaleUpperCase();
+          const groupOn = deviceName !== '' && schema.elements.some((twin) => {
+            if (twin.id === element.id || twin.name.trim().toLocaleUpperCase() !== deviceName) return false;
+            const twinSpec = POSITION_SPECS[twin.typeCode];
+            return (deps.simulation.isMaintainedType(twin.typeCode) && Boolean(deps.simulation.inputs.toggled[twin.id]))
+              || (twinSpec !== undefined && currentPosition(twin.typeCode, positions[twin.id]) !== twinSpec.rest);
+          });
+          if (current === spec.rest && groupOn) current = nextPosition(element.typeCode, spec.rest);
+          const next = nextPosition(element.typeCode, current);
+          if (deviceName !== '') for (const twin of schema.elements) {
+            if (twin.id === element.id || twin.name.trim().toLocaleUpperCase() !== deviceName) continue;
+            const twinSpec = POSITION_SPECS[twin.typeCode];
+            if (twinSpec) positions[twin.id] = next === spec.rest ? twinSpec.rest : nextPosition(twin.typeCode, twinSpec.rest);
+            if (deps.simulation.isMaintainedType(twin.typeCode)) deps.simulation.inputs.toggled[twin.id] = next !== spec.rest;
           }
+          positions[element.id] = next;
           deps.simulation.applySimulationInput(); event.preventDefault(); return;
         }
         if (element && deps.simulation.isMaintainedType(element.typeCode)) {
@@ -101,7 +143,8 @@ export function setupCanvasPointerDown(ctx: AppContext, deps: CanvasPointerDownS
           const next = !(deps.simulation.inputs.toggled[element.id] ?? armedByDefaultTypes.has(element.typeCode));
           deps.simulation.inputs.toggled[element.id] = next;
           if (element.name.trim() !== '') for (const twin of schema.elements) {
-            if (twin.id !== element.id && twin.typeCode === element.typeCode && twin.name === element.name) deps.simulation.inputs.toggled[twin.id] = next;
+            if (twin.id !== element.id && twin.typeCode === element.typeCode
+              && twin.name.trim().toLocaleUpperCase() === element.name.trim().toLocaleUpperCase()) deps.simulation.inputs.toggled[twin.id] = next;
           }
           deps.simulation.applySimulationInput(); event.preventDefault(); return;
         }

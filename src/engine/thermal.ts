@@ -19,7 +19,8 @@ export function resolveThermalState(schema: Schema, inputs: UserInputs): Thermal
     // контактов в цепи управления; силовые полюса остаются проводящими.
     const isTripped = (inputs.tripped[element.id] ?? false) || (inputs.toggled[element.id] === false);
     tripped[element.id] = isTripped;
-    if (isTripped && element.name !== '') trippedNames.add(element.name);
+    const name = element.name.trim().toLocaleUpperCase();
+    if (isTripped && name !== '') trippedNames.add(name);
   }
   return { tripped, trippedNames };
 }

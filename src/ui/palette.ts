@@ -68,7 +68,21 @@ export function setupPalette(ctx: AppContext, deps: PaletteSetup): { renderPalet
           const cadType = mappedType && PLACE_DEFAULTS[mappedType.code] ? mappedType : undefined;
           const itemName = catalog.label(item, deps.paletteLang()).trim() || (deps.paletteLang() === 'ru' ? `Элемент ${item.id}` : String(item.id));
           const button = document.createElement('button'); button.type = 'button'; button.className = 'palette-item';
-          button.textContent = itemName; button.setAttribute('aria-label', itemName);
+          const name = document.createElement('span'); name.className = 'palette-item-label'; name.textContent = itemName; button.append(name);
+          const temporarilyVerified = group.key === 'fuses'
+            || (group.key === 'power-sources' && ![32995, 33045, 33043, 32997, 33263].includes(item.id))
+            || (group.key === 'power-electronics' && item.id === 33004)
+            || (group.key === 'motors' && (item.id === 32828 || item.id === 32829))
+            || (group.key === 'manual-controls' && ![32927, 32928, 32929, 32930].includes(item.id))
+            || (group.key === 'coils-signaling' && item.id === 32949)
+            || (group.key === 'contactors' && item.id !== 33392)
+            || (group.key === 'protection' && item.id !== 33054 && item.id !== 33055);
+          const verifiedText = deps.uiText().functionalityVerified ?? 'Функциональность элемента проверена';
+          if (temporarilyVerified) {
+            const badge = document.createElement('span'); badge.className = 'palette-verified-badge'; badge.textContent = '✓'; badge.title = verifiedText; badge.setAttribute('aria-label', verifiedText);
+            button.append(badge);
+          }
+          button.setAttribute('aria-label', temporarilyVerified ? `${itemName} — ${deps.uiText().functionalityVerified}` : itemName);
           button.title = cadType ? `${itemName} · ${getCadType(cadType.code).label}` : `${itemName} · пока недоступно для размещения`;
           button.dataset.commandId = String(item.id);
           if (!cadType) { button.disabled = true; button.title += ' (нет соответствия с типом .cad)'; }

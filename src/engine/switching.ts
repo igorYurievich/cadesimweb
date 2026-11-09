@@ -1,7 +1,7 @@
 /** Расчёт внутренних контактов и замкнутых рёбер (этап 5.3b). */
 
 import type { Schema, SchemaElement } from '../model/types';
-import { currentPosition, getBehavior } from './behaviors';
+import { POSITION_SPECS, currentPosition, getBehavior, nextPosition } from './behaviors';
 import type { BehaviorLink } from './behaviors';
 import type { TerminalRef, TimerState, UserInputs } from './types';
 import { resolveThermalState } from './thermal';
@@ -75,24 +75,47 @@ export function auxContactActuatorActive(element: SchemaElement, schema: Schema,
 }
 
 function controlActive(element: SchemaElement, link: BehaviorLink, inputs: UserInputs, coils: Readonly<Record<string, boolean>>, thermal: ThermalState, schema: Schema, timers: Readonly<Record<number, TimerState>>): boolean {
+  const deviceName = element.name.trim().toLocaleUpperCase();
+  const sameNameManualControl = (candidate: SchemaElement): boolean => {
+    const type = candidate.typeCode;
+    return deviceName !== '' && candidate.id !== element.id
+      && candidate.name.trim().toLocaleUpperCase() === deviceName
+      && ((type >= 8000 && type <= 8015) || (type >= 8020 && type <= 8022));
+  };
+  const sameNameMomentaryPressed = (): boolean => schema.elements.some((candidate) => sameNameManualControl(candidate)
+    && ((candidate.typeCode >= 8000 && candidate.typeCode <= 8007) || (candidate.typeCode >= 8012 && candidate.typeCode <= 8015))
+    && Boolean(inputs.pressed[candidate.id]));
+  const sameNameMaintainedOn = (): boolean => schema.elements.some((candidate) => sameNameManualControl(candidate)
+    && candidate.typeCode >= 8008 && candidate.typeCode <= 8011
+    && Boolean(inputs.toggled[candidate.id]));
+  const sameNamePositionOn = (): boolean => schema.elements.some((candidate) => {
+    if (!sameNameManualControl(candidate)) return false;
+    const spec = POSITION_SPECS[candidate.typeCode];
+    return Boolean(spec && currentPosition(candidate.typeCode, inputs.positions?.[candidate.id]) !== spec.rest);
+  });
+  const sameNameLatchedOn = (): boolean => sameNameMaintainedOn() || sameNamePositionOn();
   switch (link.control) {
     case 'pressed': {
       if (inputs.pressed[element.id]) return true;
-      // In a CAD drawing one physical pushbutton can be represented by several
-      // contact symbols (for example S3 has a NO and an NC contact). They have
-      // separate element IDs but share the device designation, so pressing any
-      // one of them must actuate every pushbutton contact with that designation.
-      const name = element.name.trim().toLocaleUpperCase();
-      if (!name) return false;
-      return schema.elements.some((candidate) => candidate.id !== element.id
-        && candidate.name.trim().toLocaleUpperCase() === name
-        && getBehavior(candidate.typeCode).links.some((candidateLink) => candidateLink.control === 'pressed')
-        && Boolean(inputs.pressed[candidate.id]));
+      // Позиции с одинаковым обозначением работают как одно ручное устройство:
+      // импульсная кнопка действует пока удерживается, фиксируемый выключатель — пока включён.
+      return sameNameMomentaryPressed() || sameNameLatchedOn();
     }
-    case 'toggled': return inputs.toggled[element.id] ?? link.defaultClosed ?? false;
+    case 'toggled': {
+      const maintainedManual = element.typeCode >= 8008 && element.typeCode <= 8011;
+      return Boolean(inputs.toggled[element.id] ?? link.defaultClosed ?? false)
+        || (maintainedManual && (sameNameMomentaryPressed() || sameNameLatchedOn()));
+    }
     case 'coil-name': return auxContactActive(element, schema, coils, timers) || auxContactActuatorActive(element, schema, inputs);
-    case 'thermal': return (inputs.tripped[element.id] ?? false) || (element.name !== '' && thermal.trippedNames.has(element.name));
-    case 'position': return currentPosition(element.typeCode, inputs.positions?.[element.id]) === link.position;
+    case 'thermal': return (inputs.tripped[element.id] ?? false) || (element.name.trim() !== '' && thermal.trippedNames.has(element.name.trim().toLocaleUpperCase()));
+    case 'position': {
+      const spec = POSITION_SPECS[element.typeCode];
+      let position = currentPosition(element.typeCode, inputs.positions?.[element.id]);
+      if (spec && position === spec.rest && (sameNameMomentaryPressed() || sameNameLatchedOn())) {
+        position = nextPosition(element.typeCode, spec.rest);
+      }
+      return position === link.position;
+    }
     case 'always': return true;
   }
 }

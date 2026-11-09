@@ -1,7 +1,7 @@
 import { createEmptyInputs, createEmptyMemory, simulate } from '@engine/simulate';
 import { terminalKey } from '@engine/types';
 import type { EngineMemory, EngineState, PotentialLabel, TerminalKey, UserInputs } from '@engine/types';
-import { POSITION_SPECS, currentPosition, getBehavior } from '@engine/behaviors';
+import { POSITION_SPECS, currentPosition, getBehavior, nextPosition } from '@engine/behaviors';
 import { auxContactActive, auxContactActuatorActive } from '@engine/switching';
 import { resolveThermalState } from '@engine/thermal';
 import { buildWireLinks, pointOnSegment } from '@engine/wire-links';
@@ -230,12 +230,36 @@ export function setupSimulation(ctx: AppContext, deps: SimulationSetup): Simulat
       if (!symbol) continue;
       const tripped = Boolean(simInputs.tripped[element.id] || result?.tripped[element.id]);
       const thermalContactTripped = [8016, 8017, 8018, 8019].includes(element.typeCode)
-        && (Boolean(simInputs.tripped[element.id]) || (element.name !== '' && thermalState.trippedNames.has(element.name)));
+        && (Boolean(simInputs.tripped[element.id]) || (element.name.trim() !== '' && thermalState.trippedNames.has(element.name.trim().toLocaleUpperCase())));
       const defaultClosed = armedByDefaultTypes.has(element.typeCode);
       const manuallyOpen = result !== undefined && latchedTypes.has(element.typeCode) && !(simInputs.toggled[element.id] ?? defaultClosed);
-      // У выключателя с фиксацией лопасть рисуется по тому же классу, что и у нажатой кнопки.
-      symbol.classList.toggle('is-sim-pressed', (simInputs.pressed[element.id] ?? false) || (maintainedTypes.has(element.typeCode) && simInputs.toggled[element.id] === true));
-      if (POSITION_SPECS[element.typeCode]) symbol.setAttribute('data-position', String(currentPosition(element.typeCode, simInputs.positions?.[element.id])));
+      const isMomentaryManual = ((element.typeCode >= 8000 && element.typeCode <= 8007) || (element.typeCode >= 8012 && element.typeCode <= 8015));
+      const isMaintainedManual = maintainedTypes.has(element.typeCode);
+      const manualName = element.name.trim().toLocaleUpperCase();
+      const sameNameMomentaryPressed = manualName !== '' && ctx.schema.elements.some((candidate) => candidate.id !== element.id
+        && candidate.name.trim().toLocaleUpperCase() === manualName
+        && ((candidate.typeCode >= 8000 && candidate.typeCode <= 8007) || (candidate.typeCode >= 8012 && candidate.typeCode <= 8015))
+        && Boolean(simInputs.pressed[candidate.id]));
+      const sameNameMaintainedOn = manualName !== '' && ctx.schema.elements.some((candidate) => candidate.id !== element.id
+        && maintainedTypes.has(candidate.typeCode)
+        && candidate.name.trim().toLocaleUpperCase() === manualName
+        && Boolean(simInputs.toggled[candidate.id]));
+      const sameNamePositionOn = manualName !== '' && ctx.schema.elements.some((candidate) => {
+        if (candidate.id === element.id || candidate.name.trim().toLocaleUpperCase() !== manualName) return false;
+        const spec = POSITION_SPECS[candidate.typeCode];
+        return Boolean(spec && currentPosition(candidate.typeCode, simInputs.positions?.[candidate.id]) !== spec.rest);
+      });
+      const sameNameLatchedOn = sameNameMaintainedOn || sameNamePositionOn;
+      // Импульсная кнопка действует до отпускания; фиксируемый выключатель сохраняет состояние до следующего клика.
+      const manualControlActive = (isMomentaryManual && (Boolean(simInputs.pressed[element.id]) || sameNameMomentaryPressed || sameNameLatchedOn))
+        || (isMaintainedManual && (Boolean(simInputs.toggled[element.id]) || sameNameMomentaryPressed || sameNameLatchedOn));
+      symbol.classList.toggle('is-sim-pressed', manualControlActive);
+      const selectorSpec = POSITION_SPECS[element.typeCode];
+      if (selectorSpec) {
+        let position = currentPosition(element.typeCode, simInputs.positions?.[element.id]);
+        if (position === selectorSpec.rest && (sameNameMomentaryPressed || sameNameLatchedOn)) position = nextPosition(element.typeCode, selectorSpec.rest);
+        symbol.setAttribute('data-position', String(position));
+      }
       // Тепловое реле отображает состояние цветом, не поворачивая силовые лопасти.
       // Электрически контакты при срабатывании по-прежнему размыкаются в движке.
       symbol.classList.toggle('is-sim-open', element.typeCode !== 6007 && (manuallyOpen || tripped));
@@ -273,6 +297,29 @@ export function setupSimulation(ctx: AppContext, deps: SimulationSetup): Simulat
       const motor = result?.motors[element.id];
       symbol.classList.toggle('is-motor-running', motor?.running ?? false);
       symbol.classList.toggle('is-motor-faulted', motor?.faulted ?? false);
+      const supplyInputs = element.typeCode === 3018 ? [0, 1, 2].map((index) => {
+        const netId = result?.terminalNet[terminalKey(element.id, index)];
+        return nets.get(netId ?? -1)?.potentials ?? [];
+      }) : [];
+      const phaseLabels = ['L1', 'L2', 'L3'] as const;
+      let powerSupplyActive = element.typeCode === 3018
+        && supplyInputs.every((potentials, index) => potentials.includes(phaseLabels[index] as 'L1' | 'L2' | 'L3'))
+        && new Set([0, 1, 2].map((index) => result?.terminalNet[terminalKey(element.id, index)])).size === 3;
+      if (element.typeCode === 3014) {
+        const inputPotentials = [0, 1].map((index) => {
+          const netId = result?.terminalNet[terminalKey(element.id, index)];
+          return nets.get(netId ?? -1)?.potentials ?? [];
+        });
+        const netA = result?.terminalNet[terminalKey(element.id, 0)];
+        const netB = result?.terminalNet[terminalKey(element.id, 1)];
+        const phasesA = phaseLabels.filter((phase) => inputPotentials[0]?.includes(phase));
+        const phasesB = phaseLabels.filter((phase) => inputPotentials[1]?.includes(phase));
+        const separateInputs = netA !== undefined && netB !== undefined && netA !== netB;
+        powerSupplyActive = (separateInputs && phasesA.some((phase) => phasesB.some((other) => phase !== other)))
+          || (separateInputs && phasesA.length > 0 && Boolean(inputPotentials[1]?.includes('N')))
+          || (separateInputs && phasesB.length > 0 && Boolean(inputPotentials[0]?.includes('N')));
+      }
+      symbol.classList.toggle('is-power-supply-active', powerSupplyActive);
       const motorPhaseNets = [0, 1, 2].map((index) => {
         const netId = result?.terminalNet[terminalKey(element.id, index)];
         return netId === undefined ? undefined : nets.get(netId);

@@ -28,7 +28,7 @@ export function setupInterfaceTranslation(deps: InterfaceTranslationSetup): () =
     const summaries = [...deps.root.querySelectorAll<HTMLElement>('.app-menu > .menu-group > summary')];
     [t.file, t.edit, t.view, t.elementsMenu, t.language, t.examples, t.help].forEach((value, index) => { if (summaries[index]) summaries[index]!.textContent = value; });
     const commandLabels: Array<[string, string]> = [
-      ['new', t.new], ['open', t.open], ['save-json', t.save], ['export-cad', t.export], ['export-svg', t.exportSvg], ['export-png', t.exportPng], ['print-pdf', t.printPdf], ['fit-sheet', t.fitSheet], ['sheet', t.sheet],
+      ['new', t.new], ['open', t.open], ['save-json', t.save], ['export-cad', t.export], ['export-svg', t.exportSvg], ['export-png', t.exportPng], ['print-pdf', t.printPdf], ['sheet', t.sheet],
       ['copy-selection', t.copy], ['paste-selection', t.paste], ['undo', t.undo], ['redo', t.redo], ['rotate', t.rotate], ['delete', t.delete],
       ['zoom-in', t.zoomIn], ['zoom-out', t.zoomOut], ['fit', t.fit], ['shortcuts', t.shortcuts], ['about', t.about],
     ];
@@ -112,7 +112,7 @@ export function setupInterfaceTranslation(deps: InterfaceTranslationSetup): () =
       ];
       for (const [selector, label] of shortcutLabels) set(selector, label);
     }
-    const aboutDialog = deps.root.querySelector<HTMLDialogElement>('#about-dialog'); if (aboutDialog) { set('#about-dialog p', t.aboutText); set('#about-bio', t.aboutBio); set('#about-noncommercial', t.aboutNonCommercial); set('#about-contact-label', t.aboutContact); const fields = aboutDialog.querySelectorAll('dt'); if (fields[0]) fields[0]!.textContent = t.author; if (fields[1]) fields[1]!.textContent = t.version; }
+    const aboutDialog = deps.root.querySelector<HTMLDialogElement>('#about-dialog'); if (aboutDialog) { set('#about-bio', t.aboutBio); set('#about-noncommercial', t.aboutNonCommercial); set('#about-contact-label', t.aboutContact); const fields = aboutDialog.querySelectorAll('dt'); if (fields[0]) fields[0]!.textContent = t.version; }
     for (const button of [...deps.root.querySelectorAll<HTMLButtonElement>('[data-dialog-close]')]) button.textContent = t.close;
     set('#beta-title', t.betaTitle); set('#beta-text', t.betaText); set('#beta-ok', t.betaOk);
     set('#simulate-overload', t.overload); set('#reset-simulation-inputs', t.reset);

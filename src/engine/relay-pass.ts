@@ -63,6 +63,45 @@ export function solvePass(
   const switching = computeSwitching(schema, inputs, coils, thermal, timers);
   const sourceResult = findSources(schema, graph.terminalNet);
   let nets = propagatePotentials(graph.nets, graph.terminalNet, sourceResult.sources, switching.edges, switching.transfers);
+  // Блоки питания создают DC-шины только при наличии подходящего AC-входа.
+  const converterSources: import('./sources').PotentialSource[] = [];
+  for (const converter of schema.elements) {
+    if (converter.typeCode !== 3014 && converter.typeCode !== 3018) continue;
+    const phaseInputs = converter.typeCode === 3018 ? [0, 1, 2] : [0, 1];
+    const inputPotentials = phaseInputs.map((index) => {
+      const netId = graph.terminalNet[terminalKey(converter.id, index)];
+      return netId === undefined ? undefined : nets.find((net) => net.id === netId)?.potentials ?? [];
+    });
+    let active = false;
+    if (converter.typeCode === 3018) {
+      const inputNets = phaseInputs.map((index) => graph.terminalNet[terminalKey(converter.id, index)]);
+      active = inputPotentials.every((potentials, index) => potentials?.includes((['L1', 'L2', 'L3'] as const)[index] as 'L1' | 'L2' | 'L3'))
+        && inputNets.every((net) => net !== undefined) && new Set(inputNets).size === 3;
+    } else {
+      const firstNet = graph.terminalNet[terminalKey(converter.id, 0)];
+      const secondNet = graph.terminalNet[terminalKey(converter.id, 1)];
+      const first = inputPotentials[0] ?? [];
+      const second = inputPotentials[1] ?? [];
+      const phaseLabels = ['L1', 'L2', 'L3'] as const;
+      const firstPhases = phaseLabels.filter((phase) => first.includes(phase));
+      const secondPhases = phaseLabels.filter((phase) => second.includes(phase));
+      const twoPhases = firstNet !== undefined && secondNet !== undefined && firstNet !== secondNet
+        && firstPhases.some((phase) => secondPhases.some((other) => phase !== other));
+      const separateInputs = firstNet !== undefined && secondNet !== undefined && firstNet !== secondNet;
+      const phaseAndNeutral = separateInputs && ((firstPhases.length > 0 && second.includes('N')) || (secondPhases.length > 0 && first.includes('N')));
+      active = twoPhases || phaseAndNeutral;
+    }
+    if (!active) continue;
+    const positiveIndex = converter.typeCode === 3018 ? 3 : 2;
+    const negativeIndex = converter.typeCode === 3018 ? 4 : 3;
+    const positiveNet = graph.terminalNet[terminalKey(converter.id, positiveIndex)];
+    const negativeNet = graph.terminalNet[terminalKey(converter.id, negativeIndex)];
+    if (positiveNet !== undefined) converterSources.push({ terminal: { element: converter.id, index: positiveIndex }, net: positiveNet, potential: '+' });
+    if (negativeNet !== undefined) converterSources.push({ terminal: { element: converter.id, index: negativeIndex }, net: negativeNet, potential: '-' });
+  }
+  if (converterSources.length) {
+    nets = propagatePotentials(graph.nets, graph.terminalNet, [...sourceResult.sources, ...converterSources], switching.edges, switching.transfers);
+  }
   const initialMotors = evaluateMotors(schema, nets, graph.terminalNet, switching.edges);
   // В сбалансированном режиме «звезда» общая точка U2/V2/W2 имеет потенциал
   // нейтрали. Добавляем этот опорный потенциал после проверки трёх фаз и

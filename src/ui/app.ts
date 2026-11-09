@@ -2,7 +2,7 @@ import { getCadType } from '@model/cad-types';
 import type { GroupKey, Lang } from '@model/catalog';
 import { createEmptySchema } from '@model/index';
 import { parseSchemaJson, serializeSchemaJson } from '@model/schema-json';
-import { schemaBounds } from '@model/geometry';
+import { version as appVersion } from '../../package.json';
 import { EXAMPLES } from '../data/examples';
 import type { Schema, SchemaElement, WireKind, WireSegment } from '@model/types';
 import { canRedo, canUndo, createHistory, redoHistory, undoHistory } from './history';
@@ -193,7 +193,6 @@ export function mountApp(root: HTMLElement): void {
             <button type="button" class="menu-command" data-command="export-svg">Экспорт SVG</button>
             <button type="button" class="menu-command" data-command="export-png">Экспорт PNG</button>
             <button type="button" class="menu-command" data-command="print-pdf">Печать / PDF</button>
-            <button type="button" class="menu-command" data-command="fit-sheet">Подогнать лист</button>
             <button type="button" class="menu-command" data-command="sheet">Размер листа (Ajustar hoja)…</button>
           </div></details>
           <details class="menu-group"><summary>Правка</summary><div class="menu-popover">
@@ -348,12 +347,11 @@ export function mountApp(root: HTMLElement): void {
       <dialog id="about-dialog" class="app-dialog about-dialog" aria-labelledby="about-title">
         <div class="about-mark" aria-hidden="true">CS</div>
         <h2 id="about-title">Web Cade</h2>
-        <p>Редактор электрических схем и симулятор релейной логики.</p>
-        <p id="about-bio">Автор — Igor Lipskiy Vyatchin, студент 2 курса Sistemas Electrotécnicos y Automatizados центра IES Lagunas.</p>
-        <p id="about-noncommercial">Проект некоммерческий: ничего здесь не продаётся и продавать никто не будет.</p>
-        <p class="about-contact"><span id="about-contact-label">По любым вопросам:</span> <a href="mailto:igoryurievich1@gmail.com">igoryurievich1@gmail.com</a></p>
+        <p id="about-bio">Я — автор Web Cade и студент второго курса электротехники в IES Las Lagunas.</p>
+        <p id="about-noncommercial">Мой проект бесплатный и некоммерческий.</p>
+        <p class="about-contact"><span id="about-contact-label">По вопросам и пожеланиям пишите мне:</span> <a href="mailto:igoryurievich1@gmail.com">igoryurievich1@gmail.com</a></p>
         <p class="about-repository"><a href="https://github.com/igorYurievich/cadesimweb" target="_blank" rel="noopener noreferrer">GitHub: github.com/igorYurievich/cadesimweb</a></p>
-        <dl><div><dt>Автор</dt><dd>Igor Lipskiy Vyatchin</dd></div><div><dt>Версия</dt><dd>0.1.0</dd></div></dl>
+        <dl><div><dt>Версия</dt><dd id="about-version">${appVersion}</dd></div></dl>
         <div class="dialog-actions"><button type="button" data-dialog-close="about-dialog">Закрыть</button></div>
       </dialog>
       <dialog id="beta-dialog" class="app-dialog beta-dialog" aria-labelledby="beta-title">
@@ -563,6 +561,47 @@ export function mountApp(root: HTMLElement): void {
     return kinds.map((kind, index) => ({ route: lanes[index] as Point[], kind }));
   };
   const insideSheet = (route: readonly Point[]): boolean => route.every((p) => p.x >= 0 && p.y >= 0 && p.x <= schema.sheet.width && p.y <= schema.sheet.height);
+  const routeHitsComponent = (route: readonly Point[]): boolean => {
+    const boxes = schema.elements.flatMap((element) => {
+      if (element.typeCode === 20000) return [];
+      const body = elementLayer.querySelector<SVGGElement>(`[data-element-id="${element.id}"] .symbol-body`);
+      if (!body) return [];
+      const box = body.getBBox();
+      const angle = element.rotation * Math.PI / 2;
+      const cos = Math.cos(angle); const sin = Math.sin(angle);
+      const corners = [
+        { x: box.x, y: box.y }, { x: box.x + box.width, y: box.y },
+        { x: box.x, y: box.y + box.height }, { x: box.x + box.width, y: box.y + box.height },
+      ].map((p) => ({ x: element.position.x + p.x * cos - p.y * sin, y: element.position.y + p.x * sin + p.y * cos }));
+      return [{ element, minX: Math.min(...corners.map((p) => p.x)), maxX: Math.max(...corners.map((p) => p.x)), minY: Math.min(...corners.map((p) => p.y)), maxY: Math.max(...corners.map((p) => p.y)) }];
+    });
+    for (let i = 1; i < route.length; i += 1) {
+      const a = route[i - 1]; const b = route[i];
+      if (!a || !b) continue;
+      for (const box of boxes) {
+        const horizontalHit = a.y === b.y && a.y > box.minY && a.y < box.maxY
+          && Math.min(a.x, b.x) < box.maxX && Math.max(a.x, b.x) > box.minX;
+        const verticalHit = a.x === b.x && a.x > box.minX && a.x < box.maxX
+          && Math.min(a.y, b.y) < box.maxY && Math.max(a.y, b.y) > box.minY;
+        if (!horizontalHit && !verticalHit) continue;
+        // У многих символов штрих самой клеммы входит в корпус на небольшую длину.
+        // Разрешаем пройти этот штрих у конца, совпавшего с клеммой; остальное пересечение блокируем.
+        const terminalEscape = (point: Point, other: Point): boolean => {
+          if (!box.element.terminals.some((terminal) => box.element.position.x + terminal.offset.x === point.x && box.element.position.y + terminal.offset.y === point.y)) return false;
+          const towardPositive = horizontalHit ? other.x > point.x : other.y > point.y;
+          const coordinate = horizontalHit ? point.x : point.y;
+          const min = horizontalHit ? box.minX : box.minY;
+          const max = horizontalHit ? box.maxX : box.maxY;
+          const depth = towardPositive
+            ? coordinate < min ? 0 : max - coordinate
+            : coordinate > max ? 0 : coordinate - min;
+          return depth >= 0 && depth <= 3;
+        };
+        if (!terminalEscape(a, b) && !terminalEscape(b, a)) return true;
+      }
+    }
+    return false;
+  };
   const drawDraft = setupWireDraft({ layer: draftLayer, isDrawing: () => wireDrawing, points: () => draftPoints, cursor: () => draftCursor, buildRoutes: buildBundleRoutes, thickness: () => Number(wireThicknessSelect.value) });
   const { layer: ghostLayer, draw: drawGhost, move: moveGhost } = setupPlacementGhost(ctx, { svg, after: draftLayer, viewSize: () => viewSize, viewport: () => viewport, placementType: () => placementType, rotation: () => placementRotation, wireDrawing: () => wireDrawing });
   svg.addEventListener('pointerleave', () => { ghostLayer.replaceChildren(); if (cursorCoords) cursorCoords.value = 'X: — Y: —'; });
@@ -693,6 +732,11 @@ export function mountApp(root: HTMLElement): void {
       draftPoints = []; draftCursor = undefined; drawDraft(); updateHistoryButtons();
       return;
     }
+    if (bundle.some((item) => routeHitsComponent(item.route))) {
+      status.textContent = 'Нельзя провести кабель через корпус компонента. Добавьте точки изгиба вокруг него.';
+      draftPoints = []; draftCursor = undefined; drawDraft(); updateHistoryButtons();
+      return;
+    }
     const before = cloneSchema(schema);
     let id = Math.max(0, ...schema.elements.map((element) => element.id), ...schema.wires.map((wire) => wire.id)) + 1;
     const existingWires = [...schema.wires];
@@ -744,48 +788,10 @@ export function mountApp(root: HTMLElement): void {
   resetInputsAction.addEventListener('click', () => { simulationContextMenu.hidden = true; simulation.resetSimulationInputs(); });
   setupSimulationContextMenuEvents(svg, simulationContextMenu, simulation);
   const exportActions = setupExport(ctx, svg, status);
-  const autoFitSheet = (): void => {
-    const bounds = schemaBounds(schema);
-    if (!bounds) return;
-    let minX = bounds.minX; let minY = bounds.minY;
-    let maxX = bounds.maxX; let maxY = bounds.maxY;
-    const include = (x: number, y: number): void => {
-      minX = Math.min(minX, x); minY = Math.min(minY, y);
-      maxX = Math.max(maxX, x); maxY = Math.max(maxY, y);
-    };
-    for (const element of schema.elements) {
-      if (element.typeCode === 20000) continue;
-      include(element.position.x + element.size.w, element.position.y + element.size.h);
-      include(element.position.x + element.labelOffset.x, element.position.y + element.labelOffset.y);
-      for (const terminal of element.terminals) include(element.position.x + terminal.offset.x, element.position.y + terminal.offset.y);
-    }
-    for (const wire of schema.wires) {
-      include(wire.from.x, wire.from.y); include(wire.to.x, wire.to.y);
-    }
-    const margin = 24;
-    const deltaX = margin - minX; const deltaY = margin - minY;
-    const roundUpToGrid = (value: number): number => Math.ceil(value / 3) * 3;
-    const width = Math.max(30, roundUpToGrid(maxX - minX + margin * 2));
-    const height = Math.max(30, roundUpToGrid(maxY - minY + margin * 2));
-    const before = cloneSchema(schema);
-    for (const element of schema.elements) {
-      if (element.typeCode === 20000) continue;
-      element.position.x += deltaX; element.position.y += deltaY;
-    }
-    for (const wire of schema.wires) {
-      wire.from.x += deltaX; wire.from.y += deltaY;
-      wire.to.x += deltaX; wire.to.y += deltaY;
-    }
-    schema.sheet.width = width; schema.sheet.height = height;
-    commitSchema(before);
-    viewport = fitViewport(fullSheet(schema.sheet), { width: viewSize.x, height: viewSize.y });
-    drawViewport(); renderSchema();
-    status.textContent = uiText().fitSheetDone;
-  };
   setupMenus(ctx, {
     fileInput, status, undoButton, redoButton, exportActions, requestNewSchema: createDocumentTab, copySelection, pasteSelection,
     rotateSelection, deleteSelected, toggleTheme, toggleGrid, toggleDockedProperties, toggleWireColors,
-    commitSchema, renderSchema, setViewport: (value) => { viewport = value; }, viewSize, drawViewport, autoFitSheet,
+    commitSchema, renderSchema, setViewport: (value) => { viewport = value; }, viewSize, drawViewport,
   });
   root.querySelector<HTMLButtonElement>('#rotate-selection')?.addEventListener('click', rotateSelection);
   root.querySelector<HTMLButtonElement>('#delete-selection')?.addEventListener('click', deleteSelected);
@@ -811,7 +817,10 @@ export function mountApp(root: HTMLElement): void {
     if (canUndo(history)) restoreHistory(undoHistory(history));
   });
   redoButton.addEventListener('click', () => { if (canRedo(history)) restoreHistory(redoHistory(history)); });
-  runButton.addEventListener('click', simulation.startSimulation);
+  runButton.addEventListener('click', () => {
+    if (wireDrawing) cancelWireDrawing();
+    simulation.startSimulation();
+  });
   stopButton.addEventListener('click', simulation.stopSimulation);
   setupSimulationSpeedControl(speedButton, simulation);
   simulation.updateSimulationControls();

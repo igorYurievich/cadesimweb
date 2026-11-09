@@ -127,15 +127,14 @@ const TABLE: readonly TypeBehavior[] = [
   { typeCode: 3009, links: strip(['-']) },
   { typeCode: 3010, links: strip(['+', '-']) },
   { typeCode: 3015, links: strip(['PE']) },
-  // Трансформаторы, диод, выпрямитель, блоки питания, батарея и розетка пока только символы:
-  // клеммы есть, проводимость и преобразование напряжения не моделируются.
+  // Трансформаторы, диод, мостовой выпрямитель и розетка пока только символы.
   { typeCode: 3012, links: inert() },
   { typeCode: 3017, links: inert() },
   { typeCode: 3016, links: inert() },
   { typeCode: 3013, links: inert() },
   { typeCode: 3014, links: inert() },
   { typeCode: 3018, links: inert() },
-  { typeCode: 3019, links: inert() },
+  { typeCode: 3019, links: strip(['+', '-']) },
   { typeCode: 3020, links: inert() },
   // Силовая электроника, часть 1: резисторы 1050/1051 проводят между парами клемм (сопротивление не моделируется, падения напряжения нет).
   { typeCode: 1050, links: switches([[0, 1]], 'always') },
@@ -161,12 +160,13 @@ const TABLE: readonly TypeBehavior[] = [
   { typeCode: 1065, links: inert() },
   { typeCode: 1066, links: inert() },
   { typeCode: 1067, links: inert() },
-  // Предохранители 5000–5004 всегда проводят (перегорание не моделируется); разъединители 5005–5009 включаются кликом, стартуют отключёнными; сопоставление клемм по порядку «верхний ряд, нижний ряд».
-  { typeCode: 5000, links: switches([[0, 1]], 'always') },
-  { typeCode: 5001, links: switches([[0, 2], [1, 3]], 'always') },
-  { typeCode: 5002, links: switches([[0, 2], [1, 3]], 'always') },
-  { typeCode: 5003, links: switches([[0, 3], [1, 4], [2, 5]], 'always') },
-  { typeCode: 5004, links: switches([[0, 4], [1, 5], [2, 6], [3, 7]], 'always') },
+  // Предохранители 5000–5004 замкнуты по умолчанию; клик в симуляции имитирует размыкание/сброс.
+  // В моделях с N отключается также нейтральный полюс.
+  { typeCode: 5000, links: switches([[0, 1]], 'toggled', { defaultClosed: true }) },
+  { typeCode: 5001, links: switches([[0, 2], [1, 3]], 'toggled', { defaultClosed: true }) },
+  { typeCode: 5002, links: switches([[0, 2], [1, 3]], 'toggled', { defaultClosed: true }) },
+  { typeCode: 5003, links: switches([[0, 3], [1, 4], [2, 5]], 'toggled', { defaultClosed: true }) },
+  { typeCode: 5004, links: switches([[0, 4], [1, 5], [2, 6], [3, 7]], 'toggled', { defaultClosed: true }) },
   { typeCode: 5005, links: switches([[0, 1]], 'toggled') },
   { typeCode: 5006, links: switches([[0, 2], [1, 3]], 'toggled') },
   { typeCode: 5007, links: switches([[0, 2], [1, 3]], 'toggled') },

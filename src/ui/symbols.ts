@@ -798,7 +798,8 @@ function drawBattery(g: SVGGElement, element: SchemaElement): void {
   const gap = rowGapOf(element);
   const mid = gap / 2;
   g.append(path(`M ${x} 0 V ${mid - 1.1} M ${x} ${mid + 1.1} V ${gap}`));
-  g.append(path(`M ${x - 3} ${mid - 1.1} H ${x + 3} M ${x - 3} ${mid + 1.1} H ${x + 3}`, 0.9));
+  // Длинная верхняя пластина — положительный полюс; короткая нижняя — отрицательный.
+  g.append(path(`M ${x - 3} ${mid - 1.1} H ${x + 3} M ${x - 1.8} ${mid + 1.1} H ${x + 1.8}`, 0.9));
 }
 
 /** Розетка: круг с тремя контактами и тремя выводами (сверху, справа, снизу). Клемм в файле нет. */
@@ -818,9 +819,19 @@ function drawFusePole(g: SVGGElement, x: number): void {
   g.append(path(`M ${x} 0 V ${ZONE}`));
 }
 
+/** Разомкнутый предохранитель: корпус целый, в центральной линии показан небольшой разрыв. */
+function drawFusePoleOpen(g: SVGGElement, x: number): void {
+  const gapStart = 5.4;
+  const gapEnd = 6.6;
+  g.append(rect(x - 1.6, G, 3.2, 6, { 'stroke-width': 0.9 }));
+  g.append(path(`M ${x} 0 V ${gapStart} M ${x} ${gapEnd} V ${ZONE}`));
+}
+
 /** Нейтральный полюс без предохранителя: линия с короткими поперечными засечками. */
-function drawFuseNeutral(g: SVGGElement, x: number): void {
-  g.append(path(`M ${x} 0 V ${ZONE} M ${x - 1.2} ${G} H ${x + 1.2} M ${x - 1.2} ${ZONE - G} H ${x + 1.2}`));
+function drawFuseNeutral(g: SVGGElement, x: number, open = false): void {
+  const center = ZONE / 2;
+  const mainLine = open ? `M ${x} 0 V ${center - 0.6} M ${x} ${center + 0.6} V ${ZONE}` : `M ${x} 0 V ${ZONE}`;
+  g.append(path(`${mainLine} M ${x - 1.2} ${G} H ${x + 1.2} M ${x - 1.2} ${ZONE - G} H ${x + 1.2}`));
 }
 
 /** Предохранитель-разъединитель: наклонный корпус с осевой линией, выводы короткими отрезками. */
@@ -842,7 +853,11 @@ function drawFuse(g: SVGGElement, element: SchemaElement): void {
   xs.forEach((x, i) => {
     const isNeutral = neutral && i === xs.length - 1;
     if (!disconnector) {
-      (isNeutral ? drawFuseNeutral : drawFusePole)(g, x);
+      const open = group('fuse-open');
+      if (isNeutral) drawFuseNeutral(open, x, true); else drawFusePoleOpen(open, x);
+      const closed = group('fuse-closed');
+      if (isNeutral) drawFuseNeutral(closed, x); else drawFusePole(closed, x);
+      g.append(group('fuse-manual', open, closed));
       return;
     }
     // Разъединитель: в редакторе и в симуляции «отключён» — наклонное положение; после включения кликом вид как у обычного предохранителя.
@@ -1431,7 +1446,9 @@ export function createElementSymbol(element: SchemaElement): SVGGElement | null 
     const hx = Math.min(...txs, 0);
     root.append(shape('rect', { class: 'hit-area', x: hx - 9, y: 1, width: 9, height: 10, fill: '#000', 'fill-opacity': 0, stroke: 'none' }));
   }
-  drawBody(root, canonical, rotation);
+  const body = shape('g', { class: 'symbol-body' });
+  drawBody(body, canonical, rotation);
+  root.append(body);
   drawTerminalLabels(root, canonical, rotation);
   if (element.name && element.typeCode !== 2009) {
     const rowGap = rowGapOf(canonical);

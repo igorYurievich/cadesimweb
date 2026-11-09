@@ -28,11 +28,32 @@ export function setupExport(ctx: AppContext, svg: SVGSVGElement, status: HTMLEle
     downloadText(serializeSchemaJson(ctx.schema), `${outputBaseName()}.json`, 'application/json;charset=utf-8');
     status.textContent = `Схема сохранена в ${outputBaseName()}.json.`;
   };
-  const exportCadFile = (): void => {
+  const exportCadFile = async (): Promise<void> => {
     try {
-      downloadText(exportCad(ctx.schema), `${outputBaseName()}.cad`, 'text/plain;charset=utf-8');
-      status.textContent = `Экспортировано ${outputBaseName()}.cad; обратный импорт пройден.`;
+      const contents = exportCad(ctx.schema);
+      type SaveFileHandle = { name: string; createWritable(): Promise<{ write(data: string): Promise<void>; close(): Promise<void> }> };
+      type SavePicker = (options: { suggestedName: string; types: Array<{ description: string; accept: Record<string, string[]> }> }) => Promise<SaveFileHandle>;
+      const picker = (window as Window & { showSaveFilePicker?: SavePicker }).showSaveFilePicker;
+      let savedName = `${outputBaseName()}.cad`;
+      if (picker) {
+        const handle = await picker({
+          suggestedName: `${outputBaseName()}.cad`,
+          types: [{ description: 'CADe_SIMU (*.cad)', accept: { 'text/plain': ['.cad'] } }],
+        });
+        savedName = handle.name;
+        const writable = await handle.createWritable();
+        await writable.write(contents);
+        await writable.close();
+      } else {
+        const requestedName = window.prompt('Имя файла для экспорта:', `${outputBaseName()}.cad`);
+        if (requestedName === null) return;
+        const safeName = requestedName.trim().replace(/[\\/:*?"<>|\x00-\x1f]/g, '_').replace(/\.cad$/i, '') || outputBaseName();
+        savedName = `${safeName}.cad`;
+        downloadText(contents, savedName, 'text/plain;charset=utf-8');
+      }
+      status.textContent = `Экспортировано ${savedName}; обратный импорт пройден.`;
     } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') return;
       status.textContent = `Не удалось экспортировать .cad: ${error instanceof Error ? error.message : String(error)}`;
     }
   };
@@ -92,7 +113,7 @@ export function setupExport(ctx: AppContext, svg: SVGSVGElement, status: HTMLEle
       try {
         for (const rule of [...sheetStyle.cssRules]) {
           const selectorText = 'selectorText' in rule ? String(rule.selectorText) : '';
-          if (/(schematic-element|\.contact|\.blade-|is-sim|lamp-glass|\.mp-open|\.mp-closed)/.test(selectorText)) relevantRules.push(rule.cssText);
+          if (/(schematic-element|\.contact|\.blade-|is-sim|lamp-glass|\.mp-open|\.mp-closed|\.fuse-)/.test(selectorText)) relevantRules.push(rule.cssText);
         }
       } catch { /* Cross-origin style sheets are not needed for the inline SVG artwork. */ }
     }
