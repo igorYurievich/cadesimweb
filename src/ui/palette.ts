@@ -1,6 +1,7 @@
 import { catalog } from '@model/catalog';
 import type { GroupKey, Lang } from '@model/catalog';
 import { cadTypeForCommand, getCadType } from '@model/cad-types';
+import { hasVerifiedBadge } from '@model/catalog-verification';
 import type { AppContext } from './context';
 import { OPTIONAL_GROUP_STORAGE_KEY, OPTIONAL_PALETTE_GROUPS, PLACE_DEFAULTS, INTERFACE_LANGUAGE_KEY } from './constants';
 
@@ -69,14 +70,7 @@ export function setupPalette(ctx: AppContext, deps: PaletteSetup): { renderPalet
           const itemName = catalog.label(item, deps.paletteLang()).trim() || (deps.paletteLang() === 'ru' ? `Элемент ${item.id}` : String(item.id));
           const button = document.createElement('button'); button.type = 'button'; button.className = 'palette-item';
           const name = document.createElement('span'); name.className = 'palette-item-label'; name.textContent = itemName; button.append(name);
-          const temporarilyVerified = group.key === 'fuses'
-            || (group.key === 'power-sources' && ![32995, 33045, 33043, 32997, 33263].includes(item.id))
-            || (group.key === 'power-electronics' && item.id === 33004)
-            || (group.key === 'motors' && (item.id === 32828 || item.id === 32829))
-            || (group.key === 'manual-controls' && ![32927, 32928, 32929, 32930].includes(item.id))
-            || (group.key === 'coils-signaling' && item.id === 32949)
-            || (group.key === 'contactors' && item.id !== 33392)
-            || (group.key === 'protection' && item.id !== 33054 && item.id !== 33055);
+          const temporarilyVerified = hasVerifiedBadge(group.key, item.id);
           const verifiedText = deps.uiText().functionalityVerified ?? 'Функциональность элемента проверена';
           if (temporarilyVerified) {
             const badge = document.createElement('span'); badge.className = 'palette-verified-badge'; badge.textContent = '✓'; badge.title = verifiedText; badge.setAttribute('aria-label', verifiedText);

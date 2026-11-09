@@ -280,9 +280,11 @@ export function setupSimulation(ctx: AppContext, deps: SimulationSetup): Simulat
         || auxContactActuatorActive(element, ctx.schema, simInputs)
       ));
       symbol.classList.toggle('is-aux-active', auxSwitches && result !== undefined && auxActive);
-      symbol.classList.toggle('is-coil-energized', element.typeCode === 9000 || element.typeCode === 9004 ? (result?.coils[element.name] ?? false) : element.typeCode === 9005 ? (result?.memory.timers[element.id]?.powered ?? false) : false);
-      symbol.classList.toggle('is-lamp-lit', element.typeCode === 9008 ? (result?.lamps[element.id] ?? false) : false);
-      if (element.typeCode === 9004 || element.typeCode === 9005) {
+      symbol.classList.toggle('is-coil-energized', element.typeCode === 9000 || element.typeCode === 9004 ? (result?.coils[element.name] ?? false) : element.typeCode === 9005 || element.typeCode === 9006 ? (result?.memory.timers[element.id]?.powered ?? false) : false);
+      const lampPowered = result?.lamps[element.id] ?? false;
+      const lampLit = element.typeCode === 9009 ? lampPowered && simTime % 1 < 0.5 : element.typeCode === 9008 && lampPowered;
+      symbol.classList.toggle('is-lamp-lit', lampLit);
+      if (element.typeCode === 9004 || element.typeCode === 9005 || element.typeCode === 9006) {
         const readout = symbol.querySelector<SVGTextElement>('.timer-readout');
         const timer = result?.memory.timers[element.id];
         const total = Math.max(0, Number(element.params.time ?? 0));
@@ -341,6 +343,7 @@ export function setupSimulation(ctx: AppContext, deps: SimulationSetup): Simulat
       const powered = element.terminals.some((_, index) => (nets.get(result?.terminalNet[terminalKey(element.id, index)] ?? -1)?.potentials.length ?? 0) > 0);
       // Выключенный/сработавший аппарат защиты не подсвечивается красным: остаётся серым.
       symbol.classList.toggle('is-powered', element.typeCode !== 6007 && powered && !(latchedTypes.has(element.typeCode) && (manuallyOpen || tripped)));
+      symbol.classList.toggle('is-signal-active', element.typeCode >= 9010 && element.typeCode <= 9013 && (result?.lamps[element.id] ?? false));
       if (motor?.running) {
         // Постоянная скорость: менять animation-duration на лету нельзя — браузер пересчитывает фазу и стрелка «дёргается».
         symbol.style.setProperty('--motor-period', '0.9s');

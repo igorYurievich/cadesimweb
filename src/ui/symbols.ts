@@ -622,6 +622,11 @@ function drawCoilVariant(g: SVGGElement, element: SchemaElement): void {
       break;
     case 9006: // на включение и отключение: залитый отсек со знаком выдержки
       g.append(solid(), path(`M ${x - 3.4} ${mid - 1.1} H ${x - 1.6} M ${x - 2.5} ${mid - 1.1} V ${mid + 1.1} M ${x - 3.4} ${mid + 1.1} H ${x - 1.6}`, 0.6, { stroke: '#fff' }));
+      {
+        const readout = label('', x + 2, rowGapOf(element) + 4.2, { size: 2.4, halo: true });
+        readout.setAttribute('class', 'timer-readout');
+        g.append(readout);
+      }
       break;
     case 9007: // реле-прерыватель: «5» из прямых линий
       g.append(divider(), path(`M ${x - 1.9} ${mid - 1.2} H ${x - 3.2} V ${mid} H ${x - 1.9} V ${mid + 1.2} H ${x - 3.2}`, 0.7));
@@ -668,19 +673,19 @@ function drawSignal(g: SVGGElement, element: SchemaElement): void {
   const lead = (hx: number): SVGPathElement => path(`M 0 0 V ${mid - 2} H ${hx} M 0 ${gap} V ${mid + 2} H ${hx}`);
   switch (element.typeCode) {
     case 9010: // звонок: «D»
-      g.append(lead(4), path(`M 4 ${mid - 3} V ${mid + 3} M 4 ${mid - 3} C 8 ${mid - 3} 8 ${mid + 3} 4 ${mid + 3}`));
+      g.append(lead(4), path(`M 4 ${mid - 3} V ${mid + 3} M 4 ${mid - 3} C 8 ${mid - 3} 8 ${mid + 3} 4 ${mid + 3}`, 0.8, { class: 'signal-icon', fill: '#fff' }));
       break;
     case 9011: // зуммер
-      g.append(lead(3), path(`M 5.5 ${mid - 3} H 6 V ${mid + 3} H 5.5 M 5.5 ${mid - 3} C 2.5 ${mid - 1.5} 2.5 ${mid + 1.5} 5.5 ${mid + 3}`));
+      g.append(lead(3), path(`M 5.5 ${mid - 3} H 6 V ${mid + 3} H 5.5 M 5.5 ${mid - 3} C 2.5 ${mid - 1.5} 2.5 ${mid + 1.5} 5.5 ${mid + 3}`, 0.8, { class: 'signal-icon', fill: '#fff' }));
       break;
     case 9012: // сирена: треугольник
-      g.append(lead(4), path(`M 4 ${mid - 3} L 8.3 ${mid} L 4 ${mid + 3} Z`));
+      g.append(lead(4), path(`M 4 ${mid - 3} L 8.3 ${mid} L 4 ${mid + 3} Z`, 0.8, { class: 'signal-icon', fill: '#fff' }));
       break;
     default: // 9013, рупор: квадрат и раструб
       g.append(
         path(`M 0 0 V ${mid - 2} M 0 ${mid + 2} V ${gap}`),
-        rect(-2, mid - 2, 4, 4, { 'stroke-width': 0.9 }),
-        path(`M 2 ${mid - 0.8} L 5.6 ${mid - 1.5} H 6.5 L 8.2 ${mid + 0.6} V ${mid + 1.4} L 2 ${mid + 0.8}`),
+        rect(-2, mid - 2, 4, 4, { class: 'signal-icon', 'stroke-width': 0.9 }),
+        path(`M 2 ${mid - 0.8} L 5.6 ${mid - 1.5} H 6.5 L 8.2 ${mid + 0.6} V ${mid + 1.4} L 2 ${mid + 0.8}`, 0.8, { class: 'signal-icon', fill: '#fff' }),
       );
   }
 }

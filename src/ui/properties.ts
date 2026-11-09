@@ -111,7 +111,7 @@ export function setupPropertyFields(ctx: AppContext, deps: PropertyFieldsSetup):
       terminal.label = value;
       if (element.raw) element.raw.texts[2 + index] = value;
     }));
-    if (element.typeCode === 9008) {
+    if (element.typeCode === 9008 || element.typeCode === 9009) {
       const colorField = document.createElement('label'); colorField.className = 'property-field'; colorField.append(document.createTextNode(deps.uiText().lampColor));
       const select = document.createElement('select');
       for (const [value, title] of [['0', deps.uiText().green], ['1', deps.uiText().red], ['2', deps.uiText().yellow]] as const) {
@@ -132,7 +132,7 @@ export function setupPropertyFields(ctx: AppContext, deps: PropertyFieldsSetup):
       });
       colorField.append(select); deps.propertyFields.append(colorField);
     }
-    if (element.typeCode === 9004 || element.typeCode === 9005) {
+    if (element.typeCode === 9004 || element.typeCode === 9005 || element.typeCode === 9006) {
       addField(deps.uiText().delay, String(element.params.time ?? 0), (value) => {
         const time = Number(value);
         if (Number.isFinite(time) && time >= 0) {

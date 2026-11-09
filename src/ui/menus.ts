@@ -31,10 +31,16 @@ export function setupMenus(ctx: AppContext, deps: MenuSetup): void {
   const { root } = ctx;
   const menuGroups = [...root.querySelectorAll<HTMLDetailsElement>('.menu-group')];
   const closeMenus = (except?: HTMLDetailsElement): void => {
-    for (const group of menuGroups) if (group !== except) { group.open = false; delete group.dataset.hover; }
+    for (const group of menuGroups) if (group !== except) {
+      group.open = false; delete group.dataset.hover;
+      group.querySelectorAll<HTMLDetailsElement>('.menu-submenu[open]').forEach((submenu) => { submenu.open = false; });
+    }
   };
   for (const group of menuGroups) {
-    group.addEventListener('toggle', () => { if (group.open) closeMenus(group); });
+    group.addEventListener('toggle', () => {
+      if (group.open) closeMenus(group);
+      else group.querySelectorAll<HTMLDetailsElement>('.menu-submenu[open]').forEach((submenu) => { submenu.open = false; });
+    });
     // Пока открыто одно меню, наведение на соседнее переключает меню; следующий клик по заголовку его не закрывает.
     group.addEventListener('pointerenter', () => {
       if (!menuGroups.some((other) => other.open && other !== group)) return;
@@ -44,6 +50,11 @@ export function setupMenus(ctx: AppContext, deps: MenuSetup): void {
       if (group.dataset.hover === '1') { event.preventDefault(); delete group.dataset.hover; }
     });
   }
+  root.querySelector<HTMLElement>('.examples-menu > summary')?.addEventListener('click', (event) => {
+    event.preventDefault();
+    closeMenus();
+    root.querySelector<HTMLDialogElement>('#examples-dialog')?.showModal();
+  });
   window.addEventListener('pointerdown', (event) => { if (!(event.target as Element).closest('.app-menu')) closeMenus(); });
   window.addEventListener('keydown', (event) => { if (event.key === 'Escape') closeMenus(); });
 
@@ -88,7 +99,10 @@ export function setupMenus(ctx: AppContext, deps: MenuSetup): void {
   root.querySelector<HTMLElement>('.app-menu')?.addEventListener('click', (event) => {
     const command = (event.target as Element).closest<HTMLButtonElement>('[data-command]')?.dataset.command;
     if (!command) return;
-    root.querySelectorAll<HTMLDetailsElement>('.menu-group[open]').forEach((menu) => menu.removeAttribute('open'));
+    root.querySelectorAll<HTMLDetailsElement>('.menu-group[open]').forEach((menu) => {
+      menu.removeAttribute('open');
+      menu.querySelectorAll<HTMLDetailsElement>('.menu-submenu[open]').forEach((submenu) => { submenu.open = false; });
+    });
     switch (command) {
       case 'new': deps.requestNewSchema(); break;
       case 'open': deps.fileInput.click(); break;
@@ -112,6 +126,7 @@ export function setupMenus(ctx: AppContext, deps: MenuSetup): void {
       case 'wire-colors': deps.toggleWireColors(); break;
       case 'sheet': openSheetDialog(); break;
       case 'shortcuts': root.querySelector<HTMLDialogElement>('#shortcuts-dialog')?.showModal(); break;
+      case 'component-guide': root.querySelector<HTMLDialogElement>('#component-guide-dialog')?.showModal(); break;
       case 'about': root.querySelector<HTMLDialogElement>('#about-dialog')?.showModal(); break;
     }
   });

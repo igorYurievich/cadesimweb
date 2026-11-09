@@ -36,7 +36,7 @@ import { fitViewport, MAX_VIEWPORT_SCALE, MIN_VIEWPORT_SCALE, screenToSheet } fr
 import type { Point, Viewport } from './viewport';
 import { detectBundleLayout, isWireInteriorPoint, offsetRoute, orthogonalize, simplifyRoute } from './wire-routing';
 import './viewport.css';
-import { FALLBACK_VIEWPORT, AUTOSAVE_KEY, OPTIONAL_GROUP_STORAGE_KEY, OPTIONAL_PALETTE_GROUPS, CAD_GRID_STEP, PLACEABLE_TYPES, THEME_KEY, GRID_KEY, WIRE_COLOR_MODE_KEY, INTERFACE_LANGUAGE_KEY } from './constants';
+import { FALLBACK_VIEWPORT, AUTOSAVE_KEY, CAD_EXPORT_WARNING_KEY, OPTIONAL_GROUP_STORAGE_KEY, OPTIONAL_PALETTE_GROUPS, CAD_GRID_STEP, PLACEABLE_TYPES, THEME_KEY, GRID_KEY, WIRE_COLOR_MODE_KEY, INTERFACE_LANGUAGE_KEY } from './constants';
 import type { Theme, Selectable, DragState } from './constants';
 import { fullSheet, cloneSchema } from './helpers';
 import { INTERFACE_TEXT } from './i18n';
@@ -189,9 +189,14 @@ export function mountApp(root: HTMLElement): void {
             <button type="button" class="menu-command" data-command="new">Новая схема <kbd>Ctrl+N</kbd></button>
             <button type="button" class="menu-command" data-command="open">Открыть .cad / .json <kbd>Ctrl+O</kbd></button>
             <button type="button" class="menu-command" data-command="save-json">Сохранить JSON <kbd>Ctrl+S</kbd></button>
-            <button type="button" class="menu-command" data-command="export-cad">Экспорт .cad</button>
-            <button type="button" class="menu-command" data-command="export-svg">Экспорт SVG</button>
-            <button type="button" class="menu-command" data-command="export-png">Экспорт PNG</button>
+            <details class="menu-submenu">
+              <summary class="menu-command"><span id="export-menu-label">Экспорт</span><span class="menu-submenu-arrow" aria-hidden="true">›</span></summary>
+              <div class="menu-submenu-popover">
+                <button type="button" class="menu-command" data-command="export-cad">Экспорт .cad</button>
+                <button type="button" class="menu-command" data-command="export-svg">Экспорт SVG</button>
+                <button type="button" class="menu-command" data-command="export-png">Экспорт PNG</button>
+              </div>
+            </details>
             <button type="button" class="menu-command" data-command="print-pdf">Печать / PDF</button>
             <button type="button" class="menu-command" data-command="sheet">Размер листа (Ajustar hoja)…</button>
           </div></details>
@@ -232,11 +237,10 @@ export function mountApp(root: HTMLElement): void {
               <select id="palette-language" aria-label="Язык названий"><option value="es">ES — Español</option><option value="en">EN — English</option><option value="it">IT — Italiano</option><option value="ru">RU — Русский</option><option value="fr">FR — Français</option><option value="ar">AR — العربية (الفصحى)</option></select>
             </label>
           </div></details>
-          <details class="menu-group"><summary>Примеры</summary><div class="menu-popover">
-            <div class="menu-examples">${EXAMPLES.map((example) => `<button type="button" class="menu-command" data-example="${example.number}" title="Actividad ${example.code}"><span>${example.number}. ${example.title}</span><kbd>${example.code}</kbd></button>`).join('')}</div>
-          </div></details>
+          <details class="menu-group examples-menu"><summary>Примеры</summary></details>
           <details class="menu-group"><summary>Справка</summary><div class="menu-popover">
             <button type="button" class="menu-command" data-command="shortcuts">Горячие клавиши</button>
+            <button type="button" class="menu-command" data-command="component-guide">Подробнее о метках</button>
             <button type="button" class="menu-command" data-command="about">О программе</button>
           </div></details>
         </nav>
@@ -344,11 +348,43 @@ export function mountApp(root: HTMLElement): void {
         </dl>
         <div class="dialog-actions"><button type="button" data-dialog-close="shortcuts-dialog">Закрыть</button></div>
       </dialog>
+      <dialog id="component-guide-dialog" class="app-dialog component-guide-dialog" aria-labelledby="component-guide-title">
+        <h2 id="component-guide-title">Зелёные метки компонентов</h2>
+        <div class="verification-guide-marker"><span class="palette-verified-badge" aria-hidden="true">✓</span><strong id="component-guide-verified-label">Проверенный компонент</strong></div>
+        <p id="component-guide-verified-text">Зелёная метка означает, что компонент проверен и его можно использовать для построения схем.</p>
+        <p id="component-guide-unverified-text">Без метки: компонент ещё не проверен, его функциональность может быть неполной.</p>
+        <p id="component-guide-count"></p>
+        <div class="dialog-actions"><button type="button" data-dialog-close="component-guide-dialog">Закрыть</button></div>
+      </dialog>
+      <dialog id="examples-dialog" class="app-dialog examples-dialog" aria-labelledby="examples-dialog-title">
+        <div class="examples-window-titlebar">
+          <div class="examples-window-title"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6.5h7l2 2h9v10H3z" /></svg><h2 id="examples-dialog-title">Примеры</h2></div>
+          <button type="button" class="examples-window-close" data-dialog-close="examples-dialog" aria-label="Закрыть">×</button>
+        </div>
+        <div class="examples-window-toolbar">
+          <button type="button" disabled aria-label="Назад">‹</button><button type="button" disabled aria-label="Вперёд">›</button>
+          <div class="examples-breadcrumb"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6.5h7l2 2h9v10H3z" /></svg><span id="examples-folder-label">Папка примеров</span></div>
+        </div>
+        <div class="examples-window-content">
+          <aside class="examples-sidebar"><div class="examples-sidebar-heading">Избранное</div><div class="examples-sidebar-entry is-selected"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6.5h7l2 2h9v10H3z" /></svg><span id="examples-sidebar-label">Примеры</span></div></aside>
+          <section class="examples-files-section" aria-label="Примеры схем">
+            <div class="examples-list-head"><span id="examples-name-heading">Название</span><span id="examples-code-heading">Работа</span></div>
+            <div class="example-file-list">${EXAMPLES.map((example) => `<button type="button" class="example-file" data-example="${example.number}" title="${example.fileName}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2.5h8l4 4v15H6z"/><path d="M14 2.5v4h4M9 12h6M9 15h6M9 18h4"/></svg><span class="example-file-name">${example.title}</span><span class="example-file-code">${example.code}</span></button>`).join('')}</div>
+          </section>
+        </div>
+        <footer class="examples-window-footer"><span id="examples-count">${EXAMPLES.length} примеров</span><button type="button" data-dialog-close="examples-dialog">Закрыть</button></footer>
+      </dialog>
+      <dialog id="cad-export-warning-dialog" class="app-dialog cad-export-warning-dialog" aria-labelledby="cad-export-warning-title" aria-describedby="cad-export-warning-text">
+        <h2 id="cad-export-warning-title">Внимание: экспорт в .cad</h2>
+        <div class="cad-export-warning-message"><p id="cad-export-warning-text">Мы не гарантируем, что эта схема запустится и будет корректно работать в оригинальной CADe SIMU 4.2. Сохраняйте и используйте файл с учётом этого ограничения.</p></div>
+        <label class="cad-export-warning-optout"><input type="checkbox" id="cad-export-warning-optout" /><span id="cad-export-warning-optout-label">Больше не показывать это уведомление</span></label>
+        <div class="dialog-actions"><button type="button" id="cad-export-warning-cancel" data-dialog-close="cad-export-warning-dialog">Отмена</button><button type="button" class="primary-action" id="cad-export-warning-confirm">Экспортировать .cad</button></div>
+      </dialog>
       <dialog id="about-dialog" class="app-dialog about-dialog" aria-labelledby="about-title">
-        <div class="about-mark" aria-hidden="true">CS</div>
         <h2 id="about-title">Web Cade</h2>
-        <p id="about-bio">Я — автор Web Cade и студент второго курса электротехники в IES Las Lagunas.</p>
-        <p id="about-noncommercial">Мой проект бесплатный и некоммерческий.</p>
+        <p id="about-bio">Автор проекта — Игорь Липский Вячин.</p>
+        <p id="about-noncommercial">Это бета-версия. Проект находится на раннем этапе разработки и будет дальше развиваться.</p>
+        <p id="about-limitations">Сейчас веб-приложение ещё не предоставляет все возможности старого аналога программы.</p>
         <p class="about-contact"><span id="about-contact-label">По вопросам и пожеланиям пишите мне:</span> <a href="mailto:igoryurievich1@gmail.com">igoryurievich1@gmail.com</a></p>
         <p class="about-repository"><a href="https://github.com/igorYurievich/cadesimweb" target="_blank" rel="noopener noreferrer">GitHub: github.com/igorYurievich/cadesimweb</a></p>
         <dl><div><dt>Версия</dt><dd id="about-version">${appVersion}</dd></div></dl>
@@ -787,7 +823,34 @@ export function mountApp(root: HTMLElement): void {
   });
   resetInputsAction.addEventListener('click', () => { simulationContextMenu.hidden = true; simulation.resetSimulationInputs(); });
   setupSimulationContextMenuEvents(svg, simulationContextMenu, simulation);
-  const exportActions = setupExport(ctx, svg, status);
+  const confirmCadExport = (): Promise<boolean> => {
+    try { if (localStorage.getItem(CAD_EXPORT_WARNING_KEY) === '1') return Promise.resolve(true); } catch { /* Keep the warning enabled when storage is unavailable. */ }
+    const dialog = root.querySelector<HTMLDialogElement>('#cad-export-warning-dialog');
+    const optout = root.querySelector<HTMLInputElement>('#cad-export-warning-optout');
+    const confirm = root.querySelector<HTMLButtonElement>('#cad-export-warning-confirm');
+    if (!dialog || !optout || !confirm) return Promise.resolve(false);
+    optout.checked = false;
+    return new Promise((resolve) => {
+      let settled = false;
+      const finish = (accepted: boolean): void => {
+        if (settled) return;
+        settled = true;
+        dialog.removeEventListener('close', onClose);
+        confirm.removeEventListener('click', onConfirm);
+        if (accepted && optout.checked) {
+          try { localStorage.setItem(CAD_EXPORT_WARNING_KEY, '1'); } catch { /* The warning will appear again if storage is unavailable. */ }
+        }
+        if (dialog.open) dialog.close();
+        resolve(accepted);
+      };
+      const onClose = (): void => finish(false);
+      const onConfirm = (): void => finish(true);
+      dialog.addEventListener('close', onClose);
+      confirm.addEventListener('click', onConfirm);
+      dialog.showModal();
+    });
+  };
+  const exportActions = setupExport(ctx, svg, status, confirmCadExport);
   setupMenus(ctx, {
     fileInput, status, undoButton, redoButton, exportActions, requestNewSchema: createDocumentTab, copySelection, pasteSelection,
     rotateSelection, deleteSelected, toggleTheme, toggleGrid, toggleDockedProperties, toggleWireColors,

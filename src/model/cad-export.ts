@@ -108,10 +108,10 @@ function elementRecords(element: SchemaElement, allocId: () => number): CadRecor
   }
 
   const parameterStart = 2 + element.terminals.length;
-  if (element.typeCode === 9008 && element.params.color !== undefined) {
+  if ((element.typeCode === 9008 || element.typeCode === 9009) && element.params.color !== undefined) {
     record.texts[parameterStart] = String(element.params.color);
   }
-  if (element.typeCode === 9004 || element.typeCode === 9005) {
+  if (element.typeCode === 9004 || element.typeCode === 9005 || element.typeCode === 9006) {
     if (element.params.scale !== undefined) record.texts[parameterStart] = String(element.params.scale);
     if (element.params.time !== undefined) record.texts[parameterStart + 1] = String(element.params.time);
   }
@@ -155,7 +155,7 @@ function footerFor(schema: Schema): CadFooter {
 }
 
 /** CADe SIMU's printable frame starts inside the sheet area, unlike the web canvas. */
-function legacyFramePlacement(schema: Schema): { offsetY: number; height: number } {
+function legacyFramePlacement(schema: Schema): { offsetY: number } {
   let minY = Number.POSITIVE_INFINITY;
   let maxY = Number.NEGATIVE_INFINITY;
   const include = (y: number): void => { minY = Math.min(minY, y); maxY = Math.max(maxY, y); };
@@ -167,14 +167,13 @@ function legacyFramePlacement(schema: Schema): { offsetY: number; height: number
     for (const terminal of element.terminals) include(element.position.y + terminal.offset.y);
   }
   for (const wire of schema.wires) { include(wire.from.y); include(wire.to.y); }
-  if (!Number.isFinite(minY) || !Number.isFinite(maxY)) return { offsetY: 0, height: schema.sheet.height };
+  if (!Number.isFinite(minY) || !Number.isFinite(maxY)) return { offsetY: 0 };
 
   // The old editor reserves about 24 CAD units above and below its drawing frame.
   // Give top labels a small clearance too; enlarge the page if that is needed.
   const top = 30;
   const offsetY = minY < top ? top - minY : maxY > schema.sheet.height - 24 ? schema.sheet.height - 24 - maxY : 0;
-  const requiredHeight = Math.max(schema.sheet.height, maxY + offsetY + 24);
-  return { offsetY, height: Math.ceil(requiredHeight / 3) * 3 };
+  return { offsetY };
 }
 
 /** Convert the editor model to .cad and verify it by importing the result back. */
@@ -205,7 +204,6 @@ export function exportCad(schema: Schema): string {
     }
   }
   const footer = footerFor(schema);
-  footer.settings[footer.settings.length - 1] = placement.height;
   const text = serializeCad({ records, footer });
   const restored = importCad(text);
   if (restored.warnings.some((warning) => ['bad-record', 'missing-footer', 'bad-footer'].includes(warning.code))) {
@@ -213,6 +211,9 @@ export function exportCad(schema: Schema): string {
   }
   if (restored.schema.elements.length !== schema.elements.length || restored.schema.wires.length !== schema.wires.length) {
     throw new Error('Проверка .cad после экспорта не прошла: количество объектов изменилось.');
+  }
+  if (restored.schema.sheet.width !== schema.sheet.width || restored.schema.sheet.height !== schema.sheet.height) {
+    throw new Error('Проверка .cad после экспорта не прошла: размер листа изменился.');
   }
   const elementsById = new Map(restored.schema.elements.map((element) => [element.id, element]));
   for (const element of schema.elements) {

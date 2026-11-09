@@ -76,11 +76,13 @@ export function setupDocumentInputEvents(root: HTMLElement, fileInput: HTMLInput
     if (!file) return;
     openDocumentText(await file.text(), file.name);
   });
-  root.querySelector<HTMLElement>('.menu-examples')?.addEventListener('click', (event) => {
+  root.querySelector<HTMLElement>('.example-file-list')?.addEventListener('click', (event) => {
     const button = (event.target as Element).closest<HTMLButtonElement>('[data-example]');
     if (!button) return;
     const example = EXAMPLES.find((candidate) => candidate.number === Number(button.dataset.example));
-    root.querySelectorAll<HTMLDetailsElement>('.menu-group[open]').forEach((menu) => menu.removeAttribute('open'));
-    if (example) { stopSimulation(); openDocumentText(example.text, example.fileName); }
+    if (example) {
+      root.querySelector<HTMLDialogElement>('#examples-dialog')?.close();
+      stopSimulation(); openDocumentText(example.text, example.fileName);
+    }
   });
 }

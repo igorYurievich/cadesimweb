@@ -77,9 +77,15 @@ button:focus-visible, select:focus-visible, summary:focus-visible { outline: 2px
 .menu-toggle input { width: 15px; height: 15px; margin: 0; accent-color: var(--accent); cursor: pointer; }
 .menu-command { display: flex; min-height: 34px; align-items: center; justify-content: space-between; gap: 24px; padding: 0 10px; border: 0; border-radius: 6px; background: transparent; color: var(--text); font: inherit; font-size: 13px; text-align: left; cursor: pointer; }
 .menu-command:hover:not(:disabled) { background: var(--surface-hover); }
+.menu-submenu { position: relative; }
+.menu-submenu > summary { list-style: none; }
+.menu-submenu > summary::-webkit-details-marker { display: none; }
+.menu-submenu > summary.menu-command { width: 100%; }
+.menu-submenu-arrow { color: var(--muted); font-size: 19px; line-height: 1; }
+.menu-submenu[open] > summary.menu-command { background: var(--surface-hover); }
+.menu-submenu-popover { position: absolute; z-index: 31; top: -5px; inset-inline-start: calc(100% + 6px); display: none; min-width: 210px; padding: 5px; border: 1px solid var(--border); border-radius: 9px; background: var(--surface); box-shadow: var(--shadow); }
+.menu-submenu[open] > .menu-submenu-popover { display: grid; }
 .menu-heading { margin: 6px 10px 2px; padding-top: 8px; border-top: 1px solid var(--border); color: var(--muted); font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
-.menu-examples { display: grid; max-height: min(60vh, 420px); overflow-y: auto; }
-.menu-examples .menu-command { min-width: 420px; }
 .menu-command:disabled { color: var(--muted); opacity: .5; cursor: default; }
 kbd { padding: 2px 6px; border: 1px solid var(--border); border-radius: 4px; background: var(--surface-soft); color: var(--muted); font: inherit; font-size: 11px; white-space: nowrap; }
 
@@ -172,12 +178,54 @@ kbd { padding: 2px 6px; border: 1px solid var(--border); border-radius: 4px; bac
 .shortcuts-dialog dt { color: var(--muted); font-size: 11px; }
 .shortcuts-dialog dd { display: flex; gap: 4px; margin: 0; }
 .about-dialog { max-height: min(90vh, 760px); overflow-y: auto; text-align: center; }
-.about-dialog .about-mark { display: grid; width: 52px; height: 52px; place-items: center; margin: 0 auto 12px; border-radius: 15px; background: linear-gradient(145deg, #1786d1, #1355a0); color: #fff; font-size: 18px; font-weight: 750; box-shadow: 0 4px 12px #11578b33; }
 .about-dialog dl { display: grid; gap: 8px; margin: 18px auto 0; max-width: 260px; }
 .about-dialog dl > div { display: flex; justify-content: space-between; gap: 10px; padding-bottom: 7px; border-bottom: 1px solid var(--border); }
 .about-dialog dt { color: var(--muted); font-size: 11px; }
 .about-dialog dd { margin: 0; color: var(--text); font-size: 11px; font-weight: 650; }
 .about-dialog .dialog-actions { justify-content: center; }
+.component-guide-dialog { width: min(460px, calc(100vw - 32px)); }
+.verification-guide-marker { display: flex; align-items: center; gap: 9px; margin: 14px 0 8px; color: var(--text); }
+.component-guide-dialog p { margin: 8px 0; color: var(--muted); font-size: 13px; line-height: 1.55; }
+.component-guide-dialog #component-guide-count { margin-top: 14px; color: var(--text); font-weight: 650; }
+.examples-dialog { display: none; width: min(700px, calc(100vw - 28px)); max-width: none; height: min(520px, calc(100vh - 28px)); max-height: none; padding: 0; overflow: hidden; border-radius: 10px; }
+.examples-dialog[open] { display: flex; flex-direction: column; }
+.examples-window-titlebar { display: flex; height: 48px; flex: 0 0 48px; align-items: center; justify-content: space-between; padding: 0 12px 0 16px; border-bottom: 1px solid var(--border); background: var(--surface); }
+.examples-window-title { display: flex; min-width: 0; align-items: center; gap: 10px; }
+.examples-window-title svg { width: 22px; height: 22px; fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1.5; stroke-linejoin: round; }
+.examples-window-title h2 { margin: 0; overflow: hidden; font-size: 13px; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
+.examples-window-close { display: grid; width: 30px; height: 30px; place-items: center; border: 0; border-radius: 6px; background: transparent; color: var(--muted); font: inherit; font-size: 20px; cursor: pointer; }
+.examples-window-close:hover { background: #d3483e; color: #fff; }
+.examples-window-toolbar { display: flex; height: 44px; flex: 0 0 44px; align-items: center; gap: 6px; padding: 0 12px; border-bottom: 1px solid var(--border); background: var(--surface-soft); }
+.examples-window-toolbar > button { width: 28px; height: 28px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); color: var(--muted); font-size: 19px; line-height: 1; }
+.examples-breadcrumb { display: flex; min-width: 0; height: 29px; flex: 1; align-items: center; gap: 8px; margin-left: 6px; padding: 0 9px; border: 1px solid var(--border); border-radius: 5px; background: var(--surface); color: var(--text); font-size: 11px; }
+.examples-breadcrumb svg, .examples-sidebar-entry svg { width: 17px; height: 17px; flex: 0 0 auto; fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1.4; stroke-linejoin: round; }
+.examples-window-content { display: flex; min-height: 0; flex: 1; }
+.examples-sidebar { width: 155px; flex: 0 0 155px; padding: 14px 8px; border-right: 1px solid var(--border); background: var(--surface-soft); }
+.examples-sidebar-heading { padding: 3px 9px 8px; color: var(--muted); font-size: 10px; font-weight: 650; }
+.examples-sidebar-entry { display: flex; min-height: 32px; align-items: center; gap: 8px; padding: 0 9px; border-radius: 5px; color: var(--text); font-size: 11px; }
+.examples-sidebar-entry.is-selected { background: var(--accent-soft); color: var(--text); font-weight: 600; }
+.examples-files-section { display: flex; min-width: 0; flex: 1; flex-direction: column; }
+.examples-list-head { display: grid; grid-template-columns: minmax(0, 1fr) 112px; gap: 10px; padding: 10px 16px 8px; border-bottom: 1px solid var(--border); color: var(--muted); font-size: 10px; }
+.example-file-list { min-height: 0; overflow-y: auto; padding: 5px 8px; }
+.example-file { display: grid; width: 100%; min-height: 39px; grid-template-columns: 23px minmax(0, 1fr) 102px; align-items: center; gap: 8px; padding: 4px 8px; border: 1px solid transparent; border-radius: 5px; background: transparent; color: var(--text); font: inherit; font-size: 11px; text-align: start; cursor: pointer; }
+.example-file:hover, .example-file:focus-visible { border-color: var(--accent); background: var(--accent-soft); outline: none; }
+.example-file svg { width: 18px; height: 20px; fill: var(--surface); stroke: var(--muted); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.example-file-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.example-file-code { color: var(--muted); font-size: 10px; text-align: end; white-space: nowrap; }
+.examples-window-footer { display: flex; min-height: 42px; flex: 0 0 42px; align-items: center; justify-content: space-between; padding: 0 14px; border-top: 1px solid var(--border); background: var(--surface-soft); color: var(--muted); font-size: 10px; }
+.examples-window-footer button { min-height: 27px; padding: 0 10px; border: 1px solid var(--border-strong); border-radius: 6px; background: var(--surface); color: var(--text); font: inherit; font-size: 10px; cursor: pointer; }
+.examples-window-footer button:hover { background: var(--surface-hover); }
+.cad-export-warning-dialog { width: min(500px, calc(100vw - 32px)); }
+.cad-export-warning-dialog h2 { color: #b42318; }
+.cad-export-warning-message { margin: 12px 0 14px; padding: 10px 12px; border: 1px solid #f2b8b5; border-left: 4px solid #d3483e; border-radius: 7px; background: #fff0ed; }
+.cad-export-warning-message p { margin: 0; color: #7f271e; font-size: 13px; line-height: 1.55; }
+.cad-export-warning-optout { display: flex; align-items: flex-start; gap: 8px; color: var(--text); font-size: 12px; line-height: 1.4; cursor: pointer; }
+.cad-export-warning-optout input { width: 15px; height: 15px; flex: 0 0 auto; margin: 0; accent-color: var(--accent); }
+.cad-export-warning-dialog #cad-export-warning-confirm { border-color: #c63b33; background: #c63b33; color: #fff; }
+.cad-export-warning-dialog #cad-export-warning-confirm:hover { border-color: #aa2e27; background: #aa2e27; }
+#app[data-theme="dark"] .cad-export-warning-dialog h2 { color: #ffaaa0; }
+#app[data-theme="dark"] .cad-export-warning-message { border-color: #713b37; border-left-color: #e46c61; background: #382321; }
+#app[data-theme="dark"] .cad-export-warning-message p { color: #ffd0cb; }
 
 .simulation-message { padding: 8px 14px; border-bottom: 1px solid #e6b7b1; background: #fff0ed; color: #9e3027; font-size: 12px; line-height: 1.45; }
 .simulation-message[hidden] { display: none; }
@@ -185,6 +233,9 @@ kbd { padding: 2px 6px; border: 1px solid var(--border); border-radius: 4px; bac
 /* Символы: серые в покое, красные под напряжением (как в CADe_SIMU). */
 .schematic-element { color: #7b8189; }
 .schematic-element.is-powered { color: #e3181f; }
+.schematic-element.is-signal-active { color: #aeb3b9; }
+.schematic-element .signal-icon { fill: none; }
+.schematic-element.is-signal-active .signal-icon { fill: #bdbdc1; }
 .schematic-element.is-power-supply-active { color: #626a73; }
 .schematic-element.is-power-supply-active .symbol-body > rect:first-child { fill: #c6c9cd; }
 .schematic-element.is-thermal-relay-tripped { color: #e3181f; }
@@ -302,6 +353,9 @@ kbd { padding: 2px 6px; border: 1px solid var(--border); border-radius: 4px; bac
 }
 
 @media (max-width: 480px) {
+  .examples-sidebar { display: none; }
+  .examples-list-head { grid-template-columns: minmax(0, 1fr) 76px; padding-inline: 10px; }
+  .example-file { grid-template-columns: 21px minmax(0, 1fr) 70px; gap: 6px; padding-inline: 5px; }
   .brand-lockup h1 { display: none; }
 }
 

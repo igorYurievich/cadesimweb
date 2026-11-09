@@ -34,6 +34,8 @@ export interface SwitchingResult {
 export const ON_DELAY_CONTACT_TYPES: ReadonlySet<number> = new Set([7004, 7005, 7006, 7007]);
 /** Контакты срабатывают после импульсного отсчёта таймера отключения 9005. */
 export const OFF_DELAY_CONTACT_TYPES: ReadonlySet<number> = new Set([7008, 7009, 7010, 7011]);
+/** Контакты 7012–7015 переключаются по таймеру 9006 с выдержкой при включении и отпускании. */
+export const ON_OFF_DELAY_CONTACT_TYPES: ReadonlySet<number> = new Set([7012, 7013, 7014, 7015]);
 
 /**
  * Включено ли управление вспомогательного контакта: катушка с тем же именем, а для контактов с выдержкой
@@ -55,6 +57,13 @@ export function auxContactActive(
   if (OFF_DELAY_CONTACT_TYPES.has(element.typeCode) && element.name !== '') {
     const timer = schema.elements.find((candidate) => candidate.typeCode === 9005 && candidate.name === element.name);
     if (timer) return timers[timer.id]?.phase === 'done';
+  }
+  if (ON_OFF_DELAY_CONTACT_TYPES.has(element.typeCode) && element.name !== '') {
+    const timer = schema.elements.find((candidate) => candidate.typeCode === 9006 && candidate.name === element.name);
+    if (timer) {
+      const phase = timers[timer.id]?.phase;
+      return phase === 'done' || phase === 'releasing';
+    }
   }
   return element.name !== '' && (coils[element.name] ?? false);
 }

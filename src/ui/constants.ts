@@ -17,6 +17,7 @@ export type DragState =
 export const FALLBACK_VIEWPORT = { width: 1000, height: 700 };
 
 export const AUTOSAVE_KEY = 'cadesimu-web:autosave:v1';
+export const CAD_EXPORT_WARNING_KEY = 'cadesimu-web:cad-export-warning-dismissed:v1';
 
 export const OPTIONAL_GROUP_STORAGE_KEY = 'cadesimu-visible-optional-groups:v1';
 

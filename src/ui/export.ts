@@ -13,7 +13,7 @@ export interface ExportActions {
   printPdf(): void;
 }
 
-export function setupExport(ctx: AppContext, svg: SVGSVGElement, status: HTMLElement): ExportActions {
+export function setupExport(ctx: AppContext, svg: SVGSVGElement, status: HTMLElement, confirmCadExport: () => Promise<boolean>): ExportActions {
   const downloadText = (text: string, name: string, mime: string): void => {
     const url = URL.createObjectURL(new Blob([text], { type: mime }));
     const link = document.createElement('a');
@@ -29,6 +29,7 @@ export function setupExport(ctx: AppContext, svg: SVGSVGElement, status: HTMLEle
     status.textContent = `Схема сохранена в ${outputBaseName()}.json.`;
   };
   const exportCadFile = async (): Promise<void> => {
+    if (!(await confirmCadExport())) return;
     try {
       const contents = exportCad(ctx.schema);
       type SaveFileHandle = { name: string; createWritable(): Promise<{ write(data: string): Promise<void>; close(): Promise<void> }> };

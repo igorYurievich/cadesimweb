@@ -89,7 +89,7 @@ function toElement(r: CadRecord, continuations: readonly CadRecord[] = []): Sche
   const params: SchemaElement['params'] = {};
   if (info.family === 'lamp' && extra[0] !== undefined) params.color = Number(extra[0]);
   if (r.type === 8) params.text = r.tail ?? r.texts.find((value) => value.trim() !== '') ?? '';
-  if (info.code === 9004 || info.code === 9005) {
+  if (info.code === 9004 || info.code === 9005 || info.code === 9006) {
     // Порядок и смысл (шкала, значение) подтверждены только по двум образцам: 0/5 и 0/10.
     if (extra[0] !== undefined) params.scale = Number(extra[0]);
     if (extra[1] !== undefined) params.time = Number(extra[1]);

@@ -7,8 +7,10 @@ import { terminalKey } from './types';
 
 /** Короткий импульс таймированных контактов, чтобы схема успела переключить реле. */
 export const TIMER_CONTACT_RELEASE_SECONDS = 0.2;
+/** Контакты таймера 9006 удерживаются две секунды после снятия питания. */
+export const TIMER_ON_OFF_RELEASE_SECONDS = 2;
 
-/** Обновляет таймеры 9004 и 9005. Время берётся только из симуляции. */
+/** Обновляет таймеры 9004, 9005 и 9006. Время берётся только из симуляции. */
 export function advanceTimers(
   schema: Schema,
   nets: readonly NetState[],
@@ -21,13 +23,41 @@ export function advanceTimers(
   const now = Number.isFinite(time) ? time : 0;
 
   for (const element of schema.elements) {
-    if (element.typeCode !== 9004 && element.typeCode !== 9005) continue;
+    if (element.typeCode !== 9004 && element.typeCode !== 9005 && element.typeCode !== 9006) continue;
     const prior = previous[element.id];
     const aId = terminalNet[terminalKey(element.id, 0)];
     const bId = terminalNet[terminalKey(element.id, 1)];
     const a = aId === undefined ? undefined : byNet.get(aId);
     const b = bId === undefined ? undefined : byNet.get(bId);
     const powered = Boolean(a && b && isEnergized(a, b).energized);
+
+    if (element.typeCode === 9006) {
+      const configured = Number(element.params.time ?? 0);
+      const duration = Number.isFinite(configured) ? Math.max(0, configured) : 0;
+      if (powered) {
+        if (prior?.phase === 'done' || prior?.phase === 'releasing') {
+          result[element.id] = { phase: 'done', elapsed: Math.max(duration, prior.elapsed), lastTime: now, powered: true };
+        } else if (prior?.phase === 'counting') {
+          const lastTime = Number.isFinite(prior.lastTime) ? prior.lastTime as number : now;
+          const elapsed = Math.max(0, prior.elapsed) + Math.max(0, now - lastTime);
+          result[element.id] = { phase: elapsed >= duration ? 'done' : 'counting', elapsed, lastTime: now, powered: true };
+        } else {
+          result[element.id] = duration === 0
+            ? { phase: 'done', elapsed: 0, lastTime: now, powered: true }
+            : { phase: 'counting', elapsed: 0, lastTime: now, powered: true };
+        }
+      } else if (prior?.phase === 'done' || prior?.phase === 'releasing') {
+        const releaseElapsed = prior.phase === 'releasing'
+          ? Math.max(0, prior.releaseElapsed ?? 0) + Math.max(0, now - (Number.isFinite(prior.lastTime) ? prior.lastTime as number : now))
+          : 0;
+        result[element.id] = releaseElapsed >= TIMER_ON_OFF_RELEASE_SECONDS
+          ? { phase: 'idle', elapsed: 0, lastTime: now, powered: false }
+          : { phase: 'releasing', elapsed: prior.elapsed, releaseElapsed, lastTime: now, powered: false };
+      } else {
+        result[element.id] = { phase: 'idle', elapsed: 0, lastTime: now, powered: false };
+      }
+      continue;
+    }
 
     if (element.typeCode === 9005) {
       const configured = Number(element.params.time ?? 0);
