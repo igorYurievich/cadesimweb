@@ -22,8 +22,10 @@ export function setupHistoryUi(ctx: AppContext, deps: HistoryUiSetup) {
     if (undoMenu) undoMenu.disabled = deps.undoButton.disabled;
     if (redoMenu) redoMenu.disabled = deps.redoButton.disabled;
     const copyMenu = deps.root.querySelector<HTMLButtonElement>('[data-command="copy-selection"]');
+    const cutMenu = deps.root.querySelector<HTMLButtonElement>('[data-command="cut-selection"]');
     const pasteMenu = deps.root.querySelector<HTMLButtonElement>('[data-command="paste-selection"]');
     if (copyMenu) copyMenu.disabled = deps.selected.size === 0;
+    if (cutMenu) cutMenu.disabled = deps.selected.size === 0;
     if (pasteMenu) pasteMenu.disabled = !deps.clipboardAvailable();
     deps.drawWireButton.textContent = deps.wireDrawing() ? deps.uiText().cancel : deps.uiText().wire;
     deps.finishWireButton.disabled = !deps.wireDrawing() || deps.draftLength() < 2;

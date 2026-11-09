@@ -8,7 +8,8 @@
  *    точке нет точки соединения 4001, выдаётся предупреждение `t-without-junction`;
  *  - точка соединения 4001 соединяет все отрезки, проходящие через её координату
  *    (в том числе насквозь);
- *  - пересечение тел без точки НЕ соединяет;
+ *  - пересечение двух проходящих насквозь линий без точки соединения разделяет
+ *    сети, даже если линии представлены несколькими отрезками;
  *  - отрезок нулевой длины допустим (это просто точка).
  *
  * Номера групп не зависят от порядка отрезков во входе: группы нумеруются по
@@ -58,6 +59,50 @@ export function pointOnSegment(p: Point, a: Point, b: Point): boolean {
 
 const pointKey = (p: Point): string => `${p.x},${p.y}`;
 
+const EPSILON = 1e-9;
+
+function segmentIntersection(a: WireSegment, b: WireSegment): Point | undefined {
+  const rx = a.to.x - a.from.x; const ry = a.to.y - a.from.y;
+  const sx = b.to.x - b.from.x; const sy = b.to.y - b.from.y;
+  const denominator = rx * sy - ry * sx;
+  if (Math.abs(denominator) < EPSILON) return undefined;
+  const qx = b.from.x - a.from.x; const qy = b.from.y - a.from.y;
+  const t = (qx * sy - qy * sx) / denominator;
+  const u = (qx * ry - qy * rx) / denominator;
+  if (t < -EPSILON || t > 1 + EPSILON || u < -EPSILON || u > 1 + EPSILON) return undefined;
+  return { x: a.from.x + t * rx, y: a.from.y + t * ry };
+}
+
+/** Оси, по которым провод непрерывно проходит через точку. */
+function throughAxesAt(point: Point, wires: readonly WireSegment[]): Point[] {
+  const axes: Point[] = [];
+  const rays: Point[] = [];
+  const addAxis = (x: number, y: number): void => {
+    const length = Math.hypot(x, y);
+    if (length < EPSILON) return;
+    const axis = { x: x / length, y: y / length };
+    if (axis.x < -EPSILON || (Math.abs(axis.x) <= EPSILON && axis.y < 0)) { axis.x *= -1; axis.y *= -1; }
+    if (!axes.some((other) => Math.abs(axis.x * other.y - axis.y * other.x) < EPSILON)) axes.push(axis);
+  };
+  for (const wire of wires) {
+    if (isJunction(wire) || !pointOnSegment(point, wire.from, wire.to)) continue;
+    const fromAtPoint = samePoint(point, wire.from);
+    const toAtPoint = samePoint(point, wire.to);
+    if (!fromAtPoint && !toAtPoint) addAxis(wire.to.x - wire.from.x, wire.to.y - wire.from.y);
+    else if (fromAtPoint && !toAtPoint) rays.push({ x: wire.to.x - point.x, y: wire.to.y - point.y });
+    else if (toAtPoint && !fromAtPoint) rays.push({ x: wire.from.x - point.x, y: wire.from.y - point.y });
+  }
+  for (let i = 0; i < rays.length; i += 1) for (let j = i + 1; j < rays.length; j += 1) {
+    const a = rays[i]!; const b = rays[j]!;
+    const lengths = Math.hypot(a.x, a.y) * Math.hypot(b.x, b.y);
+    if (lengths < EPSILON) continue;
+    const cross = a.x * b.y - a.y * b.x;
+    const dot = a.x * b.x + a.y * b.y;
+    if (Math.abs(cross) / lengths < EPSILON && dot < 0) addAxis(a.x, a.y);
+  }
+  return axes;
+}
+
 function isJunction(w: WireSegment): boolean {
   return w.kind === 'junction';
 }
@@ -74,6 +119,20 @@ export function buildWireLinks(wires: readonly WireSegment[]): WireLinks {
 
   const junctionPoints = new Set<string>();
   for (const w of order) if (isJunction(w)) junctionPoints.add(pointKey(w.from));
+
+  // A crossing is an intersection where both line paths continue through the
+  // point. Keep each path connected to itself but do not bridge the paths.
+  const crossingPoints = new Set<string>();
+  for (let i = 0; i < n; i += 1) {
+    const a = order[i] as WireSegment;
+    if (isJunction(a)) continue;
+    for (let j = i + 1; j < n; j += 1) {
+      const b = order[j] as WireSegment;
+      if (isJunction(b)) continue;
+      const point = segmentIntersection(a, b);
+      if (point && throughAxesAt(point, order).length > 1) crossingPoints.add(pointKey(point));
+    }
+  }
 
   const warned = new Set<string>();
   const warnings: WireLinkWarning[] = [];
@@ -112,6 +171,12 @@ export function buildWireLinks(wires: readonly WireSegment[]): WireLinks {
         } else if (pointOnSegment(jn.from, other.from, other.to)) {
           uf.union(i, j);
         }
+        continue;
+      }
+      const crossing = segmentIntersection(a, b);
+      if (crossing && crossingPoints.has(pointKey(crossing)) && !junctionPoints.has(pointKey(crossing))) {
+        // Leave the two crossing paths separate until the user places an
+        // explicit junction. Collinear pieces still join through endpoint/T rules.
         continue;
       }
       // Совпадение концов.

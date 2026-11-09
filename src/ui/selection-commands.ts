@@ -21,7 +21,7 @@ export interface SelectionCommandsSetup {
 }
 
 export function setupSelectionCommands(ctx: AppContext, deps: SelectionCommandsSetup) {
-  const copySelection = (): void => {
+  const copySelection = (): boolean => {
     const { schema } = ctx;
     const elements = [...deps.selected.values()]
       .filter((item) => item.kind === 'element')
@@ -31,7 +31,7 @@ export function setupSelectionCommands(ctx: AppContext, deps: SelectionCommandsS
       .filter((item) => item.kind === 'wire')
       .map((item) => schema.wires.find((wire) => wire.id === item.id))
       .filter((wire): wire is WireSegment => Boolean(wire));
-    if (!elements.length && !wires.length) return;
+    if (!elements.length && !wires.length) return false;
     const bounds = { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity };
     const include = (x: number, y: number): void => {
       bounds.minX = Math.min(bounds.minX, x); bounds.minY = Math.min(bounds.minY, y);
@@ -46,6 +46,7 @@ export function setupSelectionCommands(ctx: AppContext, deps: SelectionCommandsS
     deps.setClipboard({ elements: structuredClone(elements), wires: structuredClone(wires), anchor: { x: (bounds.minX + bounds.maxX) / 2, y: (bounds.minY + bounds.maxY) / 2 } });
     deps.updateHistoryButtons();
     deps.status.textContent = `Скопировано объектов: ${elements.length + wires.length}. Наведите курсор и нажмите Ctrl+V.`;
+    return true;
   };
 
   const pasteSelection = (): void => {
@@ -95,6 +96,24 @@ export function setupSelectionCommands(ctx: AppContext, deps: SelectionCommandsS
     schema.wires = schema.wires.filter((wire) => !wireIds.has(wire.id));
     deps.selected.clear(); deps.commitSchema(before); deps.renderSchema();
     deps.status.textContent = 'Выбранные объекты удалены.';
+  };
+  const cutSelection = (): void => {
+    if (deps.simulationMode() !== 'edit') { deps.status.textContent = 'Остановите симуляцию перед вырезанием объектов.'; return; }
+    if (!copySelection()) return;
+    const clipboard = deps.clipboard();
+    if (!clipboard) return;
+    const { schema } = ctx; const before = cloneSchema(schema);
+    const elementIds = new Set(clipboard.elements.map((element) => element.id));
+    const wireIds = new Set(clipboard.wires.map((wire) => wire.id));
+    schema.elements = schema.elements.filter((element) => !elementIds.has(element.id));
+    schema.wires = schema.wires.filter((wire) => !wireIds.has(wire.id));
+    for (const item of [...deps.selected.values()]) {
+      if ((item.kind === 'element' && elementIds.has(item.id)) || (item.kind === 'wire' && wireIds.has(item.id))) {
+        deps.selected.delete(selectionKey(item));
+      }
+    }
+    deps.commitSchema(before); deps.renderSchema();
+    deps.status.textContent = 'Объекты вырезаны. Наведите курсор и нажмите Ctrl+V.';
   };
   const rotateSelection = (): void => {
     const placementType = deps.placementType();
@@ -153,5 +172,5 @@ export function setupSelectionCommands(ctx: AppContext, deps: SelectionCommandsS
     }
     deps.commitSchema(before); deps.renderSchema();
   };
-  return { copySelection, pasteSelection, deleteSelected, rotateSelection, nudgeSelection };
+  return { copySelection, cutSelection, pasteSelection, deleteSelected, rotateSelection, nudgeSelection };
 }

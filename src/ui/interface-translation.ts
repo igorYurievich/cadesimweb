@@ -31,7 +31,7 @@ export function setupInterfaceTranslation(deps: InterfaceTranslationSetup): () =
     [t.file, t.edit, t.view, t.elementsMenu, t.language, t.examples, t.help].forEach((value, index) => { if (summaries[index]) summaries[index]!.textContent = value; });
     const commandLabels: Array<[string, string]> = [
       ['new', t.new], ['open', t.open], ['save-json', t.save], ['export-cad', t.export], ['export-svg', t.exportSvg], ['export-png', t.exportPng], ['print-pdf', t.printPdf], ['sheet', t.sheet],
-      ['copy-selection', t.copy], ['paste-selection', t.paste], ['undo', t.undo], ['redo', t.redo], ['rotate', t.rotate], ['delete', t.delete],
+      ['copy-selection', t.copy], ['cut-selection', t.cut], ['paste-selection', t.paste], ['undo', t.undo], ['redo', t.redo], ['rotate', t.rotate], ['delete', t.delete],
       ['zoom-in', t.zoomIn], ['zoom-out', t.zoomOut], ['fit', t.fit], ['shortcuts', t.shortcuts], ['component-guide', t.componentGuide], ['about', t.about],
     ];
     for (const [command, label] of commandLabels) setButton(`[data-command="${command}"]`, label);
@@ -124,12 +124,13 @@ export function setupInterfaceTranslation(deps: InterfaceTranslationSetup): () =
     }
     const examplesDialog = deps.root.querySelector<HTMLDialogElement>('#examples-dialog'); if (examplesDialog) {
       set('#examples-dialog-title', t.examples);
-      set('#examples-folder-label', t.examplesFolder);
+      const activeExamplesFolder = deps.root.dataset.examplesFolder || '';
+      set('#examples-folder-label', activeExamplesFolder || t.examplesFolder);
       set('#examples-sidebar-label', t.examples);
       set('#examples-name-heading', t.examplesName);
       set('#examples-code-heading', t.examplesCode);
-      const count = examplesDialog.querySelectorAll('.example-file').length;
-      set('#examples-count', t.examplesCount.replace('{count}', new Intl.NumberFormat(language).format(count)));
+      const count = Number(examplesDialog.querySelector<HTMLElement>('#examples-count')?.dataset.visibleCount ?? examplesDialog.querySelectorAll('.example-file').length);
+      set('#examples-count', activeExamplesFolder ? t.examplesCount.replace('{count}', new Intl.NumberFormat(language).format(count)) : '');
       examplesDialog.querySelector<HTMLElement>('.examples-files-section')?.setAttribute('aria-label', t.examples);
       examplesDialog.querySelector<HTMLButtonElement>('.examples-window-close')?.setAttribute('aria-label', t.close);
     }

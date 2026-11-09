@@ -13,6 +13,7 @@ export interface MenuSetup {
   exportActions: ExportActions;
   requestNewSchema(): void;
   copySelection(): void;
+  cutSelection(): void;
   pasteSelection(): void;
   rotateSelection(): void;
   deleteSelected(): void;
@@ -107,6 +108,7 @@ export function setupMenus(ctx: AppContext, deps: MenuSetup): void {
       case 'new': deps.requestNewSchema(); break;
       case 'open': deps.fileInput.click(); break;
       case 'copy-selection': deps.copySelection(); break;
+      case 'cut-selection': deps.cutSelection(); break;
       case 'paste-selection': deps.pasteSelection(); break;
       case 'save-json': deps.exportActions.saveJson(); break;
       case 'export-cad': deps.exportActions.exportCadFile(); break;

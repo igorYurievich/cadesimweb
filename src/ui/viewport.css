@@ -208,8 +208,10 @@ kbd { padding: 2px 6px; border: 1px solid var(--border); border-radius: 4px; bac
 .examples-list-head { display: grid; grid-template-columns: minmax(0, 1fr) 112px; gap: 10px; padding: 10px 16px 8px; border-bottom: 1px solid var(--border); color: var(--muted); font-size: 10px; }
 .example-file-list { min-height: 0; overflow-y: auto; padding: 5px 8px; }
 .example-file { display: grid; width: 100%; min-height: 39px; grid-template-columns: 23px minmax(0, 1fr) 102px; align-items: center; gap: 8px; padding: 4px 8px; border: 1px solid transparent; border-radius: 5px; background: transparent; color: var(--text); font: inherit; font-size: 11px; text-align: start; cursor: pointer; }
+.example-folder-row { display: grid; width: 100%; min-height: 39px; grid-template-columns: 23px minmax(0, 1fr) 102px; align-items: center; gap: 8px; padding: 4px 8px; border: 1px solid transparent; border-radius: 5px; background: transparent; color: var(--text); font: inherit; font-size: 11px; text-align: start; cursor: pointer; }
 .example-file:hover, .example-file:focus-visible { border-color: var(--accent); background: var(--accent-soft); outline: none; }
-.example-file svg { width: 18px; height: 20px; fill: var(--surface); stroke: var(--muted); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.example-folder-row:hover, .example-folder-row:focus-visible { border-color: var(--accent); background: var(--accent-soft); outline: none; }
+.example-file svg, .example-folder-row svg { width: 18px; height: 20px; fill: var(--surface); stroke: var(--muted); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
 .example-file-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .example-file-code { color: var(--muted); font-size: 10px; text-align: end; white-space: nowrap; }
 .examples-window-footer { display: flex; min-height: 42px; flex: 0 0 42px; align-items: center; justify-content: space-between; padding: 0 14px; border-top: 1px solid var(--border); background: var(--surface-soft); color: var(--muted); font-size: 10px; }
@@ -227,9 +229,9 @@ kbd { padding: 2px 6px; border: 1px solid var(--border); border-radius: 4px; bac
 #app[data-theme="dark"] .cad-export-warning-message { border-color: #713b37; border-left-color: #e46c61; background: #382321; }
 #app[data-theme="dark"] .cad-export-warning-message p { color: #ffd0cb; }
 
-.simulation-message { padding: 8px 14px; border-bottom: 1px solid #e6b7b1; background: #fff0ed; color: #9e3027; font-size: 12px; line-height: 1.45; }
+.simulation-message { position: fixed; z-index: 100; top: 136px; right: 16px; width: min(560px, calc(100vw - 32px)); max-height: min(48vh, 420px); padding: 11px 14px; overflow: auto; border: 1px solid #e6b7b1; border-left: 4px solid #d3483e; border-radius: 8px; background: #fff0ed; color: #9e3027; box-shadow: 0 8px 28px #10182840; font-size: 12px; line-height: 1.45; }
 .simulation-message[hidden] { display: none; }
-#app[data-theme="dark"] .simulation-message { border-color: #713b37; background: #382321; color: #ffaaa0; }
+#app[data-theme="dark"] .simulation-message { border-color: #713b37; border-left-color: #e46c61; background: #382321; color: #ffaaa0; }
 /* Символы: серые в покое, красные под напряжением (как в CADe_SIMU). */
 .schematic-element { color: #7b8189; }
 .schematic-element.is-powered { color: #e3181f; }
@@ -355,7 +357,7 @@ kbd { padding: 2px 6px; border: 1px solid var(--border); border-radius: 4px; bac
 @media (max-width: 480px) {
   .examples-sidebar { display: none; }
   .examples-list-head { grid-template-columns: minmax(0, 1fr) 76px; padding-inline: 10px; }
-  .example-file { grid-template-columns: 21px minmax(0, 1fr) 70px; gap: 6px; padding-inline: 5px; }
+  .example-file, .example-folder-row { grid-template-columns: 21px minmax(0, 1fr) 70px; gap: 6px; padding-inline: 5px; }
   .brand-lockup h1 { display: none; }
 }
 

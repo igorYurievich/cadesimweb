@@ -9,6 +9,7 @@ import { createHistory } from './history';
 import { fitViewport } from './viewport';
 import { cloneSchema, fitBounds, fullSheet } from './helpers';
 import { EXAMPLES } from '../data/examples';
+import { INTERFACE_TEXT } from './i18n';
 
 export interface DocumentOpenSetup {
   svg: SVGSVGElement; fileName: HTMLElement; status: HTMLElement;
@@ -76,8 +77,30 @@ export function setupDocumentInputEvents(root: HTMLElement, fileInput: HTMLInput
     if (!file) return;
     openDocumentText(await file.text(), file.name);
   });
-  root.querySelector<HTMLElement>('.example-file-list')?.addEventListener('click', (event) => {
-    const button = (event.target as Element).closest<HTMLButtonElement>('[data-example]');
+  let currentExampleFolder = '';
+  const renderExampleFolder = (): void => {
+    const list = root.querySelector<HTMLElement>('.example-file-list');
+    const folderLabel = root.querySelector<HTMLElement>('#examples-folder-label');
+    const back = root.querySelector<HTMLButtonElement>('[data-examples-back]');
+    const count = root.querySelector<HTMLElement>('#examples-count');
+    if (!list || !folderLabel || !back || !count) return;
+    const visible = EXAMPLES.filter((example) => example.folder === currentExampleFolder);
+    root.dataset.examplesFolder = currentExampleFolder;
+    folderLabel.textContent = currentExampleFolder || INTERFACE_TEXT[root.lang as keyof typeof INTERFACE_TEXT]?.examplesFolder || INTERFACE_TEXT.ru.examplesFolder;
+    back.disabled = !currentExampleFolder;
+    const folderRow = (name: string): string => `<button type="button" class="example-folder-row" data-folder="${name}" title="${name}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6.5h7l2 2h9v10H3z"/></svg><span class="example-file-name">${name}</span><span class="example-file-code"></span></button>`;
+    const childFolder = currentExampleFolder === '' ? `${folderRow('Ejemplos')}${folderRow('Ejemplos 2')}` : '';
+    list.innerHTML = `${childFolder}${visible.map((example) => `<button type="button" class="example-file" data-example="${example.number}" title="${example.fileName}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2.5h8l4 4v15H6z"/><path d="M14 2.5v4h4M9 12h6M9 15h6M9 18h4"/></svg><span class="example-file-name">${example.title}</span><span class="example-file-code">${example.code}</span></button>`).join('')}`;
+    count.dataset.visibleCount = String(visible.length);
+    const text = INTERFACE_TEXT[root.lang as keyof typeof INTERFACE_TEXT]?.examplesCount || INTERFACE_TEXT.ru.examplesCount;
+    count.textContent = currentExampleFolder ? text.replace('{count}', new Intl.NumberFormat(root.lang || 'ru').format(visible.length)) : '';
+  };
+  const list = root.querySelector<HTMLElement>('.example-file-list');
+  list?.addEventListener('click', (event) => {
+    const target = event.target as Element;
+    const folderButton = target.closest<HTMLButtonElement>('[data-folder]');
+    if (folderButton) { currentExampleFolder = folderButton.dataset.folder ?? ''; renderExampleFolder(); return; }
+    const button = target.closest<HTMLButtonElement>('[data-example]');
     if (!button) return;
     const example = EXAMPLES.find((candidate) => candidate.number === Number(button.dataset.example));
     if (example) {
@@ -85,4 +108,9 @@ export function setupDocumentInputEvents(root: HTMLElement, fileInput: HTMLInput
       stopSimulation(); openDocumentText(example.text, example.fileName);
     }
   });
+  root.querySelector<HTMLButtonElement>('[data-examples-back]')?.addEventListener('click', () => {
+    currentExampleFolder = '';
+    renderExampleFolder();
+  });
+  renderExampleFolder();
 }

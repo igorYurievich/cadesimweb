@@ -50,6 +50,7 @@ export function setupSimulationSpeedControl(button: HTMLButtonElement, simulatio
 
 export interface SimulationSetup {
   wireLayer: SVGGElement; elementLayer: SVGGElement; simulationMessage: HTMLElement;
+  simulationMessageText: HTMLElement;
   runButton: HTMLButtonElement; stopButton: HTMLButtonElement; simStateValue: HTMLElement;
   simulationContextMenu: HTMLElement; overloadAction: HTMLButtonElement; status: HTMLElement;
   uiText(): InterfaceText; renderSchema(): void; uniformWireColors(): boolean;
@@ -95,6 +96,30 @@ export function setupSimulation(ctx: AppContext, deps: SimulationSetup): Simulat
         }
       });
     }
+  };
+  const formatSimulationDiagnostics = (result: EngineState | undefined): string[] => {
+    if (!result) return [];
+    const shortPairs = new Set<string>();
+    const earthPairs = new Set<string>();
+    let unstable = false;
+    for (const fault of result.faults) {
+      if (fault.kind === 'unstable') { unstable = true; continue; }
+      if (fault.kind !== 'short-circuit' && fault.kind !== 'earth-leak') continue;
+      const pair = fault.between ? [...fault.between].sort().join('–') : '—';
+      (fault.kind === 'short-circuit' ? shortPairs : earthPairs).add(pair);
+    }
+    if (shortPairs.size) {
+      const pairs = [...shortPairs].sort((a, b) => a.localeCompare(b)).join('; ');
+      return [deps.uiText().shortCircuitSummary.replace('{pairs}', pairs)];
+    }
+    const messages: string[] = [];
+    if (earthPairs.size) messages.push(deps.uiText().earthLeakSummary.replace('{pairs}', [...earthPairs].sort().join('; ')));
+    if (unstable) messages.push(deps.uiText().unstableSummary);
+    for (const element of ctx.schema.elements) {
+      if ((element.typeCode !== 1000 && element.typeCode !== 1001) || !result.motors[element.id]?.faulted) continue;
+      messages.push(deps.uiText().phaseLossSummary.replace('{motor}', element.name || `M${element.id}`));
+    }
+    return [...new Set(messages)];
   };
   const applySimulationVisuals = (): void => {
     const result = simResult;
@@ -355,20 +380,9 @@ export function setupSimulation(ctx: AppContext, deps: SimulationSetup): Simulat
         symbol.style.removeProperty('--motor-period'); symbol.style.removeProperty('--motor-play-state'); symbol.style.removeProperty('--motor-direction'); symbol.style.removeProperty('--motor-mirror');
       }
     }
-    const messages: string[] = [];
-    for (const fault of result?.faults ?? []) {
-      const details = fault.message.replace(/^[a-z-]+:\s*/i, '');
-      if (fault.kind === 'short-circuit') messages.push(`Короткое замыкание: ${details}`);
-      else if (fault.kind === 'earth-leak') messages.push(`Утечка на PE: ${details}`);
-      else if (fault.kind === 'unstable') messages.push(`Нестабильная схема: ${details}`);
-    }
-    for (const element of ctx.schema.elements) {
-      if ((element.typeCode !== 1000 && element.typeCode !== 1001) || !result?.motors[element.id]?.faulted) continue;
-      messages.push(`Потеря фазы: двигатель ${element.name || `M${element.id}`} не получил три разные фазы на U1/V1/W1.`);
-    }
-    const messageText = [...new Set(messages)].join(' ');
+    const messageText = formatSimulationDiagnostics(result).join(' ');
     deps.simulationMessage.hidden = messageText.length === 0;
-    if (deps.simulationMessage.textContent !== messageText) deps.simulationMessage.textContent = messageText;
+    if (deps.simulationMessageText.textContent !== messageText) deps.simulationMessageText.textContent = messageText;
   };
 
   const updateSimulationControls = (): void => {
@@ -378,7 +392,8 @@ export function setupSimulation(ctx: AppContext, deps: SimulationSetup): Simulat
     const modeLabel = simMode === 'run' ? deps.uiText().running : deps.uiText().editor;
     if (deps.simStateValue.textContent !== modeLabel) deps.simStateValue.textContent = modeLabel;
     deps.simStateValue.dataset.mode = simMode;
-    if (simResult?.faults.length) deps.simStateValue.title = simResult.faults.map((fault) => fault.message).join('\n');
+    const diagnostics = formatSimulationDiagnostics(simResult);
+    if (diagnostics.length) deps.simStateValue.title = diagnostics.join('\n');
     else if (simResult?.warnings.length) deps.simStateValue.title = simResult.warnings.join('\n');
     else deps.simStateValue.removeAttribute('title');
   };

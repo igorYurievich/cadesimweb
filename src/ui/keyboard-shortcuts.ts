@@ -4,7 +4,7 @@ export interface KeyboardShortcutsSetup {
   root: HTMLElement; simulationContextMenu: HTMLElement; fileInput: HTMLInputElement;
   spaceDown(value: boolean): void; panTool(): boolean; setPanTool(value: boolean): void;
   nodeTool(): boolean; setNodeTool(value: boolean): void; selectTool(): void;
-  copySelection(): void; pasteSelection(): void; saveJson(): void; requestNewSchema(): void;
+  copySelection(): void; cutSelection(): void; pasteSelection(): void; saveJson(): void; requestNewSchema(): void;
   undo(redo: boolean): void; wireDrawing(): boolean; changeWireRoute(key: string): void;
   toggleWireDrawing(): void; cycleWireKind(direction: -1 | 1): void;
   finishWireDrawing(): void; cancelPlacement(): void; cancelWireDrawing(): void;
@@ -36,6 +36,7 @@ export function setupKeyboardShortcuts(deps: KeyboardShortcutsSetup): void {
     if (!event.ctrlKey && !event.metaKey && !event.altKey && !editingField && event.key.toLowerCase() === 'n') {
       deps.setNodeTool(!deps.nodeTool()); event.preventDefault(); return;
     }
+    if (event.key === 'Escape' && deps.panTool() && !editingField) { deps.selectTool(); event.preventDefault(); return; }
     if (event.key === 'Escape' && deps.nodeTool() && !editingField) { deps.selectTool(); event.preventDefault(); return; }
     if (!event.ctrlKey && !event.metaKey && !event.altKey && !editingField && event.key.toLowerCase() === 'v') {
       deps.selectTool(); event.preventDefault(); return;
@@ -48,6 +49,7 @@ export function setupKeyboardShortcuts(deps: KeyboardShortcutsSetup): void {
       if (wireDirection) { deps.cycleWireKind(wireDirection); event.preventDefault(); return; }
     }
     if (modifier && !editingField && event.code === 'KeyC') { deps.copySelection(); event.preventDefault(); return; }
+    if (modifier && !editingField && event.code === 'KeyX') { deps.cutSelection(); event.preventDefault(); return; }
     if (modifier && !editingField && event.code === 'KeyV') { deps.pasteSelection(); event.preventDefault(); return; }
     if (!editingField && !modifier && !event.altKey && deps.selectedCount()) {
       const step = CAD_GRID_STEP;

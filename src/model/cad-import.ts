@@ -132,6 +132,12 @@ function toSheet(footer: CadFooter | null): SheetInfo {
   if (!footer) return { ...sheet, author: '' };
   const f = footer.fields.map((s) => s.trim());
   const [width, height] = footer.settings.slice(-2);
+  // CADe_SIMU may preserve stale custom dimensions even when a standard paper
+  // format is selected. Treat invalid/out-of-range dimensions as the default
+  // A4 landscape instead of interpreting values such as 3234 as 323.4 mm.
+  const dimensionsAreValid = (value: number | undefined): value is number =>
+    value !== undefined && Number.isFinite(value) && value > 0 && value <= 2000;
+  const hasValidDimensions = dimensionsAreValid(width) && dimensionsAreValid(height);
   return {
     // Поля штампа 1 и 3: имя и фамилия, как они записаны в образцах (IGOR, LIPSKIY).
     author: [f[1], f[3]].filter(Boolean).join(' '),
@@ -143,8 +149,8 @@ function toSheet(footer: CadFooter | null): SheetInfo {
     drawnDate: f[0] ?? '',
     checkedDate: f[2] ?? '',
     fileName: f[9] ?? '',
-    width: width ?? sheet.width,
-    height: height ?? sheet.height,
+    width: hasValidDimensions ? width : sheet.width,
+    height: hasValidDimensions ? height : sheet.height,
     cadFooter: { settings: [...footer.settings], fields: [...footer.fields] },
   };
 }
