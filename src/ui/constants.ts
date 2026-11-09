@@ -219,6 +219,7 @@ export const PLACE_DEFAULTS: Record<number, { prefix: string; size: { w: number;
 };
 
 export const PLACE_LABEL_OFFSETS: Record<number, { x: number; y: number }> = {
+  6007: { x: -15, y: -3 },
   2000: { x: -12, y: -3 }, 2001: { x: -12, y: -3 }, 2002: { x: -12, y: -3 }, 2006: { x: -12, y: -3 }, 2008: { x: -12, y: -3 },
   2003: { x: -18, y: -3 }, 2004: { x: -18, y: -3 }, 2005: { x: -18, y: -3 }, 2007: { x: -18, y: -3 },
   2009: { x: -6, y: -6 },
