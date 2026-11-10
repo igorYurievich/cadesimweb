@@ -122,9 +122,7 @@ function setupToolbar(state: AppSetupBase, editor: AppSetupEditor): (direction: 
     updateHistoryButtons: editor.editorView.updateHistoryButtons,
     toggleWireDrawing: state.toggleWireDrawing,
     finishWireDrawing: state.finishWireDrawing,
-    cancelWireDrawing: state.cancelWireDrawing,
-    nodeTool: () => state.nodeTool,
-    leaveNodeTool: state.leaveNodeTool,
+    selectTool: state.selectTool,
     undo: () => {
       if (canUndo(state.history)) editor.editorView.restoreHistory(undoHistory(state.history));
     },

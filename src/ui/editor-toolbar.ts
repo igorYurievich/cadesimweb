@@ -23,9 +23,7 @@ export interface EditorToolbarOptions {
   updateHistoryButtons: () => void;
   toggleWireDrawing: () => void;
   finishWireDrawing: () => void;
-  cancelWireDrawing: () => void;
-  nodeTool: () => boolean;
-  leaveNodeTool: () => void;
+  selectTool: () => void;
   undo: () => void;
   redo: () => void;
   commitSchema: (before: ReturnType<typeof cloneSchema>) => void;
@@ -73,8 +71,7 @@ export function setupEditorToolbar(options: EditorToolbarOptions): (direction: -
   });
   options.redoButton.addEventListener('click', options.redo);
   options.runButton.addEventListener('click', () => {
-    if (options.wireDrawing()) options.cancelWireDrawing();
-    if (options.nodeTool()) options.leaveNodeTool();
+    options.selectTool();
     options.simulation.startSimulation();
   });
   options.stopButton.addEventListener('click', options.simulation.stopSimulation);
