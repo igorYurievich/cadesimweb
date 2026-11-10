@@ -1,10 +1,14 @@
 import { getCadType } from '@model/cad-types';
-import type { GroupKey, Lang } from '@model/catalog';
+import type { Lang } from '@model/catalog';
 import { createEmptySchema } from '@model/index';
-import { parseSchemaJson, serializeSchemaJson } from '@model/schema-json';
-import { version as appVersion } from '../../package.json';
+import { serializeSchemaJson } from '@model/schema-json';
 import type { Schema, SchemaElement, WireKind, WireSegment } from '@model/types';
 import { canRedo, canUndo, createHistory, redoHistory, undoHistory } from './history';
+import { renderAppShell } from './app-shell';
+import { createSettingsCommands, readAppSettings } from './settings';
+import { readAutosavedSchema, readSavedDocuments, readSavedViewport, writeAutosavedSchema, writeSavedDocuments, writeSavedViewport } from './persistence';
+import { createDocumentState, renderDocumentTabs, syncActiveDocument } from './documents';
+import type { DocumentState, DocumentTab } from './documents';
 import { createAppContext } from './context';
 import { setupBetaNotice } from './beta-notice';
 import { setupExport } from './export';
@@ -16,7 +20,6 @@ import { setupSheetFrame } from './sheet-frame';
 import { setupSchemaRenderer } from './schema-renderer';
 import { setupWireDraft } from './wire-draft';
 
-const exampleFolderRow = (name: string): string => `<button type="button" class="example-folder-row" data-folder="${name}" title="${name}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6.5h7l2 2h9v10H3z"/></svg><span class="example-file-name">${name}</span><span class="example-file-code"></span></button>`;
 import { setupPlacementGhost } from './placement-ghost';
 import { setupSelectionCommands } from './selection-commands';
 import { setupMovePreview } from './move-preview';
@@ -33,12 +36,12 @@ import { setupToolModes } from './tool-modes';
 import { setupHistoryUi } from './history-ui';
 import { setupInterfaceTranslation } from './interface-translation';
 import { setupKeyboardShortcuts } from './keyboard-shortcuts';
-import { fitViewport, MAX_VIEWPORT_SCALE, MIN_VIEWPORT_SCALE, screenToSheet } from './viewport';
+import { fitViewport } from './viewport';
 import type { Point, Viewport } from './viewport';
 import { detectBundleLayout, isWireInteriorPoint, offsetRoute, orthogonalize, simplifyRoute } from './wire-routing';
 import './viewport.css';
-import { FALLBACK_VIEWPORT, AUTOSAVE_KEY, CAD_EXPORT_WARNING_KEY, OPTIONAL_GROUP_STORAGE_KEY, OPTIONAL_PALETTE_GROUPS, CAD_GRID_STEP, PLACEABLE_TYPES, THEME_KEY, GRID_KEY, WIRE_COLOR_MODE_KEY, INTERFACE_LANGUAGE_KEY } from './constants';
-import type { Theme, Selectable, DragState } from './constants';
+import { FALLBACK_VIEWPORT, CAD_EXPORT_WARNING_KEY, CAD_GRID_STEP, INTERFACE_LANGUAGE_KEY } from './constants';
+import type { Selectable, DragState } from './constants';
 import { fullSheet, cloneSchema } from './helpers';
 import { INTERFACE_TEXT } from './i18n';
 
@@ -47,95 +50,7 @@ import { INTERFACE_TEXT } from './i18n';
 
 
 
-function readOptionalPaletteGroups(): GroupKey[] {
-  try {
-    const raw: unknown = JSON.parse(localStorage.getItem(OPTIONAL_GROUP_STORAGE_KEY) ?? '[]');
-    return Array.isArray(raw) ? OPTIONAL_PALETTE_GROUPS.filter((key) => raw.includes(key)) : [];
-  } catch { return []; }
-}
-function readAutosavedSchema(): Schema | undefined {
-  try {
-    const saved = localStorage.getItem(AUTOSAVE_KEY);
-    return saved ? parseSchemaJson(saved) : undefined;
-  } catch { return undefined; }
-}
-const DOCUMENT_TABS_KEY = 'cadesimu-web:documents:v1';
-interface DocumentTab { id: string; name: string; schema: Schema; history: ReturnType<typeof createHistory<Schema>>; viewport: Viewport; }
-function readSavedDocuments(): { activeId: string; tabs: Array<{ id: string; name: string; schema: Schema }> } | undefined {
-  try {
-    const raw = localStorage.getItem(DOCUMENT_TABS_KEY); if (!raw) return undefined;
-    const saved = JSON.parse(raw) as { activeId?: unknown; tabs?: unknown };
-    if (!Array.isArray(saved.tabs)) return undefined;
-    const tabs = saved.tabs.flatMap((item): Array<{ id: string; name: string; schema: Schema }> => {
-      try {
-        if (!item || typeof item.id !== 'string' || typeof item.name !== 'string' || typeof item.schema !== 'string') return [];
-        return [{ id: item.id, name: item.name, schema: parseSchemaJson(item.schema) }];
-      } catch { return []; }
-    });
-    if (!tabs.length) return undefined;
-    return { activeId: tabs.some((tab) => tab.id === saved.activeId) ? String(saved.activeId) : tabs[0]!.id, tabs };
-  } catch { return undefined; }
-}
-/** Шаг сетки равен шагу привязки элементов и проводов (3): все клеммы лежат на узлах сетки. */
 
-
-
-
-/** Цвет проводов без потенциала: спокойный, чтобы подсветка под напряжением читалась сразу. */
-
-
-/** Единый режим: фазный провод (L1/L2/L3) под напряжением красный, без — серый; N и PE остаются синим и зелёным. */
-
-
-/** Нижняя полоса листа под штамп: она вне поля рисования. */
-
-
-/** Ссылка на исходники: кликабельна в редакторе, в SVG и в PDF (Chrome сохраняет SVG-ссылки как аннотации). */
-
-
-
-/** Ячейки штампа во всю ширину листа: x0/x1 — доли ширины, r0/r1 — строки (из 3). */
-
-
-
-/** Автоматы, выключатели и защиты с ручным включением; при старте симуляции все выключены. */
-
-/** Тепловая защита двигателя 6007 при старте симуляции уже взведена (включена); остальные аппараты включает пользователь. */
-
-
-
-
-/** Смещение подписи при размещении, как у образца elementos_contactores.cad: имя стоит слева от символа, а не поверх полюсов. */
-
-
-
-
-
-
-/** Хэш пароля (SHA-256); запасной FNV-1a нужен, если crypto.subtle недоступен (не https). Это лишь простой барьер на стороне клиента. */
-
-
- 
-
-
-
-
-function readGridVisible(): boolean {
-  try { return localStorage.getItem(GRID_KEY) !== 'off'; } catch { return true; }
-}
-
-/** По умолчанию включён единый режим: красный — под напряжением, серый — нет. */
-function readUniformWireColors(): boolean {
-  try { return localStorage.getItem(WIRE_COLOR_MODE_KEY) !== 'phase'; } catch { return true; }
-}
-
-function readTheme(): Theme {
-  try {
-    const saved = localStorage.getItem(THEME_KEY);
-    if (saved === 'light' || saved === 'dark') return saved;
-  } catch { /* Storage may be unavailable in private or embedded contexts. */ }
-  return typeof matchMedia !== 'undefined' && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-}
 
 
 
@@ -161,290 +76,10 @@ export function mountApp(root: HTMLElement): void {
   let schema: Schema = savedDocuments?.tabs.find((tab) => tab.id === savedDocuments.activeId)?.schema ?? autosavedSchema ?? createEmptySchema();
   let history = createHistory(cloneSchema(schema));
   const ctx = createAppContext(root, () => schema, (next) => { schema = next; }, () => history, (next) => { history = next; });
-  let syncActiveDocument = (): void => {};
-  let persistDocuments = (): void => {};
-  let autosaveTimer: ReturnType<typeof setTimeout> | undefined;
-  const persistSchemaNow = (): void => {
-    if (autosaveTimer !== undefined) clearTimeout(autosaveTimer);
-    autosaveTimer = undefined;
-    try { localStorage.setItem(AUTOSAVE_KEY, serializeSchemaJson(ctx.schema)); } catch { /* Editor remains usable when storage is unavailable. */ }
-    syncActiveDocument(); persistDocuments();
-  };
-  const persistSchema = (): void => {
-    if (autosaveTimer !== undefined) return;
-    autosaveTimer = setTimeout(() => {
-      persistSchemaNow();
-    }, 500);
-  };
-  let theme = readTheme();
-  let refreshInterface = (): void => {};
-  const visibleOptionalGroups = new Set<GroupKey>(readOptionalPaletteGroups());
-  root.innerHTML = `
-    <main class="app-shell">
-      <header class="app-header">
-        <div class="brand-lockup" title="Редактор и симулятор электрических схем">
-          <h1>Web Cade</h1>
-        </div>
-        <nav class="app-menu" aria-label="Главное меню">
-          <details class="menu-group"><summary>Файл</summary><div class="menu-popover">
-            <button type="button" class="menu-command" data-command="new">Новая схема <kbd>Ctrl+N</kbd></button>
-            <button type="button" class="menu-command" data-command="open">Открыть .cad / .json <kbd>Ctrl+O</kbd></button>
-            <button type="button" class="menu-command" data-command="save-json">Сохранить JSON <kbd>Ctrl+S</kbd></button>
-            <details class="menu-submenu">
-              <summary class="menu-command"><span id="export-menu-label">Экспорт</span><span class="menu-submenu-arrow" aria-hidden="true">›</span></summary>
-              <div class="menu-submenu-popover">
-                <button type="button" class="menu-command" data-command="export-cad">Экспорт .cad</button>
-                <button type="button" class="menu-command" data-command="export-svg">Экспорт SVG</button>
-                <button type="button" class="menu-command" data-command="export-png">Экспорт PNG</button>
-              </div>
-            </details>
-            <button type="button" class="menu-command" data-command="print-pdf">Печать / PDF</button>
-            <button type="button" class="menu-command" data-command="sheet">Размер листа (Ajustar hoja)…</button>
-          </div></details>
-          <details class="menu-group"><summary>Правка</summary><div class="menu-popover">
-            <button type="button" class="menu-command" data-command="copy-selection">Копировать <kbd>Ctrl+C</kbd></button>
-            <button type="button" class="menu-command" data-command="cut-selection">Вырезать <kbd>Ctrl+X</kbd></button>
-            <button type="button" class="menu-command" data-command="paste-selection" disabled>Вставить <kbd>Ctrl+V</kbd></button>
-            <button type="button" class="menu-command" data-command="undo">Отменить <kbd>Ctrl+Z</kbd></button>
-            <button type="button" class="menu-command" data-command="redo">Повторить <kbd>Ctrl+Y</kbd></button>
-            <button type="button" class="menu-command" data-command="rotate">Повернуть <kbd>R</kbd></button>
-            <button type="button" class="menu-command" data-command="delete">Удалить <kbd>Del</kbd></button>
-          </div></details>
-          <details class="menu-group"><summary>Вид</summary><div class="menu-popover">
-            <button type="button" class="menu-command" data-command="zoom-in">Увеличить <kbd>+</kbd></button>
-            <button type="button" class="menu-command" data-command="zoom-out">Уменьшить <kbd>−</kbd></button>
-            <button type="button" class="menu-command" data-command="fit">Показать всё <kbd>Ctrl+0</kbd></button>
-            <button type="button" class="menu-command" data-command="grid" id="grid-command"></button>
-            <button type="button" class="menu-command" data-command="properties-panel" id="properties-panel-command"></button>
-            <button type="button" class="menu-command" data-command="theme" id="theme-command"></button>
-            <button type="button" class="menu-command" data-command="wire-colors" id="wire-colors-command"></button>
-          </div></details>
-          <details class="menu-group optional-groups-menu"><summary>Элементы</summary><div class="menu-popover">
-            <p class="menu-heading optional-groups-heading">Показывать дополнительные категории</p>
-            <div class="menu-toggle-list">
-              <label class="menu-toggle"><input type="checkbox" data-optional-group="grafcet"><span data-extra-label="extraGrafcet">GRAFCET</span></label>
-              <label class="menu-toggle"><input type="checkbox" data-optional-group="ladder"><span data-extra-label="extraLadder">Ladder</span></label>
-              <label class="menu-toggle"><input type="checkbox" data-optional-group="logic"><span data-extra-label="extraLogic">Логика</span></label>
-              <label class="menu-toggle"><input type="checkbox" data-optional-group="realistic-2d"><span data-extra-label="extraReal2d">Реалистичные символы · 2D</span></label>
-              <label class="menu-toggle"><input type="checkbox" data-optional-group="realistic-3d"><span data-extra-label="extraReal3d">Реалистичные символы · 3D</span></label>
-              <label class="menu-toggle"><input type="checkbox" data-optional-group="wiring"><span data-extra-label="extraWiring">Провода и соединения</span></label>
-              <label class="menu-toggle"><input type="checkbox" data-optional-group="pneumatics"><span data-extra-label="extraPneumatics">Пневматические актуаторы</span></label>
-              <label class="menu-toggle"><input type="checkbox" data-optional-group="io-plc"><span data-extra-label="extraIoPlc">Входы / выходы ПЛК</span></label>
-              <label class="menu-toggle"><input type="checkbox" data-optional-group="power-electronics"><span data-extra-label="extraPowerElectronics">Силовая электроника</span></label>
-              <label class="menu-toggle"><input type="checkbox" data-optional-group="electronic-relays"><span data-extra-label="extraElectronicRelays">Электронные реле</span></label>
-              <label class="menu-toggle"><input type="checkbox" data-optional-group="sensors"><span data-extra-label="extraSensors">Датчики</span></label>
-            </div>
-          </div></details>
-          <details class="menu-group language-menu"><summary>Язык</summary><div class="menu-popover">
-            <label class="menu-language">Язык названий элементов
-              <select id="palette-language" aria-label="Язык названий"><option value="es">ES — Español</option><option value="en">EN — English</option><option value="it">IT — Italiano</option><option value="ru">RU — Русский</option><option value="fr">FR — Français</option><option value="ar">AR — العربية (الفصحى)</option></select>
-            </label>
-          </div></details>
-          <details class="menu-group examples-menu"><summary>Примеры</summary></details>
-          <details class="menu-group"><summary>Справка</summary><div class="menu-popover">
-            <button type="button" class="menu-command" data-command="shortcuts">Горячие клавиши</button>
-            <button type="button" class="menu-command" data-command="component-guide">Подробнее о метках</button>
-            <button type="button" class="menu-command" data-command="about">О программе</button>
-          </div></details>
-        </nav>
-        <span id="file-name" class="file-name">Новая схема</span>
-        <input id="cad-file" type="file" accept=".cad,.json,application/json,text/plain" />
-      </header>
-      <section class="viewport-toolbar" aria-label="Провода и симуляция">
-        <div class="tool-group wire-controls" aria-label="Провода">
-          <select id="wire-kind" aria-label="Тип нового провода"><option value="phase">Фаза</option><option value="neutral">Нейтраль</option><option value="protection">PE</option><option value="three">3 фазы (L1 L2 L3)</option><option value="threeN">3 фазы + N</option></select>
-          <select id="wire-thickness" aria-label="Толщина провода" title="Толщина провода"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="" hidden>—</option></select>
-          <button type="button" id="draw-wire" title="Провод (C)">Провод</button>
-          <span class="tool-sep" aria-hidden="true"></span>
-          <button type="button" id="undo" class="icon-btn" title="Отменить (Ctrl+Z)" aria-label="Отменить" disabled>↶</button>
-          <button type="button" id="redo" class="icon-btn" title="Повторить (Ctrl+Y)" aria-label="Повторить" disabled>↷</button>
-          <span class="tool-sep" aria-hidden="true"></span>
-          <button type="button" id="select-tool" class="icon-btn is-active" title="Курсор: выбор и перемещение элементов (V)" aria-label="Курсор" aria-pressed="true">↖</button>
-          <button type="button" id="pan-tool" class="icon-btn" title="Рука: перемещение листа без выбора элементов (H)" aria-label="Рука" aria-pressed="false">✋</button>
-          <button type="button" id="node-tool" class="icon-btn" title="Узел: щёлкните по месту соединения проводов (N)" aria-label="Узел" aria-pressed="false">●</button>
-        </div>
-        <div class="tool-group simulation-controls" aria-label="Управление симуляцией">
-          <button type="button" id="sim-run">▶ Запуск</button>
-          <button type="button" id="sim-stop" title="Полная остановка: сброс времени, памяти и нажатых кнопок" disabled>■ Стоп</button>
-          <div class="simulation-speed" role="group" aria-label="Скорость симуляции"><button type="button" class="speed-btn" id="speed-cycle" title="Изменить скорость симуляции" aria-label="Скорость симуляции: 1×">1×</button></div>
-          <span id="sim-state" class="simulation-state" role="status" aria-live="polite">Редактор</span>
-        </div>
-      </section>
-      <!-- Служебные элементы: действия доступны через меню и горячие клавиши, логика привязана к ним по id -->
-      <div hidden>
-        <select id="place-type" aria-label="Разместить элемент"><option value="">—</option>${PLACEABLE_TYPES.map((code) => `<option value="${code}">${getCadType(code).label}</option>`).join('')}</select>
-        <button type="button" id="rotate-selection">Повернуть</button>
-        <button type="button" id="delete-selection">Удалить</button>
-        <button type="button" id="finish-wire" disabled>Готово</button>
-        <button type="button" data-zoom="out">−</button><button type="button" data-zoom="in">+</button><button type="button" data-zoom="fit">Показать всё</button>
-      </div>
-      <div id="simulation-message" class="simulation-message" role="alert" aria-live="assertive" hidden><span id="simulation-message-text"></span></div>
-      <div class="editor-workspace">
-        <aside class="component-palette" aria-label="Палитра элементов">
-          <div class="palette-heading"><h2>Элементы</h2><span id="palette-count"></span></div>
-          <div class="palette-search-row">
-            <input id="palette-search" type="search" placeholder="Поиск элементов…" aria-label="Поиск элементов" />
-          </div>
-          <div id="palette-groups" class="palette-groups"></div>
-        </aside>
-        <section class="viewport-stage" aria-label="Поле схемы">
-        <nav id="document-tabs" class="document-tabs" aria-label="Открытые схемы"></nav>
-        <svg class="viewport-svg" viewBox="0 0 ${FALLBACK_VIEWPORT.width} ${FALLBACK_VIEWPORT.height}" preserveAspectRatio="none" role="img" aria-label="Поле схемы">
-          <defs><pattern id="cad-grid" x="${-CAD_GRID_STEP / 2}" y="${-CAD_GRID_STEP / 2}" width="${CAD_GRID_STEP}" height="${CAD_GRID_STEP}" patternUnits="userSpaceOnUse">
-            <circle cx="${CAD_GRID_STEP / 2}" cy="${CAD_GRID_STEP / 2}" r="0.24" fill="#7d8996" />
-          </pattern></defs>
-          <rect class="viewport-backdrop" x="0" y="0" width="${FALLBACK_VIEWPORT.width}" height="${FALLBACK_VIEWPORT.height}" />
-          <g id="sheet-transform">
-            <rect id="sheet-paper" x="0" y="0" width="297" height="210" fill="#fff" />
-            <rect id="sheet-grid" x="0" y="0" width="297" height="210" fill="url(#cad-grid)" />
-            <rect id="sheet-border" x="0" y="0" width="297" height="210" fill="none" stroke="#aeb8c4" stroke-width="0.8" />
-            <g id="wire-layer" />
-            <g id="element-layer" />
-            <g id="selection-layer" />
-            <g id="draft-layer" />
-            <g id="sheet-frame" />
-            <g id="sheet-stamp" />
-          </g>
-        </svg>
-        </section>
-        <aside id="properties-panel" class="properties-panel" aria-label="Свойства элемента">
-          <div class="properties-head"><h2>Свойства</h2><button type="button" id="properties-close" class="properties-close" title="Готово">Готово</button></div><div id="property-fields" class="property-fields"></div>
-        </aside>
-      </div>
-      <footer class="app-footer">
-        <div id="status" class="status-bar" role="status" aria-live="polite">Выберите файл .cad, чтобы открыть схему.</div>
-        <output id="cursor-coords" class="cursor-coords" title="X / Y, мм">X: — Y: —</output>
-        <output id="zoom-value" class="zoom-value" aria-live="polite" title="Масштаб">100%</output>
-        <span class="viewport-help">Клик — выбрать · Перетащить — двигать · Рамка — пустое место · Пробел / средняя кнопка — панорама</span>
-      </footer>
-      <dialog id="sheet-dialog" class="app-dialog sheet-dialog" aria-labelledby="sheet-title">
-        <h2 id="sheet-title">Размер листа</h2>
-        <div class="sheet-fields">
-          <label class="property-field">Формат
-            <select id="sheet-format">
-              <option value="custom">Пользовательский</option><option value="297x210">A4 — альбомный</option><option value="210x297">A4 — книжный</option><option value="420x297">A3 — альбомный</option><option value="297x420">A3 — книжный</option>
-            </select>
-          </label>
-          <div class="sheet-size-row">
-            <label class="property-field">Ширина, мм<input id="sheet-width" type="number" min="30" max="2000" step="1" /></label>
-            <label class="property-field">Высота, мм<input id="sheet-height" type="number" min="30" max="2000" step="1" /></label>
-          </div>
-        </div>
-        <div class="dialog-actions"><button type="button" data-dialog-close="sheet-dialog">Отмена</button><button type="button" class="primary-action" id="sheet-apply">Применить</button></div>
-      </dialog>
-      <dialog id="shortcuts-dialog" class="app-dialog shortcuts-dialog" aria-labelledby="shortcuts-title">
-        <h2 id="shortcuts-title">Горячие клавиши</h2>
-        <dl>
-          <div><dt id="shortcut-new">Новая схема</dt><dd><kbd>Ctrl</kbd> + <kbd>N</kbd></dd></div>
-          <div><dt id="shortcut-open">Открыть файл .cad</dt><dd><kbd>Ctrl</kbd> + <kbd>O</kbd></dd></div>
-          <div><dt id="shortcut-copy-paste">Копировать / вырезать / вставить выделенное</dt><dd><kbd>Ctrl</kbd> + <kbd>C</kbd> / <kbd>X</kbd> / <kbd>V</kbd></dd></div>
-          <div><dt id="shortcut-undo-redo">Отменить / повторить</dt><dd><kbd>Ctrl</kbd> + <kbd>Z</kbd> / <kbd>Y</kbd></dd></div>
-          <div><dt id="shortcut-rotate">Повернуть</dt><dd><kbd>R</kbd></dd></div>
-          <div><dt id="shortcut-delete">Удалить выбранное</dt><dd><kbd>Delete</kbd></dd></div>
-          <div><dt id="shortcut-wire">Режим провода</dt><dd><kbd>C</kbd></dd></div>
-          <div><dt id="shortcut-wire-type">Переключить тип провода</dt><dd><kbd>↑</kbd> / <kbd>↓</kbd> / <kbd>←</kbd> / <kbd>→</kbd></dd></div>
-          <div><dt id="shortcut-finish">Завершить провод / отменить действие</dt><dd><kbd>Enter</kbd> / <kbd>Esc</kbd></dd></div>
-          <div><dt id="shortcut-cursor-pan">Курсор / Рука</dt><dd><kbd>V</kbd> / <kbd>H</kbd></dd></div>
-          <div><dt id="shortcut-panning">Панорамирование</dt><dd><kbd>Space</kbd> + перетаскивание</dd></div>
-          <div><dt id="shortcut-zoom">Масштаб</dt><dd><kbd>+</kbd> / <kbd>−</kbd></dd></div>
-          <div><dt id="shortcut-fit">Показать всё</dt><dd><kbd>Ctrl</kbd> + <kbd>0</kbd></dd></div>
-        </dl>
-        <div class="dialog-actions"><button type="button" data-dialog-close="shortcuts-dialog">Закрыть</button></div>
-      </dialog>
-      <dialog id="component-guide-dialog" class="app-dialog component-guide-dialog" aria-labelledby="component-guide-title">
-        <h2 id="component-guide-title">Зелёные метки компонентов</h2>
-        <div class="verification-guide-marker"><span class="palette-verified-badge" aria-hidden="true">✓</span><strong id="component-guide-verified-label">Проверенный компонент</strong></div>
-        <p id="component-guide-verified-text">Зелёная метка означает, что компонент проверен и его можно использовать для построения схем.</p>
-        <p id="component-guide-unverified-text">Без метки: компонент ещё не проверен, его функциональность может быть неполной.</p>
-        <p id="component-guide-count"></p>
-        <div class="dialog-actions"><button type="button" data-dialog-close="component-guide-dialog">Закрыть</button></div>
-      </dialog>
-      <dialog id="examples-dialog" class="app-dialog examples-dialog" aria-labelledby="examples-dialog-title">
-        <div class="examples-window-titlebar">
-          <div class="examples-window-title"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6.5h7l2 2h9v10H3z" /></svg><h2 id="examples-dialog-title">Примеры</h2></div>
-          <button type="button" class="examples-window-close" data-dialog-close="examples-dialog" aria-label="Закрыть">×</button>
-        </div>
-        <div class="examples-window-toolbar">
-          <button type="button" data-examples-back disabled aria-label="Назад">‹</button><button type="button" disabled aria-label="Вперёд">›</button>
-          <div class="examples-breadcrumb"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6.5h7l2 2h9v10H3z" /></svg><span id="examples-folder-label">Папка примеров</span></div>
-        </div>
-        <div class="examples-window-content">
-          <aside class="examples-sidebar"><div class="examples-sidebar-heading">Избранное</div><div class="examples-sidebar-entry is-selected"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6.5h7l2 2h9v10H3z" /></svg><span id="examples-sidebar-label">Примеры</span></div></aside>
-          <section class="examples-files-section" aria-label="Примеры схем">
-            <div class="examples-list-head"><span id="examples-name-heading">Название</span><span id="examples-code-heading">Работа</span></div>
-            <div class="example-file-list">${exampleFolderRow('Ejemplos')}${exampleFolderRow('Ejemplos 2')}</div>
-          </section>
-        </div>
-        <footer class="examples-window-footer"><span id="examples-count"></span><button type="button" data-dialog-close="examples-dialog">Закрыть</button></footer>
-      </dialog>
-      <dialog id="cad-export-warning-dialog" class="app-dialog cad-export-warning-dialog" aria-labelledby="cad-export-warning-title" aria-describedby="cad-export-warning-text">
-        <h2 id="cad-export-warning-title">Внимание: экспорт в .cad</h2>
-        <div class="cad-export-warning-message"><p id="cad-export-warning-text">Мы не гарантируем, что эта схема запустится и будет корректно работать в оригинальной CADe SIMU 4.2. Сохраняйте и используйте файл с учётом этого ограничения.</p></div>
-        <label class="cad-export-warning-optout"><input type="checkbox" id="cad-export-warning-optout" /><span id="cad-export-warning-optout-label">Больше не показывать это уведомление</span></label>
-        <div class="dialog-actions"><button type="button" id="cad-export-warning-cancel" data-dialog-close="cad-export-warning-dialog">Отмена</button><button type="button" class="primary-action" id="cad-export-warning-confirm">Экспортировать .cad</button></div>
-      </dialog>
-      <dialog id="about-dialog" class="app-dialog about-dialog" aria-labelledby="about-title">
-        <h2 id="about-title">Web Cade</h2>
-        <p id="about-bio">Автор проекта — Игорь Липский Вячин.</p>
-        <p id="about-noncommercial">Это бета-версия. Проект находится на раннем этапе разработки и будет дальше развиваться.</p>
-        <p id="about-limitations">Сейчас веб-приложение ещё не предоставляет все возможности старого аналога программы.</p>
-        <p class="about-contact"><span id="about-contact-label">По вопросам и пожеланиям пишите мне:</span> <a href="mailto:igoryurievich1@gmail.com">igoryurievich1@gmail.com</a></p>
-        <p class="about-repository"><a href="https://github.com/igorYurievich/cadesimweb" target="_blank" rel="noopener noreferrer">GitHub: github.com/igorYurievich/cadesimweb</a></p>
-        <dl><div><dt>Версия</dt><dd id="about-version">${appVersion}</dd></div></dl>
-        <div class="dialog-actions"><button type="button" data-dialog-close="about-dialog">Закрыть</button></div>
-      </dialog>
-      <dialog id="beta-dialog" class="app-dialog beta-dialog" aria-labelledby="beta-title">
-        <h2 id="beta-title">Бета-версия</h2>
-        <p id="beta-text">Это бета-версия. Логика всех компонентов ещё не доработана, поэтому симуляция может работать некорректно.</p>
-        <div class="dialog-actions"><button type="button" class="primary-action" id="beta-ok">Понятно</button></div>
-      </dialog>
-      <div id="simulation-context-menu" class="simulation-context-menu" role="menu" hidden>
-        <button type="button" id="simulate-overload" role="menuitem">Имитировать перегрузку</button>
-        <button type="button" id="reset-simulation-inputs" role="menuitem">Reset</button>
-      </div>
-    </main>`;
-  root.dataset.theme = theme;
-  const themeCommand = root.querySelector<HTMLButtonElement>('#theme-command');
-  const updateThemeCommand = (): void => {
-    if (themeCommand) themeCommand.textContent = theme === 'dark' ? 'Светлая тема' : 'Тёмная тема';
-  };
-  updateThemeCommand();
-  const toggleTheme = (): void => {
-    theme = theme === 'dark' ? 'light' : 'dark';
-    root.dataset.theme = theme;
-    updateThemeCommand();
-    refreshInterface();
-    try { localStorage.setItem(THEME_KEY, theme); } catch { /* Theme still works for this session. */ }
-  };
-
-  const gridCommand = root.querySelector<HTMLButtonElement>('#grid-command');
-  let gridVisible = readGridVisible();
-  const applyGrid = (): void => {
-    root.querySelector<SVGRectElement>('#sheet-grid')?.setAttribute('visibility', gridVisible ? 'visible' : 'hidden');
-    if (gridCommand) gridCommand.textContent = gridVisible ? 'Скрыть сетку' : 'Показать сетку';
-  };
-  const toggleGrid = (): void => {
-    gridVisible = !gridVisible;
-    applyGrid();
-    refreshInterface();
-    try { localStorage.setItem(GRID_KEY, gridVisible ? 'on' : 'off'); } catch { /* Grid still toggles for this session. */ }
-  };
-  applyGrid();
+  const appSettings = readAppSettings();
+  renderAppShell(root, appSettings.theme);
 
   const { applyPropertiesPanel, openFloatingProperties, toggleDockedProperties } = setupPropertiesPanel(ctx, () => uiText());
-
-  const wireColorsCommand = root.querySelector<HTMLButtonElement>('#wire-colors-command');
-  let uniformWireColors = readUniformWireColors();
-  const updateWireColorsCommand = (): void => {
-    // Подпись показывает действующий режим; клик переключает на другой.
-    if (wireColorsCommand) wireColorsCommand.textContent = `${uniformWireColors ? uiText().wireColorsUniform : uiText().wireColorsPerPhase} ✓`;
-  };
-  const toggleWireColors = (): void => {
-    uniformWireColors = !uniformWireColors;
-    updateWireColorsCommand();
-    simulation.applySimulationVisuals();
-    try { localStorage.setItem(WIRE_COLOR_MODE_KEY, uniformWireColors ? 'uniform' : 'phase'); } catch { /* Mode still works for this session. */ }
-  };
 
   const svg = root.querySelector<SVGSVGElement>('.viewport-svg');
   const sheet = root.querySelector<SVGGElement>('#sheet-transform');
@@ -493,33 +128,13 @@ export function mountApp(root: HTMLElement): void {
   const backdrop = svg.querySelector<SVGRectElement>('.viewport-backdrop');
   backdrop?.setAttribute('width', String(viewSize.x));
   backdrop?.setAttribute('height', String(viewSize.y));
-  /** Вид (масштаб и центр в координатах листа) переживает перезагрузку страницы. */
-  const VIEWPORT_KEY = 'cadesimu-viewport';
-  const readSavedViewport = (): Viewport | undefined => {
-    try {
-      const raw = localStorage.getItem(VIEWPORT_KEY);
-      if (!raw) return undefined;
-      const saved = JSON.parse(raw) as { scale?: unknown; cx?: unknown; cy?: unknown };
-      const { scale, cx, cy } = saved;
-      if (typeof scale !== 'number' || typeof cx !== 'number' || typeof cy !== 'number') return undefined;
-      if (![scale, cx, cy].every(Number.isFinite) || scale < MIN_VIEWPORT_SCALE || scale > MAX_VIEWPORT_SCALE) return undefined;
-      return { scale, offsetX: viewSize.x / 2 - cx * scale, offsetY: viewSize.y / 2 - cy * scale };
-    } catch { return undefined; }
-  };
-  let viewport: Viewport = readSavedViewport() ?? fitViewport(fullSheet(schema.sheet), { width: viewSize.x, height: viewSize.y });
-  let documents: DocumentTab[] = savedDocuments?.tabs.map((tab) => ({
-    ...tab, history: createHistory(cloneSchema(tab.schema)),
-    viewport: tab.id === savedDocuments.activeId ? viewport : fitViewport(fullSheet(tab.schema.sheet), { width: viewSize.x, height: viewSize.y }),
-  })) ?? [{ id: crypto.randomUUID(), name: schema.sheet.fileName || 'Новая схема', schema, history, viewport }];
-  let activeDocumentId = savedDocuments?.activeId ?? documents[0]!.id;
+  let viewport: Viewport = readSavedViewport(viewSize) ?? fitViewport(fullSheet(schema.sheet), { width: viewSize.x, height: viewSize.y });
+  const documentState: DocumentState = createDocumentState(savedDocuments, schema, history, viewport, viewSize);
   const documentTabBar = root.querySelector<HTMLElement>('#document-tabs');
   let viewportSaveTimer: ReturnType<typeof setTimeout> | undefined;
   const saveViewportNow = (): void => {
     if (viewportSaveTimer !== undefined) { clearTimeout(viewportSaveTimer); viewportSaveTimer = undefined; }
-    try {
-      const center = screenToSheet({ x: viewSize.x / 2, y: viewSize.y / 2 }, viewport);
-      localStorage.setItem(VIEWPORT_KEY, JSON.stringify({ scale: viewport.scale, cx: center.x, cy: center.y }));
-    } catch { /* The view simply is not restored next time. */ }
+    writeSavedViewport(viewSize, viewport);
   };
   const scheduleViewportSave = (): void => {
     if (viewportSaveTimer !== undefined) clearTimeout(viewportSaveTimer);
@@ -546,8 +161,31 @@ export function mountApp(root: HTMLElement): void {
   let placementRotation: 0 | 1 | 2 | 3 = 0;
   let wireDrawing = false;
   const uiText = (): typeof INTERFACE_TEXT.ru => INTERFACE_TEXT[paletteLang] as typeof INTERFACE_TEXT.ru;
-  const translateInterface = setupInterfaceTranslation({ root, uiText, visibleOptionalGroups, wireDrawing: () => wireDrawing, simulationMode: () => simulation.mode, speedButton, gridVisible: () => gridVisible, applyPropertiesPanel, updateWireColorsCommand, paletteSearch, paletteLanguage, paletteLang: () => paletteLang, zoomValue, schema: () => schema, fileName });
-  refreshInterface = translateInterface;
+  const syncCurrentDocument = (): void => {
+    syncActiveDocument(documentState, schema, history, viewport, uiText().new);
+  };
+  const persistDocuments = (): void => {
+    writeSavedDocuments(documentState.activeDocumentId, documentState.documents.map((tab) => ({
+      id: tab.id,
+      name: tab.name,
+      schema: serializeSchemaJson(tab.schema),
+    })));
+    renderDocumentTabs(documentState, documentTabBar, uiText());
+  };
+  let autosaveTimer: ReturnType<typeof setTimeout> | undefined;
+  const persistSchemaNow = (): void => {
+    if (autosaveTimer !== undefined) clearTimeout(autosaveTimer);
+    autosaveTimer = undefined;
+    writeAutosavedSchema(ctx.schema, serializeSchemaJson);
+    syncCurrentDocument();
+    persistDocuments();
+  };
+  const persistSchema = (): void => {
+    if (autosaveTimer !== undefined) return;
+    autosaveTimer = setTimeout(() => {
+      persistSchemaNow();
+    }, 500);
+  };
 
   let draftPoints: Point[] = [];
   let draftCursor: Point | undefined;
@@ -555,9 +193,21 @@ export function mountApp(root: HTMLElement): void {
   let propertySnapshot: Schema | undefined;
   const simulation = setupSimulation(ctx, {
     wireLayer, elementLayer, simulationMessage, simulationMessageText, runButton, stopButton, simStateValue, simulationContextMenu, overloadAction, status,
-    uiText: () => uiText(), renderSchema: () => renderSchema(), uniformWireColors: () => uniformWireColors,
+    uiText: () => uiText(), renderSchema: () => renderSchema(), uniformWireColors: () => appSettings.uniformWireColors,
     clearSelection: () => { selected.clear(); renderSchema(); },
   });
+  const settingsCommands = createSettingsCommands(root, appSettings, uiText, simulation.applySimulationVisuals);
+  const translateInterface = setupInterfaceTranslation({
+    root, uiText, visibleOptionalGroups: appSettings.visibleOptionalGroups,
+    wireDrawing: () => wireDrawing, simulationMode: () => simulation.mode, speedButton,
+    gridVisible: () => appSettings.gridVisible, applyPropertiesPanel,
+    updateWireColorsCommand: settingsCommands.updateWireColorsCommand,
+    paletteSearch, paletteLanguage, paletteLang: () => paletteLang, zoomValue,
+    schema: () => schema, fileName,
+  });
+  const toggleTheme = (): void => settingsCommands.toggleTheme(translateInterface);
+  const toggleGrid = (): void => settingsCommands.toggleGrid(translateInterface);
+  const toggleWireColors = settingsCommands.toggleWireColors;
   translateInterface();
 
   const { updateHistoryButtons, commitSchema, restoreHistory } = setupHistoryUi(ctx, { root, undoButton, redoButton, drawWireButton, finishWireButton, selected, clipboardAvailable: () => clipboard !== undefined, wireDrawing: () => wireDrawing, draftLength: () => draftPoints.length, uiText, simulation, renderSchema: () => renderSchema() });
@@ -655,77 +305,35 @@ export function mountApp(root: HTMLElement): void {
     wireThicknessSelect.value = selectedWires.every((wire) => wire.thickness === firstThickness) ? String(firstThickness) : '';
   };
   const renderSchema = setupSchemaRenderer(ctx, { root, svg, wireLayer, elementLayer, selectionLayer, selected, drag: () => drag, renderSheetFrame, drawDraft, simulation, updateHistoryButtons, renderProperties: () => renderProperties(), persistSchema, syncSelectedWireThickness });
-  const activeDocument = (): DocumentTab => documents.find((tab) => tab.id === activeDocumentId) ?? documents[0]!;
-  const renderDocumentTabs = (): void => {
-    if (!documentTabBar) return;
-    documentTabBar.replaceChildren();
-    const tabList = documentTabBar.ownerDocument.createElement('div');
-    tabList.className = 'document-tab-list';
-    for (const document of documents) {
-      const tab = documentTabBar.ownerDocument.createElement('div');
-      tab.className = `document-tab${document.id === activeDocumentId ? ' is-active' : ''}`;
-      const select = documentTabBar.ownerDocument.createElement('button');
-      select.type = 'button'; select.className = 'document-tab-select'; select.dataset.documentTab = document.id;
-      const documentName = document.schema.sheet.fileName || uiText().new;
-      select.textContent = documentName; select.title = documentName;
-      const close = documentTabBar.ownerDocument.createElement('button');
-      close.type = 'button'; close.className = 'document-tab-close'; close.dataset.closeDocument = document.id;
-      close.setAttribute('aria-label', `${uiText().close} «${documentName}»`); close.title = uiText().close; close.textContent = '×';
-      tab.append(select, close); tabList.append(tab);
-    }
-    documentTabBar.append(tabList);
-    const add = documentTabBar.ownerDocument.createElement('button');
-    add.type = 'button'; add.id = 'new-document-tab'; add.className = 'document-tab-add'; add.title = uiText().new; add.setAttribute('aria-label', uiText().new); add.textContent = '+';
-    documentTabBar.append(add);
-    const activeTab = tabList.querySelector<HTMLElement>('.document-tab.is-active');
-    if (activeTab) {
-      const tabLeft = activeTab.getBoundingClientRect().left - tabList.getBoundingClientRect().left + tabList.scrollLeft;
-      if (tabLeft < tabList.scrollLeft) tabList.scrollLeft = tabLeft;
-      else if (tabLeft + activeTab.offsetWidth > tabList.scrollLeft + tabList.clientWidth) {
-        tabList.scrollLeft = tabLeft + activeTab.offsetWidth - tabList.clientWidth;
-      }
-    }
-  };
-  syncActiveDocument = (): void => {
-    const current = activeDocument();
-    current.schema = schema; current.history = history; current.viewport = viewport;
-    current.name = schema.sheet.fileName || uiText().new;
-  };
-  persistDocuments = (): void => {
-    try {
-      localStorage.setItem(DOCUMENT_TABS_KEY, JSON.stringify({ activeId: activeDocumentId, tabs: documents.map((tab) => ({ id: tab.id, name: tab.name, schema: serializeSchemaJson(tab.schema) })) }));
-    } catch { /* The current document remains available even when storage is full. */ }
-    renderDocumentTabs();
-  };
   const activateDocument = (id: string, skipSavingCurrent = false): void => {
-    if (id === activeDocumentId) return;
-    if (!skipSavingCurrent) { syncActiveDocument(); persistDocuments(); }
+    if (id === documentState.activeDocumentId) return;
+    if (!skipSavingCurrent) { syncCurrentDocument(); persistDocuments(); }
     simulation.stopSimulation();
-    const target = documents.find((tab) => tab.id === id); if (!target) return;
-    activeDocumentId = target.id; schema = target.schema; history = target.history; viewport = target.viewport;
+    const target = documentState.documents.find((tab) => tab.id === id); if (!target) return;
+    documentState.activeDocumentId = target.id; schema = target.schema; history = target.history; viewport = target.viewport;
     selected.clear(); fileInput.value = ''; fileName.textContent = schema.sheet.fileName || target.name;
     placementType = undefined; placementRotation = 0; activePaletteCommand = undefined; wireDrawing = false; draftPoints = []; draftCursor = undefined;
     if (placeTypeSelect) placeTypeSelect.value = ''; svg.classList.remove('is-placing', 'is-drawing-wire');
-    simulation.resetSimulation(); renderSchema(); drawViewport(); updateHistoryButtons(); refreshInterface();
-    status.textContent = `Открыта схема «${target.name}».`; renderDocumentTabs();
+    simulation.resetSimulation(); renderSchema(); drawViewport(); updateHistoryButtons(); translateInterface();
+    status.textContent = `Открыта схема «${target.name}».`; renderDocumentTabs(documentState, documentTabBar, uiText());
   };
   const createDocumentTab = (name = uiText().new): void => {
-    if (documents.length) { syncActiveDocument(); persistDocuments(); }
+    if (documentState.documents.length) { syncCurrentDocument(); persistDocuments(); }
     simulation.stopSimulation();
     const nextSchema = createEmptySchema();
     const tab: DocumentTab = { id: crypto.randomUUID(), name, schema: nextSchema, history: createHistory(cloneSchema(nextSchema)), viewport: fitViewport(fullSheet(nextSchema.sheet), { width: viewSize.x, height: viewSize.y }) };
-    documents.push(tab); activeDocumentId = tab.id; schema = tab.schema; history = tab.history; viewport = tab.viewport;
+    documentState.documents.push(tab); documentState.activeDocumentId = tab.id; schema = tab.schema; history = tab.history; viewport = tab.viewport;
     selected.clear(); fileInput.value = ''; fileName.textContent = name;
     placementType = undefined; placementRotation = 0; activePaletteCommand = undefined; wireDrawing = false; draftPoints = []; draftCursor = undefined;
     if (placeTypeSelect) placeTypeSelect.value = ''; svg.classList.remove('is-placing', 'is-drawing-wire');
-    simulation.resetSimulation(); renderSchema(); drawViewport(); updateHistoryButtons(); refreshInterface();
-    status.textContent = 'Новая схема создана.'; persistSchemaNow(); renderDocumentTabs();
+    simulation.resetSimulation(); renderSchema(); drawViewport(); updateHistoryButtons(); translateInterface();
+    status.textContent = 'Новая схема создана.'; persistSchemaNow(); renderDocumentTabs(documentState, documentTabBar, uiText());
   };
   const closeDocumentTab = (id: string): void => {
-    const index = documents.findIndex((tab) => tab.id === id); if (index < 0) return;
-    syncActiveDocument(); documents.splice(index, 1);
-    if (!documents.length) { activeDocumentId = ''; createDocumentTab(); return; }
-    if (activeDocumentId === id) { activeDocumentId = ''; activateDocument(documents[Math.min(index, documents.length - 1)]!.id, true); }
+    const index = documentState.documents.findIndex((tab) => tab.id === id); if (index < 0) return;
+    syncCurrentDocument(); documentState.documents.splice(index, 1);
+    if (!documentState.documents.length) { documentState.activeDocumentId = ''; createDocumentTab(); return; }
+    if (documentState.activeDocumentId === id) { documentState.activeDocumentId = ''; activateDocument(documentState.documents[Math.min(index, documentState.documents.length - 1)]!.id, true); }
     else { persistDocuments(); }
   };
   documentTabBar?.addEventListener('click', (event) => {
@@ -736,10 +344,10 @@ export function mountApp(root: HTMLElement): void {
     if (tab?.dataset.documentTab) activateDocument(tab.dataset.documentTab);
     else if (target.closest('#new-document-tab')) createDocumentTab();
   });
-  renderDocumentTabs();
+  renderDocumentTabs(documentState, documentTabBar, uiText());
   const { renderPalette } = setupPalette(ctx, {
     search: paletteSearch, language: paletteLanguage, count: paletteCount, groups: paletteGroups, svg, status,
-    paletteLang: () => paletteLang, setPaletteLang: (value) => { paletteLang = value; }, visibleOptionalGroups,
+    paletteLang: () => paletteLang, setPaletteLang: (value) => { paletteLang = value; }, visibleOptionalGroups: appSettings.visibleOptionalGroups,
     activePaletteCommand: () => activePaletteCommand, setActivePaletteCommand: (value) => { activePaletteCommand = value; },
     setPlacement: (value) => { placementType = value; }, resetPlacementRotation: () => { placementRotation = 0; },
     uiText: () => uiText(), leaveNodeTool, isWireDrawing: () => wireDrawing, cancelWireDrawing: () => cancelWireDrawing(),
