@@ -1,5 +1,5 @@
 import type { GroupKey } from '@model/catalog';
-import { GRID_KEY, OPTIONAL_GROUP_STORAGE_KEY, OPTIONAL_PALETTE_GROUPS, THEME_KEY, WIRE_COLOR_MODE_KEY } from './constants';
+import { GRID_KEY, INTERFACE_LANGUAGE_KEY, OPTIONAL_GROUP_STORAGE_KEY, OPTIONAL_PALETTE_GROUPS, THEME_KEY, WIRE_COLOR_MODE_KEY } from './constants';
 import type { Theme } from './constants';
 
 export interface AppSettings {
@@ -98,4 +98,12 @@ export function readTheme(): Theme {
     if (saved === 'light' || saved === 'dark') return saved;
   } catch { /* Storage may be unavailable in private or embedded contexts. */ }
   return typeof matchMedia !== 'undefined' && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
+export function readInterfaceLanguage(): 'es' | 'en' | 'it' | 'ru' | 'fr' | 'ar' {
+  try {
+    const saved = localStorage.getItem(INTERFACE_LANGUAGE_KEY);
+    return saved === 'es' || saved === 'en' || saved === 'it'
+      || saved === 'ru' || saved === 'fr' || saved === 'ar' ? saved : 'es';
+  } catch { return 'es'; }
 }

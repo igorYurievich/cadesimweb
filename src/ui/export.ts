@@ -2,7 +2,7 @@ import { exportCad } from '@model/cad-export';
 import { serializeSchemaJson } from '@model/schema-json';
 import { POSITION_SPECS, currentPosition } from '@engine/behaviors';
 import type { AppContext } from './context';
-import { CADESIM_LINK_TEXT, CADESIM_URL, IDLE_WIRE_COLORS, SVG_NS } from './constants';
+import { CADESIM_LINK_TEXT, CADESIM_URL, CAD_EXPORT_WARNING_KEY, IDLE_WIRE_COLORS, SVG_NS } from './constants';
 import { fullSheet, stampMetrics } from './helpers';
 
 export interface ExportActions {
@@ -11,6 +11,39 @@ export interface ExportActions {
   exportSvgFile(): void;
   exportPngFile(): void;
   printPdf(): void;
+}
+
+export function setupCadExportConfirmation(root: HTMLElement): () => Promise<boolean> {
+  return (): Promise<boolean> => {
+    try {
+      if (localStorage.getItem(CAD_EXPORT_WARNING_KEY) === '1') return Promise.resolve(true);
+    } catch { /* Keep the warning enabled when storage is unavailable. */ }
+    const dialog = root.querySelector<HTMLDialogElement>('#cad-export-warning-dialog');
+    const optout = root.querySelector<HTMLInputElement>('#cad-export-warning-optout');
+    const confirm = root.querySelector<HTMLButtonElement>('#cad-export-warning-confirm');
+    if (!dialog || !optout || !confirm) return Promise.resolve(false);
+    optout.checked = false;
+    return new Promise((resolve) => {
+      let settled = false;
+      const finish = (accepted: boolean): void => {
+        if (settled) return;
+        settled = true;
+        dialog.removeEventListener('close', onClose);
+        confirm.removeEventListener('click', onConfirm);
+        if (accepted && optout.checked) {
+          try { localStorage.setItem(CAD_EXPORT_WARNING_KEY, '1'); }
+          catch { /* The warning will appear again if storage is unavailable. */ }
+        }
+        if (dialog.open) dialog.close();
+        resolve(accepted);
+      };
+      const onClose = (): void => finish(false);
+      const onConfirm = (): void => finish(true);
+      dialog.addEventListener('close', onClose);
+      confirm.addEventListener('click', onConfirm);
+      dialog.showModal();
+    });
+  };
 }
 
 export function setupExport(ctx: AppContext, svg: SVGSVGElement, status: HTMLElement, confirmCadExport: () => Promise<boolean>): ExportActions {

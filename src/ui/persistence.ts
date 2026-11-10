@@ -1,5 +1,5 @@
 import type { Schema } from '@model/types';
-import { parseSchemaJson } from '@model/schema-json';
+import { parseSchemaJson, serializeSchemaJson } from '@model/schema-json';
 import { AUTOSAVE_KEY } from './constants';
 import { MAX_VIEWPORT_SCALE, MIN_VIEWPORT_SCALE, screenToSheet } from './viewport';
 import type { Point, Viewport } from './viewport';
@@ -9,6 +9,74 @@ export const DOCUMENT_TABS_KEY = 'cadesim-web:documents:v1';
 export interface SavedDocuments {
   activeId: string;
   tabs: Array<{ id: string; name: string; schema: Schema }>;
+}
+
+export interface DocumentToSave {
+  id: string;
+  name: string;
+  schema: Schema;
+}
+
+export interface PersistenceControllerOptions {
+  schema: () => Schema;
+  activeDocumentId: () => string;
+  documents: () => DocumentToSave[];
+  syncCurrentDocument: () => void;
+  renderDocuments: () => void;
+}
+
+export interface PersistenceController {
+  persistSchema: () => void;
+  persistSchemaNow: () => void;
+  persistDocuments: () => void;
+}
+
+export interface ViewportPersistenceController {
+  saveNow: () => void;
+  schedule: () => void;
+}
+
+export function createViewportPersistenceController(
+  viewSize: () => Point,
+  viewport: () => Viewport,
+): ViewportPersistenceController {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const saveNow = (): void => {
+    if (timer !== undefined) {
+      clearTimeout(timer);
+      timer = undefined;
+    }
+    writeSavedViewport(viewSize(), viewport());
+  };
+  const schedule = (): void => {
+    if (timer !== undefined) clearTimeout(timer);
+    timer = setTimeout(saveNow, 250);
+  };
+  return { saveNow, schedule };
+}
+
+export function createPersistenceController(options: PersistenceControllerOptions): PersistenceController {
+  let autosaveTimer: ReturnType<typeof setTimeout> | undefined;
+  const persistDocuments = (): void => {
+    writeSavedDocuments(options.activeDocumentId(), options.documents().map((tab) => ({
+      id: tab.id,
+      name: tab.name,
+      schema: serializeSchemaJson(tab.schema),
+    })));
+    options.renderDocuments();
+  };
+  const persistSchemaNow = (): void => {
+    if (autosaveTimer !== undefined) clearTimeout(autosaveTimer);
+    autosaveTimer = undefined;
+    writeAutosavedSchema(options.schema(), serializeSchemaJson);
+    options.syncCurrentDocument();
+    persistDocuments();
+  };
+  const persistSchema = (): void => {
+    if (autosaveTimer !== undefined) return;
+    autosaveTimer = setTimeout(persistSchemaNow, 500);
+  };
+  return { persistSchema, persistSchemaNow, persistDocuments };
 }
 
 export function readAutosavedSchema(): Schema | undefined {
