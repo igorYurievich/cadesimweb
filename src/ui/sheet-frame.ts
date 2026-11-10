@@ -1,5 +1,5 @@
 import type { AppContext } from './context';
-import { CADESIM_LINK_TEXT, CADESIM_URL, STAMP_CELLS, SVG_NS } from './constants';
+import { CADESIM_URL, STAMP_CELLS, STAMP_LINK_TEXT, SVG_NS } from './constants';
 import { stampMetrics, stampValue } from './helpers';
 
 export function setupSheetFrame(ctx: AppContext, sheetFrame: SVGGElement, sheetStamp: SVGGElement): () => void {
@@ -47,14 +47,14 @@ export function setupSheetFrame(ctx: AppContext, sheetFrame: SVGGElement, sheetS
     }
     const cw = 0.075 * stampWidth;
     add('rect', { x: String(x), y: String(y), width: String(cw), height: String(rowH), fill: 'none', stroke: '#8793a1', 'stroke-width': '0.35', 'vector-effect': 'non-scaling-stroke' });
-    const linkSize = Math.min(labelSize * 1.15, (cw - 1) / (CADESIM_LINK_TEXT.length * 0.58));
+    const linkSize = Math.min(labelSize * 1.15, (cw - 1) / (STAMP_LINK_TEXT.length * 0.58));
     const link = add('a', { href: CADESIM_URL, target: '_blank', rel: 'noopener noreferrer', class: 'stamp-link' });
     link.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', CADESIM_URL);
     const hit = document.createElementNS(SVG_NS, 'rect');
     for (const [k, v] of Object.entries({ x: String(x), y: String(y), width: String(cw), height: String(rowH), fill: 'transparent' })) hit.setAttribute(k, v);
     const label = document.createElementNS(SVG_NS, 'text');
     for (const [k, v] of Object.entries({ x: String(x + cw / 2), y: String(y + rowH / 2 + linkSize * 0.35), 'font-family': 'Arial, sans-serif', 'font-size': String(linkSize), fill: '#1f5fbf', 'text-anchor': 'middle', 'text-decoration': 'underline' })) label.setAttribute(k, v);
-    label.textContent = CADESIM_LINK_TEXT;
+    label.textContent = STAMP_LINK_TEXT;
     const tip = document.createElementNS(SVG_NS, 'title'); tip.textContent = CADESIM_URL; link.append(hit, label, tip);
     add('rect', { x: String(x), y: String(y), width: String(stampWidth), height: String(stampHeight), fill: 'none', stroke: '#536273', 'stroke-width': '0.6', 'vector-effect': 'non-scaling-stroke', 'pointer-events': 'none' });
   };

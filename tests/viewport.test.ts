@@ -1,5 +1,14 @@
 import { describe, expect, it } from 'vitest';
-import { fitViewport, panBy, screenToSheet, sheetToScreen, snapPointToGrid, snapToGrid, zoomAt } from '../src/ui/viewport';
+import {
+  clampViewport,
+  fitViewport,
+  panBy,
+  screenToSheet,
+  sheetToScreen,
+  snapPointToGrid,
+  snapToGrid,
+  zoomAt,
+} from '../src/ui/viewport';
 
 describe('SVG viewport math (6.1)', () => {
   it('converts screen coordinates to sheet coordinates and back', () => {
@@ -28,6 +37,24 @@ describe('SVG viewport math (6.1)', () => {
   it('pans by the pointer delta', () => {
     expect(panBy({ scale: 1.5, offsetX: 20, offsetY: 30 }, { x: -4, y: 12 }))
       .toEqual({ scale: 1.5, offsetX: 16, offsetY: 42 });
+  });
+
+  it('keeps a zoomed-out sheet inside the view while panning', () => {
+    const viewport = clampViewport(
+      { scale: 0.5, offsetX: -200, offsetY: 900 },
+      { width: 200, height: 100 },
+      { x: 1000, y: 700 },
+    );
+    expect(viewport).toEqual({ scale: 0.5, offsetX: 0, offsetY: 650 });
+  });
+
+  it('leaves part of a zoomed-in sheet visible at the pan limits', () => {
+    const viewport = clampViewport(
+      { scale: 2, offsetX: 2000, offsetY: -2000 },
+      { width: 1000, height: 800 },
+      { x: 1200, y: 900 },
+    );
+    expect(viewport).toEqual({ scale: 2, offsetX: 1120, offsetY: -1520 });
   });
 
   it('snaps coordinates to the CAD grid and fits a sheet in the view', () => {

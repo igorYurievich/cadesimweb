@@ -64,7 +64,7 @@ export function renderAppShell(root: HTMLElement, theme: Theme): void {
           </div></details>
           <details class="menu-group language-menu"><summary>Язык</summary><div class="menu-popover">
             <label class="menu-language">Язык названий элементов
-              <select id="palette-language" aria-label="Язык названий"><option value="es">ES — Español</option><option value="en">EN — English</option><option value="it">IT — Italiano</option><option value="ru">RU — Русский</option><option value="fr">FR — Français</option><option value="ar">AR — العربية (الفصحى)</option></select>
+              <select id="palette-language" aria-label="Язык названий"><option value="es">ES — Español</option><option value="en">EN — English</option><option value="it">IT — Italiano</option><option value="ru">RU — Русский</option><option value="fr">FR — Français</option></select>
             </label>
           </div></details>
           <details class="menu-group examples-menu"><summary>Примеры</summary></details>
@@ -80,7 +80,12 @@ export function renderAppShell(root: HTMLElement, theme: Theme): void {
       <section class="viewport-toolbar" aria-label="Провода и симуляция">
         <div class="tool-group wire-controls" aria-label="Провода">
           <select id="wire-kind" aria-label="Тип нового провода"><option value="phase">Фаза</option><option value="neutral">Нейтраль</option><option value="protection">PE</option><option value="three">3 фазы (L1 L2 L3)</option><option value="threeN">3 фазы + N</option></select>
-          <select id="wire-thickness" aria-label="Толщина провода" title="Толщина провода"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="" hidden>—</option></select>
+          <label id="wire-thickness-label" for="wire-thickness">Толщина</label>
+          <select id="wire-thickness" aria-label="Толщина провода" title="Толщина провода">
+            <option value="1">1</option><option value="2">2</option>
+            <option value="3">3</option><option value="4">4</option>
+            <option value="" hidden>—</option>
+          </select>
           <button type="button" id="draw-wire" title="Провод (C)">Провод</button>
           <span class="tool-sep" aria-hidden="true"></span>
           <button type="button" id="undo" class="icon-btn" title="Отменить (Ctrl+Z)" aria-label="Отменить" disabled>↶</button>

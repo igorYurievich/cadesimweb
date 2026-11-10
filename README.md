@@ -1,78 +1,163 @@
 # CADe SIMU Web
 
-Веб-редактор электрических схем и симулятор релейной логики, вдохновлённый программой CADe SIMU.
-Рисуете схему, нажимаете «запуск» и смотрите, как работают контакторы, реле, таймеры и двигатели.
+## Español
 
-**Онлайн-версия:** https://webcade3.netlify.app/
+Editor web de esquemas eléctricos y simulador de lógica de relés, inspirado en CADe SIMU. Dibuja un esquema, inicia la simulación y observa el funcionamiento de contactores, relés, temporizadores y motores.
 
-> ⚠️ Проект находится в стадии **беты** (версия 0.1.8). Возможны ошибки и неполная поддержка отдельных компонентов.
+**Versión en línea:** https://webcade3.netlify.app/
 
-## Возможности
+> ⚠️ El proyecto está en fase **beta** (versión 0.1.8). Puede contener errores y algunos componentes pueden tener funciones incompletas.
 
-- **Редактор схем:** сетка, узлы, провода с автоматической маршрутизацией, вкладки с несколькими документами, отмена/повтор, копирование, вырезание и вставка (Ctrl+C / Ctrl+X / Ctrl+V), рамка листа.
-- **Каталог компонентов:** источники питания, защитные автоматы и предохранители, контакторы, реле, таймеры, кнопки и переключатели, концевые выключатели, лампы, двигатели, трансформаторы и другие.
-- **Симуляция релейной логики:** самоблокировка, блокировки, задержки таймеров, пуск «звезда-треугольник», автотрансформаторный пуск, тепловые реле, ручное управление, предупреждения о коротких замыканиях.
-- **Формат `.cad`:** импорт и экспорт файлов, совместимых с CADe_SIMU 4.x (см. [FORMATO_CAD.md](FORMATO_CAD.md)).
-- **Экспорт в PDF.**
-- **Готовые примеры схем** прямо в приложении.
-- **6 языков интерфейса:** испанский, английский, итальянский, русский, французский, арабский.
-- **Автосохранение** в браузере: схема и масштаб холста восстанавливаются при перезагрузке.
+### Independencia del proyecto
 
-## Быстрый старт
+Este es un proyecto educativo independiente y sin fines comerciales. No está afiliado, respaldado ni asociado con los autores o desarrolladores de CADe SIMU.
 
-Нужен [Node.js](https://nodejs.org/) версии 20 или новее.
+### Funciones
+
+- **Editor de esquemas:** cuadrícula, nodos, cableado con enrutamiento automático, varias pestañas, deshacer y rehacer, copiar, cortar y pegar (Ctrl+C / Ctrl+X / Ctrl+V), marco de hoja.
+- **Catálogo de componentes:** fuentes de alimentación, interruptores automáticos, fusibles, contactores, relés, temporizadores, pulsadores, finales de carrera, lámparas, motores, transformadores y más.
+- **Simulación de lógica de relés:** auto-mantenimiento, enclavamientos, retardos, arranque estrella-triángulo, arranque con autotransformador, relés térmicos, control manual y avisos de cortocircuito.
+- **Formato `.cad`:** importación y exportación de archivos CADe SIMU 4.x. Consulta [FORMATO_CAD.md](FORMATO_CAD.md).
+- **Exportación a PDF** y ejemplos de esquemas incluidos en la aplicación.
+- **Idiomas disponibles en el selector:** español, inglés, italiano, ruso y francés. La traducción al árabe se conserva, pero su opción está temporalmente oculta.
+- **Guardado automático** en el navegador; el esquema y el zoom se restauran al volver a abrir la aplicación.
+
+### Inicio rápido
+
+Se necesita [Node.js](https://nodejs.org/) 20 o posterior.
 
 ```bash
-git clone <адрес-репозитория>
+git clone <URL-del-repositorio>
 cd proj
 npm ci
 npm run dev
 ```
 
-После запуска откройте адрес, который напечатает Vite (обычно http://localhost:5173).
+Abre la dirección que indique Vite, normalmente http://localhost:5173.
 
-## Команды
+### Comandos
 
-| Команда | Что делает |
+| Comando | Descripción |
 |---|---|
-| `npm run dev` | Запускает сервер разработки |
-| `npm run build` | Проверяет типы и собирает проект в `dist/` |
-| `npm run preview` | Запускает локальный просмотр собранной версии |
-| `npm test` | Запускает все автотесты (Vitest) |
-| `npm run test:watch` | Тесты в режиме наблюдения |
-| `npm run typecheck` | Только проверка типов TypeScript |
+| `npm run dev` | Inicia el servidor de desarrollo |
+| `npm run build` | Comprueba los tipos y genera `dist/` |
+| `npm run preview` | Sirve localmente la versión compilada |
+| `npm test` | Ejecuta las pruebas con Vitest |
+| `npm run test:watch` | Ejecuta las pruebas en modo observación |
+| `npm run typecheck` | Comprueba los tipos de TypeScript |
 
-## Структура проекта
+### Estructura del proyecto
 
-```
+```text
 src/
-  model/    Модель схемы, каталог компонентов, чтение и запись формата .cad
-  engine/   Движок симуляции: чистая функция «схема + ввод → состояние»
-  ui/       Интерфейс: холст, палитра, свойства, меню, экспорт, переводы (i18n)
-  data/     Каталог команд (components.json) и примеры схем (examples/)
-  main.ts   Точка входа
-tests/      Автотесты и фикстуры схем (tests/fixtures/)
-data/reference/   Справочный JSON-каталог компонентов
-FORMATO_CAD.md    Описание формата .cad
+  model/    Modelo del esquema, catálogo y lectura/escritura de `.cad`
+  engine/   Motor de simulación sin dependencias del DOM
+  ui/       Interfaz, lienzo, paleta, propiedades, menús y traducciones
+  data/     Catálogo de componentes y ejemplos de esquemas
+  main.ts   Punto de entrada
+tests/      Pruebas automatizadas y esquemas de prueba
+data/reference/   Catálogo de componentes de referencia
+FORMATO_CAD.md    Descripción del formato `.cad`
 ```
 
-Движок (`src/engine`) не зависит от интерфейса и не обращается к DOM, поэтому его легко тестировать отдельно.
+El motor (`src/engine`) recibe un esquema y entradas, y devuelve el estado de simulación. No depende de la interfaz ni accede al DOM.
 
-В коде используются алиасы импортов: `@engine/*`, `@model/*`, `@ui/*`.
+El código usa los alias `@engine/*`, `@model/*` y `@ui/*`.
 
-## Тесты
+### Pruebas
 
-Проект покрыт автотестами (около 220 тестов): движок симуляции, формат `.cad`, каталог компонентов, таймеры, защитные аппараты, двигатели и сценарии на реальных учебных схемах. Запуск:
+Las pruebas automatizadas cubren el motor de simulación, el formato `.cad`, el catálogo, temporizadores, protecciones, motores y escenarios de esquemas. Para ejecutarlas:
 
 ```bash
 npm test
 ```
 
-## Технологии
+### Tecnologías
 
-TypeScript (строгий режим), Vite, Vitest. Внешних runtime-зависимостей нет.
+TypeScript en modo estricto, Vite y Vitest. No hay dependencias externas en tiempo de ejecución.
 
-## Автор
+### Autor
 
-Игорь Липский Вятчин (Igor Lipskiy Vyatchin), студент второго курса электротехники, IES Las Lagunas.
-Это бесплатный некоммерческий учебный проект.
+Igor Lipskiy Vyatchin, estudiante de segundo curso de ingeniería eléctrica en IES Las Lagunas. Proyecto educativo gratuito y sin fines comerciales.
+
+---
+
+## English
+
+An electrical schematic editor and relay-logic simulator for the web, inspired by CADe SIMU. Draw a schematic, start the simulation, and observe contactors, relays, timers, and motors in action.
+
+**Online version:** https://webcade3.netlify.app/
+
+> ⚠️ This project is in **beta** (version 0.1.8). It may contain bugs, and some components may have incomplete functionality.
+
+### Project independence
+
+This is an independent, non-commercial educational project. It is not affiliated with, endorsed by, or associated with the authors or developers of CADe SIMU.
+
+### Features
+
+- **Schematic editor:** grid, junctions, automatic wire routing, multiple document tabs, undo and redo, copy, cut and paste (Ctrl+C / Ctrl+X / Ctrl+V), and a sheet frame.
+- **Component catalog:** power supplies, circuit breakers, fuses, contactors, relays, timers, push buttons, limit switches, lamps, motors, transformers, and more.
+- **Relay-logic simulation:** self-holding circuits, interlocks, timer delays, star-delta starting, autotransformer starting, thermal relays, manual controls, and short-circuit warnings.
+- **`.cad` format:** import and export for CADe SIMU 4.x files. See [FORMATO_CAD.md](FORMATO_CAD.md).
+- **PDF export** and built-in schematic examples.
+- **Languages currently available in the selector:** Spanish, English, Italian, Russian, and French. The Arabic translation remains in the project, but its selector option is temporarily hidden.
+- **Browser autosave:** the schematic and canvas zoom are restored when the app is reopened.
+
+### Quick start
+
+[Node.js](https://nodejs.org/) 20 or later is required.
+
+```bash
+git clone <repository-URL>
+cd proj
+npm ci
+npm run dev
+```
+
+Open the address printed by Vite, usually http://localhost:5173.
+
+### Commands
+
+| Command | Description |
+|---|---|
+| `npm run dev` | Starts the development server |
+| `npm run build` | Type-checks and builds the app into `dist/` |
+| `npm run preview` | Serves the production build locally |
+| `npm test` | Runs the Vitest suite |
+| `npm run test:watch` | Runs tests in watch mode |
+| `npm run typecheck` | Runs the TypeScript type check |
+
+### Project structure
+
+```text
+src/
+  model/    Schematic model, component catalog, and `.cad` import/export
+  engine/   Simulation engine with no DOM dependencies
+  ui/       Interface, canvas, palette, properties, menus, and translations
+  data/     Component catalog and schematic examples
+  main.ts   Application entry point
+tests/      Automated tests and test schematics
+data/reference/   Reference component catalog
+FORMATO_CAD.md    `.cad` format description
+```
+
+The engine (`src/engine`) takes a schematic and inputs, then returns the simulation state. It does not depend on the UI or access the DOM.
+
+The code uses the `@engine/*`, `@model/*`, and `@ui/*` import aliases.
+
+### Tests
+
+The automated tests cover the simulation engine, `.cad` format, component catalog, timers, protection devices, motors, and schematic scenarios. Run them with:
+
+```bash
+npm test
+```
+
+### Technologies
+
+TypeScript in strict mode, Vite, and Vitest. There are no external runtime dependencies.
+
+### Author
+
+Igor Lipskiy Vyatchin, a second-year electrical engineering student at IES Las Lagunas. This is a free, non-commercial educational project.

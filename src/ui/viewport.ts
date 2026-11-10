@@ -36,6 +36,25 @@ export function panBy(viewport: Viewport, delta: Point): Viewport {
   return { ...viewport, offsetX: viewport.offsetX + delta.x, offsetY: viewport.offsetY + delta.y };
 }
 
+/** Keeps the whole small sheet in view and leaves part of a zoomed-in sheet reachable. */
+export function clampViewport(
+  viewport: Viewport,
+  sheet: { width: number; height: number },
+  screen: Point,
+): Viewport {
+  return {
+    ...viewport,
+    offsetX: clampViewportAxis(viewport.offsetX, screen.x, sheet.width * viewport.scale),
+    offsetY: clampViewportAxis(viewport.offsetY, screen.y, sheet.height * viewport.scale),
+  };
+}
+
+function clampViewportAxis(offset: number, screenSize: number, sheetSize: number): number {
+  if (sheetSize <= screenSize) return Math.max(0, Math.min(screenSize - sheetSize, offset));
+  const visible = Math.min(screenSize * 0.2, 80);
+  return Math.max(visible - sheetSize, Math.min(screenSize - visible, offset));
+}
+
 /** Snaps a coordinate to the nearest CAD grid step. */
 export function snapToGrid(value: number, step = 3): number {
   if (!Number.isFinite(value)) return value;

@@ -25,6 +25,8 @@ const rootExamples: ExampleScheme[] = CATALOG.flatMap((fileName, index) => {
 
 const secondFolderExamples: ExampleScheme[] = Array.from({ length: 7 }, (_, index) => {
   const fileName = `Ejemplo 2.${index + 1}.cad`;
+  // Ejemplo 2.5 остаётся для теста характеристики, но не показывается в каталоге.
+  if (fileName === 'Ejemplo 2.5.cad') return null;
   const key = `./examples/Ejemplos 2/${fileName}`;
   const text = files[key];
   return text === undefined ? null : { number: 21 + index, code: 'CAD', title: fileName, fileName, folder: 'Ejemplos 2', text };

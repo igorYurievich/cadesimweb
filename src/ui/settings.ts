@@ -100,10 +100,10 @@ export function readTheme(): Theme {
   return typeof matchMedia !== 'undefined' && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 }
 
-export function readInterfaceLanguage(): 'es' | 'en' | 'it' | 'ru' | 'fr' | 'ar' {
+export function readInterfaceLanguage(): 'es' | 'en' | 'it' | 'ru' | 'fr' {
   try {
     const saved = localStorage.getItem(INTERFACE_LANGUAGE_KEY);
     return saved === 'es' || saved === 'en' || saved === 'it'
-      || saved === 'ru' || saved === 'fr' || saved === 'ar' ? saved : 'es';
+      || saved === 'ru' || saved === 'fr' ? saved : 'es';
   } catch { return 'es'; }
 }

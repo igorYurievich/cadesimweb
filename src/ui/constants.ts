@@ -44,6 +44,7 @@ export const PHASE_LABELS: readonly PotentialLabel[] = ['L1', 'L2', 'L3'];
 export const CADESIM_URL = 'https://github.com/igorYurievich/cadesimweb';
 
 export const CADESIM_LINK_TEXT = 'Cadesim web';
+export const STAMP_LINK_TEXT = 'WEB CADE';
 
 export const STAMP_CELLS: ReadonlyArray<{ key?: StampKey; label?: string; x0: number; x1: number; r0: number; r1: number; hint?: string }> = [
   { label: 'Fecha', x0: 0.075, x1: 0.15, r0: 0, r1: 1 }, { label: 'Nombre', x0: 0.15, x1: 0.25, r0: 0, r1: 1 }, { label: 'Firmas', x0: 0.25, x1: 0.35, r0: 0, r1: 1 },

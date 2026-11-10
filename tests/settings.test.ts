@@ -29,6 +29,8 @@ describe('persisted UI settings', () => {
     expect(readTheme()).toBe('dark');
     values.set('cadesimu-language', 'unsupported');
     expect(readInterfaceLanguage()).toBe('es');
+    values.set('cadesimu-language', 'ar');
+    expect(readInterfaceLanguage()).toBe('es');
   });
 
   it('preserves the existing grid and wire-color preferences', () => {

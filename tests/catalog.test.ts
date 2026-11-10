@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { catalog, buildCatalog, normalizeText } from '@model/catalog';
+import { hasVerifiedBadge } from '@model/catalog-verification';
 
 describe('catalog: data integrity', () => {
   it('matches the numbers extracted from the original exe', () => {
@@ -50,6 +51,13 @@ describe('catalog: lookup', () => {
       const ids = catalog.inGroup(g.key).map((c) => c.id);
       expect(new Set(ids).size).toBe(ids.length);
     }
+  });
+});
+
+describe('catalog: verification marks', () => {
+  it('does not mark the generic pushbutton as verified', () => {
+    expect(hasVerifiedBadge('manual-controls', 33278)).toBe(false);
+    expect(hasVerifiedBadge('manual-controls', 32909)).toBe(true);
   });
 });
 
