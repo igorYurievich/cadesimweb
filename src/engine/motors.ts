@@ -51,10 +51,12 @@ export function evaluateMotors(
     return netId === undefined ? undefined : netById.get(netId);
   };
   const phasesOf = (net: NetState | undefined): string[] => PHASES.filter((phase) => net?.potentials.includes(phase));
+  const acPotentialsOf = (elementId: number, index: number): string[] =>
+    AC_SUPPLY.filter((potential) => netOf(elementId, index)?.potentials.includes(potential));
   /** Однофазное питание между двумя выводами: на каждом ровно один потенциал питания, они разные, и хотя бы один из них фаза. */
   const singlePhaseSupplied = (elementId: number, a: number, b: number): boolean => {
-    const left = AC_SUPPLY.filter((potential) => netOf(elementId, a)?.potentials.includes(potential));
-    const right = AC_SUPPLY.filter((potential) => netOf(elementId, b)?.potentials.includes(potential));
+    const left = acPotentialsOf(elementId, a);
+    const right = acPotentialsOf(elementId, b);
     const first = left[0];
     const second = right[0];
     return left.length === 1 && right.length === 1 && first !== second;
@@ -96,7 +98,21 @@ export function evaluateMotors(
       motors[element.id] = { running, faulted: anyPhase && !running };
       continue;
     }
-    if (element.typeCode === 1002 || element.typeCode === 1008) {
+    if (element.typeCode === 1008) {
+      // У этого двигателя обмотки расположены между U1–V1 и U2–V2; их полярность задаёт направление.
+      const mainWinding = singlePhaseSupplied(element.id, 0, 1);
+      const auxiliaryWinding = singlePhaseSupplied(element.id, 3, 4);
+      const main = [acPotentialsOf(element.id, 0)[0], acPotentialsOf(element.id, 1)[0]];
+      const auxiliary = [acPotentialsOf(element.id, 3)[0], acPotentialsOf(element.id, 4)[0]];
+      const running = mainWinding && auxiliaryWinding;
+      motors[element.id] = {
+        running,
+        faulted: false,
+        reversed: running && main[0] === auxiliary[1] && main[1] === auxiliary[0],
+      };
+      continue;
+    }
+    if (element.typeCode === 1002) {
       // Однофазный: обмотка U1–V1, нужна фаза на одном выводе и нейтраль (или другая фаза) на другом.
       motors[element.id] = { running: singlePhaseSupplied(element.id, 0, 1), faulted: false };
       continue;
