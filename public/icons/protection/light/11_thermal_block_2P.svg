@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="294" height="220" viewBox="0 0 294 220">
+  <title>Switch with thermal block 2P</title>
+  <g fill="none" stroke="#000000" stroke-width="8" stroke-linecap="butt" stroke-linejoin="miter">
+    <path d="M128,0 V16"/>
+    <path d="M128,86 V12.89" transform="rotate(-32 128 86)"/>
+    <path d="M232,0 V16"/>
+    <path d="M232,86 V12.89" transform="rotate(-32 232 86)"/>
+  </g>
+  <g fill="none" stroke="#000000" stroke-width="5" stroke-linecap="butt" stroke-linejoin="miter">
+    <path d="M128,86 V102 H148 V138 H128 V154"/>
+    <path d="M128,154 V168 M128,194 V220"/>
+    <rect x="119" y="168" width="18" height="26"/>
+    <path d="M232,86 V102 H252 V138 H232 V154"/>
+    <path d="M232,154 V168 M232,194 V220"/>
+    <rect x="223" y="168" width="18" height="26"/>
+  </g>
+  <g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="butt" stroke-linejoin="miter">
+    <rect x="76" y="86" width="208" height="122"/>
+    <path d="M76,154 H284"/>
+    <path d="M180,86 V208"/>
+  </g>
+  <g fill="none" stroke="#000000" stroke-width="5" stroke-linecap="butt" stroke-linejoin="miter" stroke-dasharray="9 8">
+    <path d="M108.0,54 H212.0"/>
+  </g>
+  <g fill="none" stroke="#000000" stroke-width="5" stroke-linecap="butt" stroke-linejoin="miter">
+    <path d="M72,54 H108.0"/>
+  </g>
+  <g fill="none" stroke="#000000" stroke-width="5" stroke-linecap="butt" stroke-linejoin="miter" stroke-dasharray="9 8">
+    <path d="M50,76 V181 M50,120 H64 M50,181 H68"/>
+  </g>
+  <g fill="none" stroke="#000000" stroke-width="5" stroke-linecap="butt" stroke-linejoin="miter">
+    <rect x="28" y="32" width="44" height="44"/>
+    <path d="M28,54 H72 M50,32 V76"/>
+  </g>
+  <g fill="#000000" stroke="none">
+    <polygon points="26.0,40.0 12.0,45.0 12.0,63.0 26.0,68.0"/>
+  </g>
+  <g fill="#000000" stroke="none">
+    <polygon points="62.0,112.0 62.0,128.0 74.0,120.0"/>
+  </g>
+</svg>

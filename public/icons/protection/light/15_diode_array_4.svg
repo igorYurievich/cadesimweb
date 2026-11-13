@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="288" height="200" viewBox="0 0 288 200">
+  <title>Diode array, 4 columns</title>
+  <g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="butt" stroke-linejoin="miter">
+    <path d="M54,6 V28 M54,70 V113 M54,152 V168"/>
+    <path d="M114,6 V28 M114,70 V113 M114,152 V168"/>
+    <path d="M174,6 V28 M174,70 V113 M174,152 V168"/>
+    <path d="M234,6 V28 M234,70 V113 M234,152 V168"/>
+    <path d="M54,168 H234"/>
+    <path d="M54,168 V200"/>
+  </g>
+  <g fill="#000000" stroke="none">
+    <polygon points="33.0,28.0 75.0,28.0 54.0,70.0"/>
+    <polygon points="54.0,113.0 33.0,152.0 75.0,152.0"/>
+    <polygon points="93.0,28.0 135.0,28.0 114.0,70.0"/>
+    <polygon points="114.0,113.0 93.0,152.0 135.0,152.0"/>
+    <polygon points="153.0,28.0 195.0,28.0 174.0,70.0"/>
+    <polygon points="174.0,113.0 153.0,152.0 195.0,152.0"/>
+    <polygon points="213.0,28.0 255.0,28.0 234.0,70.0"/>
+    <polygon points="234.0,113.0 213.0,152.0 255.0,152.0"/>
+  </g>
+  <g fill="none" stroke="#000000" stroke-width="5" stroke-linecap="butt" stroke-linejoin="miter" stroke-dasharray="16 10">
+    <rect x="8" y="6" width="272" height="184"/>
+  </g>
+</svg>

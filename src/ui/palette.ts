@@ -1,9 +1,27 @@
 import { catalog } from '@model/catalog';
-import type { GroupKey, Lang } from '@model/catalog';
-import { cadTypeForCommand, getCadType } from '@model/cad-types';
+import type { ComponentDef, ComponentGroup, GroupKey, Lang } from '@model/catalog';
+import { cadTypeForCommand } from '@model/cad-types';
 import { hasVerifiedBadge } from '@model/catalog-verification';
+import { createPlacedElement } from './helpers';
+import { createElementSymbol } from './symbols';
+import {
+  createContactorIcon,
+  createAuxContactIcon,
+  createCoilSignalIcon,
+  createFuseIcon,
+  createManualControlIcon,
+  createMotorIcon,
+  createPowerSourceIcon,
+  createPowerElectronicsIcon,
+  createProtectionIcon,
+} from './palette-icon-assets';
 import type { AppContext } from './context';
-import { OPTIONAL_GROUP_STORAGE_KEY, OPTIONAL_PALETTE_GROUPS, PLACE_DEFAULTS, INTERFACE_LANGUAGE_KEY } from './constants';
+import {
+  INTERFACE_LANGUAGE_KEY,
+  OPTIONAL_GROUP_STORAGE_KEY,
+  OPTIONAL_PALETTE_GROUPS,
+  PLACE_DEFAULTS,
+} from './constants';
 
 const groupTitles: Record<Lang, Record<GroupKey, string>> = {
   es: { 'power-sources': 'Alimentaciones y fuentes', fuses: 'Fusibles y seccionadores', protection: 'Protección', contactors: 'Contactores e interruptores', motors: 'Motores', 'power-electronics': 'Potencia electrónica', 'aux-contacts': 'Contactos auxiliares', 'manual-controls': 'Accionamientos', sensors: 'Detectores y sensores', 'coils-signaling': 'Bobinas, temporizadores y señalización', 'electronic-relays': 'Relés electrónicos', logic: 'Lógica', ladder: 'Ladder', grafcet: 'GRAFCET', 'io-plc': 'Entrada / salida, PLC', pneumatics: 'Actuadores neumáticos', wiring: 'Cables y conexiones', 'realistic-2d': 'Símbolos realistas · 2D', 'realistic-3d': 'Símbolos realistas · 3D' },
@@ -37,72 +55,23 @@ export interface PaletteSetup {
   renderProperties(): void;
 }
 
+interface PaletteGroupItems {
+  group: ComponentGroup;
+  items: ComponentDef[];
+}
+
 export function setupPalette(ctx: AppContext, deps: PaletteSetup): { renderPalette(): void } {
   const openPaletteGroups = new Set<string>();
-  const renderPalette = (): void => {
-    const query = deps.search.value.trim();
-    const matches = query ? catalog.search(query) : catalog.components;
-    const groupIsVisible = (key: GroupKey): boolean => !(OPTIONAL_PALETTE_GROUPS as readonly GroupKey[]).includes(key) || deps.visibleOptionalGroups.has(key);
-    const visibleMatches = matches.filter((item) => item.groups.some(groupIsVisible));
-    deps.count.textContent = deps.uiText().elementCount.replace('{count}', new Intl.NumberFormat(deps.paletteLang()).format(visibleMatches.length));
-    deps.groups.replaceChildren();
-    for (const group of catalog.groups) {
-      try {
-        if (!groupIsVisible(group.key)) continue;
-        const items = matches.filter((item) => item.groups.includes(group.key));
-        if (!items.length) continue;
-        const section = document.createElement('details'); section.className = 'palette-group';
-        section.open = Boolean(query) || openPaletteGroups.has(group.key);
-        section.addEventListener('toggle', () => {
-          if (query) return;
-          if (section.open) openPaletteGroups.add(group.key); else openPaletteGroups.delete(group.key);
-        });
-        const toggle = document.createElement('summary'); toggle.className = 'palette-group-toggle';
-        toggle.textContent = groupTitles[deps.paletteLang()]?.[group.key] ?? group.name;
-        const countBadge = document.createElement('span'); countBadge.className = 'palette-count-badge'; countBadge.textContent = String(items.length);
-        toggle.append(countBadge);
-        const list = document.createElement('div'); list.className = 'palette-items';
-        section.append(toggle, list);
-        deps.groups.append(section);
-        for (const item of items) {
-          const mappedType = cadTypeForCommand(item.id);
-          const cadType = mappedType && PLACE_DEFAULTS[mappedType.code] ? mappedType : undefined;
-          const itemName = catalog.label(item, deps.paletteLang()).trim() || (deps.paletteLang() === 'ru' ? `Элемент ${item.id}` : String(item.id));
-          const button = document.createElement('button'); button.type = 'button'; button.className = 'palette-item';
-          const name = document.createElement('span'); name.className = 'palette-item-label'; name.textContent = itemName; button.append(name);
-          const temporarilyVerified = hasVerifiedBadge(group.key, item.id);
-          const verifiedText = deps.uiText().functionalityVerified ?? 'Функциональность элемента проверена';
-          if (temporarilyVerified) {
-            const badge = document.createElement('span'); badge.className = 'palette-verified-badge'; badge.textContent = '✓'; badge.title = verifiedText; badge.setAttribute('aria-label', verifiedText);
-            button.append(badge);
-          }
-          button.setAttribute('aria-label', temporarilyVerified ? `${itemName} — ${deps.uiText().functionalityVerified}` : itemName);
-          button.title = cadType ? `${itemName} · ${getCadType(cadType.code).label}` : `${itemName} · пока недоступно для размещения`;
-          button.dataset.commandId = String(item.id);
-          if (!cadType) { button.disabled = true; button.title += ' (нет соответствия с типом .cad)'; }
-          else { button.draggable = true; button.setAttribute('aria-pressed', String(deps.activePaletteCommand() === item.id)); }
-          button.addEventListener('click', () => {
-            if (!cadType) return;
-            deps.setActivePaletteCommand(item.id); deps.setPlacement(cadType.code); deps.resetPlacementRotation();
-            deps.leaveNodeTool();
-            if (deps.isWireDrawing()) deps.cancelWireDrawing();
-            deps.svg.classList.add('is-placing'); renderPalette(); deps.drawGhost();
-            deps.status.textContent = `Размещение: ${itemName} · щёлкните по листу или перетащите элемент; R — поворот, Esc — отмена.`;
-          });
-          button.addEventListener('dragstart', (event) => {
-            if (!event.dataTransfer || !cadType) return;
-            deps.setActivePaletteCommand(item.id); deps.setPlacement(cadType.code); deps.resetPlacementRotation();
-            deps.leaveNodeTool();
-            event.dataTransfer.setData('text/plain', String(item.id)); event.dataTransfer.effectAllowed = 'copy';
-            deps.svg.classList.add('is-placing');
-          });
-          list.append(button);
-        }
-      } catch (error) {
-        console.error(`Не удалось отобразить категорию ${group.key}`, error);
-      }
-    }
-  };
+  let activeIconGroup: GroupKey | undefined;
+  setupPaletteSubpanelScrolling(ctx);
+  const renderPalette = (): void => renderPaletteGroups(
+    ctx,
+    deps,
+    openPaletteGroups,
+    activeIconGroup,
+    (value) => { activeIconGroup = value; },
+    renderPalette,
+  );
   deps.search.addEventListener('input', renderPalette);
   for (const input of [...ctx.root.querySelectorAll<HTMLInputElement>('[data-optional-group]')]) {
     input.addEventListener('change', () => {
@@ -124,4 +93,346 @@ export function setupPalette(ctx: AppContext, deps: PaletteSetup): { renderPalet
     ctx.root.querySelector<HTMLDetailsElement>('.language-menu')?.removeAttribute('open');
   });
   return { renderPalette };
+}
+
+function renderPaletteGroups(
+  ctx: AppContext,
+  deps: PaletteSetup,
+  openGroups: Set<string>,
+  activeIconGroup: GroupKey | undefined,
+  setActiveIconGroup: (value: GroupKey | undefined) => void,
+  renderPalette: () => void,
+): void {
+  const query = deps.search.value.trim();
+  const matches = query ? catalog.search(query) : catalog.components;
+  const isVisible = (key: GroupKey): boolean =>
+    !(OPTIONAL_PALETTE_GROUPS as readonly GroupKey[]).includes(key) || deps.visibleOptionalGroups.has(key);
+  const visible = matches.filter((item) => item.groups.some(isVisible));
+  const iconView = ctx.root.dataset.paletteView === 'icons';
+  ctx.root.querySelector<HTMLElement>('.component-palette')?.classList.toggle('is-icon-view', iconView);
+  deps.groups.dataset.searching = query ? 'true' : 'false';
+  deps.count.textContent = deps.uiText().elementCount.replace(
+    '{count}',
+    new Intl.NumberFormat(deps.paletteLang()).format(visible.length),
+  );
+  deps.groups.replaceChildren();
+  const groupItems: PaletteGroupItems[] = [];
+  for (const group of catalog.groups) {
+    if (!isVisible(group.key)) continue;
+    const items = matches.filter((item) => item.groups.includes(group.key));
+    if (items.length) groupItems.push({ group, items });
+  }
+  if (iconView) {
+    renderIconPalette(ctx, deps, groupItems, activeIconGroup, setActiveIconGroup, renderPalette, query);
+    return;
+  }
+  const subpanel = ctx.root.querySelector<HTMLElement>('#palette-subpanel');
+  if (subpanel) {
+    subpanel.hidden = true;
+    subpanel.querySelector('.palette-subpanel-items')?.replaceChildren();
+  }
+  for (const entry of groupItems) {
+    try {
+      deps.groups.append(renderPaletteGroup(entry, ctx, deps, query, openGroups, renderPalette));
+    } catch (error) {
+      console.error(`Не удалось отобразить категорию ${entry.group.key}`, error);
+    }
+  }
+}
+
+function renderIconPalette(
+  ctx: AppContext,
+  deps: PaletteSetup,
+  entries: PaletteGroupItems[],
+  activeKey: GroupKey | undefined,
+  setActive: (value: GroupKey | undefined) => void,
+  renderPalette: () => void,
+  query: string,
+): void {
+  const activeEntry = entries.find((entry) => entry.group.key === activeKey);
+  if (activeKey && !activeEntry) activeKey = undefined;
+  if (query && !activeEntry) activeKey = entries[0]?.group.key;
+  setActive(activeKey);
+  for (const entry of entries) {
+    deps.groups.append(createIconCategoryButton(entry, activeKey, ctx, deps, () => {
+      setActive(activeKey === entry.group.key ? undefined : entry.group.key);
+      renderPalette();
+    }));
+  }
+  const selected = entries.find((entry) => entry.group.key === activeKey);
+  renderIconSubpanel(selected, ctx, deps, renderPalette);
+}
+
+function createIconCategoryButton(
+  entry: PaletteGroupItems,
+  activeKey: GroupKey | undefined,
+  ctx: AppContext,
+  deps: PaletteSetup,
+  activate: () => void,
+): HTMLButtonElement {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'palette-group-toggle palette-icon-toggle';
+  const name = groupTitles[deps.paletteLang()]?.[entry.group.key] ?? entry.group.name;
+  button.title = name;
+  button.setAttribute('aria-label', name);
+  button.setAttribute('aria-expanded', String(activeKey === entry.group.key));
+  button.classList.toggle('is-selected', activeKey === entry.group.key);
+  const categoryPreview = entry.group.key === 'manual-controls'
+    ? entry.items.find((item) => item.id === 32909)
+    : undefined;
+  const first = categoryPreview ?? entry.items.find((item) => {
+    const type = cadTypeForCommand(item.id);
+    return Boolean(type && PLACE_DEFAULTS[type.code]);
+  });
+  const type = first && cadTypeForCommand(first.id);
+  if (first && type) button.append(createPaletteItemSymbol(first, type.code, entry.group.key, ctx));
+  button.addEventListener('click', activate);
+  return button;
+}
+
+function renderIconSubpanel(
+  entry: PaletteGroupItems | undefined,
+  ctx: AppContext,
+  deps: PaletteSetup,
+  renderPalette: () => void,
+): void {
+  const panel = ctx.root.querySelector<HTMLElement>('#palette-subpanel');
+  const items = panel?.querySelector<HTMLElement>('.palette-subpanel-items');
+  if (!panel || !items) return;
+  panel.hidden = !entry;
+  items.replaceChildren();
+  if (!entry) return;
+  for (const item of entry.items) {
+    if (entry.group.key === 'manual-controls' && [32914, 32919, 32923, 32927].includes(item.id)) {
+      const divider = document.createElement('span');
+      divider.className = 'palette-subpanel-divider';
+      divider.setAttribute('aria-hidden', 'true');
+      items.append(divider);
+    }
+    items.append(createPaletteItem(item, entry.group.key, ctx, deps, true, renderPalette));
+  }
+  updatePaletteSubpanelSlider(items, panel.querySelector<HTMLInputElement>('.palette-subpanel-scroll'));
+}
+
+function setupPaletteSubpanelScrolling(ctx: AppContext): void {
+  const panel = ctx.root.querySelector<HTMLElement>('#palette-subpanel');
+  const items = panel?.querySelector<HTMLElement>('.palette-subpanel-items');
+  const slider = panel?.querySelector<HTMLInputElement>('.palette-subpanel-scroll');
+  if (!items || !slider) return;
+  const sync = (): void => updatePaletteSubpanelSlider(items, slider);
+  items.addEventListener('scroll', sync, { passive: true });
+  items.addEventListener('wheel', (event) => {
+    const maxScroll = items.scrollHeight - items.clientHeight;
+    if (maxScroll <= 0 || event.deltaY === 0) return;
+    event.preventDefault();
+    const multiplier = event.deltaMode === WheelEvent.DOM_DELTA_LINE
+      ? 16
+      : event.deltaMode === WheelEvent.DOM_DELTA_PAGE ? items.clientHeight : 1;
+    items.scrollTop += event.deltaY * multiplier;
+    sync();
+  }, { passive: false });
+  slider.addEventListener('input', () => {
+    items.scrollTop = Number(slider.value);
+    sync();
+  });
+  if (typeof ResizeObserver !== 'undefined') new ResizeObserver(sync).observe(items);
+  sync();
+}
+
+function updatePaletteSubpanelSlider(items: HTMLElement, slider: HTMLInputElement | null): void {
+  if (!slider) return;
+  const maxScroll = Math.max(0, items.scrollHeight - items.clientHeight);
+  slider.max = String(maxScroll);
+  slider.value = String(Math.min(items.scrollTop, maxScroll));
+  slider.disabled = maxScroll === 0;
+}
+
+function renderPaletteGroup(
+  entry: PaletteGroupItems,
+  ctx: AppContext,
+  deps: PaletteSetup,
+  query: string,
+  openGroups: Set<string>,
+  renderPalette: () => void,
+): HTMLDetailsElement {
+  const section = document.createElement('details');
+  section.className = 'palette-group';
+  section.open = Boolean(query) || openGroups.has(entry.group.key);
+  const toggle = createGroupToggle(entry.group, entry.items, deps);
+  section.addEventListener('toggle', () => {
+    if (query) return;
+    if (section.open) openGroups.add(entry.group.key);
+    else openGroups.delete(entry.group.key);
+  });
+  const list = document.createElement('div');
+  list.className = 'palette-items';
+  for (const item of entry.items) {
+    list.append(createPaletteItem(item, entry.group.key, ctx, deps, false, renderPalette));
+  }
+  section.append(toggle, list);
+  return section;
+}
+
+function createGroupToggle(
+  group: ComponentGroup,
+  items: ComponentDef[],
+  deps: PaletteSetup,
+): HTMLElement {
+  const toggle = document.createElement('summary');
+  toggle.className = 'palette-group-toggle';
+  const name = groupTitles[deps.paletteLang()]?.[group.key] ?? group.name;
+  toggle.title = name;
+  toggle.textContent = name;
+  const badge = document.createElement('span');
+  badge.className = 'palette-count-badge';
+  badge.textContent = String(items.length);
+  toggle.append(badge);
+  return toggle;
+}
+
+function createPaletteItem(
+  item: ComponentDef,
+  group: GroupKey,
+  ctx: AppContext,
+  deps: PaletteSetup,
+  iconView: boolean,
+  renderPalette: () => void,
+): HTMLButtonElement {
+  const mappedType = cadTypeForCommand(item.id);
+  const cadType = mappedType && PLACE_DEFAULTS[mappedType.code] ? mappedType : undefined;
+  const itemName = catalog.label(item, deps.paletteLang()).trim()
+    || (deps.paletteLang() === 'ru' ? `Элемент ${item.id}` : String(item.id));
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'palette-item';
+  button.dataset.commandId = String(item.id);
+  if (iconView && cadType) button.append(createPaletteItemSymbol(item, cadType.code, group, ctx));
+  const name = document.createElement('span');
+  name.className = 'palette-item-label';
+  name.textContent = itemName;
+  button.append(name);
+  addPaletteBadge(button, item, group, itemName, deps);
+  button.title = cadType ? itemName : `${itemName} · пока недоступно для размещения`;
+  if (!cadType) {
+    button.disabled = true;
+    button.title += ' (нет соответствия с типом .cad)';
+  } else {
+    button.draggable = true;
+    button.setAttribute('aria-pressed', String(deps.activePaletteCommand() === item.id));
+    addPlacementHandlers(button, item, cadType.code, itemName, deps, renderPalette);
+  }
+  return button;
+}
+
+function addPaletteBadge(
+  button: HTMLButtonElement,
+  item: ComponentDef,
+  group: GroupKey,
+  itemName: string,
+  deps: PaletteSetup,
+): void {
+  const verified = hasVerifiedBadge(group, item.id);
+  const verifiedText = deps.uiText().functionalityVerified ?? 'Функциональность элемента проверена';
+  button.setAttribute('aria-label', verified ? `${itemName} — ${verifiedText}` : itemName);
+  if (!verified) return;
+  const badge = document.createElement('span');
+  badge.className = 'palette-verified-badge';
+  badge.textContent = '✓';
+  badge.title = verifiedText;
+  badge.setAttribute('aria-label', verifiedText);
+  button.append(badge);
+}
+
+function addPlacementHandlers(
+  button: HTMLButtonElement,
+  item: ComponentDef,
+  typeCode: number,
+  itemName: string,
+  deps: PaletteSetup,
+  renderPalette: () => void,
+): void {
+  const setPlacement = (): void => {
+    deps.setActivePaletteCommand(item.id);
+    deps.setPlacement(typeCode);
+    deps.resetPlacementRotation();
+    deps.leaveNodeTool();
+  };
+  button.addEventListener('click', () => {
+    setPlacement();
+    if (deps.isWireDrawing()) deps.cancelWireDrawing();
+    deps.svg.classList.add('is-placing');
+    renderPalette();
+    deps.drawGhost();
+    deps.status.textContent = `Размещение: ${itemName} · щёлкните по листу или перетащите элемент; R — поворот, Esc — отмена.`;
+  });
+  button.addEventListener('dragstart', (event) => {
+    if (!event.dataTransfer) return;
+    setPlacement();
+    event.dataTransfer.setData('text/plain', String(item.id));
+    event.dataTransfer.effectAllowed = 'copy';
+    deps.svg.classList.add('is-placing');
+  });
+}
+
+function createPaletteSymbol(typeCode: number, ctx: AppContext): SVGSVGElement {
+  const element = createPlacedElement(typeCode, { x: 0, y: 0 }, 0, ctx.schema);
+  element.position = { x: 0, y: 0 };
+  const preview = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  preview.setAttribute('viewBox', '0 0 48 36');
+  preview.setAttribute('aria-hidden', 'true');
+  preview.classList.add('palette-symbol');
+  const symbol = createElementSymbol(element);
+  if (symbol) {
+    symbol.removeAttribute('data-element-id');
+    const scale = Math.min(1.15, 26 / Math.max(6, element.size.w), 22 / Math.max(6, element.size.h));
+    symbol.setAttribute('transform', `translate(${24 - element.size.w * scale / 2} ${18 - element.size.h * scale / 2}) scale(${scale})`);
+    preview.append(symbol);
+  }
+  return preview;
+}
+
+function createPaletteItemSymbol(
+  item: ComponentDef,
+  typeCode: number,
+  group: GroupKey,
+  ctx: AppContext,
+): Element {
+  if (group === 'power-sources') {
+    const sourceIcon = createPowerSourceIcon(item.id);
+    if (sourceIcon) return sourceIcon;
+  }
+  if (group === 'fuses') {
+    const fuseIcon = createFuseIcon(item.id);
+    if (fuseIcon) return fuseIcon;
+  }
+  if (group === 'contactors') {
+    const contactorIcon = createContactorIcon(item.id);
+    if (contactorIcon) return contactorIcon;
+  }
+  if (group === 'protection') {
+    const protectionIcon = createProtectionIcon(item.id);
+    if (protectionIcon) return protectionIcon;
+  }
+  if (group === 'motors') {
+    const motorIcon = createMotorIcon(item.id);
+    if (motorIcon) return motorIcon;
+  }
+  if (group === 'aux-contacts') {
+    const contactIcon = createAuxContactIcon(item.id);
+    if (contactIcon) return contactIcon;
+  }
+  if (group === 'manual-controls') {
+    const controlIcon = createManualControlIcon(item.id);
+    if (controlIcon) return controlIcon;
+  }
+  if (group === 'coils-signaling') {
+    const signalIcon = createCoilSignalIcon(item.id);
+    if (signalIcon) return signalIcon;
+  }
+  if (group === 'power-electronics') {
+    const electronicsIcon = createPowerElectronicsIcon(item.id);
+    if (electronicsIcon) return electronicsIcon;
+  }
+  return createPaletteSymbol(typeCode, ctx);
 }

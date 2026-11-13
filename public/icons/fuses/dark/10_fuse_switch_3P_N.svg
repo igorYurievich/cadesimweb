@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="324" height="168" viewBox="0 0 324 168">
+  <title>Fuse switch 3P+N</title>
+  <g fill="none" stroke="#FFFFFF" stroke-width="8" stroke-linecap="butt" stroke-linejoin="miter">
+    <path d="M70,0 V30 M70,142 V168"/>
+  </g>
+  <g transform="rotate(-22 70 142)" fill="none" stroke="#FFFFFF" stroke-width="8" stroke-linecap="butt" stroke-linejoin="miter">
+    <rect x="52" y="38" width="36" height="84"/>
+  </g>
+  <g fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="butt" stroke-linejoin="miter">
+    <path d="M70,142 V26" transform="rotate(-22 70 142)"/>
+  </g>
+  <g fill="none" stroke="#FFFFFF" stroke-width="8" stroke-linecap="butt" stroke-linejoin="miter">
+    <path d="M150,0 V30 M150,142 V168"/>
+  </g>
+  <g transform="rotate(-22 150 142)" fill="none" stroke="#FFFFFF" stroke-width="8" stroke-linecap="butt" stroke-linejoin="miter">
+    <rect x="132" y="38" width="36" height="84"/>
+  </g>
+  <g fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="butt" stroke-linejoin="miter">
+    <path d="M150,142 V26" transform="rotate(-22 150 142)"/>
+  </g>
+  <g fill="none" stroke="#FFFFFF" stroke-width="8" stroke-linecap="butt" stroke-linejoin="miter">
+    <path d="M230,0 V30 M230,142 V168"/>
+  </g>
+  <g transform="rotate(-22 230 142)" fill="none" stroke="#FFFFFF" stroke-width="8" stroke-linecap="butt" stroke-linejoin="miter">
+    <rect x="212" y="38" width="36" height="84"/>
+  </g>
+  <g fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="butt" stroke-linejoin="miter">
+    <path d="M230,142 V26" transform="rotate(-22 230 142)"/>
+  </g>
+  <g fill="none" stroke="#FFFFFF" stroke-width="8" stroke-linecap="butt" stroke-linejoin="miter">
+    <path d="M310,0 V60 M310,142 V168"/>
+  </g>
+  <g fill="none" stroke="#FFFFFF" stroke-width="8" stroke-linecap="butt" stroke-linejoin="miter">
+    <path d="M310,142 V26" transform="rotate(-22 310 142)"/>
+  </g>
+</svg>

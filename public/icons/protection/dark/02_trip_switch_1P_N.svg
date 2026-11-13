@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="144" viewBox="0 0 128 144">
+  <title>Switch with trip arrow 1P+N</title>
+  <g fill="none" stroke="#FFFFFF" stroke-width="8" stroke-linecap="butt" stroke-linejoin="miter">
+    <path d="M52,0 V26 M52,105 V144"/>
+    <path d="M52,105 V31.89" transform="rotate(-32 52 105)"/>
+    <path d="M116,0 V26 M116,105 V144"/>
+    <path d="M116,105 V31.89" transform="rotate(-32 116 105)"/>
+  </g>
+  <g fill="#FFFFFF" stroke="none">
+    <polygon points="10.1,37.9 34.5,58.1 17.5,68.7"/>
+  </g>
+</svg>

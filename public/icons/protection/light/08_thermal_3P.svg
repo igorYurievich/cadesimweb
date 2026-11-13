@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="228" height="144" viewBox="0 0 228 144">
+  <title>Thermal elements 3P</title>
+  <g fill="none" stroke="#000000" stroke-width="8" stroke-linecap="butt" stroke-linejoin="miter">
+    <path d="M56,0 V46 H74 V98 H56 V144"/>
+    <path d="M114,0 V46 H132 V98 H114 V144"/>
+    <path d="M172,0 V46 H190 V98 H172 V144"/>
+  </g>
+  <g fill="none" stroke="#000000" stroke-width="5" stroke-linecap="butt" stroke-linejoin="miter" stroke-dasharray="16 10">
+    <rect x="8" y="30" width="212" height="84"/>
+  </g>
+</svg>

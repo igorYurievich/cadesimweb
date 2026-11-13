@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="190" height="194" viewBox="0 0 190 194">
+  <title>Motor</title>
+  <g fill="none" stroke="#FFFFFF" stroke-width="8" stroke-linecap="butt" stroke-linejoin="miter">
+    <path d="M37,0 V57.8 M153,0 V57.8 M95,0 V27"/>
+    <path d="M37,194 V136.2 M153,194 V136.2 M95,194 V167"/>
+  </g>
+  <g fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="butt" stroke-linejoin="miter">
+    <circle cx="95" cy="97" r="70"/>
+  </g>
+  <g fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="butt" stroke-linejoin="miter">
+    <path d="M71.0,117.0 V77.0 L95,103.0 L119.0,77.0 V117.0"/>
+  </g>
+  <g fill="none" stroke="#E03131" stroke-width="6" stroke-linecap="butt" stroke-linejoin="miter">
+    <path d="M9,12 V50 M23,12 V50"/>
+  </g>
+</svg>

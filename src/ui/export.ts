@@ -2,7 +2,7 @@ import { exportCad } from '@model/cad-export';
 import { serializeSchemaJson } from '@model/schema-json';
 import { POSITION_SPECS, currentPosition } from '@engine/behaviors';
 import type { AppContext } from './context';
-import { CADESIM_LINK_TEXT, CADESIM_URL, CAD_EXPORT_WARNING_KEY, IDLE_WIRE_COLORS, SVG_NS } from './constants';
+import { CADESIM_LINK_TEXT, CADESIM_URL, CAD_EXPORT_WARNING_KEY, SVG_NS, WIRE_COLORS } from './constants';
 import { fullSheet, stampMetrics } from './helpers';
 
 export interface ExportActions {
@@ -120,7 +120,7 @@ export function setupExport(ctx: AppContext, svg: SVGSVGElement, status: HTMLEle
       // so the printed result keeps a comparable visual weight at sheet scale.
       line.setAttribute('stroke-width', String(Math.max(1, wire.thickness || 1) * 0.4));
       line.removeAttribute('vector-effect');
-      line.setAttribute('stroke', wire.kind === 'phase' ? '#566170' : IDLE_WIRE_COLORS[wire.kind]);
+      line.setAttribute('stroke', WIRE_COLORS[wire.kind]);
     }
     copy.querySelectorAll<SVGCircleElement>('#wire-layer circle[data-wire-id]').forEach((dot) => {
       dot.classList.remove('is-energized');
@@ -229,6 +229,7 @@ export function setupExport(ctx: AppContext, svg: SVGSVGElement, status: HTMLEle
     printWindow.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${title}</title><style>
       @page { size: ${printWidth} ${printHeight}; margin: 0; }
       html, body { margin: 0; padding: 0; }
+      .page, .page > svg { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
       @media print { html, body { width: ${printWidth}; height: ${printHeight}; overflow: hidden; } }
       .page { position: relative; width: ${printWidth}; height: ${printHeight}; overflow: hidden; break-inside: avoid; page-break-inside: avoid; }
       .page > svg { position: absolute; inset: 0; display: block; width: 100%; height: 100%; color: #263342; }

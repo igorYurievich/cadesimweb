@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="105" height="144" viewBox="0 0 105 144">
+  <title>Contact changeover</title>
+  <g fill="none" stroke="#000000" stroke-width="8" stroke-linecap="butt" stroke-linejoin="miter">
+    <path d="M52,0 V34"/>
+    <path d="M52,34 L22,108"/>
+    <path d="M9,144 V108 H22 M95,144 V108 H81"/>
+  </g>
+</svg>

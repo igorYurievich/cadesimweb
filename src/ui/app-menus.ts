@@ -23,6 +23,7 @@ export interface AppMenuOptions {
   toggleGrid: () => void;
   toggleDockedProperties: () => void;
   toggleWireColors: () => void;
+  setPaletteView: (value: 'list' | 'icons') => void;
   commitSchema: (before: Schema) => void;
   renderSchema: () => void;
   setViewport: (viewport: Viewport) => void;
@@ -53,6 +54,7 @@ export function setupAppMenus(options: AppMenuOptions): ExportActions {
     toggleGrid: options.toggleGrid,
     toggleDockedProperties: options.toggleDockedProperties,
     toggleWireColors: options.toggleWireColors,
+    setPaletteView: options.setPaletteView,
     commitSchema: options.commitSchema,
     renderSchema: options.renderSchema,
     setViewport: options.setViewport,

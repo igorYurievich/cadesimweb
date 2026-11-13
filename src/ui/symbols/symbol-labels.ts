@@ -76,11 +76,11 @@ export function drawTerminalLabels(g: SVGGElement, element: SchemaElement, rotat
       continue;
     }
     const top = y <= minY;
-    if (element.typeCode === 9008 || element.typeCode === 9009) {
+    if ((element.typeCode === 9008 || element.typeCode === 9009) && rotation !== 0) {
       // Лампа повёрнута: подписи клемм ставим «вверх» в системе листа, а не в системе элемента.
       const k = ((4 - rotation / 90) % 4) as 0 | 1 | 2 | 3;
-      // Нижнюю метку опускаем, чтобы она не прилипала к краю колбы.
-      const o = rotateOffset({ x: 0, y: top ? -2.6 : -1.6 }, k);
+      // Одинаковый отступ сохраняет метки на одном уровне после поворота лампы.
+      const o = rotateOffset({ x: 0, y: -2.1 }, k);
       g.append(
         label(terminal.label, x + o.x, y + o.y, {
           size: 2.3,

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="214" viewBox="0 0 200 214">
+  <title>Three-phase motor (variant)</title>
+  <g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="butt" stroke-linejoin="miter">
+    <path d="M12,12 H50 C82,12 82,56 46,56 C86,56 86,100 50,100 H12"/>
+  </g>
+  <g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="butt" stroke-linejoin="miter">
+    <circle cx="128" cy="56" r="47"/>
+  </g>
+  <g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="butt" stroke-linejoin="miter">
+    <path d="M111.68,69.6 V42.4 L128,60.08 L144.32,42.4 V69.6"/>
+  </g>
+  <g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="butt" stroke-linejoin="miter">
+    <path d="M80,204 V168 L104,142 L128,168 V204 M128,168 L152,142 L176,168 V204"/>
+  </g>
+</svg>

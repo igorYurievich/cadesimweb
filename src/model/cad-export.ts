@@ -29,8 +29,6 @@ const SLOT_MAP: Readonly<Record<number, readonly number[]>> = {
 
 /** Типы, у которых клеммы не помещаются в одну запись: сколько клемм в основной, остальные идут записью-продолжением -1 (как в образце). */
 const SPLIT_AT: Readonly<Record<number, number>> = { 1056: 7 };
-const THERMAL_REFERENCE_TYPES = new Set([6007, 8016, 8017, 8018, 8019]);
-
 /** Дополняет запись до минимума полей; лишние поля (11-е текстовое, 24-е число у 1052) остаются как есть. */
 function padRecord(record: CadRecord): void {
   while (record.texts.length < CAD_TEXT_FIELDS) record.texts.push('');
@@ -45,18 +43,6 @@ function slotsOf(record: Pick<CadRecord, 'nums'>): number[] {
   return record.nums.slice(0, count).flatMap((flag, index) => flag !== 0 ? [index] : []);
 }
 
-/**
- * Thermal relays and their auxiliary contacts use a leading dash in CADe_SIMU
- * 4.2 reference names (for example, -FG1). The web editor keeps the short
- * visible name (FG1), so add the legacy prefix to the serialized record only.
- */
-function cadReferenceName(element: SchemaElement): string {
-  if (THERMAL_REFERENCE_TYPES.has(element.typeCode) && element.name !== '' && !element.name.startsWith('-')) {
-    return `-${element.name}`;
-  }
-  return element.name;
-}
-
 /** Записи элемента: основная и (если были) продолжения типа -1, как в исходном файле. */
 function elementRecords(element: SchemaElement, allocId: () => number): CadRecord[] {
   const raw = element.raw;
@@ -66,25 +52,17 @@ function elementRecords(element: SchemaElement, allocId: () => number): CadRecor
   if (!raw && DEFAULT_TAILS[element.typeCode] !== undefined) record.tail = DEFAULT_TAILS[element.typeCode] as string;
   padRecord(record);
   const o = shiftOf(record);
-  record.texts[0] = cadReferenceName(element);
+  record.texts[0] = element.name;
   record.texts[1] = element.func;
   record.nums[8 + o] = element.position.x;
   record.nums[9 + o] = element.position.y;
-  // CADe_SIMU 4.2 places the 6007 reference label at (-15, -3). The web
-  // editor's midpoint default (+10.5, -3) shifts the legacy hit target to the
-  // right of the drawn relay, so normalize this offset in exported CAD files.
-  record.nums[12 + o] = element.typeCode === 6007 ? -15 : element.labelOffset.x;
-  record.nums[13 + o] = element.typeCode === 6007 ? -3 : element.labelOffset.y;
+  record.nums[12 + o] = element.labelOffset.x;
+  record.nums[13 + o] = element.labelOffset.y;
   if (element.typeCode !== 8) {
     record.nums[14 + o] = element.size.w;
     record.nums[15 + o] = element.size.h;
   }
   record.nums[17 + o] = element.rotation;
-  // CADe_SIMU 4.2 marks electrical elements with nums[19] = 1. In particular,
-  // its native 6007 thermal-relay records use this flag; without it the symbol
-  // imports as a passive graphic even when its type and terminals are correct.
-  if (THERMAL_REFERENCE_TYPES.has(element.typeCode)) record.nums[19 + o] = 1;
-
   const continuations: CadRecord[] = (raw?.continuations ?? []).map((c) => ({
     id: c.id, type: c.type, texts: [...c.texts], nums: [...c.nums], ...(c.tail !== undefined ? { tail: c.tail } : {}),
   }));

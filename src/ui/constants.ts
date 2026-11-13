@@ -20,6 +20,7 @@ export const AUTOSAVE_KEY = 'cadesimu-web:autosave:v1';
 export const CAD_EXPORT_WARNING_KEY = 'cadesimu-web:cad-export-warning-dismissed:v1';
 
 export const OPTIONAL_GROUP_STORAGE_KEY = 'cadesimu-visible-optional-groups:v1';
+export const PALETTE_VIEW_KEY = 'cadesimu-palette-view:v1';
 
 export const OPTIONAL_PALETTE_GROUPS = ['grafcet', 'ladder', 'logic', 'realistic-2d', 'realistic-3d', 'wiring', 'pneumatics', 'io-plc', 'power-electronics', 'electronic-relays', 'sensors'] as const satisfies readonly GroupKey[];
 
@@ -27,7 +28,12 @@ export const CAD_GRID_STEP = 3;
 
 export const SVG_NS = 'http://www.w3.org/2000/svg';
 
-export const WIRE_COLORS = { phase: '#9e1b16', neutral: '#7a8798', protection: '#7a8798', junction: '#263342' } as const;
+export const WIRE_COLORS = {
+  phase: '#9e1b16',
+  neutral: '#1f6fe0',
+  protection: '#1fa355',
+  junction: '#263342',
+} as const;
 
 export const POTENTIAL_COLORS: Record<PotentialLabel, string> = {
   L1: '#b4541a', L2: '#1b2430', L3: '#8e99a8', N: '#1f6fe0', PE: '#1fa355', '+': '#d93a3a', '-': '#1b2430',
@@ -199,9 +205,9 @@ export const PLACE_DEFAULTS: Record<number, { prefix: string; size: { w: number;
   8022: { prefix: 'S', size: { w: 12, h: 15 }, labels: ['1', '2', '3', '4'] },
   // Тепловой контакт: в образце accionamientos.cad префикс -F, рамка 15×15 (раньше FG и 15×21).
   8018: { prefix: 'F', size: { w: 15, h: 15 }, labels: ['95', '97', '96', '98'] },
-  9000: { prefix: 'KM', size: { w: 6, h: 21 }, labels: ['A1', 'A2'] },
-  9004: { prefix: 'KT', size: { w: 6, h: 21 }, labels: ['A1', 'A2'] },
-  9008: { prefix: 'H', size: { w: 6, h: 21 }, labels: ['X1', 'X2'] },
+  9000: { prefix: 'KM', size: { w: 9, h: 15 }, labels: ['A1', 'A2'] },
+  9004: { prefix: 'KT', size: { w: 9, h: 15 }, labels: ['A1', 'A2'] },
+  9008: { prefix: 'H', size: { w: 9, h: 15 }, labels: ['X1', 'X2'] },
   // Остальные кнопки панели «Bobinas…»: размеры и метки из образца elementos_bobinas.cad.
   9001: { prefix: 'K', size: { w: 9, h: 15 }, labels: ['A1', 'B1', 'A2'] },
   9002: { prefix: 'K', size: { w: 9, h: 15 }, labels: ['A1', 'A2'] },

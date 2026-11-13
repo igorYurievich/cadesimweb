@@ -3,7 +3,7 @@ import type { Schema } from '@model/types';
 import type { DragState, Selectable } from './constants';
 import type { Point, Viewport } from './viewport';
 import { clampDeltaToSheet, clampPointToSheet, elementExtent } from './bounds';
-import { clampViewport, panBy, screenToSheet } from './viewport';
+import { panBy, screenToSheet } from './viewport';
 import { snapDrawingPoint } from './wire-routing';
 import { svgPoint } from './canvas-primitives';
 import { normalizedBounds } from './helpers';
@@ -39,7 +39,7 @@ export function setupCanvasPointerMove(ctx: AppContext, deps: CanvasPointerMoveS
     const schema = ctx.schema;
     if (drag.mode === 'pan') {
       const panned = panBy(deps.viewport(), { x: screen.x - drag.last.x, y: screen.y - drag.last.y });
-      deps.setViewport(clampViewport(panned, schema.sheet, deps.viewSize()));
+      deps.setViewport(panned);
       pointerSheetPosition = screenToSheet(screen, deps.viewport());
       deps.setPointerSheetPosition(pointerSheetPosition);
       drag.last = screen; deps.drawViewport();

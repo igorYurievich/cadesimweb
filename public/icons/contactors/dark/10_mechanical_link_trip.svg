@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="100" viewBox="0 0 256 100">
+  <title>Mechanical link with trip triangle</title>
+  <g fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="butt" stroke-linejoin="miter">
+    <path d="M0,50 H36"/>
+    <path d="M58,50 H94"/>
+    <path d="M162,50 H198"/>
+    <path d="M220,50 H256"/>
+  </g>
+  <g stroke-linejoin="miter" fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="butt">
+    <path d="M90,12 H166 L128,88 Z"/>
+  </g>
+</svg>

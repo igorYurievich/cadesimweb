@@ -1,6 +1,13 @@
 import type { EngineState, PotentialLabel } from '@engine/types';
 import { POTENTIAL_ORDER } from '../constants';
-import { CONFLICT_COLOR, IDLE_WIRE_COLORS, PHASE_LABELS, POTENTIAL_COLORS, UNIFORM_LIVE_COLOR } from '../constants';
+import {
+  CONFLICT_COLOR,
+  IDLE_WIRE_COLORS,
+  PHASE_LABELS,
+  POTENTIAL_COLORS,
+  UNIFORM_LIVE_COLOR,
+  WIRE_COLORS,
+} from '../constants';
 import type { AppContext } from '../context';
 import type { SimulationDependencies, SimulationState } from './types';
 
@@ -16,6 +23,20 @@ export function applyWireVisuals(
   for (const wire of ctx.schema.wires) {
     const node = deps.wireLayer.querySelector<SVGElement>(`[data-wire-id="${wire.id}"]`);
     if (!node) continue;
+    if (state.mode === 'edit') {
+      const color = WIRE_COLORS[wire.kind];
+      applyWireNode(
+        deps.wireLayer,
+        node,
+        wire.id,
+        wire.kind === 'junction',
+        wire.thickness,
+        color,
+        false,
+      );
+      node.setAttribute('aria-label', 'Провод');
+      continue;
+    }
     const group = state.wireGroupOf.get(wire.id);
     const potentials = collectPotentials(group, state, result, nets);
     const ordered = POTENTIAL_ORDER.filter((potential) => potentials.has(potential));

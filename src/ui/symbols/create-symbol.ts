@@ -66,7 +66,21 @@ function appendName(
     const rowGap = rowGapOf(canonical);
     const mid = motorSpec ? motorSpec.cy : rowGap > 0 ? rowGap / 2 : element.size.h / 2;
     const x = element.labelOffset.x + 6.5;
-    const named = NAME_SPOTS[element.typeCode];
+    const family = getCadType(element.typeCode).family;
+    const named = NAME_SPOTS[element.typeCode]
+      ?? (
+        family === "pushbutton"
+        || family === "coil"
+        || family === "relay-coil"
+        || family === "lamp"
+        || family === "thermal-contact"
+          ? {
+              x: family === "pushbutton" || family === "thermal-contact" ? -8 : -6.5,
+              y: mid,
+              anchor: "end" as const,
+            }
+          : undefined
+      );
     if (rotation === 0) {
       root.append(
         named
@@ -87,8 +101,9 @@ function appendName(
       // Подпись повёрнутых элементов остаётся читаемой: рисуется в неповёрнутой системе координат.
       const wrapper = shape("g", { transform: `rotate(${-rotation})` });
       wrapper.append(
-        label(element.name, element.labelOffset.x + 3, element.labelOffset.y + 3, {
+        label(element.name, named?.x ?? element.labelOffset.x + 3, named?.y ?? element.labelOffset.y + 3, {
           size: 2.7,
+          anchor: named?.anchor,
           halo: true,
           fill: NAME_COLOR,
         }),

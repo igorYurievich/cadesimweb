@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="190" height="188" viewBox="0 0 190 188">
+  <title>Motor, split terminal</title>
+  <g fill="none" stroke="#FFFFFF" stroke-width="8" stroke-linecap="butt" stroke-linejoin="miter">
+    <path d="M37,0 V72.8 M153,0 V72.8 M127,0 V26 H153"/>
+  </g>
+  <g fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="butt" stroke-linejoin="miter">
+    <circle cx="95" cy="112" r="70"/>
+  </g>
+  <g fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="butt" stroke-linejoin="miter">
+    <path d="M71.0,132.0 V92.0 L95,118.0 L119.0,92.0 V132.0"/>
+  </g>
+</svg>

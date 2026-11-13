@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="144" viewBox="0 0 120 144">
+  <title>Terminals + -</title>
+  <g fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M18,28 H42 M30,16 V40"/>
+    <path d="M78,28 H102"/>
+  </g>
+  <g fill="none" stroke="#FFFFFF" stroke-width="8">
+    <circle cx="30" cy="82" r="18"/>
+    <path d="M30,100 V144" stroke-linecap="butt"/>
+    <circle cx="90" cy="82" r="18"/>
+    <path d="M90,100 V144" stroke-linecap="butt"/>
+  </g>
+</svg>

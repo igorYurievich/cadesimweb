@@ -21,6 +21,7 @@ export interface MenuSetup {
   toggleGrid(): void;
   toggleDockedProperties(): void;
   toggleWireColors(): void;
+  setPaletteView(value: 'list' | 'icons'): void;
   commitSchema(before: Schema): void;
   renderSchema(): void;
   setViewport(viewport: Viewport): void;
@@ -126,6 +127,8 @@ export function setupMenus(ctx: AppContext, deps: MenuSetup): void {
       case 'grid': deps.toggleGrid(); break;
       case 'properties-panel': deps.toggleDockedProperties(); break;
       case 'wire-colors': deps.toggleWireColors(); break;
+      case 'palette-view-list': deps.setPaletteView('list'); break;
+      case 'palette-view-icons': deps.setPaletteView('icons'); break;
       case 'sheet': openSheetDialog(); break;
       case 'shortcuts': root.querySelector<HTMLDialogElement>('#shortcuts-dialog')?.showModal(); break;
       case 'component-guide': root.querySelector<HTMLDialogElement>('#component-guide-dialog')?.showModal(); break;

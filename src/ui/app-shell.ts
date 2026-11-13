@@ -1,11 +1,16 @@
 import { version as appVersion } from '../../package.json';
-import { CAD_GRID_STEP, FALLBACK_VIEWPORT, PLACEABLE_TYPES } from './constants';
+import { CAD_GRID_STEP, FALLBACK_VIEWPORT, PALETTE_VIEW_KEY, PLACEABLE_TYPES } from './constants';
 import { getCadType } from '@model/cad-types';
 import type { Theme } from './constants';
 
 const exampleFolderRow = (name: string): string => `<button type="button" class="example-folder-row" data-folder="${name}" title="${name}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6.5h7l2 2h9v10H3z" /></svg><span class="example-file-name">${name}</span><span class="example-file-code"></span></button>`;
 
 export function renderAppShell(root: HTMLElement, theme: Theme): void {
+  let paletteView = 'list';
+  try {
+    paletteView = localStorage.getItem(PALETTE_VIEW_KEY) === 'icons' ? 'icons' : 'list';
+  } catch { /* По умолчанию остаётся текстовый список. */ }
+  root.dataset.paletteView = paletteView;
   root.innerHTML = `
     <main class="app-shell">
       <header class="app-header">
@@ -43,6 +48,9 @@ export function renderAppShell(root: HTMLElement, theme: Theme): void {
             <button type="button" class="menu-command" data-command="fit">Показать всё <kbd>Ctrl+0</kbd></button>
             <button type="button" class="menu-command" data-command="grid" id="grid-command"></button>
             <button type="button" class="menu-command" data-command="properties-panel" id="properties-panel-command"></button>
+            <p class="menu-heading" id="palette-view-title">Панель элементов</p>
+            <button type="button" class="menu-command" data-command="palette-view-list" id="palette-view-list">Текстовый список</button>
+            <button type="button" class="menu-command" data-command="palette-view-icons" id="palette-view-icons">Значки элементов</button>
             <button type="button" class="menu-command" data-command="theme" id="theme-command"></button>
             <button type="button" class="menu-command" data-command="wire-colors" id="wire-colors-command"></button>
           </div></details>
@@ -118,6 +126,10 @@ export function renderAppShell(root: HTMLElement, theme: Theme): void {
             <input id="palette-search" type="search" placeholder="Поиск элементов…" aria-label="Поиск элементов" />
           </div>
           <div id="palette-groups" class="palette-groups"></div>
+          <div id="palette-subpanel" class="palette-subpanel" hidden>
+            <div class="palette-subpanel-items"></div>
+            <input class="palette-subpanel-scroll" type="range" min="0" max="0" value="0" tabindex="-1" aria-hidden="true" />
+          </div>
         </aside>
         <section class="viewport-stage" aria-label="Поле схемы">
         <nav id="document-tabs" class="document-tabs" aria-label="Открытые схемы"></nav>

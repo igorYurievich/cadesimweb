@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="160" viewBox="0 0 360 160">
+  <title>Switch with coil body 4P</title>
+  <g fill="none" stroke="#000000" stroke-width="8" stroke-linecap="butt" stroke-linejoin="miter">
+    <path d="M130,0 V16"/>
+    <path d="M130,84 V13.25" transform="rotate(-32 130 84)"/>
+    <path d="M188,0 V16"/>
+    <path d="M188,84 V13.25" transform="rotate(-32 188 84)"/>
+    <path d="M246,0 V16"/>
+    <path d="M246,84 V13.25" transform="rotate(-32 246 84)"/>
+    <path d="M304,0 V16"/>
+    <path d="M304,84 V13.25" transform="rotate(-32 304 84)"/>
+  </g>
+  <g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="butt" stroke-linejoin="miter">
+    <path d="M130,84 V160"/>
+    <path d="M188,84 V160"/>
+    <path d="M246,84 V160"/>
+    <path d="M304,84 V160"/>
+  </g>
+  <g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="butt" stroke-linejoin="miter">
+    <polygon fill="none" points="86.0,117.0 130.0,84.0 304.0,84.0 348.0,117.0 304.0,150.0 130.0,150.0"/>
+  </g>
+  <g fill="none" stroke="#000000" stroke-width="5" stroke-linecap="butt" stroke-linejoin="miter" stroke-dasharray="9 8">
+    <path d="M111.3,54 H169.3"/>
+    <path d="M169.3,54 H227.3"/>
+    <path d="M227.3,54 H285.3"/>
+  </g>
+  <g fill="none" stroke="#000000" stroke-width="5" stroke-linecap="butt" stroke-linejoin="miter">
+    <path d="M63,54 H111.3"/>
+  </g>
+  <g fill="none" stroke="#000000" stroke-width="5" stroke-linecap="butt" stroke-linejoin="miter" stroke-dasharray="9 8">
+    <path d="M41,76 V117 H70"/>
+  </g>
+  <g fill="none" stroke="#000000" stroke-width="5" stroke-linecap="butt" stroke-linejoin="miter">
+    <rect x="19" y="32" width="44" height="44"/>
+    <path d="M19,54 H63 M41,32 V76"/>
+  </g>
+  <g fill="#000000" stroke="none">
+    <polygon points="17.0,40.0 3.0,45.0 3.0,63.0 17.0,68.0"/>
+  </g>
+  <g fill="#000000" stroke="none">
+    <polygon points="70.0,109.0 70.0,125.0 82.0,117.0"/>
+  </g>
+</svg>

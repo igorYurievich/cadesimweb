@@ -17,6 +17,10 @@ const PHRASES: Record<string, Locales> = {
   'Fusible seccionable': { fr: 'Porte-fusible sectionnable', ar: 'حامل مصهر قابل للفصل' },
   'Enclavamiento': { fr: 'Interverrouillage', ar: 'تشابك' },
   'Motor monofásico': { fr: 'Moteur monophasé', ar: 'محرك أحادي الطور' },
+  'Motor monofásico con condensador': {
+    fr: 'Moteur monophasé avec condensateur',
+    ar: 'محرك أحادي الطور بمكثف',
+  },
   'Motor II Veloc': { fr: 'Moteur à 2 vitesses', ar: 'محرك بسرعتين' },
   'Motor Dahalander': { fr: 'Moteur Dahlander', ar: 'محرك دالاندر' },
   'Autotransformador': { fr: 'Autotransformateur', ar: 'محول ذاتي' },

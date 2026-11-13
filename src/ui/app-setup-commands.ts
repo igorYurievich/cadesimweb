@@ -7,6 +7,7 @@ import { setupSelectionCommands } from './selection-commands';
 import { setupNodeTool as setupNodeToolController } from './node-tool';
 import type { AppSetupBase } from './app-setup-base';
 import type { AppSetupEditor } from './app-setup-editor';
+import { PALETTE_VIEW_KEY } from './constants';
 
 function setupSelection(state: AppSetupBase, editor: AppSetupEditor) {
   return setupSelectionCommands(state.ctx, {
@@ -74,6 +75,12 @@ function setupMenus(state: AppSetupBase, editor: AppSetupEditor, selection: Retu
     toggleGrid: state.toggleGrid,
     toggleDockedProperties: state.toggleDockedProperties,
     toggleWireColors: state.toggleWireColors,
+    setPaletteView: (value) => {
+      state.root.dataset.paletteView = value;
+      try { localStorage.setItem(PALETTE_VIEW_KEY, value); } catch { /* Режим действует до закрытия вкладки. */ }
+      state.renderPalette();
+      state.translateInterface();
+    },
     commitSchema: editor.editorView.commitSchema,
     renderSchema: state.renderSchema,
     setViewport: (value) => { state.viewport = value; },

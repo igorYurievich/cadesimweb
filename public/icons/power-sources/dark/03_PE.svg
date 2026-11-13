@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="60" height="144" viewBox="0 0 60 144">
+  <title>Terminal PE</title>
+  <g fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M9,46 V10 H17 A9.5,9.5 0 0 1 17,29 H9 M51,10 H39 V46 H51 M39,28 H49"/>
+  </g>
+  <g fill="none" stroke="#FFFFFF" stroke-width="8">
+    <circle cx="30" cy="82" r="18"/>
+    <path d="M30,100 V144" stroke-linecap="butt"/>
+  </g>
+</svg>

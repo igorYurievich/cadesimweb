@@ -29,6 +29,18 @@ export function setupInterfaceTranslation(deps: InterfaceTranslationSetup): () =
     };
     const summaries = [...deps.root.querySelectorAll<HTMLElement>('.app-menu > .menu-group > summary')];
     [t.file, t.edit, t.view, t.elementsMenu, t.language, t.examples, t.help].forEach((value, index) => { if (summaries[index]) summaries[index]!.textContent = value; });
+    set('#palette-view-title', t.paletteViewTitle);
+    const iconView = deps.root.dataset.paletteView === 'icons';
+    const listViewButton = deps.root.querySelector<HTMLButtonElement>('#palette-view-list');
+    const iconViewButton = deps.root.querySelector<HTMLButtonElement>('#palette-view-icons');
+    if (listViewButton) {
+      listViewButton.textContent = `${t.paletteViewList}${iconView ? '' : ' ✓'}`;
+      listViewButton.classList.toggle('is-selected', !iconView);
+    }
+    if (iconViewButton) {
+      iconViewButton.textContent = `${t.paletteViewIcons}${iconView ? ' ✓' : ''}`;
+      iconViewButton.classList.toggle('is-selected', iconView);
+    }
     const commandLabels: Array<[string, string]> = [
       ['new', t.new], ['open', t.open], ['save-json', t.save], ['export-cad', t.export], ['export-svg', t.exportSvg], ['export-png', t.exportPng], ['print-pdf', t.printPdf], ['sheet', t.sheet],
       ['copy-selection', t.copy], ['cut-selection', t.cut], ['paste-selection', t.paste], ['undo', t.undo], ['redo', t.redo], ['rotate', t.rotate], ['delete', t.delete],

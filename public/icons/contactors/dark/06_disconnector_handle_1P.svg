@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="86" height="144" viewBox="0 0 86 144">
+  <title>Disconnector 1P with handle</title>
+  <g fill="none" stroke="#FFFFFF" stroke-width="8" stroke-linecap="butt" stroke-linejoin="miter">
+    <path d="M74,0 V26 M74,105 V144"/>
+    <path d="M74,105 V32" transform="rotate(-32 74 105)"/>
+    <path d="M8.63,48 V100"/>
+  </g>
+  <g fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="butt" stroke-linejoin="miter">
+    <path d="M8.63,74 H54.63"/>
+  </g>
+</svg>

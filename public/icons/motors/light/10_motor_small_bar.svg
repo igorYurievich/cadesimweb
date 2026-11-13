@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="190" height="150" viewBox="0 0 190 150">
+  <title>Small motor</title>
+  <g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="butt" stroke-linejoin="miter">
+    <circle cx="95" cy="82" r="46"/>
+  </g>
+  <g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="butt" stroke-linejoin="miter">
+    <path d="M80.12,88.4 V63.6 L95,79.72 L109.88,63.6 V88.4"/>
+  </g>
+  <g fill="none" stroke="#000000" stroke-width="5" stroke-linecap="butt" stroke-linejoin="miter">
+    <path d="M81,100 H109"/>
+  </g>
+  <g fill="#000000" stroke="none">
+    <polygon points="47.0,68.0 47.0,96.0 19.0,82.0"/>
+    <polygon points="143.0,68.0 143.0,96.0 171.0,82.0"/>
+  </g>
+  <g fill="none" stroke="#000000" stroke-width="5" stroke-linecap="butt" stroke-linejoin="miter">
+    <path d="M25,16 H165"/>
+  </g>
+  <rect x="57" y="6" width="76" height="20" rx="3" fill="#000000"/>
+</svg>

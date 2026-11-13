@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="158" height="144" viewBox="0 0 158 144">
+  <title>Contact NO_NC</title>
+  <g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="butt" stroke-linejoin="miter">
+    <path d="M45,72 H8 M24,52 L8,72 L24,92"/>
+  </g>
+  <g fill="none" stroke="#000000" stroke-width="8" stroke-linecap="butt" stroke-linejoin="miter">
+    <path d="M48.37931138699219,0 V46 H85.37931138699219"/>
+    <path d="M48.37931138699219,105 V144"/>
+    <path d="M48.37931138699219,105 L85.37931138699219,46"/>
+    <path d="M140.37931138699219,0 V26 M140.37931138699219,105 V144"/>
+    <path d="M140.37931138699219,105 V32" transform="rotate(-32 140.37931138699219 105)"/>
+  </g>
+  <g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="butt" stroke-linejoin="miter">
+    <path d="M86.4,72 H102.4"/>
+    <path d="M53,72 H69.0"/>
+  </g>
+</svg>

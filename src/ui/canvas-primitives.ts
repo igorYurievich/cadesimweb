@@ -1,6 +1,6 @@
 import type { Point } from './viewport';
 import type { WireSegment } from '@model/types';
-import { SVG_NS, IDLE_WIRE_COLORS } from './constants';
+import { SVG_NS, WIRE_COLORS } from './constants';
 
 export function svgPoint(event: MouseEvent | WheelEvent, svg: SVGSVGElement, viewSize: Point): Point {
   const rect = svg.getBoundingClientRect();
@@ -16,7 +16,7 @@ export function lineElement(wire: WireSegment): SVGLineElement {
   line.setAttribute('y1', String(wire.from.y));
   line.setAttribute('x2', String(wire.to.x));
   line.setAttribute('y2', String(wire.to.y));
-  line.setAttribute('stroke', IDLE_WIRE_COLORS[wire.kind]);
+  line.setAttribute('stroke', WIRE_COLORS[wire.kind]);
   const strokeWidth = Math.max(1, wire.thickness || 1) * 1.35;
   line.setAttribute('stroke-width', String(strokeWidth));
   line.style.setProperty('--wire-stroke-width', `${strokeWidth}px`);
@@ -31,7 +31,7 @@ export function junctionElement(wire: WireSegment): SVGCircleElement {
   dot.setAttribute('cx', String(wire.from.x));
   dot.setAttribute('cy', String(wire.from.y));
   dot.setAttribute('r', '1.15');
-  dot.setAttribute('fill', IDLE_WIRE_COLORS.junction);
+  dot.setAttribute('fill', WIRE_COLORS.junction);
   dot.setAttribute('data-junction-id', String(wire.id));
   dot.setAttribute('data-wire-id', String(wire.id));
   return dot;

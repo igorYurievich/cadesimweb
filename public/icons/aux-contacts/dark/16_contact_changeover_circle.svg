@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="162" height="144" viewBox="0 0 162 144">
+  <title>Contact changeover</title>
+  <g fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="butt" stroke-linejoin="miter">
+    <circle cx="31" cy="72" r="23"/>
+  </g>
+  <g fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="butt" stroke-linejoin="miter">
+    <path d="M14,72 H70 M54,56 L70,72 L54,88"/>
+  </g>
+  <g fill="none" stroke="#FFFFFF" stroke-width="8" stroke-linecap="butt" stroke-linejoin="miter">
+    <path d="M109.4054054054054,0 V34"/>
+    <path d="M109.4054054054054,34 L79.4054054054054,108"/>
+    <path d="M66.4054054054054,144 V108 H79.4054054054054 M152.40540540540542,144 V108 H138.40540540540542"/>
+  </g>
+  <g fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="butt" stroke-linejoin="miter">
+    <path d="M78,72 H94.0"/>
+  </g>
+</svg>

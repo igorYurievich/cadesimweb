@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="188" height="144" viewBox="0 0 188 144">
+  <title>Disconnector 3P</title>
+  <g fill="none" stroke="#000000" stroke-width="8" stroke-linecap="butt" stroke-linejoin="miter">
+    <path d="M48,0 V26 M48,105 V144"/>
+    <path d="M48,105 V32" transform="rotate(-32 48 105)"/>
+    <path d="M112,0 V26 M112,105 V144"/>
+    <path d="M112,105 V32" transform="rotate(-32 112 105)"/>
+    <path d="M176,0 V26 M176,105 V144"/>
+    <path d="M176,105 V32" transform="rotate(-32 176 105)"/>
+  </g>
+  <g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="butt" stroke-linejoin="miter">
+    <path d="M28.63,74 H92.63"/>
+    <path d="M92.63,74 H156.63"/>
+  </g>
+</svg>
