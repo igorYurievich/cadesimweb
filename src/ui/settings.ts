@@ -1,5 +1,8 @@
 import type { GroupKey } from '@model/catalog';
-import { GRID_KEY, INTERFACE_LANGUAGE_KEY, OPTIONAL_GROUP_STORAGE_KEY, OPTIONAL_PALETTE_GROUPS, THEME_KEY, WIRE_COLOR_MODE_KEY } from './constants';
+import {
+  GRID_KEY, HIDDEN_OPTIONAL_GROUPS, INTERFACE_LANGUAGE_KEY, OPTIONAL_GROUP_STORAGE_KEY, OPTIONAL_PALETTE_GROUPS, THEME_KEY,
+  WIRE_COLOR_MODE_KEY,
+} from './constants';
 import type { Theme } from './constants';
 
 export interface AppSettings {
@@ -79,7 +82,10 @@ export function createSettingsCommands(
 export function readOptionalPaletteGroups(): GroupKey[] {
   try {
     const raw: unknown = JSON.parse(localStorage.getItem(OPTIONAL_GROUP_STORAGE_KEY) ?? '[]');
-    return Array.isArray(raw) ? OPTIONAL_PALETTE_GROUPS.filter((key) => raw.includes(key)) : [];
+    // Убранная категория не показывается, даже если раньше была включена.
+    return Array.isArray(raw)
+      ? OPTIONAL_PALETTE_GROUPS.filter((key) => raw.includes(key) && !HIDDEN_OPTIONAL_GROUPS.includes(key))
+      : [];
   } catch { return []; }
 }
 

@@ -1,3 +1,4 @@
+import { updatePlcAddresses } from './symbols/plc-address-registry';
 import type { AppContext } from './context';
 import { SVG_NS } from './constants';
 import type { DragState, Selectable } from './constants';
@@ -44,6 +45,8 @@ export function setupSchemaRenderer(ctx: AppContext, deps: SchemaRendererSetup):
       if (deps.selected.has(selectionKey({ kind: 'wire', id: dot.id }))) circle.classList.add('is-selected-junction');
       deps.wireLayer.append(circle);
     }
+    // Адреса входов/выходов DM8 зависят от базового LOGO на листе.
+    updatePlcAddresses(schema);
     for (const element of schema.elements) {
       const symbol = createElementSymbol(element);
       if (!symbol) continue;

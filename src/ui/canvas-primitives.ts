@@ -30,7 +30,8 @@ export function junctionElement(wire: WireSegment): SVGCircleElement {
   const dot = document.createElementNS(SVG_NS, 'circle');
   dot.setAttribute('cx', String(wire.from.x));
   dot.setAttribute('cy', String(wire.from.y));
-  dot.setAttribute('r', '1.15');
+  // Узел соединения: небольшая точка, чуть толще провода.
+  dot.setAttribute('r', '0.75');
   dot.setAttribute('fill', WIRE_COLORS.junction);
   dot.setAttribute('data-junction-id', String(wire.id));
   dot.setAttribute('data-wire-id', String(wire.id));

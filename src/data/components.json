@@ -945,71 +945,71 @@
         [
           33032,
           "Det. inductivo NA",
-          "NO Inductive detector",
-          "Sensori induttivo NO",
+          "NO inductive detector",
+          "Sensore induttivo NO",
           "Индуктивный датчик НО"
         ],
         [
           33020,
           "Det. inductivo NC",
-          "NCInductive detector",
-          "Sensori induttivo NC",
+          "NC inductive detector",
+          "Sensore induttivo NC",
           "Индуктивный датчик НЗ"
         ],
         [
           33021,
           "Det. capacitivo NA",
-          "NO Capacitive detector",
-          "Sensori capacitivo NO",
+          "NO capacitive detector",
+          "Sensore capacitivo NO",
           "Ёмкостный датчик НО"
         ],
         [
           33022,
           "Det. capacitivo NC",
-          "NC Capacitive detector",
-          "Sensori capacitivo NC",
+          "NC capacitive detector",
+          "Sensore capacitivo NC",
           "Ёмкостный датчик НЗ"
         ],
         [
           33023,
           "Det. magnético NA",
-          "NO Magnetic detector",
-          "Sensori  magnetico NO",
+          "NO magnetic detector",
+          "Sensore magnetico NO",
           "Магнитный датчик НО"
         ],
         [
           33024,
           "Det. magnético NC",
-          "NC Magnetic detector",
-          "Sensori  magnetico NC",
+          "NC magnetic detector",
+          "Sensore magnetico NC",
           "Магнитный датчик НЗ"
         ],
         [
           33025,
-          "Barrera fotoeléctica",
-          "Light barrier",
-          "Fotodellula",
-          "Фотоэлектрический датчик"
+          "Detector de barrera fotoeléctrico",
+          "Photoelectric barrier detector",
+          "Rilevatore a barriera fotoelettrica",
+          "Фотоэлектрический датчик-барьер"
         ],
         [
           33027,
-          "Barrera emisor",
-          "Emitter barrier",
-          "Fotodellula emettitore",
-          "Излучатель фотоэлектрического датчика"
+          "Barrera foto. emisor",
+          "Photoelectric barrier emitter",
+          "Fotocellula emettitore",
+          "Излучатель фотоэлектрического барьера"
         ],
         [
           33034,
-          "Barrera receptor NA",
-          "NO receptor barrier",
-          "Fotodellula recevitore NO",
+          "Barrera foto. receptor NA",
+          "NO photoelectric barrier receiver",
+          "Fotocellula ricevitore NO",
           "Приёмник фотоэлектрического барьера НО"
         ],
         [
           33033,
-          "Barrera receptor NC",
-          "NC receptor barrier",
-          "Fotodellula recevitore NC",
+          "Barrera foto. receptor NC",
+          "NC photoelectric barrier receiver",
+          "Fotocellula ricevitore NC",
           "Приёмник фотоэлектрического барьера НЗ"
         ],
         [

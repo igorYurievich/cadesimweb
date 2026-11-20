@@ -21,7 +21,7 @@ export function setupToolModes(deps: ToolModesSetup) {
     deps.setPanToolState(on);
     if (on) deps.setNodeToolState(false);
     syncToolButtons();
-    if (on) deps.status.textContent = 'Рука: тяните лист левой кнопкой мыши. Нажмите ↖ или V, чтобы вернуться к курсору.';
+    if (on) deps.status.textContent = 'Рука: тяните лист левой кнопкой мыши. Нажмите кнопку курсора или V, чтобы вернуться к нему.';
   };
   const selectTool = (): void => {
     leaveNodeTool();

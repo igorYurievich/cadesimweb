@@ -3,6 +3,12 @@ import { rotateOffset } from "@model/geometry";
 
 import { isStrip } from "./terminal-strips";
 import { label } from "./svg-primitives";
+import { DETECTOR_NAME_SPOTS, DETECTOR_SIDE_LABELS } from "./detector-layout";
+import { AUX_BLOCK_2D, isDelayBlock2d } from "@model/realistic-2d-types";
+import { LADDER_EXTRA, PLC_BLOCK } from "@model/plc-blocks";
+
+const LADDER_NAME = { x: 6, y: -5, anchor: "middle" } as const;
+const BLOCK_NAME = { x: 7.5, y: -5, anchor: "middle" } as const;
 
 /** Место имени (-M, -Fr) у двигателей, у которых оно не слева от окружности. */
 export const NAME_SPOTS: Readonly<
@@ -31,9 +37,35 @@ export const NAME_SPOTS: Readonly<
   1065: { x: -4, y: 5.7, anchor: "end" },
   1066: { x: -4, y: 5.7, anchor: "end" },
   1067: { x: -4, y: 5.7, anchor: "end" },
+  // Фотоэлектрический барьер: имя слева от корпуса, по середине высоты (стрелки справа).
+  15000: { x: -4.5, y: 12, anchor: "end" },
+  // Детекторы: имя слева над корпусом, как в CADe_SIMU (detector-layout.ts).
+  ...DETECTOR_NAME_SPOTS,
+  // Символы 2D: имя слева у верхнего края.
+  8100: { x: 4.5, y: 1.5, anchor: "end" },
+  7018: { x: -1, y: 4.5, anchor: "end" },
+  6015: { x: -1, y: 4.5, anchor: "end" },
+  6017: { x: -1, y: 9, anchor: "end" }, 60171: { x: -1, y: 9, anchor: "end" }, 60172: { x: -1, y: 9, anchor: "end" },
+  6018: { x: -1, y: 9, anchor: "end" }, 60182: { x: -1, y: 9, anchor: "end" },
+  6016: { x: -1, y: 4.5, anchor: "end" },
+  7019: { x: -1, y: 6.5, anchor: "end" },
+  7020: { x: -1, y: 6.5, anchor: "end" }, 7021: { x: -1, y: 6.5, anchor: "end" },
+  // LOGO: имя над левым верхним углом; Ladder: операнд по центру над символом.
+  10202: { x: 0, y: -2, anchor: "start" }, 10214: { x: 0, y: -2, anchor: "start" },
+  10050: { x: 6, y: -5, anchor: "middle" }, 10051: { x: 6, y: -5, anchor: "middle" },
+  10060: { x: 6, y: -5, anchor: "middle" },
+  ...Object.fromEntries(LADDER_EXTRA.map((code) => [code, LADDER_NAME])),
+  ...Object.fromEntries(Object.values(PLC_BLOCK).map((code) => [code, BLOCK_NAME])),
 };
 
-type LabelSpot = readonly [dx: number, dy: number, anchor: "start" | "middle" | "end"];
+type LabelSpot = readonly [dx: number, dy: number, anchor: "start" | "middle" | "end", size?: number];
+
+/** Дисюнтор 2D: полюса 1 3 5 и вспомогательные 21 22 13 14 стоят через 3 — подписи мельче, полюса над выводом. */
+const BREAKER_POLE: LabelSpot = [0.4, -0.9, "start", 1.9];
+const BREAKER_AUX: LabelSpot = [0.4, 1.7, "start", 1.9];
+/** Те же подписи у нижних выводов: полюса под концом вывода, короткие вспомогательные — справа над концом. */
+const BREAKER_BELOW: LabelSpot = [0.4, 2.6, "start", 1.9];
+const AUX_BELOW: LabelSpot = [0.4, 2.2, "start", 1.9];
 
 const LEFT: LabelSpot = [-1, 0, "end"];
 
@@ -52,12 +84,24 @@ const SIDE_LABELS: Readonly<Record<number, ReadonlyArray<LabelSpot | undefined>>
   1008: [undefined, undefined, undefined, [-1.2, -1.7, "end"]], // U2 слева от вывода: справа стоит конденсатор
   1052: [undefined, undefined, undefined, undefined, undefined, undefined, RIGHT, RIGHT, RIGHT],
   1053: [undefined, undefined, undefined, undefined, undefined, undefined, [-2, -1.8, "start"]],
+  ...DETECTOR_SIDE_LABELS,
+  // Контактор 2D A1 A2 1 2 3 4 5 6 13 14 21 22: как у дисюнтора — полюса над / под концами выводов,
+  // 13 21 A1 и 14 22 — справа у своих коротких выводов, A2 — под концом вывода, как полюса.
+  7018: [BREAKER_AUX, BREAKER_BELOW, BREAKER_POLE, BREAKER_BELOW, BREAKER_POLE, BREAKER_BELOW, BREAKER_POLE,
+    BREAKER_BELOW, BREAKER_AUX, AUX_BELOW, BREAKER_AUX, AUX_BELOW],
+  // 1 3 5 2 4 6 13 14 21 22: 1 3 5 над концами выводов, 13 14 21 22 — справа у своих коротких выводов.
+  6015: [BREAKER_POLE, BREAKER_POLE, BREAKER_POLE, undefined, undefined, undefined,
+    BREAKER_AUX, BREAKER_AUX, BREAKER_AUX, BREAKER_AUX],
 };
 
 /** Подписи клемм: верхний ряд — под клеммой справа от вывода, нижний — над клеммой. Колодка подписана выше. */
 export function drawTerminalLabels(g: SVGGElement, element: SchemaElement, rotation: number): void {
   // Колодки подписаны над клеммами; у земли, батареи и розетки подписей клемм на символе нет.
   if (isStrip(element.typeCode) || [3015, 3019, 3020].includes(element.typeCode)) return;
+  // У блоков с выдержкой 2D номера клемм напечатаны на корпусе у винтов (realistic-2d-delay.ts).
+  if (isDelayBlock2d(element.typeCode) || element.typeCode === AUX_BLOCK_2D) return;
+  // LOGO и DM8 подписывают клеммы сами (logo-symbol.ts, dm8-symbol.ts).
+  if (element.typeCode === 10202 || element.typeCode === 10214) return;
   if (element.terminals.length === 0) return;
   const minY = Math.min(...element.terminals.map((t) => t.offset.y));
   const sideSpots = SIDE_LABELS[element.typeCode];
@@ -68,7 +112,7 @@ export function drawTerminalLabels(g: SVGGElement, element: SchemaElement, rotat
     if (spot) {
       g.append(
         label(terminal.label, x + spot[0], y + spot[1], {
-          size: 2.3,
+          size: spot[3] ?? 2.3,
           anchor: spot[2],
           upright: rotation,
         }),

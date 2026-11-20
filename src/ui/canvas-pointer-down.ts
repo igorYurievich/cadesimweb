@@ -1,4 +1,5 @@
 import { POSITION_SPECS, currentPosition, nextPosition } from '@engine/behaviors';
+import { THERMAL_RELAY_TYPES } from '@engine/thermal';
 import type { AppContext } from './context';
 import type { Point } from './viewport';
 import type { DragState, Selectable, StampKey } from './constants';
@@ -68,10 +69,11 @@ export function setupCanvasPointerDown(ctx: AppContext, deps: CanvasPointerDownS
       schema.elements.push(element);
       const item: Selectable = { kind: 'element', id: element.id };
       deps.selected.clear(); deps.selected.set(selectionKey(item), item); deps.commitSchema(before);
-      deps.setPlacementType(undefined); deps.setPlacementRotation(0); deps.clearActivePaletteCommand(); deps.renderPalette();
-      if (deps.placeTypeSelect) deps.placeTypeSelect.value = '';
-      deps.svg.classList.remove('is-placing'); deps.renderSchema();
-      deps.status.textContent = `Добавлен ${element.name}.`; event.preventDefault(); return;
+      // Режим размещения остаётся: тот же элемент можно ставить ещё раз, выход — Esc.
+      deps.renderSchema();
+      deps.status.textContent =
+        `Добавлен ${element.name}. Щёлкните ещё раз для следующего; R — поворот, Esc — завершить.`;
+      event.preventDefault(); return;
     }
     if (event.button === 0 && deps.simulation.mode !== 'edit') {
       const hit = getSelectionHit(event.target); const { schema } = ctx;
@@ -87,7 +89,7 @@ export function setupCanvasPointerDown(ctx: AppContext, deps: CanvasPointerDownS
               const position = POSITION_SPECS[candidate.typeCode];
               return (deps.simulation.isMaintainedType(candidate.typeCode) && deps.simulation.inputs.toggled[candidate.id] === true)
                 || (position !== undefined && (deps.simulation.inputs.positions?.[candidate.id] ?? position.rest) !== position.rest)
-                || (candidate.typeCode === 6007 && (Boolean(deps.simulation.inputs.tripped[candidate.id]) || deps.simulation.inputs.toggled[candidate.id] === false))
+                || (THERMAL_RELAY_TYPES.has(candidate.typeCode) && (Boolean(deps.simulation.inputs.tripped[candidate.id]) || deps.simulation.inputs.toggled[candidate.id] === false))
                 || ([8016, 8017, 8018, 8019].includes(candidate.typeCode) && Boolean(deps.simulation.inputs.tripped[candidate.id]));
             });
             if (groupIsLatched) {
@@ -97,7 +99,7 @@ export function setupCanvasPointerDown(ctx: AppContext, deps: CanvasPointerDownS
                 if (deps.simulation.isMaintainedType(twin.typeCode)) deps.simulation.inputs.toggled[twin.id] = false;
                 const position = POSITION_SPECS[twin.typeCode];
                 if (position) positions[twin.id] = position.rest;
-                if (twin.typeCode === 6007) {
+                if (THERMAL_RELAY_TYPES.has(twin.typeCode)) {
                   delete deps.simulation.inputs.tripped[twin.id];
                   deps.simulation.inputs.toggled[twin.id] = true;
                 }

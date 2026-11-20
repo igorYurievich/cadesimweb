@@ -80,7 +80,7 @@ export function buildNets(schema: Schema): NetsResult {
 
   const lineKinds = new Map<number, Set<'phase' | 'neutral' | 'protection'>>();
   const kindForCode = (code: number): 'phase' | 'neutral' | 'protection' | undefined => {
-    if (code === 4000) return 'phase';
+    if (code === 4000 || code === 4018 || code === 4019) return 'phase';
     if (code === 4009) return 'neutral';
     if (code === 4010) return 'protection';
     return undefined; // 4001 — соединительная точка, не тип линии.

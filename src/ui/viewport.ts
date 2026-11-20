@@ -11,7 +11,8 @@ export interface Viewport {
 }
 
 export const MIN_VIEWPORT_SCALE = 0.2;
-export const MAX_VIEWPORT_SCALE = 8;
+/** Максимальное увеличение листа: 1000 %. */
+export const MAX_VIEWPORT_SCALE = 10;
 
 export function sheetToScreen(point: Point, viewport: Viewport): Point {
   return { x: point.x * viewport.scale + viewport.offsetX, y: point.y * viewport.scale + viewport.offsetY };

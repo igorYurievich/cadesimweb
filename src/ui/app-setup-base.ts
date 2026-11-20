@@ -12,7 +12,8 @@ import {
   readSavedDocuments,
 } from './persistence';
 import { initializeCanvasViewport } from './canvas-viewport';
-import { createDocumentState, renderDocumentTabs, syncActiveDocument } from './documents';
+import { activeDocument, createDocumentState, renderDocumentTabs, syncActiveDocument } from './documents';
+import { markDocumentSaved } from './document-dirty';
 import { createAppContext } from './context';
 import { setupPropertiesPanel } from './properties';
 import { setupSimulation } from './sim-controller';
@@ -102,6 +103,13 @@ function createAppFrame(root: HTMLElement) {
     toggleWireDrawing: (): void => undefined,
     finishWireDrawing: (): void => undefined,
     placeTypeSelect: null as HTMLSelectElement | null,
+    /** Сохранить активную схему в файл (.cad или .json по имени); назначается, когда готов экспорт. */
+    saveActiveDocument: (): Promise<boolean> => Promise.resolve(false),
+    /** Активная схема только что открыта или сохранена: «*» у вкладки пропадает. */
+    markActiveDocumentSaved: (): void => {
+      syncActiveDocument(core.documentState, core.schema, core.history, core.viewport, core.uiText().new);
+      markDocumentSaved(activeDocument(core.documentState));
+    },
     syncCurrentDocument: (): void => syncActiveDocument(
       core.documentState,
       core.schema,

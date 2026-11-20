@@ -6,7 +6,7 @@ Editor web de esquemas eléctricos y simulador de lógica de relés, inspirado e
 
 **Versión en línea:** https://webcade3.netlify.app/
 
-> ⚠️ El proyecto está en fase **beta** (versión 0.1.8). Puede contener errores y algunos componentes pueden tener funciones incompletas.
+> ⚠️ El proyecto está en fase **beta** (versión 0.5.0). Puede contener errores y algunos componentes pueden tener funciones incompletas.
 
 ### Independencia del proyecto
 
@@ -88,7 +88,7 @@ An electrical schematic editor and relay-logic simulator for the web, inspired b
 
 **Online version:** https://webcade3.netlify.app/
 
-> ⚠️ This project is in **beta** (version 0.1.8). It may contain bugs, and some components may have incomplete functionality.
+> ⚠️ This project is in **beta** (version 0.5.0). It may contain bugs, and some components may have incomplete functionality.
 
 ### Project independence
 

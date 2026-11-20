@@ -44,7 +44,7 @@ export const inkFill = (d: string): SVGPathElement =>
   });
 
 /** Стрелка вращения двигателя. */
-function motorRotor(cx: number, cy: number, s: number): SVGGElement {
+export function motorRotor(cx: number, cy: number, s: number): SVGGElement {
   const acy = cy - 0.6 * s;
   const rotor = group("motor-rotor");
   rotor.append(shape("circle", { cx, cy: acy, r: 5.6 * s, fill: "none", stroke: "none" }));

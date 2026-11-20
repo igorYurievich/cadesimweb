@@ -7,11 +7,19 @@ import { fullSheet, stampMetrics } from './helpers';
 
 export interface ExportActions {
   saveJson(): void;
-  exportCadFile(): void;
+  /** true — файл записан (пользователь не отменил). */
+  exportCadFile(): Promise<boolean>;
   exportSvgFile(): void;
   exportPngFile(): void;
   printPdf(): void;
 }
+
+/** Цвета ламп на листе: те же, что у включённой лампы в симуляции (viewport.css, .lamp-c0…2). */
+const LAMP_PRINT_COLORS: readonly { fill: string; stroke: string }[] = [
+  { fill: '#43df70', stroke: '#16843a' },
+  { fill: '#ff4048', stroke: '#b21c25' },
+  { fill: '#ffe600', stroke: '#b88a00' },
+];
 
 export function setupCadExportConfirmation(root: HTMLElement): () => Promise<boolean> {
   return (): Promise<boolean> => {
@@ -46,7 +54,10 @@ export function setupCadExportConfirmation(root: HTMLElement): () => Promise<boo
   };
 }
 
-export function setupExport(ctx: AppContext, svg: SVGSVGElement, status: HTMLElement, confirmCadExport: () => Promise<boolean>): ExportActions {
+export function setupExport(
+  ctx: AppContext, svg: SVGSVGElement, status: HTMLElement, confirmCadExport: () => Promise<boolean>,
+  onSaved: () => void = () => {},
+): ExportActions {
   const downloadText = (text: string, name: string, mime: string): void => {
     const url = URL.createObjectURL(new Blob([text], { type: mime }));
     const link = document.createElement('a');
@@ -60,9 +71,10 @@ export function setupExport(ctx: AppContext, svg: SVGSVGElement, status: HTMLEle
   const saveJson = (): void => {
     downloadText(serializeSchemaJson(ctx.schema), `${outputBaseName()}.json`, 'application/json;charset=utf-8');
     status.textContent = `Схема сохранена в ${outputBaseName()}.json.`;
+    onSaved();
   };
-  const exportCadFile = async (): Promise<void> => {
-    if (!(await confirmCadExport())) return;
+  const exportCadFile = async (): Promise<boolean> => {
+    if (!(await confirmCadExport())) return false;
     try {
       const contents = exportCad(ctx.schema);
       type SaveFileHandle = { name: string; createWritable(): Promise<{ write(data: string): Promise<void>; close(): Promise<void> }> };
@@ -80,15 +92,18 @@ export function setupExport(ctx: AppContext, svg: SVGSVGElement, status: HTMLEle
         await writable.close();
       } else {
         const requestedName = window.prompt('Имя файла для экспорта:', `${outputBaseName()}.cad`);
-        if (requestedName === null) return;
+        if (requestedName === null) return false;
         const safeName = requestedName.trim().replace(/[\\/:*?"<>|\x00-\x1f]/g, '_').replace(/\.cad$/i, '') || outputBaseName();
         savedName = `${safeName}.cad`;
         downloadText(contents, savedName, 'text/plain;charset=utf-8');
       }
       status.textContent = `Экспортировано ${savedName}; обратный импорт пройден.`;
+      onSaved();
+      return true;
     } catch (error) {
-      if (error instanceof DOMException && error.name === 'AbortError') return;
+      if (error instanceof DOMException && error.name === 'AbortError') return false;
       status.textContent = `Не удалось экспортировать .cad: ${error instanceof Error ? error.message : String(error)}`;
+      return false;
     }
   };
   const createSheetExportSvg = (): SVGSVGElement => {
@@ -139,6 +154,18 @@ export function setupExport(ctx: AppContext, svg: SVGSVGElement, status: HTMLEle
       element.classList.remove('is-selected-element');
     });
     copy.querySelectorAll('.is-selected-wire, .is-selected-junction').forEach((wire) => wire.classList.remove('is-selected-wire', 'is-selected-junction'));
+    // На листе лампа показывает свой цвет (зелёный, красный, жёлтый) и без симуляции: заливка
+    // встроенным стилем, без свечения, чтобы цвет был виден при печати, в PDF, SVG и PNG.
+    copy.querySelectorAll<SVGElement>('.lamp-glass').forEach((glass) => {
+      const index = [0, 1, 2].find((candidate) => glass.classList.contains(`lamp-c${candidate}`)) ?? 0;
+      const colors = LAMP_PRINT_COLORS[index]!;
+      glass.style.setProperty('fill', colors.fill);
+      glass.style.setProperty('stroke', colors.stroke);
+      glass.style.setProperty('filter', 'none');
+      // Крест лампы рисуется следом за стеклом; серый плохо виден на красном, поэтому темнее.
+      const cross = glass.nextElementSibling;
+      if (cross instanceof SVGPathElement) cross.setAttribute('stroke', '#374151');
+    });
     const title = document.createElementNS(SVG_NS, 'title');
     title.textContent = ctx.schema.sheet.fileName || outputBaseName();
     copy.prepend(title);

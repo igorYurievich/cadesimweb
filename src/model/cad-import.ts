@@ -19,6 +19,16 @@ import { getCadType, isKnownCadType, isWireType, wireKindOf } from './cad-types'
 import { buildTerminals } from './geometry';
 import type { CadRaw, Rotation, Schema, SchemaElement, SheetInfo, WireSegment } from './types';
 import { createEmptySchema } from './types';
+import { TAIL_TERMINALS, parseTailLabels } from './cad-tail-terminals';
+import { internalVariantCode, isVariantFileCode } from './cad-variants';
+import {
+  FIXED_2D_LABELS, MOTOR_2D_FILE_PARAM, POLE_LABELS, POLE_VARIANT_OF, isDelayBlock2d,
+} from './realistic-2d-types';
+import { delayBlockParams } from './cad-delay-blocks';
+import { isPushbutton2d } from './pushbutton-2d';
+import { PLC_FIXED_LABELS } from './plc-types';
+import { plcBlockParams } from './plc-blocks';
+import { syncModuleLabels } from './plc-modules';
 
 export interface ImportResult {
   schema: Schema;
@@ -67,7 +77,10 @@ function toWire(r: CadRecord, kind: NonNullable<ReturnType<typeof wireKindOf>>):
 }
 
 function toElement(r: CadRecord, continuations: readonly CadRecord[] = []): SchemaElement {
-  const info = getCadType(r.type);
+  // Автомат и дифавтомат 2D: вариант в nums[16] → внутренний код варианта (cad-variants.ts).
+  const typeCode = isVariantFileCode(r.type) ? internalVariantCode(r.type, num(r, 16)) : r.type;
+  const info = getCadType(typeCode);
+  const poleVariant = POLE_VARIANT_OF[typeCode];
   const size = r.type === 8
     ? { w: Math.abs(num(r, 10) - num(r, 8)), h: Math.abs(num(r, 11) - num(r, 9)) }
     : { w: num(r, 14), h: num(r, 15) };
@@ -77,10 +90,18 @@ function toElement(r: CadRecord, continuations: readonly CadRecord[] = []): Sche
   const flaggedSlots = flagSlots(r);
   // Для контактной группы код типа задаёт реальную топологию. В старых/повреждённых
   // .cad-записях после клемм может оставаться мусор в дополнительных слотах флагов.
-  const slots = info.terminalCount === undefined ? flaggedSlots : flaggedSlots.slice(0, info.terminalCount);
+  const tailSpec = TAIL_TERMINALS[r.type];
+  const slots = tailSpec
+    ? flaggedSlots.filter((i) => i < tailSpec.start)
+    : info.terminalCount === undefined ? flaggedSlots : flaggedSlots.slice(0, info.terminalCount);
   // Записи-продолжения (тип -1) дают дополнительные клеммы того же элемента, метки по их слотам флагов.
-  const labels = [
+  // У символов 2D остальные клеммы лежат в хвосте записи (cad-tail-terminals.ts).
+  // У вариантов автомата слоты записи одинаковы (N 1 3 5 2 4 6), клеммы задаёт вариант.
+  // У блоков 7019/7020/7021 2D клемм в записи нет совсем, они постоянные (FIXED_2D_LABELS).
+  const fixedLabels = poleVariant ? POLE_LABELS[poleVariant] : FIXED_2D_LABELS[typeCode] ?? PLC_FIXED_LABELS[typeCode];
+  const labels = fixedLabels ? [...fixedLabels] : [
     ...slots.map((i) => r.texts[2 + i] ?? ''),
+    ...(tailSpec ? parseTailLabels(r.tail) : []),
     ...continuations.flatMap((c) => flagSlots(c).map((i) => c.texts[2 + i] ?? '')),
   ];
   const terminals = buildTerminals(info, labels.length, size, rotation, labels);
@@ -96,11 +117,16 @@ function toElement(r: CadRecord, continuations: readonly CadRecord[] = []): Sche
     if (extra[0] !== undefined) params.scale = Number(extra[0]);
     if (extra[1] !== undefined) params.time = Number(extra[1]);
   }
+  if (isDelayBlock2d(typeCode)) Object.assign(params, delayBlockParams(extra));
+  Object.assign(params, plcBlockParams(typeCode, r.texts));
+  if ((typeCode === 1000 || typeCode === 1001) && num(r, 16) === MOTOR_2D_FILE_PARAM) params.motor2d = true;
+  // Цвет кнопки 2D — nums[16] (pushbutton-2d.ts).
+  if (isPushbutton2d(typeCode) && num(r, 16) !== 0) params.buttonColor = num(r, 16);
   if (extra.length > 0) params.extra = extra.join('#');
 
   return {
     id: r.id,
-    typeCode: r.type,
+    typeCode,
     name: r.texts[0] ?? '',
     func: r.texts[1] ?? '',
     position: { x: num(r, 8), y: num(r, 9) },
@@ -206,6 +232,8 @@ export function importCad(text: string): ImportResult {
     wires,
     sheet: toSheet(file.footer),
   };
+  // Клеммы LOGO / DM8 подписаны по адресам модулей на листе (plc-modules.ts).
+  syncModuleLabels(schema);
   return { schema, warnings, unknownTypes: [...unknown].sort((a, b) => a - b) };
 }
 

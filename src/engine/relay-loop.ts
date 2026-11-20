@@ -1,11 +1,14 @@
 /** Цикл обновления катушек до устойчивого состояния (этап 5.5b). */
 
 import type { Schema } from '../model/types';
-import { getCadType } from '../model/cad-types';
+import { drivesNamedRelay } from './sensors';
 import { solvePass } from './relay-pass';
 import type { RelayPassResult } from './relay-pass';
 import type { Fault, TimerState, UserInputs } from './types';
 import { advanceTimers } from './timers';
+import { advanceDelayBlocks } from './delay-blocks';
+import { beginPlcScan, endPlcScan, logoRelayNames } from './plc';
+import { advancePlcBlocks } from './plc-blocks';
 
 export interface RelayLoopResult {
   pass: RelayPassResult;
@@ -23,9 +26,14 @@ export function relayCoilNames(schema: Schema): string[] {
     .map((element, index) => ({ element, index }))
     .sort((a, b) => a.element.id - b.element.id || a.index - b.index);
   for (const { element } of elements) {
-    if (getCadType(element.typeCode).family !== 'coil' || element.name === '' || seen.has(element.name)) continue;
+    if (!drivesNamedRelay(element) || element.name === '' || seen.has(element.name)) continue;
     seen.add(element.name);
     names.push(element.name);
+  }
+  // Операнды, которые задаёт LOGO: «запитан» и входы I1…I8 (plc.ts).
+  for (const name of logoRelayNames(schema)) {
+    if (!seen.has(name)) names.push(name);
+    seen.add(name);
   }
   return names;
 }
@@ -52,6 +60,7 @@ export function solveRelayLoop(
   }
   const coils: Record<string, boolean> = {};
   for (const name of names) coils[name] = initialCoils[name] ?? false;
+  beginPlcScan(schema, names, initialCoils, coils);
 
   let pass: RelayPassResult | undefined;
   let iterations = 0;
@@ -78,7 +87,11 @@ export function solveRelayLoop(
 
   stable = settleRelays();
   if (stable && pass) {
-    const nextTimers = advanceTimers(schema, pass.nets, pass.terminalNet, time, timers);
+    const coilTimers = advanceTimers(schema, pass.nets, pass.terminalNet, time, timers);
+    // Блоки с выдержкой 2D считают от устойчивого состояния своих катушек.
+    const delayTimers = advanceDelayBlocks(schema, coils, time, coilTimers);
+    // Блоки Ladder: таймеры, счётчики, биестабильный и делитель (plc-blocks.ts).
+    const nextTimers = advancePlcBlocks(schema, pass.nets, pass.terminalNet, time, delayTimers);
     const timersChanged = JSON.stringify(nextTimers) !== JSON.stringify(timers);
     timers = nextTimers;
     // Recalculate timed contacts after elapsed time changes, but advance timers
@@ -99,5 +112,6 @@ export function solveRelayLoop(
     };
   }
 
+  endPlcScan(schema, coils);
   return { pass, coils, stable, iterations, timers };
 }

@@ -5,6 +5,9 @@ import { buildTerminals, frameSize } from '@model/geometry';
 import { getCadType } from '@model/cad-types';
 import { clampElementPosition } from './bounds';
 import { PLACE_DEFAULTS, PLACE_LABEL_OFFSETS } from './constants';
+import { isPlcFixedType } from '@model/plc-types';
+import { plcPlacedFields } from './plc-placement';
+import { DELAY_BLOCK_DEFAULT_TIME, MOTOR_2D, isDelayBlock2d } from '@model/realistic-2d-types';
 import type { StampKey, Selectable } from './constants';
 
 export function stampMetrics(width: number, height: number) {
@@ -49,6 +52,14 @@ export function nextElementName(prefix: string, schema: Schema): string {
   return `${prefix}${suffix}`;
 }
 
+/** Имя нового элемента; у типов с bareFirst первый экземпляр без номера, если имя ещё свободно. */
+function placedName(defaults: { prefix: string; bareFirst?: boolean }, schema: Schema): string {
+  if (!defaults.prefix) return '';
+  const bareFree = !schema.elements.some((element) => element.name === defaults.prefix);
+  if (defaults.bareFirst && bareFree) return defaults.prefix;
+  return nextElementName(defaults.prefix, schema);
+}
+
 export function createPlacedElement(typeCode: number, position: Point, rotation: 0 | 1 | 2 | 3, schema: Schema): Schema['elements'][number] {
   const defaults = PLACE_DEFAULTS[typeCode];
   if (!defaults) throw new RangeError(`Нет шаблона размещения для CAD-типа ${typeCode}.`);
@@ -57,12 +68,22 @@ export function createPlacedElement(typeCode: number, position: Point, rotation:
   const size = frameSize(defaults.size, rotation);
   const terminals = buildTerminals(info, defaults.labels.length, size, rotation, defaults.labels);
   const element: Schema['elements'][number] = {
-    id, typeCode, name: defaults.prefix ? nextElementName(defaults.prefix, schema) : '', func: info.label,
+    id, typeCode, name: placedName(defaults, schema), func: info.label,
     position: snapPointToGrid(position, 3), rotation, size: { ...size },
     labelOffset: PLACE_LABEL_OFFSETS[typeCode] ? { ...PLACE_LABEL_OFFSETS[typeCode] } : { x: defaults.size.w / 2, y: -3 }, terminals, params: {},
   };
   // Блокировка не имеет клемм: в name и func лежат имена двух блокируемых контакторов.
   if (typeCode === 2009) { element.name = 'KM1'; element.func = 'KM2'; }
+  // Блок с выдержкой 2D: шкала и выдержка как у свежего блока в образце 2d-simbolos.cad.
+  if (isDelayBlock2d(typeCode)) element.params = { scale: 0, time: DELAY_BLOCK_DEFAULT_TIME };
+  // LOGO и Ladder: функция пустая (у First Scan — «SCAN»), у блоков время 1 с и PV 0, как в ladder.cad.
+  if (isPlcFixedType(typeCode)) Object.assign(element, plcPlacedFields(typeCode));
+  // Мотор 2D: обычный 1000/1001 с цветным рисунком (realistic-2d-types.ts).
+  const motorCode = MOTOR_2D[typeCode];
+  if (motorCode !== undefined) {
+    element.typeCode = motorCode;
+    element.params = { motor2d: true };
+  }
   element.position = clampElementPosition(element.position, element, schema.sheet);
   return element;
 }

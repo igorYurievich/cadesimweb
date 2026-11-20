@@ -8,13 +8,14 @@ export const DOCUMENT_TABS_KEY = 'cadesim-web:documents:v1';
 
 export interface SavedDocuments {
   activeId: string;
-  tabs: Array<{ id: string; name: string; schema: Schema }>;
+  tabs: Array<{ id: string; name: string; schema: Schema; savedHash?: string }>;
 }
 
 export interface DocumentToSave {
   id: string;
   name: string;
   schema: Schema;
+  savedHash?: string;
 }
 
 export interface PersistenceControllerOptions {
@@ -62,6 +63,7 @@ export function createPersistenceController(options: PersistenceControllerOption
       id: tab.id,
       name: tab.name,
       schema: serializeSchemaJson(tab.schema),
+      ...(tab.savedHash !== undefined ? { savedHash: tab.savedHash } : {}),
     })));
     options.renderDocuments();
   };
@@ -95,7 +97,8 @@ export function readSavedDocuments(): SavedDocuments | undefined {
     const tabs = saved.tabs.flatMap((item): SavedDocuments['tabs'] => {
       try {
         if (!item || typeof item.id !== 'string' || typeof item.name !== 'string' || typeof item.schema !== 'string') return [];
-        return [{ id: item.id, name: item.name, schema: parseSchemaJson(item.schema) }];
+        const savedHash = typeof item.savedHash === 'string' ? { savedHash: item.savedHash as string } : {};
+        return [{ id: item.id, name: item.name, schema: parseSchemaJson(item.schema), ...savedHash }];
       } catch { return []; }
     });
     if (!tabs.length) return undefined;
@@ -108,7 +111,7 @@ export function writeAutosavedSchema(schema: Schema, serialize: (value: Schema) 
 
 export function writeSavedDocuments(
   activeId: string,
-  tabs: Array<{ id: string; name: string; schema: string }>,
+  tabs: Array<{ id: string; name: string; schema: string; savedHash?: string }>,
 ): void {
   try { localStorage.setItem(DOCUMENT_TABS_KEY, JSON.stringify({ activeId, tabs })); }
   catch { /* The current document remains available even when storage is full. */ }

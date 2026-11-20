@@ -1,4 +1,6 @@
 import type { Schema } from './types';
+import { realign2dTerminals } from './realistic-2d-realign';
+import { syncModuleLabels } from './plc-modules';
 
 export const SCHEMA_JSON_VERSION = 1;
 
@@ -59,7 +61,10 @@ export function parseSchemaJson(text: string): Schema {
     requireString(value.sheet[key], `sheet.${key}`);
   }
   requireFinite(value.sheet.width, 'sheet.width'); requireFinite(value.sheet.height, 'sheet.height');
-  return value as unknown as Schema;
+  const schema = value as unknown as Schema;
+  realign2dTerminals(schema);
+  syncModuleLabels(schema);
+  return schema;
 }
 
 export function serializeSchemaJson(schema: Schema): string {

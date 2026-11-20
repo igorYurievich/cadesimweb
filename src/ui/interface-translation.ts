@@ -1,3 +1,4 @@
+import { renderWireButton } from './wire-button';
 import type { GroupKey } from '@model/catalog';
 import type { Schema } from '@model/types';
 import { countVerifiedCatalogComponents } from '@model/catalog-verification';
@@ -61,8 +62,8 @@ export function setupInterfaceTranslation(deps: InterfaceTranslationSetup): () =
     if (languageLabel?.firstChild) languageLabel.firstChild.textContent = `${t.languageNames} `;
     const options: Record<string, string> = { phase: t.phase, neutral: t.neutral, protection: 'PE', three: t.three, threeN: t.threeN };
     for (const option of [...deps.root.querySelectorAll<HTMLOptionElement>('#wire-kind option')]) option.textContent = options[option.value] ?? option.textContent;
-    set('#draw-wire', deps.wireDrawing() ? t.cancel : t.wire);
-    deps.root.querySelector<HTMLButtonElement>('#draw-wire')?.setAttribute('title', `${deps.wireDrawing() ? t.cancel : t.wire} (C)`);
+    const wireButton = deps.root.querySelector<HTMLButtonElement>('#draw-wire');
+    if (wireButton) renderWireButton(wireButton, deps.wireDrawing(), t);
     set('#finish-wire', t.done);
     deps.root.querySelector<HTMLButtonElement>('#undo')?.setAttribute('aria-label', t.undo);
     deps.root.querySelector<HTMLButtonElement>('#undo')?.setAttribute('title', t.undo);
@@ -74,7 +75,11 @@ export function setupInterfaceTranslation(deps: InterfaceTranslationSetup): () =
     deps.root.querySelector<HTMLButtonElement>('#pan-tool')?.setAttribute('title', t.hand);
     deps.root.querySelector<HTMLButtonElement>('#node-tool')?.setAttribute('aria-label', t.node);
     deps.root.querySelector<HTMLButtonElement>('#node-tool')?.setAttribute('title', t.node);
-    set('#sim-run', `▶ ${t.run}`); set('#sim-stop', `■ ${t.stop}`);
+    // Кнопки симуляции — только значки ▶ и ■; название — во всплывающей подсказке и для экранных дикторов.
+    set('#sim-run', '▶'); set('#sim-stop', '■');
+    deps.root.querySelector<HTMLButtonElement>('#sim-run')?.setAttribute('title', t.run);
+    deps.root.querySelector<HTMLButtonElement>('#sim-run')?.setAttribute('aria-label', t.run);
+    deps.root.querySelector<HTMLButtonElement>('#sim-stop')?.setAttribute('aria-label', t.stop);
     deps.root.querySelector<HTMLButtonElement>('#sim-stop')?.setAttribute('title', t.stopTitle);
     set('#sim-state', deps.simulationMode() === 'run' ? t.run : t.editor);
     set('#speed-cycle', deps.speedButton.textContent === '1×' ? '1×' : deps.speedButton.textContent ?? '1×');
@@ -152,7 +157,7 @@ export function setupInterfaceTranslation(deps: InterfaceTranslationSetup): () =
     set('#cad-export-warning-optout-label', t.cadExportWarningOptout);
     set('#cad-export-warning-cancel', t.cadExportWarningCancel);
     set('#cad-export-warning-confirm', t.cadExportWarningConfirm);
-    const aboutDialog = deps.root.querySelector<HTMLDialogElement>('#about-dialog'); if (aboutDialog) { set('#about-bio', t.aboutBio); set('#about-noncommercial', t.aboutNonCommercial); set('#about-limitations', t.aboutLimitations); set('#about-contact-label', t.aboutContact); const fields = aboutDialog.querySelectorAll('dt'); if (fields[0]) fields[0]!.textContent = t.version; }
+    const aboutDialog = deps.root.querySelector<HTMLDialogElement>('#about-dialog'); if (aboutDialog) { set('#about-bio', t.aboutBio); set('#about-noncommercial', t.aboutNonCommercial); set('#about-thanks', t.aboutThanks); set('#about-support-label', t.supportKofi); set('#about-contact-label', t.aboutContact); const fields = aboutDialog.querySelectorAll('dt'); if (fields[0]) fields[0]!.textContent = t.version; }
     for (const button of [...deps.root.querySelectorAll<HTMLButtonElement>('[data-dialog-close]')]) {
       if (button.id === 'cad-export-warning-cancel') button.textContent = t.cadExportWarningCancel;
       else if (button.classList.contains('examples-window-close')) { button.textContent = '×'; button.setAttribute('aria-label', t.close); }

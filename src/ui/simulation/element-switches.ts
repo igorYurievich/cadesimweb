@@ -1,5 +1,6 @@
 import { POSITION_SPECS, currentPosition, getBehavior, nextPosition } from '@engine/behaviors';
 import { auxContactActive, auxContactActuatorActive } from '@engine/switching';
+import { THERMAL_RELAY_TYPES } from '@engine/thermal';
 import type { SchemaElement } from '@model/types';
 import { armedByDefaultTypes, latchedTypes } from '../constants';
 import type { AppContext } from '../context';
@@ -29,7 +30,7 @@ export function applyManualSwitchVisuals(
     || (maintained && (Boolean(state.inputs.toggled[element.id]) || sameMomentary || sameLatched));
   node.classList.toggle('is-sim-pressed', active);
   applySelectorPosition(state, element, node, sameMomentary || sameLatched);
-  node.classList.toggle('is-sim-open', element.typeCode !== 6007 && (manuallyOpen || tripped));
+  node.classList.toggle('is-sim-open', !THERMAL_RELAY_TYPES.has(element.typeCode) && (manuallyOpen || tripped));
 }
 
 function namedElementActive(
@@ -116,7 +117,7 @@ export function applyContactAndIndicatorVisuals(
 function applyLampVisuals(state: SimulationState, element: SchemaElement, node: SVGGElement): void {
   const powered = state.result?.lamps[element.id] ?? false;
   const lit = element.typeCode === 9009 ? powered && state.time % 1 < 0.5
-    : element.typeCode === 9008 && powered;
+    : (element.typeCode === 9008 || element.typeCode === 8101) && powered;
   node.classList.toggle('is-lamp-lit', lit);
 }
 

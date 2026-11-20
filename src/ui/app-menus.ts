@@ -14,6 +14,8 @@ export interface AppMenuOptions {
   undoButton: HTMLButtonElement;
   redoButton: HTMLButtonElement;
   requestNewSchema: () => void;
+  /** Файл записан на устройство: снять «*» с вкладки. */
+  onSaved: () => void;
   copySelection: () => void;
   cutSelection: () => void;
   pasteSelection: () => void;
@@ -37,6 +39,7 @@ export function setupAppMenus(options: AppMenuOptions): ExportActions {
     options.svg,
     options.status,
     setupCadExportConfirmation(options.root),
+    options.onSaved,
   );
   setupMenus(options.ctx, {
     fileInput: options.fileInput,

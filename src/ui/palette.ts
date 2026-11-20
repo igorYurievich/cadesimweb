@@ -2,6 +2,7 @@ import { catalog } from '@model/catalog';
 import type { ComponentDef, ComponentGroup, GroupKey, Lang } from '@model/catalog';
 import { cadTypeForCommand } from '@model/cad-types';
 import { hasVerifiedBadge } from '@model/catalog-verification';
+import { isPaletteItemShown, readVerifiedOnly, writeVerifiedOnly } from './palette-filter';
 import { createPlacedElement } from './helpers';
 import { createElementSymbol } from './symbols';
 import {
@@ -55,6 +56,9 @@ export interface PaletteSetup {
   renderProperties(): void;
 }
 
+/** Только проверенные компоненты в палитре (по умолчанию да). */
+let verifiedOnly = readVerifiedOnly();
+
 interface PaletteGroupItems {
   group: ComponentGroup;
   items: ComponentDef[];
@@ -73,6 +77,12 @@ export function setupPalette(ctx: AppContext, deps: PaletteSetup): { renderPalet
     renderPalette,
   );
   deps.search.addEventListener('input', renderPalette);
+  // «Вид → Показать все / только проверенные компоненты».
+  ctx.root.querySelector('#palette-verified-only')?.addEventListener('click', () => {
+    verifiedOnly = !verifiedOnly;
+    writeVerifiedOnly(verifiedOnly);
+    renderPalette();
+  });
   for (const input of [...ctx.root.querySelectorAll<HTMLInputElement>('[data-optional-group]')]) {
     input.addEventListener('change', () => {
       const key = input.dataset.optionalGroup as GroupKey;
@@ -107,7 +117,14 @@ function renderPaletteGroups(
   const matches = query ? catalog.search(query) : catalog.components;
   const isVisible = (key: GroupKey): boolean =>
     !(OPTIONAL_PALETTE_GROUPS as readonly GroupKey[]).includes(key) || deps.visibleOptionalGroups.has(key);
-  const visible = matches.filter((item) => item.groups.some(isVisible));
+  const shown = (group: GroupKey, item: ComponentDef): boolean =>
+    isVisible(group) && isPaletteItemShown(group, item.id, verifiedOnly);
+  const visible = matches.filter((item) => item.groups.some((group) => shown(group, item)));
+  const filterCommand = ctx.root.querySelector<HTMLElement>('#palette-verified-only');
+  if (filterCommand) {
+    const text = deps.uiText();
+    filterCommand.textContent = (verifiedOnly ? text.showAllComponents : text.showVerifiedOnly) ?? '';
+  }
   const iconView = ctx.root.dataset.paletteView === 'icons';
   ctx.root.querySelector<HTMLElement>('.component-palette')?.classList.toggle('is-icon-view', iconView);
   deps.groups.dataset.searching = query ? 'true' : 'false';
@@ -119,7 +136,7 @@ function renderPaletteGroups(
   const groupItems: PaletteGroupItems[] = [];
   for (const group of catalog.groups) {
     if (!isVisible(group.key)) continue;
-    const items = matches.filter((item) => item.groups.includes(group.key));
+    const items = matches.filter((item) => item.groups.includes(group.key) && shown(group.key, item));
     if (items.length) groupItems.push({ group, items });
   }
   if (iconView) {

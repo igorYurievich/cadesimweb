@@ -1,8 +1,9 @@
 /** Таблица внутренних связей CAD-типов. Здесь только данные, без расчёта состояния. */
 
 import { allCadTypes } from '../model/cad-types';
+import { PANEL_BEHAVIORS } from './panel-behaviors';
 
-export type ControlMode = 'pressed' | 'toggled' | 'coil-name' | 'thermal' | 'position' | 'always';
+export type ControlMode = 'pressed' | 'toggled' | 'coil-name' | 'thermal' | 'position' | 'plc-output' | 'plc-edge' | 'always';
 export type BehaviorLinkKind = 'switch' | 'transfer' | 'load' | 'source-strip' | 'none';
 
 /** Индексы относятся к SchemaElement.terminals, метки клемм на них не влияют. */
@@ -18,6 +19,8 @@ export interface BehaviorLink {
   position?: number;
   /** Размыкать полюс при ручной имитации срабатывания защиты. */
   opensWhenTripped?: boolean;
+  /** Для control 'plc-output': номер выхода LOGO (0 = Q1). */
+  output?: number;
   /** Для source-strip: потенциалы клемм по порядку, если в файле нет меток. */
   potentials?: string[];
 }
@@ -262,6 +265,8 @@ const TABLE: readonly TypeBehavior[] = [
   { typeCode: 9014, links: inert() },
   { typeCode: 9015, links: inert() },
   { typeCode: 9016, links: inert() },
+  // Панели «Detectores» и «Símbolos 2D» (см. panel-behaviors.ts).
+  ...PANEL_BEHAVIORS,
   { typeCode: 4000, links: [{ terminals: [], kind: 'none', control: 'always' }] },
   { typeCode: 4009, links: [{ terminals: [], kind: 'none', control: 'always' }] },
   { typeCode: 4010, links: [{ terminals: [], kind: 'none', control: 'always' }] },

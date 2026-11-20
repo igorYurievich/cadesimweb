@@ -1,3 +1,4 @@
+import { renderWireButton } from './wire-button';
 import type { Schema } from '@model/types';
 import type { AppContext } from './context';
 import type { Selectable } from './constants';
@@ -27,7 +28,7 @@ export function setupHistoryUi(ctx: AppContext, deps: HistoryUiSetup) {
     if (copyMenu) copyMenu.disabled = deps.selected.size === 0;
     if (cutMenu) cutMenu.disabled = deps.selected.size === 0;
     if (pasteMenu) pasteMenu.disabled = !deps.clipboardAvailable();
-    deps.drawWireButton.textContent = deps.wireDrawing() ? deps.uiText().cancel : deps.uiText().wire;
+    renderWireButton(deps.drawWireButton, deps.wireDrawing(), deps.uiText());
     deps.finishWireButton.disabled = !deps.wireDrawing() || deps.draftLength() < 2;
   };
   const commitSchema = (before: Schema): void => {

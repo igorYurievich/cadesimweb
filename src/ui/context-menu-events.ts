@@ -6,6 +6,8 @@ export function setupSimulationContextMenuEvents(svg: SVGSVGElement, menu: HTMLE
     if (!menu.hidden && !menu.contains(event.target as Node)) menu.hidden = true;
   });
   svg.addEventListener('contextmenu', (event) => {
+    // В редакторе ПКМ открывает меню текста (text-tool.ts), меню симуляции — только во время симуляции.
+    if (simulation.mode === 'edit') return;
     const target = event.target instanceof Element ? event.target : null;
     const item = target?.closest<SVGGElement>('[data-element-id]');
     event.preventDefault();

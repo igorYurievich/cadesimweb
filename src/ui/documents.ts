@@ -4,6 +4,8 @@ import { createHistory } from './history';
 import type { SavedDocuments } from './persistence';
 import { cloneSchema, fullSheet } from './helpers';
 import { fitViewport } from './viewport';
+import { isDocumentDirty, markDocumentSaved } from './document-dirty';
+import { renderDocumentTabs } from './document-tab-bar';
 import type { Point, Viewport } from './viewport';
 
 export interface DocumentTab {
@@ -12,6 +14,8 @@ export interface DocumentTab {
   schema: Schema;
   history: ReturnType<typeof createHistory<Schema>>;
   viewport: Viewport;
+  /** Отпечаток схемы на момент открытия или сохранения файла (document-dirty.ts). */
+  savedHash?: string;
 }
 
 export interface DocumentState {
@@ -42,6 +46,8 @@ export interface DocumentTabControllerOptions {
   updateHistoryButtons: () => void;
   translateInterface: () => void;
   status: HTMLElement;
+  /** Перед закрытием вкладки с изменениями (она уже активна): true — можно закрывать. */
+  confirmCloseDirty?: (tab: DocumentTab) => Promise<boolean>;
 }
 
 export interface DocumentTabController {
@@ -76,6 +82,7 @@ export interface AppDocumentTabsOptions {
     translateInterface: () => void;
   };
   uiText: () => { new: string; close: string };
+  confirmCloseDirty?: (tab: DocumentTab) => Promise<boolean>;
 }
 
 export function setupAppDocumentTabs(options: AppDocumentTabsOptions): DocumentTabController {
@@ -102,6 +109,7 @@ export function setupAppDocumentTabs(options: AppDocumentTabsOptions): DocumentT
     drawViewport: options.editor.drawViewport,
     updateHistoryButtons: options.editor.updateHistoryButtons,
     translateInterface: options.editor.translateInterface,
+    ...(options.confirmCloseDirty ? { confirmCloseDirty: options.confirmCloseDirty } : {}),
   });
 }
 
@@ -152,6 +160,7 @@ export function setupDocumentTabController(options: DocumentTabControllerOptions
         height: options.viewSize().y,
       }),
     };
+    markDocumentSaved(tab);
     state.documents.push(tab);
     state.activeDocumentId = tab.id;
     options.setSchema(tab.schema);
@@ -189,12 +198,23 @@ export function setupDocumentTabController(options: DocumentTabControllerOptions
     }
   };
 
+  // Вкладку с изменениями сначала показываем, потом спрашиваем «Сохранить перед закрытием?».
+  const requestCloseDocumentTab = async (id: string): Promise<void> => {
+    if (id === state.activeDocumentId) options.syncCurrentDocument();
+    const tab = state.documents.find((candidate) => candidate.id === id);
+    if (tab && options.confirmCloseDirty && isDocumentDirty(tab)) {
+      activateDocument(id);
+      if (!(await options.confirmCloseDirty(tab))) return;
+    }
+    closeDocumentTab(id);
+  };
+
   tabBar?.addEventListener('click', (event) => {
     const target = event.target as Element;
     const close = target.closest<HTMLButtonElement>('[data-close-document]');
     if (close?.dataset.closeDocument) {
       event.stopPropagation();
-      closeDocumentTab(close.dataset.closeDocument);
+      void requestCloseDocumentTab(close.dataset.closeDocument);
       return;
     }
     const tab = target.closest<HTMLButtonElement>('[data-document-tab]');
@@ -219,6 +239,8 @@ export function createDocumentState(
       ? viewport
       : fitViewport(fullSheet(tab.schema.sheet), { width: viewSize.x, height: viewSize.y }),
   })) ?? [{ id: crypto.randomUUID(), name: schema.sheet.fileName || 'Новая схема', schema, history, viewport }];
+  // Без сохранённого отпечатка считаем вкладку сохранённой.
+  for (const tab of documents) if (tab.savedHash === undefined) markDocumentSaved(tab);
   return { documents, activeDocumentId: saved?.activeId ?? documents[0]!.id };
 }
 
@@ -240,50 +262,4 @@ export function syncActiveDocument(
   current.name = schema.sheet.fileName || defaultName;
 }
 
-export function renderDocumentTabs(
-  state: DocumentState,
-  documentTabBar: HTMLElement | null,
-  uiText: { new: string; close: string },
-): void {
-  if (!documentTabBar) return;
-  documentTabBar.replaceChildren();
-  const tabList = documentTabBar.ownerDocument.createElement('div');
-  tabList.className = 'document-tab-list';
-  for (const document of state.documents) {
-    const tab = documentTabBar.ownerDocument.createElement('div');
-    tab.className = `document-tab${document.id === state.activeDocumentId ? ' is-active' : ''}`;
-    const select = documentTabBar.ownerDocument.createElement('button');
-    select.type = 'button';
-    select.className = 'document-tab-select';
-    select.dataset.documentTab = document.id;
-    const documentName = document.schema.sheet.fileName || uiText.new;
-    select.textContent = documentName;
-    select.title = documentName;
-    const close = documentTabBar.ownerDocument.createElement('button');
-    close.type = 'button';
-    close.className = 'document-tab-close';
-    close.dataset.closeDocument = document.id;
-    close.setAttribute('aria-label', `${uiText.close} «${documentName}»`);
-    close.title = uiText.close;
-    close.textContent = '×';
-    tab.append(select, close);
-    tabList.append(tab);
-  }
-  documentTabBar.append(tabList);
-  const add = documentTabBar.ownerDocument.createElement('button');
-  add.type = 'button';
-  add.id = 'new-document-tab';
-  add.className = 'document-tab-add';
-  add.title = uiText.new;
-  add.setAttribute('aria-label', uiText.new);
-  add.textContent = '+';
-  documentTabBar.append(add);
-  const activeTab = tabList.querySelector<HTMLElement>('.document-tab.is-active');
-  if (activeTab) {
-    const tabLeft = activeTab.getBoundingClientRect().left - tabList.getBoundingClientRect().left + tabList.scrollLeft;
-    if (tabLeft < tabList.scrollLeft) tabList.scrollLeft = tabLeft;
-    else if (tabLeft + activeTab.offsetWidth > tabList.scrollLeft + tabList.clientWidth) {
-      tabList.scrollLeft = tabLeft + activeTab.offsetWidth - tabList.clientWidth;
-    }
-  }
-}
+export { renderDocumentTabs };

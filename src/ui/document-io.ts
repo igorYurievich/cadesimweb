@@ -18,6 +18,8 @@ export interface DocumentOpenSetup {
   persistSchemaNow(): void; viewSize(): Point;
   setViewport(value: Viewport): void; drawViewport(): void; renderSchema(): void;
   beforeOpenDocument?(name: string): void;
+  /** Схема только что открыта из файла: запомнить её как сохранённую (document-dirty.ts). */
+  afterOpenDocument?(): void;
 }
 
 export function setupDocumentOpen(ctx: AppContext, deps: DocumentOpenSetup): (text: string, name: string) => void {
@@ -50,6 +52,7 @@ export function setupDocumentOpen(ctx: AppContext, deps: DocumentOpenSetup): (te
         if (settings && settings.length >= 2) { settings[settings.length - 2] = ctx.schema.sheet.width; settings[settings.length - 1] = ctx.schema.sheet.height; }
       }
       ctx.history = createHistory(cloneSchema(ctx.schema));
+      deps.afterOpenDocument?.();
       deps.persistSchemaNow(); deps.simulation.resetSimulation(); deps.renderSchema();
       deps.fileName.textContent = name;
       const notes = [

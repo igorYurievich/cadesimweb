@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  MAX_VIEWPORT_SCALE,
   clampViewport,
   fitViewport,
   panBy,
@@ -29,7 +30,7 @@ describe('SVG viewport math (6.1)', () => {
 
   it('clamps zoom and ignores invalid zoom factors safely', () => {
     const viewport = { scale: 1, offsetX: 0, offsetY: 0 };
-    expect(zoomAt(viewport, { x: 0, y: 0 }, 100).scale).toBe(8);
+    expect(zoomAt(viewport, { x: 0, y: 0 }, 100).scale).toBe(MAX_VIEWPORT_SCALE);
     expect(zoomAt(viewport, { x: 0, y: 0 }, 0.001).scale).toBe(0.2);
     expect(zoomAt(viewport, { x: 5, y: 5 }, Number.NaN).scale).toBe(1);
   });

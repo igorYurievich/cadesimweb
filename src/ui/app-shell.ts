@@ -3,6 +3,9 @@ import { CAD_GRID_STEP, FALLBACK_VIEWPORT, PALETTE_VIEW_KEY, PLACEABLE_TYPES } f
 import { getCadType } from '@model/cad-types';
 import type { Theme } from './constants';
 
+/** Страница поддержки проекта на Ko-fi (обычная ссылка вместо скрипта-виджета Ko-fi). */
+const KOFI_URL = 'https://ko-fi.com/S3M12AF9Y5';
+
 const exampleFolderRow = (name: string): string => `<button type="button" class="example-folder-row" data-folder="${name}" title="${name}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6.5h7l2 2h9v10H3z" /></svg><span class="example-file-name">${name}</span><span class="example-file-code"></span></button>`;
 
 export function renderAppShell(root: HTMLElement, theme: Theme): void {
@@ -51,23 +54,22 @@ export function renderAppShell(root: HTMLElement, theme: Theme): void {
             <p class="menu-heading" id="palette-view-title">Панель элементов</p>
             <button type="button" class="menu-command" data-command="palette-view-list" id="palette-view-list">Текстовый список</button>
             <button type="button" class="menu-command" data-command="palette-view-icons" id="palette-view-icons">Значки элементов</button>
+            <button type="button" class="menu-command" data-command="palette-verified-only"
+              id="palette-verified-only"></button>
             <button type="button" class="menu-command" data-command="theme" id="theme-command"></button>
             <button type="button" class="menu-command" data-command="wire-colors" id="wire-colors-command"></button>
           </div></details>
           <details class="menu-group optional-groups-menu"><summary>Элементы</summary><div class="menu-popover">
             <p class="menu-heading optional-groups-heading">Показывать дополнительные категории</p>
             <div class="menu-toggle-list">
-              <label class="menu-toggle"><input type="checkbox" data-optional-group="grafcet"><span data-extra-label="extraGrafcet">GRAFCET</span></label>
-              <label class="menu-toggle"><input type="checkbox" data-optional-group="ladder"><span data-extra-label="extraLadder">Ladder</span></label>
-              <label class="menu-toggle"><input type="checkbox" data-optional-group="logic"><span data-extra-label="extraLogic">Логика</span></label>
               <label class="menu-toggle"><input type="checkbox" data-optional-group="realistic-2d"><span data-extra-label="extraReal2d">Реалистичные символы · 2D</span></label>
-              <label class="menu-toggle"><input type="checkbox" data-optional-group="realistic-3d"><span data-extra-label="extraReal3d">Реалистичные символы · 3D</span></label>
-              <label class="menu-toggle"><input type="checkbox" data-optional-group="wiring"><span data-extra-label="extraWiring">Провода и соединения</span></label>
-              <label class="menu-toggle"><input type="checkbox" data-optional-group="pneumatics"><span data-extra-label="extraPneumatics">Пневматические актуаторы</span></label>
-              <label class="menu-toggle"><input type="checkbox" data-optional-group="io-plc"><span data-extra-label="extraIoPlc">Входы / выходы ПЛК</span></label>
               <label class="menu-toggle"><input type="checkbox" data-optional-group="power-electronics"><span data-extra-label="extraPowerElectronics">Силовая электроника</span></label>
               <label class="menu-toggle"><input type="checkbox" data-optional-group="electronic-relays"><span data-extra-label="extraElectronicRelays">Электронные реле</span></label>
               <label class="menu-toggle"><input type="checkbox" data-optional-group="sensors"><span data-extra-label="extraSensors">Датчики</span></label>
+              <label class="menu-toggle"><input type="checkbox" data-optional-group="grafcet"><span data-extra-label="extraGrafcet">GRAFCET</span></label>
+              <label class="menu-toggle"><input type="checkbox" data-optional-group="ladder"><span data-extra-label="extraLadder">Ladder</span></label>
+              <label class="menu-toggle"><input type="checkbox" data-optional-group="logic"><span data-extra-label="extraLogic">Логика</span></label>
+              <label class="menu-toggle"><input type="checkbox" data-optional-group="io-plc"><span data-extra-label="extraIoPlc">Входы / выходы ПЛК</span></label>
             </div>
           </div></details>
           <details class="menu-group language-menu"><summary>Язык</summary><div class="menu-popover">
@@ -94,18 +96,18 @@ export function renderAppShell(root: HTMLElement, theme: Theme): void {
             <option value="3">3</option><option value="4">4</option>
             <option value="" hidden>—</option>
           </select>
-          <button type="button" id="draw-wire" title="Провод (C)">Провод</button>
+          <button type="button" id="draw-wire" class="icon-btn" title="Провод (C)" aria-label="Провод" aria-pressed="false"></button>
           <span class="tool-sep" aria-hidden="true"></span>
           <button type="button" id="undo" class="icon-btn" title="Отменить (Ctrl+Z)" aria-label="Отменить" disabled>↶</button>
           <button type="button" id="redo" class="icon-btn" title="Повторить (Ctrl+Y)" aria-label="Повторить" disabled>↷</button>
           <span class="tool-sep" aria-hidden="true"></span>
-          <button type="button" id="select-tool" class="icon-btn is-active" title="Курсор: выбор и перемещение элементов (V)" aria-label="Курсор" aria-pressed="true">↖</button>
-          <button type="button" id="pan-tool" class="icon-btn" title="Рука: перемещение листа без выбора элементов (H)" aria-label="Рука" aria-pressed="false">✋</button>
+          <button type="button" id="select-tool" class="icon-btn is-active" title="Курсор: выбор и перемещение элементов (V)" aria-label="Курсор" aria-pressed="true"><svg class="tool-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 2.5 L5 20 L9.6 15.6 L12.6 22 L15.6 20.6 L12.7 14.4 L19.2 14.1 Z"/></svg></button>
+          <button type="button" id="pan-tool" class="icon-btn" title="Рука: перемещение листа без выбора элементов (H)" aria-label="Рука" aria-pressed="false"><svg class="tool-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M23 5.5V20c0 2.2-1.8 4-4 4h-7.3c-1.08 0-2.1-.43-2.85-1.19L1 14.83s1.26-1.23 1.3-1.25c.22-.19.49-.29.79-.29.22 0 .42.06.6.16.04.01 4.31 2.46 4.31 2.46V4c0-.83.67-1.5 1.5-1.5S11 3.17 11 4v7h1V1.5c0-.83.67-1.5 1.5-1.5S15 .67 15 1.5V11h1V2.5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5V11h1V5.5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5z"/></svg></button>
           <button type="button" id="node-tool" class="icon-btn" title="Узел: щёлкните по месту соединения проводов (N)" aria-label="Узел" aria-pressed="false">●</button>
         </div>
         <div class="tool-group simulation-controls" aria-label="Управление симуляцией">
-          <button type="button" id="sim-run">▶ Запуск</button>
-          <button type="button" id="sim-stop" title="Полная остановка: сброс времени, памяти и нажатых кнопок" disabled>■ Стоп</button>
+          <button type="button" id="sim-run" title="Запуск" aria-label="Запуск">▶</button>
+          <button type="button" id="sim-stop" title="Полная остановка: сброс времени, памяти и нажатых кнопок" aria-label="Стоп" disabled>■</button>
           <div class="simulation-speed" role="group" aria-label="Скорость симуляции"><button type="button" class="speed-btn" id="speed-cycle" title="Изменить скорость симуляции" aria-label="Скорость симуляции: 1×">1×</button></div>
           <span id="sim-state" class="simulation-state" role="status" aria-live="polite">Редактор</span>
         </div>
@@ -227,13 +229,29 @@ export function renderAppShell(root: HTMLElement, theme: Theme): void {
         <label class="cad-export-warning-optout"><input type="checkbox" id="cad-export-warning-optout" /><span id="cad-export-warning-optout-label">Больше не показывать это уведомление</span></label>
         <div class="dialog-actions"><button type="button" id="cad-export-warning-cancel" data-dialog-close="cad-export-warning-dialog">Отмена</button><button type="button" class="primary-action" id="cad-export-warning-confirm">Экспортировать .cad</button></div>
       </dialog>
+      <dialog id="unsaved-close-dialog" class="app-dialog"
+        aria-labelledby="unsaved-close-title" aria-describedby="unsaved-close-text">
+        <h2 id="unsaved-close-title">Несохранённые изменения</h2>
+        <p id="unsaved-close-text"></p>
+        <div class="dialog-actions">
+          <button type="button" data-close-choice="cancel">Отмена</button>
+          <button type="button" data-close-choice="discard">Не сохранять</button>
+          <button type="button" class="primary-action" data-close-choice="save">Сохранить</button>
+        </div>
+      </dialog>
       <dialog id="about-dialog" class="app-dialog about-dialog" aria-labelledby="about-title">
         <h2 id="about-title">Web Cade</h2>
         <p id="about-bio">Автор проекта — Игорь Липский Вячин.</p>
         <p id="about-noncommercial">Это бета-версия. Проект находится на раннем этапе разработки и будет дальше развиваться.</p>
-        <p id="about-limitations">Сейчас веб-приложение ещё не предоставляет все возможности старого аналога программы.</p>
+        <p id="about-thanks">Отдельное спасибо Артему Горохову за помощь в разработке.</p>
         <p class="about-contact"><span id="about-contact-label">По вопросам и пожеланиям пишите мне:</span> <a href="mailto:igoryurievich1@gmail.com">igoryurievich1@gmail.com</a></p>
         <p class="about-repository"><a href="https://github.com/igorYurievich/cadesimweb" target="_blank" rel="noopener noreferrer">GitHub: github.com/igorYurievich/cadesimweb</a></p>
+        <p class="about-support">
+          <a class="kofi-button" href="${KOFI_URL}" target="_blank" rel="noopener noreferrer">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h12v6a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5zM16 8.5h1.5a2.75 2.75 0 0 1 0 5.5H16" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M10 9.4c-1-1-2.6-.2-2.2 1.1.3 1 2.2 2.3 2.2 2.3s1.9-1.3 2.2-2.3c.4-1.3-1.2-2.1-2.2-1.1z" fill="#ff5f5f"/></svg>
+            <span id="about-support-label">Поддержать проект на Ko-fi</span>
+          </a>
+        </p>
         <dl><div><dt>Версия</dt><dd id="about-version">${appVersion}</dd></div></dl>
         <div class="dialog-actions"><button type="button" data-dialog-close="about-dialog">Закрыть</button></div>
       </dialog>

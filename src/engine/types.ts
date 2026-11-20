@@ -114,6 +114,10 @@ export interface TimerState {
   releaseElapsed?: number;
   /** Питание катушки при последнем расчёте; нужно таймеру 9005 для фиксации нового импульса. */
   powered?: boolean;
+  /** Блоки Ladder (plc-blocks.ts): выход, счёт и уровни входов прошлого кадра. */
+  q?: boolean;
+  count?: number;
+  inputs?: boolean[];
 }
 
 export interface EngineOptions {

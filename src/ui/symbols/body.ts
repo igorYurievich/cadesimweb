@@ -43,6 +43,29 @@ import {
   drawResistor,
   drawStepperController,
 } from "./drives";
+import { drawPhotoBarrier } from "./sensors";
+import { drawDetector } from "./detectors";
+import { drawRealistic2d } from "./realistic-2d";
+import { drawPoles2d } from "./realistic-2d-poles";
+import { drawPilotSimple } from "./realistic-2d-pilot";
+import { drawDelayBlock2d } from "./realistic-2d-delay";
+import { drawThermalRelay2d } from "./realistic-2d-thermal";
+import { drawAuxBlock2d } from "./realistic-2d-aux";
+import { drawMotor2d } from "./motor-2d";
+import { drawLadder } from "./ladder";
+import { drawLadderBlock } from "./ladder-blocks";
+import { LADDER_EXTRA, PLC_BLOCK } from "@model/plc-blocks";
+import { drawLogo } from "./logo-symbol";
+import { drawDm8 } from "./dm8-symbol";
+import { LOGO_DM8 } from "@model/plc-modules";
+import { LADDER_COIL, LADDER_NC, LADDER_NO, LOGO_TYPE } from "@model/plc-types";
+import {
+  BREAKER_2D, CONTACTOR_2D, PUSHBUTTON_2D, REALISTIC_2D_ORIGIN_DX, isDelayBlock2d, isSimpleView,
+} from "@model/realistic-2d-types";
+import { drawColor2d } from "./realistic-2d-color";
+import { drawDelayBlockColor } from "./realistic-2d-color-delay";
+import { DETECTOR_CODES, EMITTER_TYPE } from "@model/detector-types";
+import { PHOTO_BARRIER_TYPE } from "@model/cad-types-sensors";
 import { INK, NAME_COLOR, label, shape } from "./svg-primitives";
 
 type BodyDrawer = (g: SVGGElement, element: SchemaElement, rotation: number) => void;
@@ -53,13 +76,31 @@ function register(types: readonly number[], draw: BodyDrawer): void {
   for (const type of types) BODY_DRAWERS.set(type, draw);
 }
 
+/**
+ * Символы 2D нарисованы от клеммы 1, а позиция элемента — левый край корпуса (как в CADe_SIMU):
+ * рисунок сдвигается вправо на REALISTIC_2D_ORIGIN_DX.
+ */
+function register2d(types: readonly number[], draw: BodyDrawer): void {
+  for (const type of types) {
+    BODY_DRAWERS.set(type, (g, element, rotation) => {
+      const inner = shape("g", { transform: `translate(${REALISTIC_2D_ORIGIN_DX[type] ?? 0} 0)` });
+      // Цветной вид по умолчанию, «Vista simple» в свойствах — линейный рисунок.
+      if (isSimpleView(element)) draw(inner, element, rotation);
+      else if (isDelayBlock2d(type)) drawDelayBlockColor(inner, element, rotation);
+      else if (!drawColor2d(inner, element, rotation)) draw(inner, element, rotation);
+      g.append(inner);
+    });
+  }
+}
+
 function drawText(g: SVGGElement, element: SchemaElement): void {
   const text = String(element.params.text ?? element.raw?.tail ?? "");
   const annotation = shape("text", {
     x: 0,
     y: 0,
     fill: NAME_COLOR,
-    "font-size": 2.8,
+    // Шрифт растёт с высотой рамки (text-tool.ts): 2.8 при обычной высоте 4.
+    "font-size": 0.7 * (element.size.h || 4),
     "font-weight": 700,
     "font-family": "Arial, Helvetica, sans-serif",
   });
@@ -145,7 +186,10 @@ function drawFallback(g: SVGGElement, element: SchemaElement, rotation: number):
 }
 
 register([8], drawText);
-register([1000, 1001, 1002, 1003, 1004, 1005, 1008, 1010], drawMotor);
+// Мотор 2D — тот же 1000/1001 с params.motor2d, рисунок цветной (motor-2d.ts).
+register([1000, 1001], (g, element) =>
+  (element.params.motor2d === true && !isSimpleView(element) ? drawMotor2d(g, element) : drawMotor(g, element)));
+register([1002, 1003, 1004, 1005, 1008, 1010], drawMotor);
 register([1006, 1007], drawDcMotor);
 register([1011, 1012], drawStepper);
 register([1009], drawBrake);
@@ -203,6 +247,18 @@ register([1054, 1055], drawDrive);
 register([1056, 1061], drawDriveControl);
 register([1065, 1066, 1067], drawStepperController);
 register([1057, 1058, 1059, 1060], drawDcDrive);
+register([PHOTO_BARRIER_TYPE], drawPhotoBarrier);
+register([...DETECTOR_CODES, EMITTER_TYPE], drawDetector);
+register2d([PUSHBUTTON_2D, CONTACTOR_2D, BREAKER_2D], drawRealistic2d);
+register2d([6017, 60171, 60172, 6018, 60182], drawPoles2d);
+register2d([7020, 7021], drawDelayBlock2d);
+register2d([6016], drawThermalRelay2d);
+register2d([7019], drawAuxBlock2d);
+register2d([8101], drawPilotSimple);
+register([LADDER_NO, LADDER_NC, LADDER_COIL, ...LADDER_EXTRA], drawLadder);
+register(Object.values(PLC_BLOCK), drawLadderBlock);
+register([LOGO_TYPE], drawLogo);
+register([LOGO_DM8], drawDm8);
 
 export function drawBody(g: SVGGElement, element: SchemaElement, rotation: number): void {
   (BODY_DRAWERS.get(element.typeCode) ?? drawFallback)(g, element, rotation);

@@ -5,7 +5,10 @@ import { POSITION_SPECS, currentPosition, getBehavior, nextPosition } from './be
 import type { BehaviorLink } from './behaviors';
 import type { TerminalRef, TimerState, UserInputs } from './types';
 import { resolveThermalState } from './thermal';
+import { delayBlockActive } from './delay-blocks';
+import { isDelayBlock2d } from '../model/realistic-2d-types';
 import type { ThermalState } from './thermal';
+import { logoOutputActive, plcEdgeActive } from './plc';
 
 export interface ClosedEdge {
   a: TerminalRef;
@@ -47,6 +50,8 @@ export function auxContactActive(
   coils: Readonly<Record<string, boolean>>,
   timers: Readonly<Record<number, TimerState>>,
 ): boolean {
+  // Блоки с выдержкой 2D: отсчёт от своей катушки ведёт delay-blocks.ts.
+  if (isDelayBlock2d(element.typeCode)) return delayBlockActive(element, timers);
   if (ON_DELAY_CONTACT_TYPES.has(element.typeCode) && element.name !== '') {
     const timer = schema.elements.find((candidate) => candidate.typeCode === 9004 && candidate.name === element.name);
     if (timer) {
@@ -116,7 +121,8 @@ function controlActive(element: SchemaElement, link: BehaviorLink, inputs: UserI
         || (maintainedManual && (sameNameMomentaryPressed() || sameNameLatchedOn()));
     }
     case 'coil-name': return auxContactActive(element, schema, coils, timers) || auxContactActuatorActive(element, schema, inputs);
-    case 'thermal': return (inputs.tripped[element.id] ?? false) || (element.name.trim() !== '' && thermal.trippedNames.has(element.name.trim().toLocaleUpperCase()));
+    // thermal.tripped — ручной вход и тепловые реле, сработавшие кликом (resolveThermalState).
+    case 'thermal': return (thermal.tripped[element.id] ?? false) || (element.name.trim() !== '' && thermal.trippedNames.has(element.name.trim().toLocaleUpperCase()));
     case 'position': {
       const spec = POSITION_SPECS[element.typeCode];
       let position = currentPosition(element.typeCode, inputs.positions?.[element.id]);
@@ -125,6 +131,9 @@ function controlActive(element: SchemaElement, link: BehaviorLink, inputs: UserI
       }
       return position === link.position;
     }
+    // Выход LOGO: операнд Qk и питание модуля (plc.ts).
+    case 'plc-output': return logoOutputActive(element, link, coils, schema);
+    case 'plc-edge': return plcEdgeActive(element, coils);
     case 'always': return true;
   }
 }

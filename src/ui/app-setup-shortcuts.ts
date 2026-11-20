@@ -1,5 +1,7 @@
 import { canRedo, canUndo, redoHistory, undoHistory } from './history';
 import { setupKeyboardShortcuts } from './keyboard-shortcuts';
+import { cloneSchema } from './helpers';
+import { resizeTexts } from './text-tool';
 import type { AppSetupBase } from './app-setup-base';
 import type { AppSetupEditor } from './app-setup-editor';
 import type { AppSetupCommands } from './app-setup-commands';
@@ -42,6 +44,10 @@ function cancelWireDrawing(state: AppSetupBase, editor: AppSetupEditor): void {
   editor.updateHistoryButtons();
 }
 
+/** Выделенный элемент — надпись (у предела размера «+»/«−» не должны переключаться на масштаб). */
+const isText = (state: AppSetupBase, id: number): boolean =>
+  state.ctx.schema.elements.some((element) => element.id === id && element.typeCode === 8);
+
 export function setupAppKeyboardShortcuts(
   state: AppSetupBase,
   editor: AppSetupEditor,
@@ -83,5 +89,14 @@ export function setupAppKeyboardShortcuts(
     deleteSelected: commands.selection.deleteSelected,
     rotateSelection: commands.selection.rotateSelection,
     nudgeSelection: commands.selection.nudgeSelection,
+    resizeSelectedText: (direction) => {
+      if (state.simulation.mode !== 'edit') return false;
+      const ids = [...state.selected.values()].filter((item) => item.kind === 'element').map((item) => item.id);
+      const before = cloneSchema(state.ctx.schema);
+      if (!resizeTexts(state.ctx.schema, ids, direction)) return ids.some((id) => isText(state, id));
+      editor.editorView.commitSchema(before);
+      state.renderSchema();
+      return true;
+    },
   });
 }

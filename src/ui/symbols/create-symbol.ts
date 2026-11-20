@@ -67,7 +67,10 @@ function appendName(
     const mid = motorSpec ? motorSpec.cy : rowGap > 0 ? rowGap / 2 : element.size.h / 2;
     const x = element.labelOffset.x + 6.5;
     const family = getCadType(element.typeCode).family;
-    const named = NAME_SPOTS[element.typeCode]
+    // Мотор 2D: имя над валом, чтобы не наезжать на него.
+    const motor2dName = element.params.motor2d === true && element.params.view2d !== "simple"
+      ? { x: -4, y: 5, anchor: "end" as const } : undefined;
+    const named = motor2dName ?? NAME_SPOTS[element.typeCode]
       ?? (
         family === "pushbutton"
         || family === "coil"

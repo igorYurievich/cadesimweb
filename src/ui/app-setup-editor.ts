@@ -1,4 +1,5 @@
 import { setupAppDocumentTabs } from './documents';
+import { askSaveBeforeClose } from './document-dirty';
 import { setupPalette } from './palette';
 import { setupEditorView } from './editor-view';
 import { createWireEditorCommands } from './wire-editor-commands';
@@ -69,6 +70,11 @@ function setupDocumentTabs(state: AppSetupBase, editorView: EditorView) {
       viewSize: () => state.viewSize,
     },
     uiText: state.uiText,
+    confirmCloseDirty: async (tab) => {
+      const name = tab.schema.sheet.fileName || state.uiText().new;
+      const choice = await askSaveBeforeClose(state.root, name, state.uiText());
+      return choice === 'discard' || (choice === 'save' && await state.saveActiveDocument());
+    },
     persistence: {
       syncCurrentDocument: state.syncCurrentDocument,
       persistDocuments: state.persistDocuments,

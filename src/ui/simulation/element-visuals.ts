@@ -7,6 +7,9 @@ import type { SimulationDependencies, SimulationState } from './types';
 import { applyContactAndIndicatorVisuals, applyManualSwitchVisuals, applyTimerVisuals } from './element-switches';
 import { applyMotorAnimationVisuals, applyMotorVisuals } from './element-motors';
 import { applyPoweredVisuals, applyPowerSupplyVisuals } from './element-power';
+import { applySensorVisuals } from './element-sensors';
+import { apply2dVisuals } from './element-2d';
+import { applyPlcVisuals } from './element-plc';
 
 export function applyElementVisuals(
   ctx: AppContext,
@@ -44,4 +47,7 @@ function applyOneElement(
   applyPowerSupplyVisuals(element, node, result, nets);
   applyMotorAnimationVisuals(state, element, node, nets);
   applyPoweredVisuals(state, element, node, nets, manuallyOpen, tripped);
+  applySensorVisuals(state, element, node);
+  apply2dVisuals(state, element, node);
+  applyPlcVisuals(state, element, node);
 }

@@ -2,6 +2,18 @@ import type { SchemaElement } from "@model/types";
 import type { MotorSpec } from "./motors";
 import { MOTOR_R } from "./motors";
 import { shape } from "./svg-primitives";
+import { detectorHitFrame } from "./detector-layout";
+import { BLOCK_SPECS } from "@model/plc-blocks";
+import { isPlcFixedType, LOGO_TYPE } from "@model/plc-types";
+
+/** LOGO — весь корпус; блоки Ladder — корпус и выводы; контакты и катушки Ladder — символ ±3 по высоте. */
+function plcHitFrame(typeCode: number): HitFrame | undefined {
+  if (typeCode === LOGO_TYPE) return { x: 0, y: 0, w: 87, h: 102 };
+  if (typeCode === 10214) return { x: 0, y: 0, w: 42, h: 102 };
+  const spec = BLOCK_SPECS[typeCode];
+  if (spec) return { x: -0.5, y: -3.5, w: 16, h: spec.h - 2 };
+  return isPlcFixedType(typeCode) ? { x: -0.5, y: -3.6, w: 13, h: 7.2 } : undefined;
+}
 
 interface HitFrame {
   x: number;
@@ -26,6 +38,17 @@ const FRAME_HIT: Readonly<Record<number, HitFrame>> = {
   9011: { x: -2, y: -1, w: 10, h: 14 },
   9012: { x: -2, y: -1, w: 12, h: 14 },
   9013: { x: -3, y: -1, w: 13, h: 14 },
+  // Фотоэлектрический барьер: корпус, выводы и стрелки справа.
+  15000: { x: -4, y: -1, w: 24, h: 26 },
+  // Символы 2D: корпус с выводами.
+  8100: { x: -1, y: -1, w: 18, h: 29 }, 8101: { x: -2, y: -1, w: 10, h: 23 },
+  7018: { x: -1, y: -1, w: 26, h: 47 },
+  6015: { x: -1, y: -1, w: 26, h: 53 },
+  6017: { x: -1, y: -1, w: 14, h: 29 }, 60171: { x: -1, y: -1, w: 20, h: 29 }, 60172: { x: -1, y: -1, w: 26, h: 29 },
+  6018: { x: -1, y: -1, w: 14, h: 29 }, 60182: { x: -1, y: -1, w: 26, h: 29 },
+  6016: { x: -1, y: -1, w: 26, h: 38 },
+  7019: { x: -1, y: -1, w: 26, h: 29 },
+  7020: { x: -1, y: -1, w: 26, h: 29 }, 7021: { x: -1, y: -1, w: 26, h: 29 },
 };
 
 function hitRect(frame: HitFrame): SVGRectElement {
@@ -59,7 +82,7 @@ function frameHit(element: SchemaElement): HitFrame | undefined {
       h: Math.max(element.size.h, 3),
     };
   }
-  return FRAME_HIT[element.typeCode];
+  return FRAME_HIT[element.typeCode] ?? detectorHitFrame(element.typeCode) ?? plcHitFrame(element.typeCode);
 }
 
 function appendActuatorHitAreas(root: SVGGElement, element: SchemaElement, canonical: SchemaElement): void {

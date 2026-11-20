@@ -30,6 +30,7 @@ function setupDocumentEvents(state: AppSetupBase, editor: AppSetupEditor): void 
     drawViewport: editor.drawViewport,
     renderSchema: state.renderSchema,
     beforeOpenDocument: (name) => editor.createDocumentTab(name),
+    afterOpenDocument: state.markActiveDocumentSaved,
   });
   setupDocumentInputEvents(
     state.root,

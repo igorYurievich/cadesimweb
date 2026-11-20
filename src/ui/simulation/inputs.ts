@@ -1,3 +1,4 @@
+import { DETECTOR_CODES } from '@model/detector-types';
 import { createEmptyMemory } from '@engine/simulate';
 import type { AppContext } from '../context';
 import { createSimInputs } from './state';
@@ -15,11 +16,16 @@ export interface SimulationInputActions {
   isTrippableType(typeCode: number): boolean;
 }
 
-const momentaryTypes = new Set([8000, 8001, 8002, 8003, 8004, 8005, 8006, 8007, 8012, 8013, 8014, 8015]);
+// Детекторы (все варианты подключения) и барьер 15000 срабатывают, пока их зажимают мышью, как кнопки.
+const momentaryTypes = new Set([
+  8000, 8001, 8002, 8003, 8004, 8005, 8006, 8007, 8012, 8013, 8014, 8015,
+  ...DETECTOR_CODES, 15000, 8100,
+]);
 const maintainedTypes = new Set([8008, 8009, 8010, 8011]);
 const trippableTypes = new Set([
   6000, 6001, 6002, 6003, 6004, 6005, 6006, 6007, 6008,
-  6009, 6010, 6011, 6012, 8016, 8017, 8018, 8019,
+  6009, 6010, 6011, 6012, 8016, 8017, 8018, 8019, 6015,
+  6017, 60171, 60172, 6018, 60182, 6016,
 ]);
 
 export function createSimulationInputs(

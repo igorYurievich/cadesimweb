@@ -2,6 +2,7 @@ import { terminalKey } from '@engine/types';
 import type { EngineState, PotentialLabel } from '@engine/types';
 import type { SchemaElement } from '@model/types';
 import { latchedTypes } from '../constants';
+import { THERMAL_RELAY_TYPES } from '@engine/thermal';
 import type { SimulationState } from './types';
 
 const phaseLabels = ['L1', 'L2', 'L3'] as const;
@@ -29,7 +30,7 @@ export function applyPoweredVisuals(
     const netId = result?.terminalNet[terminalKey(element.id, index)] ?? -1;
     return (nets.get(netId)?.potentials.length ?? 0) > 0;
   });
-  node.classList.toggle('is-powered', element.typeCode !== 6007 && powered
+  node.classList.toggle('is-powered', !THERMAL_RELAY_TYPES.has(element.typeCode) && powered
     && !(latchedType(element.typeCode) && (manuallyOpen || tripped)));
   node.classList.toggle('is-signal-active', element.typeCode >= 9010 && element.typeCode <= 9013
     && (result?.lamps[element.id] ?? false));

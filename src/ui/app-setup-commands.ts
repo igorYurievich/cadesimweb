@@ -1,5 +1,6 @@
 import { canRedo, canUndo, redoHistory, undoHistory } from './history';
 import { setupAppDialogs } from './app-dialogs';
+import { setupTextTool } from './text-tool';
 import { setupAppMenus } from './app-menus';
 import { setupEditorToolbar } from './editor-toolbar';
 import { setupPlacementEvents } from './placement-events';
@@ -66,6 +67,7 @@ function setupMenus(state: AppSetupBase, editor: AppSetupEditor, selection: Retu
     undoButton: state.elements.undoButton,
     redoButton: state.elements.redoButton,
     requestNewSchema: editor.createDocumentTab,
+    onSaved: () => { state.markActiveDocumentSaved(); state.persistDocuments(); },
     copySelection: selection.copySelection,
     cutSelection: selection.cutSelection,
     pasteSelection: selection.pasteSelection,
@@ -146,7 +148,25 @@ export function setupAppCommands(state: AppSetupBase, editor: AppSetupEditor) {
   const selection = setupSelection(state, editor);
   setupPlacement(state, editor);
   setupDialogs(state);
+  setupTextTool(state.ctx, {
+    svg: state.elements.svg,
+    viewSize: () => state.viewSize,
+    viewport: () => state.viewport,
+    editMode: () => state.simulation.mode === 'edit',
+    wireDrawing: () => state.wireDrawing,
+    uiText: state.uiText,
+    commitSchema: editor.editorView.commitSchema,
+    renderSchema: state.renderSchema,
+  });
   const exportActions = setupMenus(state, editor, selection);
+  // «Сохранить» при закрытии вкладки: в том же формате, из которого схема открыта (.json или .cad).
+  state.saveActiveDocument = async (): Promise<boolean> => {
+    if (/\.json$/i.test(state.schema.sheet.fileName)) {
+      exportActions.saveJson();
+      return true;
+    }
+    return exportActions.exportCadFile();
+  };
   setupToolButtons(state);
   const nodeTool = createNodeTool(state, editor);
   const cycleWireKind = setupToolbar(state, editor);

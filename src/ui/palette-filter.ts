@@ -1,0 +1,35 @@
+/**
+ * Что показывает палитра: по умолчанию только компоненты с зелёной меткой (проверенные).
+ * «Вид → Показать все компоненты» снимает фильтр; выбор хранится в localStorage.
+ */
+
+import type { GroupKey } from '@model/catalog';
+import { hasVerifiedBadge } from '@model/catalog-verification';
+import { VERIFIED_ONLY_KEY } from './constants';
+
+/**
+ * Временно скрыты из палитры (ещё не сделаны): реле давления 33253/33254, вакуумное реле 33255/33256,
+ * термостат 33346/33347; из реалистичных символов 2D и 3D — реле в колодке (обычное и с выдержкой), светодиод,
+ * кнопочный пост, клемма и компоненты малого, среднего и большого размера. В каталоге и при чтении .cad они остаются.
+ */
+export const HIDDEN_PALETTE_COMMANDS: ReadonlySet<number> = new Set([
+  33253, 33254, 33255, 33256, 33346, 33347,
+  // Símbolos realistas 2D: Rele zócalo, Rele temporizado zócalo, Diodo LED, Botonera, Borna, Componente S/M/L.
+  33313, 33314, 33371, 33323, 33319, 33363, 33364, 33365,
+  // Те же в 3D: Rele zócalo, Rele temporizado zócalo, Diodo led, Borna (Botonera и Componente — общие коды).
+  33315, 33316, 33375, 33322,
+]);
+
+export function readVerifiedOnly(): boolean {
+  try { return localStorage.getItem(VERIFIED_ONLY_KEY) !== 'off'; } catch { return true; }
+}
+
+export function writeVerifiedOnly(value: boolean): void {
+  try { localStorage.setItem(VERIFIED_ONLY_KEY, value ? 'on' : 'off'); } catch { /* Выбор действует до перезагрузки. */ }
+}
+
+/** Показывать ли кнопку команды id в категории group. */
+export function isPaletteItemShown(group: GroupKey, id: number, verifiedOnly: boolean): boolean {
+  if (HIDDEN_PALETTE_COMMANDS.has(id)) return false;
+  return !verifiedOnly || hasVerifiedBadge(group, id);
+}

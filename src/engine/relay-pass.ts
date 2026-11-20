@@ -1,7 +1,6 @@
 /** Один проход релейного расчёта: контакты, питание, нагрузки, катушки. */
 
 import type { Schema } from '../model/types';
-import { getCadType } from '../model/cad-types';
 import { buildNets } from './graph';
 import { computeSwitching } from './switching';
 import { findSources } from './sources';
@@ -11,6 +10,9 @@ import type { Fault, NetState, TerminalKey, TimerState, UserInputs } from './typ
 import { terminalKey } from './types';
 import { evaluateMotors } from './motors';
 import { resolveThermalState } from './thermal';
+import { drivesNamedRelay, relayTriggerActive } from './sensors';
+import { applyLogoInputs, applyPlcCoils } from './plc';
+import { plcBlockSources } from './plc-blocks';
 
 export interface RelayPassResult {
   nets: NetState[];
@@ -99,6 +101,8 @@ export function solvePass(
     if (positiveNet !== undefined) converterSources.push({ terminal: { element: converter.id, index: positiveIndex }, net: positiveNet, potential: '+' });
     if (negativeNet !== undefined) converterSources.push({ terminal: { element: converter.id, index: negativeIndex }, net: negativeNet, potential: '-' });
   }
+  // Выходы включённых блоков Ladder отдают «+» (plc-blocks.ts).
+  converterSources.push(...plcBlockSources(schema, graph.terminalNet, timers));
   if (converterSources.length) {
     nets = propagatePotentials(graph.nets, graph.terminalNet, [...sourceResult.sources, ...converterSources], switching.edges, switching.transfers);
   }
@@ -138,8 +142,9 @@ export function solvePass(
   const nextCoils: Record<string, boolean> = {};
 
   for (const element of schema.elements) {
-    if (getCadType(element.typeCode).family !== 'coil' || element.name === '') continue;
+    if (!drivesNamedRelay(element) || element.name === '') continue;
     nextCoils[element.name] ??= false;
+    if (!relayTriggerActive(element, inputs)) continue;
     const aId = graph.terminalNet[terminalKey(element.id, 0)];
     const bId = graph.terminalNet[terminalKey(element.id, 1)];
     const a = aId === undefined ? undefined : netById.get(aId);
@@ -147,6 +152,9 @@ export function solvePass(
     if (a && b && isEnergized(a, b).energized) nextCoils[element.name] = true;
   }
 
+  // LOGO: питание модуля и входы I1…I8 (plc.ts).
+  applyLogoInputs(schema, graph.terminalNet, netById, nextCoils);
+  applyPlcCoils(schema, graph.terminalNet, netById, coils, nextCoils, timers);
   applyInterlocks(schema, coils, nextCoils);
 
   return {

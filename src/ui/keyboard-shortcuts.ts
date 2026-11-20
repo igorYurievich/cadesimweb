@@ -11,6 +11,8 @@ export interface KeyboardShortcutsSetup {
   placing(): boolean;
   selectedCount(): number; clearSelection(): void; deleteSelected(): void; rotateSelection(): void;
   nudgeSelection(dx: number, dy: number): void;
+  /** «+»/«−» по выделенным надписям: true, если размер текста изменён (иначе — масштаб вида). */
+  resizeSelectedText(direction: 1 | -1): boolean;
 }
 
 export function setupKeyboardShortcuts(deps: KeyboardShortcutsSetup): void {
@@ -61,6 +63,8 @@ export function setupKeyboardShortcuts(deps: KeyboardShortcutsSetup): void {
     if (modifier && !editingField && event.key.toLowerCase() === 'n') { deps.requestNewSchema(); event.preventDefault(); return; }
     if (modifier && !editingField && event.key.toLowerCase() === 'o') { deps.fileInput.click(); event.preventDefault(); return; }
     if (modifier && !editingField && event.key === '0') { deps.root.querySelector<HTMLButtonElement>('[data-zoom="fit"]')?.click(); event.preventDefault(); return; }
+    const textStep = event.key === '+' || event.key === '=' ? 1 : event.key === '-' || event.key === '_' ? -1 : 0;
+    if (!editingField && !modifier && textStep && deps.resizeSelectedText(textStep)) { event.preventDefault(); return; }
     if (!editingField && (event.key === '+' || event.key === '=')) { deps.root.querySelector<HTMLButtonElement>('[data-zoom="in"]')?.click(); event.preventDefault(); return; }
     if (!editingField && (event.key === '-' || event.key === '_')) { deps.root.querySelector<HTMLButtonElement>('[data-zoom="out"]')?.click(); event.preventDefault(); return; }
     const isTextField = textarea || (input && !['checkbox', 'radio', 'button', 'range'].includes((event.target as HTMLInputElement).type));

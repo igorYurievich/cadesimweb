@@ -13,6 +13,9 @@
  */
 
 import { catalog } from './catalog';
+import { SENSOR_TYPES } from './cad-types-sensors';
+import { REALISTIC_2D_TYPES } from './realistic-2d-types';
+import { PLC_TYPES } from './plc-types';
 import type { Point, WireKind } from './types';
 
 export type CadFamily =
@@ -46,6 +49,9 @@ export type CadFamily =
   | 'wire'
   | 'junction'
   | 'system'
+  | 'sensor'
+  | 'detector'
+  | 'plc' | 'plc-coil' | 'plc-block'
   | 'unknown';
 
 export type Confidence = 'confirmed' | 'probable' | 'unknown';
@@ -301,6 +307,10 @@ const TABLE: readonly CadTypeInfo[] = [
   { code: 1066, family: 'control-unit', label: 'Controlador motor paso a paso 2 CLK (-G)', layout: { kind: 'points', points: [{ x: 0, y: 0 }, { x: 6, y: 0 }, { x: 12, y: 0 }, { x: 0, y: 18 }, { x: 6, y: 18 }, { x: 12, y: 18 }, { x: 18, y: 18 }] }, commandIds: [33298], confidence: 'probable', note: '40×24: I1 I2 I3 сверху (0, 6, 12), Q1..Q4 снизу (y = 18). Слот флага 3 пуст (метка « »), Q1..Q4 лежат в слотах 4..7. Надписи CW CCW PD рисует символ. L+ и L- как у 1065. Только символ. Смещения сняты со скриншота.' },
   { code: 1067, family: 'control-unit', label: 'Controlador motor paso a paso CLK/DIR (-G)', layout: { kind: 'points', points: [{ x: 0, y: 0 }, { x: 6, y: 0 }, { x: 12, y: 0 }, { x: 0, y: 18 }, { x: 6, y: 18 }, { x: 12, y: 18 }, { x: 18, y: 18 }] }, commandIds: [33299], confidence: 'probable', note: 'Как 1066, но надписи CK UD PD. Только символ. Смещения сняты со скриншота.' },
 
+  // Датчики (панель «Detectores / sensores») вынесены в cad-types-sensors.ts.
+  ...SENSOR_TYPES,
+  ...REALISTIC_2D_TYPES,
+  ...PLC_TYPES,
 ];
 
 const BY_CODE = new Map<number, CadTypeInfo>(TABLE.map((t) => [t.code, t]));
@@ -339,6 +349,7 @@ const WIRE_KIND: Readonly<Record<number, WireKind>> = {
   4000: 'phase',
   4009: 'neutral',
   4010: 'protection',
+  4018: 'phase', 4019: 'phase', // шина «+» Ladder и «Cable color» (plc-types.ts)
   4001: 'junction',
 };
 

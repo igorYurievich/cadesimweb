@@ -3,6 +3,11 @@ import type { Schema } from '@model/types';
 import type { AppContext } from './context';
 import type { Selectable } from './constants';
 import { cloneSchema } from './helpers';
+import { appendDetectorWiringField } from './detector-properties';
+import { appendPoleVariantField } from './pole-properties';
+import { appendButtonColorField, appendViewField } from './view-properties';
+import { appendPlcFields } from './plc-properties';
+import { isDelayBlock2d } from '@model/realistic-2d-types';
 import type { InterfaceText } from './i18n';
 
 export interface PropertiesPanelActions {
@@ -106,12 +111,17 @@ export function setupPropertyFields(ctx: AppContext, deps: PropertyFieldsSetup):
     };
     addField(element.typeCode === 2009 ? deps.uiText().contactor1 : deps.uiText().name, element.name, (value) => { element.name = value; if (element.raw) element.raw.texts[0] = value; });
     addField(element.typeCode === 2009 ? deps.uiText().contactor2 : deps.uiText().function, element.func, (value) => { element.func = value; if (element.raw) element.raw.texts[1] = value; });
+    appendDetectorWiringField(ctx.schema, element, { ...deps, rerender: renderProperties });
+    appendPoleVariantField(ctx.schema, element, { ...deps, rerender: renderProperties });
+    appendViewField(ctx.schema, element, { ...deps, rerender: renderProperties });
+    appendButtonColorField(ctx.schema, element, { ...deps, rerender: renderProperties });
+    appendPlcFields(ctx.schema, element, { ...deps, rerender: renderProperties });
     const terminalsHeading = document.createElement('h3'); terminalsHeading.textContent = deps.uiText().terminals; deps.propertyFields.append(terminalsHeading);
     element.terminals.forEach((terminal, index) => addField(`${deps.uiText().terminal} ${index + 1}`, terminal.label, (value) => {
       terminal.label = value;
       if (element.raw) element.raw.texts[2 + index] = value;
     }));
-    if (element.typeCode === 9008 || element.typeCode === 9009) {
+    if (element.typeCode === 9008 || element.typeCode === 9009 || element.typeCode === 8101) {
       const colorField = document.createElement('label'); colorField.className = 'property-field'; colorField.append(document.createTextNode(deps.uiText().lampColor));
       const select = document.createElement('select');
       for (const [value, title] of [['0', deps.uiText().green], ['1', deps.uiText().red], ['2', deps.uiText().yellow]] as const) {
@@ -122,7 +132,7 @@ export function setupPropertyFields(ctx: AppContext, deps: PropertyFieldsSetup):
       select.addEventListener('change', () => {
         element.params.color = Number(select.value);
         element.params.extra = select.value;
-        if (element.raw) element.raw.texts[2 + element.terminals.length] = select.value;
+        if (element.raw && element.typeCode !== 8101) element.raw.texts[2 + element.terminals.length] = select.value;
         deps.renderSchema();
       });
       select.addEventListener('blur', () => {
@@ -132,11 +142,14 @@ export function setupPropertyFields(ctx: AppContext, deps: PropertyFieldsSetup):
       });
       colorField.append(select); deps.propertyFields.append(colorField);
     }
-    if (element.typeCode === 9004 || element.typeCode === 9005 || element.typeCode === 9006) {
+    const timedCoil = element.typeCode === 9004 || element.typeCode === 9005 || element.typeCode === 9006;
+    // У блока с выдержкой 2D сырые тексты записи переписывает экспорт (cad-delay-blocks.ts).
+    if (timedCoil || isDelayBlock2d(element.typeCode)) {
       addField(deps.uiText().delay, String(element.params.time ?? 0), (value) => {
         const time = Number(value);
         if (Number.isFinite(time) && time >= 0) {
           element.params.time = time;
+          if (!timedCoil) return;
           element.params.extra = `${element.params.scale ?? 0}#${time}`;
           if (element.raw) {
             element.raw.texts[2 + element.terminals.length] = String(element.params.scale ?? 0);

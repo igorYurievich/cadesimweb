@@ -99,6 +99,10 @@ kbd { padding: 2px 6px; border: 1px solid var(--border); border-radius: 4px; bac
 .viewport-toolbar button:hover:not(:disabled), .viewport-toolbar select:hover { border-color: var(--border-strong); background: var(--surface-hover); }
 .viewport-toolbar button:disabled { opacity: .42; cursor: default; }
 .viewport-toolbar .icon-btn { width: var(--control-h); padding: 0; font-size: 15px; }
+/* Значки курсора и руки: залитые SVG в цвет текста кнопки (рука — значок pan_tool из Material Icons, Apache 2.0). */
+/* Значок кабеля на кнопке «Провод» (wire-button.ts). */
+.viewport-toolbar .wire-icon { width: 22px; height: 22px; display: block; margin: auto; fill: none; stroke-width: 2.6; stroke-linecap: round; }
+.viewport-toolbar .tool-icon { width: 16px; height: 16px; display: block; margin: auto; fill: currentColor; stroke: none; }
 .file-name { max-width: 320px; margin-left: auto; overflow: hidden; color: var(--muted); font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
 
 .simulation-controls { margin-left: auto; padding: 3px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
@@ -332,6 +336,9 @@ kbd { padding: 2px 6px; border: 1px solid var(--border); border-radius: 4px; bac
 .app-dialog { width: min(420px, calc(100% - 32px)); padding: 20px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); color: var(--text); box-shadow: 0 20px 60px #08111f55; }
 .app-dialog::backdrop { background: #0b142080; backdrop-filter: blur(2px); }
 .app-dialog h2 { margin: 0 0 10px; font-size: 17px; }
+/* Окно ввода текста на схеме (text-tool.ts). */
+.text-dialog input { width: 100%; box-sizing: border-box; margin: 4px 0 14px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface-hover); color: var(--text); font: inherit; }
+.text-dialog .dialog-actions { display: flex; justify-content: flex-end; gap: 8px; }
 .app-dialog p { color: var(--muted); font-size: 12px; line-height: 1.55; }
 .dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; }
 .dialog-actions button { min-height: 34px; padding: 0 12px; border: 1px solid var(--border-strong); border-radius: 7px; background: var(--surface); color: var(--text); font: inherit; font-size: 11px; cursor: pointer; }
@@ -457,7 +464,26 @@ kbd { padding: 2px 6px; border: 1px solid var(--border); border-radius: 4px; bac
 .is-sim-tripped .contact.by-trip:not(.rest-closed) .blade-closed { display: inline; }
 
 .schematic-element.is-coil-energized rect { fill: #bdbdbd; }
+/* Фотоэлектрический барьер: заливка серая, пока реле включено; объект в луче виден, пока луч перекрыт. */
+.schematic-element.is-sensor-active .sensor-body { fill: #c0c0c0; }
+.schematic-element.is-sim-pressed .sensor-body { fill: #c0c0c0; }
+/* Символы 2D: подвижные части по классу is-d2-on, внутренняя схема краснеет при срабатывании. */
+.schematic-element .d2-switch .d2-on { display: none; }
+.schematic-element.is-d2-on .d2-switch .d2-on { display: inline; }
+.schematic-element.is-d2-on .d2-switch .d2-off { display: none; }
+.schematic-element.is-d2-on .d2-inner { color: #e3181f; }
+.schematic-element .beam-object { display: none; }
+.schematic-element.is-beam-blocked .beam-object { display: inline; }
 /* Пока лампа выключена (в том числе вне симуляции), стекло и ободок нейтральные. */
+.schematic-element .logo-run { display: none; }
+.schematic-element.is-logo-run .logo-run { display: inline; }
+.schematic-element .logo-led.is-on { fill-opacity: 0.6; }
+.schematic-element.is-ladder-on .ladder-glow { fill-opacity: 0.22; }
+.schematic-element.is-ladder-on .ladder-mark { stroke: #16a34a; }
+.schematic-element.is-ladder-on .ladder-box { fill: #86efac; }
+.schematic-element .pilot-lit { display: none; }
+.schematic-element.is-lamp-lit .pilot-lit { display: inline; }
+.schematic-element.is-lamp-lit .pilot-off { display: none; }
 .schematic-element .lamp-glass { fill: #f6f7f8; stroke: #7b8794; filter: none; }
 .schematic-element.is-lamp-lit .lamp-glass { filter: drop-shadow(0 0 2.8px currentColor); }
 .schematic-element.is-lamp-lit .lamp-glass.lamp-c0 { fill: #43df70; stroke: #16843a; filter: drop-shadow(0 0 3px #29dc5a); }
@@ -494,7 +520,7 @@ kbd { padding: 2px 6px; border: 1px solid var(--border); border-radius: 4px; bac
 .schematic-element { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Cg fill='%230b3d6e' stroke='%23fff' stroke-width='1.2' stroke-linejoin='round'%3E%3Cpath d='M14 2L18 7H15.4V12.6H21V10L26 14L21 18V15.4H15.4V21H18L14 26L10 21H12.6V15.4H7V18L2 14L7 10V12.6H12.6V7H10Z'/%3E%3C/g%3E%3C/svg%3E") 14 14, move; }
 .schematic-element text { user-select: none; }
 .is-selected-wire { stroke: #0a67c7 !important; stroke-width: calc(var(--wire-stroke-width, 1.35px) + 1px) !important; }
-.is-selected-junction { stroke: #0a67c7 !important; stroke-width: 1.5px !important; r: 2.4px; }
+.is-selected-junction { stroke: #0a67c7 !important; stroke-width: 1.5px !important; r: 1.6px; }
 .element-selection-box, .selection-marquee { fill: rgba(29, 111, 190, .07); stroke: #2676bd; stroke-width: 1.2px; stroke-dasharray: 4 3; vector-effect: non-scaling-stroke; pointer-events: none; }
 .wire-end-handle { fill: #fff; stroke: #126fc2; stroke-width: 1.5px; vector-effect: non-scaling-stroke; cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cg fill='none' stroke-linecap='round'%3E%3Cpath d='M16 3V12M16 20V29M3 16H12M20 16H29' stroke='%23fff' stroke-width='3.6'/%3E%3Cpath d='M16 3V12M16 20V29M3 16H12M20 16H29' stroke='%230b3d6e' stroke-width='1.6'/%3E%3Ccircle cx='16' cy='16' r='1.6' fill='%23e5484d' stroke='%23fff' stroke-width='.8'/%3E%3C/g%3E%3C/svg%3E") 16 16, crosshair; }
 .wire-draft { pointer-events: none; }
@@ -610,3 +636,13 @@ kbd { padding: 2px 6px; border: 1px solid var(--border); border-radius: 4px; bac
 
 .about-dialog .about-repository { margin: 12px 0 0; }
 .about-dialog .about-repository a { color: var(--accent); font-weight: 650; overflow-wrap: anywhere; }
+/* Кнопка Ko-fi: чёрная, с переливающимся бликом по поверхности. */
+.about-dialog .about-support { margin: 16px 0 0; }
+.kofi-button { position: relative; display: inline-flex; align-items: center; gap: 8px; padding: 9px 18px; overflow: hidden; border-radius: 10px; color: #fff; font-weight: 700; text-decoration: none; border: 1px solid #ffffff30; background: linear-gradient(110deg, #000 0%, #1f2937 35%, #000 70%); background-size: 220% 100%; box-shadow: 0 2px 10px #0006; animation: kofi-flow 4s ease-in-out infinite; }
+.kofi-button svg { width: 20px; height: 20px; flex: none; }
+.kofi-button::after { content: ''; position: absolute; inset: 0; background: linear-gradient(100deg, transparent 30%, #ffffff55 48%, #ff5f5f44 52%, transparent 70%); transform: translateX(-120%); animation: kofi-shine 2.6s ease-in-out infinite; pointer-events: none; }
+.kofi-button:hover { transform: translateY(-1px); box-shadow: 0 4px 14px #0008; }
+.kofi-button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@keyframes kofi-flow { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+@keyframes kofi-shine { 0% { transform: translateX(-120%); } 60%, 100% { transform: translateX(120%); } }
+@media (prefers-reduced-motion: reduce) { .kofi-button, .kofi-button::after { animation: none; } }
