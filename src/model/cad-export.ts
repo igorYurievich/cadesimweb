@@ -1,12 +1,15 @@
+import { packProgramPagesForCad } from './program-pages';
 import { importCad } from './cad-import';
 import { LOGO_DEFAULT_IP, LOGO_TYPE, isPlcFixedType } from './plc-types';
 import { writePlcBlockRecord } from './plc-blocks';
-import { DM8_DEFAULT_TAIL, LOGO_DM8, plcAddresses, type ModuleAddress } from './plc-modules';
+import { DM8_DEFAULT_TAIL, LOGO_DM8, logoSupply, plcAddresses, type ModuleAddress } from './plc-modules';
 import { buttonColorValue, isPushbutton2d } from './pushbutton-2d';
+import { STAIR_TIMER_2D, stairTimerFileParam } from './stair-timer';
 import { CAD_NUM_FIELDS, CAD_TEXT_FIELDS, flagCountOf, serializeCad } from './cad-format';
 import type { CadFooter, CadRecord } from './cad-format';
 import type { Schema, SchemaElement, WireSegment } from './types';
 import { TAIL_TERMINALS, buildTail } from './cad-tail-terminals';
+import { VFD_CONTROL, isVfd2d, vfdSettings, vfdTailWithSettings } from './vfd';
 import { CAD_VARIANTS, VARIANT_RECORD_LABELS, VARIANT_STEP } from './cad-variants';
 import { writeTextFrame } from './cad-text';
 import { writeDelayBlockRecord } from './cad-delay-blocks';
@@ -72,6 +75,9 @@ function elementRecords(
     ? { id: element.id, type: element.typeCode, texts: [...raw.texts], nums: [...raw.nums], ...(raw.tail !== undefined ? { tail: raw.tail } : {}) }
     : emptyRecord(element.id, element.typeCode, newRecordExtraFlags(element));
   if (!raw && DEFAULT_TAILS[element.typeCode] !== undefined) record.tail = DEFAULT_TAILS[element.typeCode] as string;
+  // Блок управления преобразователя: фиксированные частоты и рампы — в полях хвоста (model/vfd.ts, §35 FORMATO).
+  if (element.typeCode === VFD_CONTROL) record.tail = vfdTailWithSettings(record.tail, vfdSettings(element));
+  if (isVfd2d(element.typeCode)) record.tail = vfdTailWithSettings(record.tail, vfdSettings(element), true);
   padRecord(record);
   const o = shiftOf(record);
   record.texts[0] = element.name;
@@ -88,6 +94,8 @@ function elementRecords(
   if (element.params.motor2d === true) record.nums[16 + o] = MOTOR_2D_FILE_PARAM;
   // Цвет кнопки 2D — nums[16] (pushbutton-2d.ts).
   if (isPushbutton2d(element.typeCode)) record.nums[16 + o] = buttonColorValue(element);
+  // Минутник (только веб): выдержка и подключение кнопок — nums[16] (stair-timer.ts).
+  if (element.typeCode === STAIR_TIMER_2D) record.nums[16 + o] = stairTimerFileParam(element);
   const continuations: CadRecord[] = (raw?.continuations ?? []).map((c) => ({
     id: c.id, type: c.type, texts: [...c.texts], nums: [...c.nums], ...(c.tail !== undefined ? { tail: c.tail } : {}),
   }));
@@ -124,6 +132,11 @@ function elementRecords(
     const address = element.typeCode === LOGO_DM8
       ? addresses.get(element.id) : undefined;
     if (address) [record.texts[2], record.texts[3]] = [String(address.firstInput), String(address.firstOutput)];
+    // Питание LOGO / DM8 (24 или 230 V, только веб-версия): последнее текстовое поле записи (plc-modules.ts).
+    // Пишется, только если питание выбрано в свойствах: файлы CADe_SIMU сохраняются без изменений.
+    if ((element.typeCode === LOGO_TYPE || element.typeCode === LOGO_DM8) && element.params.supply !== undefined) {
+      record.texts[record.texts.length - 1] = `${logoSupply(element)}V`;
+    }
     continuations.length = 0;
   } else if (tailSpec) {
     // Символы 2D: первые 8 клемм в слотах записи, клеммы с номера start — парами в хвосте (cad-tail-terminals.ts).
@@ -170,8 +183,14 @@ function elementRecords(
   }
 
   const parameterStart = 2 + element.terminals.length;
-  if ((element.typeCode === 9008 || element.typeCode === 9009) && element.params.color !== undefined) {
+  // Цвет лампы: 9008 / 9009 — как в CADe_SIMU; пилот 2D 8101 — тем же полем (кодировка CADe_SIMU у него не известна).
+  if ([9008, 9009, 8101].includes(element.typeCode) && element.params.color !== undefined) {
     record.texts[parameterStart] = String(element.params.color);
+  }
+  // «Botón pulsador» 8023 (клемм нет): цвет «rrggbb» (без «#», он в .cad служебный) в первом поле после имени
+  // и функции (только веб-версия).
+  if (element.typeCode === 8023 && typeof element.params.buttonColor === 'string') {
+    record.texts[parameterStart] = element.params.buttonColor.replace(/^#/, '');
   }
   if (element.typeCode === 9004 || element.typeCode === 9005 || element.typeCode === 9006) {
     if (element.params.scale !== undefined) record.texts[parameterStart] = String(element.params.scale);
@@ -239,7 +258,10 @@ function legacyFramePlacement(schema: Schema): { offsetY: number } {
 }
 
 /** Convert the editor model to .cad and verify it by importing the result back. */
-export function exportCad(schema: Schema): string {
+export function exportCad(original: Schema): string {
+  // Листы программ ПЛК — справа от рамки основного листа (program-pages.ts); проверка ниже — по исходной схеме,
+  // потому что при чтении файла листы раскладываются обратно.
+  const schema = packProgramPagesForCad(original);
   const placement = legacyFramePlacement(schema);
   // Свободные id для новых записей-продолжений (-1): у каждой записи файла свой id.
   let nextId = 1 + Math.max(

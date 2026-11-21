@@ -2,7 +2,7 @@ import type { GroupKey } from '@model/catalog';
 import type { PotentialLabel } from '@engine/types';
 import type { Point } from './viewport';
 import { DETECTOR_LABEL_OFFSETS, DETECTOR_PLACE_DEFAULTS, DETECTOR_PLACEABLE_TYPES } from './detector-placement';
-import { PLC_LABEL_OFFSETS, PLC_PLACE_DEFAULTS, PLC_PLACEABLE_TYPES } from './plc-placement';
+import { WEB_LABEL_OFFSETS, WEB_PLACE_DEFAULTS, WEB_PLACEABLE_TYPES } from './web-placement';
 
 export type StampKey = 'drawnDate' | 'author' | 'drawnSign' | 'checkedDate' | 'checkedName' | 'checkedSign' | 'entity' | 'title' | 'date' | 'number' | 'total' | 'fileName';
 
@@ -74,14 +74,15 @@ export const STAMP_CELLS: ReadonlyArray<{ key?: StampKey; label?: string; x0: nu
 export const POTENTIAL_ORDER: readonly PotentialLabel[] = ['L1', 'L2', 'L3', 'N', 'PE', '+', '-'];
 
 export const latchedTypes = new Set([2003, 2004, 2005, 2007, 5000, 5001, 5002, 5003, 5004, 5005, 5006, 5007, 5008, 5009, 6000, 6001, 6002, 6003, 6004, 6005, 6006, 6007, 6008, 6009, 6010, 6011, 6012, 6015,
-  6017, 60171, 60172, 6018, 60182, 6016]);
+  6017, 60171, 60172, 6018, 60182, 6016, 8110,
+  8120, 8121, 8122]);
 
 export const armedByDefaultTypes = new Set([5000, 5001, 5002, 5003, 5004, 6007, 6016]);
 
 export const startsOpen = (typeCode: number): boolean => latchedTypes.has(typeCode) && !armedByDefaultTypes.has(typeCode);
 
 export const PLACEABLE_TYPES = [1000, 1001, 1002, 1008, 1010, 1003, 1005, 1004, 1006, 1007, 1011, 1012, 1009, 1050, 1051, 1052, 1053, 1062, 1063, 1054, 1055, 1056, 1057, 1058, 1059, 1060, 1061, 1065, 1066, 1067, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 3000, 3001, 3002, 3003, 3011, 3004, 3005, 3006, 3007, 3008, 3009, 3010, 3015, 3012, 3017, 3016, 3013, 3014, 3018, 3019, 3020, 5000, 5001, 5002, 5003, 5004, 5005, 5006, 5007, 5008, 5009, 6000, 6001, 6002, 6003, 6004, 6005, 6006, 6007, 6008, 6009, 6010, 6011, 6012, 6013, 6014, 7000, 7001, 7002, 7003, 7004, 7005, 7006, 7007, 7008, 7009, 7010, 7011, 7012, 7013, 7014, 7015, 8000, 8001, 8002, 8003, 8004, 8005, 8006, 8007, 8008, 8009, 8010, 8011, 8012, 8013, 8014, 8015, 8016, 8017, 8019, 8020, 8021, 8022, 8023, 8018, 9000, 9001, 9002, 9003, 9004, 9005, 9006, 9007, 9015, 9014, 9016, 9008, 9009, 9010, 9011, 9012, 9013, 15000,
-  ...DETECTOR_PLACEABLE_TYPES, 8100, 7018, 6015, 6017, 6018, 7020, 7021, 6016, 7019, 10000, 10010, 8101, ...PLC_PLACEABLE_TYPES];
+  ...DETECTOR_PLACEABLE_TYPES, 8100, 7018, 6015, 6017, 6018, 7020, 7021, 6016, 7019, 10000, 10010, 8101, ...WEB_PLACEABLE_TYPES];
 
 /** bareFirst: первый экземпляр получает имя без номера (-B), следующие — -B1, -B2. */
 export const PLACE_DEFAULTS: Record<
@@ -259,7 +260,7 @@ export const PLACE_DEFAULTS: Record<
   7019: { prefix: '-KM', size: { w: 27, h: 30 }, labels: ['53', '54', '61', '62', '71', '72', '83', '84'] },
   8101: { prefix: '-H', size: { w: 6, h: 21 }, labels: ['X1', 'X2'] }, // пилот 2D
   7020: { prefix: '-KM', size: { w: 27, h: 30 }, labels: ['57', '58', '65', '66'] }, // блоки с выдержкой 2D
-  7021: { prefix: '-KM', size: { w: 27, h: 30 }, labels: ['57', '58', '65', '66'] }, ...PLC_PLACE_DEFAULTS,
+  7021: { prefix: '-KM', size: { w: 27, h: 30 }, labels: ['57', '58', '65', '66'] }, ...WEB_PLACE_DEFAULTS,
 };
 
 export const PLACE_LABEL_OFFSETS: Record<number, { x: number; y: number }> = {
@@ -280,7 +281,7 @@ export const PLACE_LABEL_OFFSETS: Record<number, { x: number; y: number }> = {
   // Катушки и сигнализация: смещение подписи из образца elementos_bobinas.cad.
   9001: { x: -15, y: -3 }, 9002: { x: -15, y: -3 }, 9003: { x: -15, y: -3 }, 9005: { x: -15, y: -3 }, 9006: { x: -15, y: -3 }, 9007: { x: -15, y: -3 },
   15000: { x: -12, y: 9 },
-  ...DETECTOR_LABEL_OFFSETS, ...PLC_LABEL_OFFSETS,
+  ...DETECTOR_LABEL_OFFSETS, ...WEB_LABEL_OFFSETS,
   8100: { x: -18, y: -3 }, 8101: { x: -18, y: -3 }, 7018: { x: -12, y: -3 }, 6015: { x: -12, y: -3 },
   6017: { x: -12, y: -3 }, 60171: { x: -12, y: -3 }, 60172: { x: -12, y: -3 },
   6018: { x: -12, y: -3 }, 60182: { x: -12, y: -3 }, 7020: { x: -12, y: -3 }, 7021: { x: -12, y: -3 },

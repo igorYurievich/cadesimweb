@@ -3,6 +3,7 @@ import type { Lang } from '@model/catalog';
 import type { AppSettings, SettingsCommands } from './settings';
 import { createSettingsCommands } from './settings';
 import { setupInterfaceTranslation } from './interface-translation';
+import { setupFullscreenButton } from './fullscreen';
 import type { SimulationController } from './sim-controller';
 import type { INTERFACE_TEXT } from './i18n';
 
@@ -54,6 +55,7 @@ export function setupAppInterface(options: AppInterfaceOptions): AppInterface {
     fileName: options.fileName,
   });
   translateInterface();
+  setupFullscreenButton(options.root, options.uiText);
   return {
     translateInterface,
     toggleTheme: () => settingsCommands.toggleTheme(translateInterface),

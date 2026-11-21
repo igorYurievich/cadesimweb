@@ -1,5 +1,5 @@
 import { POSITION_SPECS, currentPosition, getBehavior, nextPosition } from '@engine/behaviors';
-import { auxContactActive, auxContactActuatorActive } from '@engine/switching';
+import { auxContactActive, auxContactActuatorActive, isMomentaryManual } from '@engine/switching';
 import { THERMAL_RELAY_TYPES } from '@engine/thermal';
 import type { SchemaElement } from '@model/types';
 import { armedByDefaultTypes, latchedTypes } from '../constants';
@@ -78,7 +78,7 @@ function applySelectorPosition(
 }
 
 function isMomentary(typeCode: number): boolean {
-  return (typeCode >= 8000 && typeCode <= 8007) || (typeCode >= 8012 && typeCode <= 8015);
+  return isMomentaryManual(typeCode);
 }
 
 export function applyContactAndIndicatorVisuals(
@@ -117,7 +117,7 @@ export function applyContactAndIndicatorVisuals(
 function applyLampVisuals(state: SimulationState, element: SchemaElement, node: SVGGElement): void {
   const powered = state.result?.lamps[element.id] ?? false;
   const lit = element.typeCode === 9009 ? powered && state.time % 1 < 0.5
-    : (element.typeCode === 9008 || element.typeCode === 8101) && powered;
+    : [9008, 8101, 8125].includes(element.typeCode) && powered;
   node.classList.toggle('is-lamp-lit', lit);
 }
 

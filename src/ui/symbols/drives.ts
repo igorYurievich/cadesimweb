@@ -83,6 +83,20 @@ export function drawDrive(g: SVGGElement, element: SchemaElement): void {
   // Транзистор: база, коллектор и эмиттер со стрелкой.
   g.append(path("M 9 19.4 V 22.6 M 9 20.5 L 10.4 19.2 M 9 21.5 L 10.5 22.6"));
   g.append(inkFill("M 10.8 23 L 9.7 22.5 L 10.4 21.8 Z"));
+  g.append(vfdDisplay(element.size.w - 1, 15));
+}
+
+/**
+ * Дисплей частоты справа от рамки (виден только в симуляции при питании): «25.0 Hz» и стрелка направления.
+ * Текст выставляет simulation/element-vfd.ts.
+ */
+function vfdDisplay(x: number, y: number): SVGGElement {
+  const display = group("vfd-display");
+  display.append(shape("rect", { x, y: y - 3.4, width: 21, height: 6.8, rx: 1, class: "vfd-display-screen" }));
+  const text = label("0.0 Hz", x + 10.5, y, { size: 2.9, anchor: "middle" });
+  text.classList.add("vfd-display-text");
+  display.append(text);
+  return display;
 }
 
 /** Рамка блока (x −3..w − 3, y 3..h − 6) и выводы от клемм до рамки. */
@@ -97,7 +111,17 @@ function drawBlockFrame(g: SVGGElement, element: SchemaElement, left = -3): void
 /** Control Variador 1056: рамка 54×33, 13 выводов и переключающий контакт у RA–RC. */
 export function drawDriveControl(g: SVGGElement, element: SchemaElement): void {
   drawBlockFrame(g, element, element.typeCode === 1061 ? -6 : -3);
-  g.append(path("M 0 3 V 6 H 3 M 3 9 L 9 6 M 9 6 H 12 V 3"));
+  if (element.typeCode !== 1056) {
+    g.append(path("M 0 3 V 6 H 3 M 3 9 L 9 6 M 9 6 H 12 V 3"));
+    return;
+  }
+  // Реле RA–RC: в симуляции нож замыкается, пока преобразователь выдаёт частоту (класс is-vfd-run).
+  g.append(path("M 0 3 V 6 H 3 M 9 6 H 12 V 3"));
+  const open = path("M 3 9 L 9 6");
+  open.classList.add("vfd-relay-open");
+  const closed = path("M 3 6 H 9");
+  closed.classList.add("vfd-relay-closed");
+  g.append(open, closed);
 }
 
 /** Диод моста: треугольник вправо и катодная черта. */

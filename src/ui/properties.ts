@@ -1,3 +1,4 @@
+import { indicatorColor } from './symbols/switches';
 import { getCadType } from '@model/cad-types';
 import type { Schema } from '@model/types';
 import type { AppContext } from './context';
@@ -6,7 +7,10 @@ import { cloneSchema } from './helpers';
 import { appendDetectorWiringField } from './detector-properties';
 import { appendPoleVariantField } from './pole-properties';
 import { appendButtonColorField, appendViewField } from './view-properties';
-import { appendPlcFields } from './plc-properties';
+import { appendStairTimerField } from './stair-timer-properties';
+import { appendVfdFields } from './vfd-properties';
+import { appendLogoSupplyField, appendPlcFields } from './plc-properties';
+import { appendProgramButton } from './program-pages-view';
 import { isDelayBlock2d } from '@model/realistic-2d-types';
 import type { InterfaceText } from './i18n';
 
@@ -115,12 +119,31 @@ export function setupPropertyFields(ctx: AppContext, deps: PropertyFieldsSetup):
     appendPoleVariantField(ctx.schema, element, { ...deps, rerender: renderProperties });
     appendViewField(ctx.schema, element, { ...deps, rerender: renderProperties });
     appendButtonColorField(ctx.schema, element, { ...deps, rerender: renderProperties });
+    appendStairTimerField(ctx.schema, element, { ...deps, rerender: renderProperties });
+    appendVfdFields(ctx.schema, element, { ...deps, rerender: renderProperties });
+    appendLogoSupplyField(ctx.schema, element, { ...deps, rerender: renderProperties });
     appendPlcFields(ctx.schema, element, { ...deps, rerender: renderProperties });
+    appendProgramButton(ctx.schema, element, { ...deps, root: ctx.root });
     const terminalsHeading = document.createElement('h3'); terminalsHeading.textContent = deps.uiText().terminals; deps.propertyFields.append(terminalsHeading);
     element.terminals.forEach((terminal, index) => addField(`${deps.uiText().terminal} ${index + 1}`, terminal.label, (value) => {
       terminal.label = value;
       if (element.raw) element.raw.texts[2 + index] = value;
     }));
+    if (element.typeCode === 8023) {
+      // «Botón pulsador»: любой цвет кнопки (палитра браузера).
+      const colorField = document.createElement('label'); colorField.className = 'property-field';
+      colorField.append(document.createTextNode(deps.uiText().buttonColor));
+      const input = document.createElement('input'); input.type = 'color'; input.value = indicatorColor(element);
+      input.addEventListener('focus', () => { if (!deps.propertySnapshot()) deps.setPropertySnapshot(cloneSchema(ctx.schema)); });
+      input.addEventListener('input', () => { element.params.buttonColor = input.value; deps.renderSchema(); });
+      input.addEventListener('change', () => {
+        element.params.buttonColor = input.value;
+        const before = deps.propertySnapshot();
+        if (before) deps.commitSchema(before);
+        deps.setPropertySnapshot(undefined);
+      });
+      colorField.append(input); deps.propertyFields.append(colorField);
+    }
     if (element.typeCode === 9008 || element.typeCode === 9009 || element.typeCode === 8101) {
       const colorField = document.createElement('label'); colorField.className = 'property-field'; colorField.append(document.createTextNode(deps.uiText().lampColor));
       const select = document.createElement('select');

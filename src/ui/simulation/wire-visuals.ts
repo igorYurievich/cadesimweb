@@ -55,7 +55,7 @@ export function applyWireVisuals(
       : transformerCurrent
         ? 'Провод с током через автотрансформатор'
         : motorCurrent
-          ? 'Провод с током в режиме «звезда»'
+          ? 'Провод с током двигателя (звезда / цепь ротора)'
           : 'Провод без потенциала';
     node.setAttribute('aria-label', message);
   }

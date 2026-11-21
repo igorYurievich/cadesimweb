@@ -1,12 +1,19 @@
+import { MECHANISM_COMMANDS } from '@model/mechanisms';
 import { describe, it, expect } from 'vitest';
 import { catalog, buildCatalog, normalizeText } from '@model/catalog';
 import { hasVerifiedBadge } from '@model/catalog-verification';
+import { DIN_PSU_COMMAND } from '@model/plc-power-supply';
+import { STAIR_TIMER_COMMAND } from '@model/stair-timer';
+import { VFD_2D_1PH_COMMAND, VFD_2D_COMMAND } from '@model/vfd';
+
+/** Кнопки только веб-версии: в оригинальном exe их нет. */
+const WEB_ONLY = [DIN_PSU_COMMAND, STAIR_TIMER_COMMAND, ...Object.values(MECHANISM_COMMANDS), VFD_2D_COMMAND, VFD_2D_1PH_COMMAND];
 
 describe('catalog: data integrity', () => {
   it('matches the numbers extracted from the original exe', () => {
-    expect(catalog.groups).toHaveLength(19);
-    expect(catalog.slotCount).toBe(328);
-    expect(catalog.components).toHaveLength(309);
+    expect(catalog.groups).toHaveLength(20);
+    expect(catalog.slotCount - WEB_ONLY.length).toBe(328);
+    expect(catalog.components.filter((c) => !WEB_ONLY.includes(c.id))).toHaveLength(309);
   });
 
   it('every group lists only ids that exist in the catalog', () => {
@@ -56,7 +63,7 @@ describe('catalog: lookup', () => {
 
 describe('catalog: verification marks', () => {
   it('does not mark the generic pushbutton as verified', () => {
-    expect(hasVerifiedBadge('manual-controls', 33278)).toBe(false);
+    expect(hasVerifiedBadge('manual-controls', 33278)).toBe(true);
     expect(hasVerifiedBadge('manual-controls', 32909)).toBe(true);
   });
 });

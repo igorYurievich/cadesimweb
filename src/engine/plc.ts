@@ -13,11 +13,12 @@ import {
   LADDER_COIL, LADDER_NC, LADDER_NO, LOGO_POWER, PLC_FIXED_LABELS,
 } from '../model/plc-types';
 import {
-  LOGO_BASE, LOGO_DM8, LOGO_MODULE_TYPES, MODULE_SHAPE, moduleInputIndex, moduleOutputPair, plcAddresses,
+  LOGO_BASE, LOGO_DM8, LOGO_MODULE_TYPES, MODULE_SHAPE, logoSupply, moduleInputIndex, moduleOutputPair, plcAddresses,
 } from '../model/plc-modules';
 import {
   LADDER_FALL, LADDER_FIRST_SCAN, LADDER_RESET, LADDER_RISE, LADDER_SET, PLC_BLOCK, isPlcBlock,
 } from '../model/plc-blocks';
+import { DIN_PSU_TYPE } from '../model/plc-power-supply';
 import type { BehaviorLink, TypeBehavior } from './behaviors';
 import { isEnergized } from './loads';
 import type { NetState, TerminalKey, TimerState } from './types';
@@ -37,6 +38,8 @@ export const PLC_BEHAVIORS: readonly TypeBehavior[] = [
   // Провода образца CADe_S1.cad (шина «+» и «Cable color»): ребра даёт graph.ts.
   { typeCode: 4018, links: [{ terminals: [], kind: 'none', control: 'always' }] },
   { typeCode: 4019, links: [{ terminals: [], kind: 'none', control: 'always' }] },
+  // Блок питания 24 V на DIN-рейку: «+» и «−» даёт relay-pass.ts, пока на входе L и N (как у 3014).
+  { typeCode: DIN_PSU_TYPE, links: [{ terminals: [], kind: 'none', control: 'always' }] },
   { typeCode: LADDER_NO, links: [{ terminals: [0, 1], kind: 'switch', control: 'coil-name' }] },
   { typeCode: LADDER_NC, links: [{ terminals: [0, 1], kind: 'switch', control: 'coil-name', normallyClosed: true }] },
   { typeCode: LADDER_COIL, links: [{ terminals: [0, 1], kind: 'load', control: 'always' }] },
@@ -154,10 +157,54 @@ export function applyLogoInputs(
   for (const element of schema.elements) {
     if (!LOGO_MODULE_TYPES.has(element.typeCode)) continue;
     const neutral = netOf(element, LOGO_POWER.N);
-    const powered = energized(netOf(element, LOGO_POWER.L), neutral);
+    const supply = netOf(element, LOGO_POWER.L);
+    // Модуль на 230 V от 24 V не запускается: нужна сеть (фаза или нейтраль) на P1 / P2.
+    const powered = energized(supply, neutral)
+      && (logoSupply(element) === 24 || hasMains(supply) || hasMains(neutral));
     next[logoPowerKey(element)] = powered;
     addresses.get(element.id)?.inputs.forEach((name, k) => {
       next[name] = (next[name] ?? false) || (powered && energized(netOf(element, moduleInputIndex(k)), neutral));
     });
   }
+}
+
+const MAINS: readonly string[] = ['L1', 'L2', 'L3', 'N'];
+const hasMains = (net?: NetState): boolean => net?.potentials.some((p) => MAINS.includes(p)) ?? false;
+
+/** Модули LOGO / DM8, у которых питание P1 / P2 не подходит к выбранной модели (только для предупреждений). */
+function supplyMismatch(
+  schema: Schema,
+  terminalNet: Readonly<Record<TerminalKey, number>>,
+  nets: readonly NetState[],
+  wrong: (mains: boolean, energized: boolean) => boolean,
+  model: 24 | 230,
+): SchemaElement[] {
+  const byId = new Map(nets.map((net) => [net.id, net] as const));
+  const net = (element: SchemaElement, index: number) => byId.get(terminalNet[terminalKey(element.id, index)] ?? -1);
+  return schema.elements.filter((element) => {
+    if (!LOGO_MODULE_TYPES.has(element.typeCode) || logoSupply(element) !== model) return false;
+    const [p1, p2] = [net(element, LOGO_POWER.L), net(element, LOGO_POWER.N)];
+    return wrong(hasMains(p1) || hasMains(p2), Boolean(p1 && p2 && isEnergized(p1, p2).energized));
+  });
+}
+
+/**
+ * Модули на 24 V (24RCE / DM8 24R), на клеммы питания P1 / P2 которых пришла сеть 230 В (фаза или нейтраль).
+ * Модуль при этом работает как раньше; список нужен только для предупреждения в интерфейсе.
+ */
+export function logoMainsSupplied(
+  schema: Schema,
+  terminalNet: Readonly<Record<TerminalKey, number>>,
+  nets: readonly NetState[],
+): SchemaElement[] {
+  return supplyMismatch(schema, terminalNet, nets, (mains) => mains, 24);
+}
+
+/** Модули на 230 V (230RCE / DM8 230R), запитанные от 24 V (без сети на P1 / P2): они не запускаются. */
+export function logoLowVoltageSupplied(
+  schema: Schema,
+  terminalNet: Readonly<Record<TerminalKey, number>>,
+  nets: readonly NetState[],
+): SchemaElement[] {
+  return supplyMismatch(schema, terminalNet, nets, (mains, energized) => energized && !mains, 230);
 }

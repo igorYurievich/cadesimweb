@@ -1,3 +1,4 @@
+import { updateFullscreenButton } from './fullscreen';
 import { renderWireButton } from './wire-button';
 import type { GroupKey } from '@model/catalog';
 import type { Schema } from '@model/types';
@@ -43,7 +44,7 @@ export function setupInterfaceTranslation(deps: InterfaceTranslationSetup): () =
       iconViewButton.classList.toggle('is-selected', iconView);
     }
     const commandLabels: Array<[string, string]> = [
-      ['new', t.new], ['open', t.open], ['save-json', t.save], ['export-cad', t.export], ['export-svg', t.exportSvg], ['export-png', t.exportPng], ['print-pdf', t.printPdf], ['sheet', t.sheet],
+      ['new', t.new], ['open', t.open], ['save-json', t.save], ['export-cad', t.export], ['export-svg', t.exportSvg], ['export-png', t.exportPng], ['print-preview', t.printPreview], ['print-pdf', t.printPdf], ['sheet', t.sheet],
       ['copy-selection', t.copy], ['cut-selection', t.cut], ['paste-selection', t.paste], ['undo', t.undo], ['redo', t.redo], ['rotate', t.rotate], ['delete', t.delete],
       ['zoom-in', t.zoomIn], ['zoom-out', t.zoomOut], ['fit', t.fit], ['shortcuts', t.shortcuts], ['component-guide', t.componentGuide], ['about', t.about],
     ];
@@ -60,7 +61,7 @@ export function setupInterfaceTranslation(deps: InterfaceTranslationSetup): () =
     }
     const languageLabel = deps.root.querySelector<HTMLElement>('.menu-language');
     if (languageLabel?.firstChild) languageLabel.firstChild.textContent = `${t.languageNames} `;
-    const options: Record<string, string> = { phase: t.phase, neutral: t.neutral, protection: 'PE', three: t.three, threeN: t.threeN };
+    const options: Record<string, string> = { phase: t.phase, neutral: t.neutral, protection: 'PE', three: t.three, threeN: t.threeN, positive: t.wirePositive, negative: t.wireNegative };
     for (const option of [...deps.root.querySelectorAll<HTMLOptionElement>('#wire-kind option')]) option.textContent = options[option.value] ?? option.textContent;
     const wireButton = deps.root.querySelector<HTMLButtonElement>('#draw-wire');
     if (wireButton) renderWireButton(wireButton, deps.wireDrawing(), t);
@@ -81,13 +82,16 @@ export function setupInterfaceTranslation(deps: InterfaceTranslationSetup): () =
     deps.root.querySelector<HTMLButtonElement>('#sim-run')?.setAttribute('aria-label', t.run);
     deps.root.querySelector<HTMLButtonElement>('#sim-stop')?.setAttribute('aria-label', t.stop);
     deps.root.querySelector<HTMLButtonElement>('#sim-stop')?.setAttribute('title', t.stopTitle);
-    set('#sim-state', deps.simulationMode() === 'run' ? t.run : t.editor);
+    const simState = deps.root.querySelector<HTMLElement>('#sim-state')?.dataset.mode;
+    set('#sim-state', simState === 'pause' ? t.paused : deps.simulationMode() === 'run' ? t.running : t.editor);
+    deps.root.querySelector<HTMLButtonElement>('#sim-pause')?.setAttribute('title', t.pauseTitle);
+    deps.root.querySelector<HTMLButtonElement>('#sim-pause')?.setAttribute('aria-label', t.pause);
     set('#speed-cycle', deps.speedButton.textContent === '1×' ? '1×' : deps.speedButton.textContent ?? '1×');
     deps.speedButton.setAttribute('aria-label', `${t.speed}: ${deps.speedButton.textContent}`);
     deps.speedButton.title = t.speed;
     set('#rotate-selection', t.rotate); set('#delete-selection', t.delete);
     set('[data-zoom="fit"]', t.showAll);
-    set('.palette-heading h2', t.elements);
+    set('.palette-heading h2', t.elements); set('#palette-toggle-label', t.elements);
     deps.paletteSearch.placeholder = t.search; deps.paletteSearch.setAttribute('aria-label', t.search.replace(/…$/, ''));
     set('#properties-panel h2', t.properties);
     set('#status', t.status); deps.zoomValue.title = t.zoom;
@@ -106,6 +110,8 @@ export function setupInterfaceTranslation(deps: InterfaceTranslationSetup): () =
     deps.root.querySelector<SVGSVGElement>('.viewport-svg')?.setAttribute('aria-label', t.schematic);
     const theme = deps.root.querySelector<HTMLButtonElement>('#theme-command');
     if (theme) theme.textContent = deps.root.dataset.theme === 'dark' ? t.themeLight : t.themeDark;
+    updateFullscreenButton(deps.root, t);
+    set('#print-preview-title', t.printPreview); setButton('#print-preview-print', t.printPdf); setButton('#print-preview-close', t.close);
     const grid = deps.root.querySelector<HTMLButtonElement>('#grid-command');
     if (grid) grid.textContent = deps.gridVisible() ? t.gridHide : t.gridShow;
     deps.applyPropertiesPanel();
@@ -142,14 +148,10 @@ export function setupInterfaceTranslation(deps: InterfaceTranslationSetup): () =
     }
     const examplesDialog = deps.root.querySelector<HTMLDialogElement>('#examples-dialog'); if (examplesDialog) {
       set('#examples-dialog-title', t.examples);
-      const activeExamplesFolder = deps.root.dataset.examplesFolder || '';
-      set('#examples-folder-label', activeExamplesFolder || t.examplesFolder);
-      set('#examples-sidebar-label', t.examples);
-      set('#examples-name-heading', t.examplesName);
-      set('#examples-code-heading', t.examplesCode);
+      for (const title of examplesDialog.querySelectorAll<HTMLElement>('[data-examples-author]')) title.textContent = t.examplesAuthor;
       const count = Number(examplesDialog.querySelector<HTMLElement>('#examples-count')?.dataset.visibleCount ?? examplesDialog.querySelectorAll('.example-file').length);
-      set('#examples-count', activeExamplesFolder ? t.examplesCount.replace('{count}', new Intl.NumberFormat(language).format(count)) : '');
-      examplesDialog.querySelector<HTMLElement>('.examples-files-section')?.setAttribute('aria-label', t.examples);
+      set('#examples-count', t.examplesCount.replace('{count}', new Intl.NumberFormat(language).format(count)));
+      examplesDialog.querySelector<HTMLElement>('.example-groups')?.setAttribute('aria-label', t.examples);
       examplesDialog.querySelector<HTMLButtonElement>('.examples-window-close')?.setAttribute('aria-label', t.close);
     }
     set('#cad-export-warning-title', t.cadExportWarningTitle);

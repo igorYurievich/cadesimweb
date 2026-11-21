@@ -3,8 +3,14 @@ import {
   isDelayBlock2d,
 } from '@model/realistic-2d-types';
 import { delayBlockActive, delayBlockSeconds } from '@engine/delay-blocks';
+import { stairTimerActive, stairTimerSeconds } from '@engine/stair-timer';
+import { STAIR_TIMER_2D } from '@model/stair-timer';
+import { isMomentaryManual } from '@engine/switching';
+import { MECH_BULB, MECH_PUSH, MECH_SOCKET, isMechanism } from '@model/mechanisms';
+import { isEnergized } from '@engine/loads';
+import { terminalKey } from '@engine/types';
 import type { EngineState } from '@engine/types';
-import type { SchemaElement } from '@model/types';
+import type { Schema, SchemaElement } from '@model/types';
 import type { SimulationState } from './types';
 
 /**
@@ -12,10 +18,11 @@ import type { SimulationState } from './types';
  * Корпус и винты у контактора и дисюнтора остаются чёрными, как в CADe_SIMU, поэтому is-powered с них снимается.
  * Вызывается последним, после общих визуалов.
  */
-export function apply2dVisuals(state: SimulationState, element: SchemaElement, node: SVGGElement): void {
+export function apply2dVisuals(state: SimulationState, element: SchemaElement, node: SVGGElement, schema?: Schema): void {
   const result = state.result;
   if (element.typeCode === PUSHBUTTON_2D) {
-    const pressed = result !== undefined && Boolean(state.inputs.pressed[element.id]);
+    const pressed = result !== undefined
+      && (Boolean(state.inputs.pressed[element.id]) || remotePressed(state, element, schema));
     node.classList.toggle('is-d2-on', pressed);
     if (pressed) node.classList.add('is-powered');
     return;
@@ -25,6 +32,15 @@ export function apply2dVisuals(state: SimulationState, element: SchemaElement, n
     node.classList.toggle('is-d2-on', on);
     node.classList.remove('is-powered');
     applyDelayReadout(result, element, node, on);
+    return;
+  }
+  if (element.typeCode === STAIR_TIMER_2D) {
+    applyStairTimerVisuals(state, element, node);
+    return;
+  }
+  if (isMechanism(element.typeCode)) {
+    node.classList.toggle('is-d2-on', result !== undefined
+      && (mechanismOn(state, element) || (element.typeCode === MECH_PUSH && remotePressed(state, element, schema))));
     return;
   }
   if (element.typeCode === THERMAL_RELAY_2D) {
@@ -67,4 +83,53 @@ function applyDelayReadout(
   if (readout && readout.textContent !== text) readout.textContent = text;
   node.classList.toggle('is-timer-counting', counting);
   node.classList.toggle('is-timer-done', on && !counting);
+}
+
+const formatMinutes = (seconds: number): string => {
+  const whole = Math.ceil(seconds);
+  return `${Math.floor(whole / 60)}:${String(whole % 60).padStart(2, '0')}`;
+};
+
+/**
+ * Минутник Alst 8: контакт P–3 (is-d2-on) замкнут отсчётом или движком «☼» (is-stair-permanent, видна
+ * табличка «☼ ON»); пока кнопка отпущена и идёт выдержка, под «<min» виден остаток «м:сс».
+ */
+function applyStairTimerVisuals(state: SimulationState, element: SchemaElement, node: SVGGElement): void {
+  const result = state.result;
+  const permanent = result !== undefined && Boolean(state.inputs.toggled[element.id]);
+  const timer = result?.memory.timers[element.id];
+  const on = result !== undefined && (permanent || stairTimerActive(element, result.memory.timers));
+  node.classList.toggle('is-d2-on', on);
+  node.classList.toggle('is-stair-permanent', permanent);
+  node.classList.remove('is-powered');
+  const counting = !permanent && timer?.phase === 'releasing';
+  const total = stairTimerSeconds(element);
+  const left = counting ? Math.max(0, total - (timer?.releaseElapsed ?? 0)) : total;
+  const text = result === undefined || permanent ? '' : formatMinutes(left);
+  const readout = node.querySelector<SVGTextElement>('.timer-readout');
+  if (readout && readout.textContent !== text) readout.textContent = text;
+  node.classList.toggle('is-timer-counting', counting);
+  node.classList.toggle('is-timer-done', on && !counting);
+}
+
+/** Механизм: клавиша нажата (выключатель, переключатели), кнопка зажата, розетка под напряжением L–N. */
+function mechanismOn(state: SimulationState, element: SchemaElement): boolean {
+  if (element.typeCode === MECH_PUSH) return Boolean(state.inputs.pressed[element.id]);
+  if (element.typeCode === MECH_BULB) return state.result?.lamps[element.id] ?? false;
+  if (element.typeCode !== MECH_SOCKET) return state.inputs.toggled[element.id] === true;
+  const result = state.result;
+  if (!result) return false;
+  const byId = new Map(result.nets.map((net) => [net.id, net] as const));
+  const net = (index: number) => byId.get(result.terminalNet[terminalKey(element.id, index)] ?? -1);
+  const l = net(0);
+  const n = net(2);
+  return Boolean(l && n && isEnergized(l, n).energized);
+}
+
+/** Кнопку нажимают одноимённой «Botón pulsador» 8023 (или другой одноимённой кнопкой без фиксации). */
+function remotePressed(state: SimulationState, element: SchemaElement, schema: Schema | undefined): boolean {
+  const name = element.name.trim().toLocaleUpperCase();
+  if (!schema || !name) return false;
+  return schema.elements.some((candidate) => candidate.id !== element.id && isMomentaryManual(candidate.typeCode)
+    && candidate.name.trim().toLocaleUpperCase() === name && Boolean(state.inputs.pressed[candidate.id]));
 }

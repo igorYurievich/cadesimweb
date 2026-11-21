@@ -1,3 +1,5 @@
+import { unpackProgramPagesFromCad } from './program-pages';
+import { migrateResizedWebTerminals } from './web-terminal-migration';
 /**
  * Импорт .cad в модель схемы (Schema).
  * Поля записи (индексы в CadRecord.nums), выведенные из образцов:
@@ -26,9 +28,10 @@ import {
 } from './realistic-2d-types';
 import { delayBlockParams } from './cad-delay-blocks';
 import { isPushbutton2d } from './pushbutton-2d';
+import { STAIR_TIMER_2D, stairTimerParamsFromFile } from './stair-timer';
 import { PLC_FIXED_LABELS } from './plc-types';
 import { plcBlockParams } from './plc-blocks';
-import { syncModuleLabels } from './plc-modules';
+import { logoSupplyFromFile, syncModuleLabels } from './plc-modules';
 
 export interface ImportResult {
   schema: Schema;
@@ -111,6 +114,15 @@ function toElement(r: CadRecord, continuations: readonly CadRecord[] = []): Sche
   const extra = r.texts.filter((t, i) => i >= 2 && !labelFields.has(i) && t !== '');
   const params: SchemaElement['params'] = {};
   if (info.family === 'lamp' && extra[0] !== undefined) params.color = Number(extra[0]);
+  // «Botón pulsador» 8023: цвет «rrggbb» → params.buttonColor «#rrggbb» (только веб-версия, switches.ts).
+  // Питание LOGO / DM8 — последнее текстовое поле (plc-modules.ts).
+  if (typeCode === 10202 || typeCode === 10214) {
+    const supply = logoSupplyFromFile(r.texts.at(-1));
+    if (supply !== undefined) params.supply = supply;
+  }
+  if (typeCode === 8023 && extra[0] !== undefined && /^[0-9a-f]{6}$/i.test(extra[0])) {
+    params.buttonColor = `#${extra[0]}`;
+  }
   if (r.type === 8) params.text = r.tail ?? r.texts.find((value) => value.trim() !== '') ?? '';
   if (info.code === 9004 || info.code === 9005 || info.code === 9006) {
     // Порядок и смысл (шкала, значение) подтверждены только по двум образцам: 0/5 и 0/10.
@@ -122,6 +134,8 @@ function toElement(r: CadRecord, continuations: readonly CadRecord[] = []): Sche
   if ((typeCode === 1000 || typeCode === 1001) && num(r, 16) === MOTOR_2D_FILE_PARAM) params.motor2d = true;
   // Цвет кнопки 2D — nums[16] (pushbutton-2d.ts).
   if (isPushbutton2d(typeCode) && num(r, 16) !== 0) params.buttonColor = num(r, 16);
+  // Минутник: nums[16] — выдержка и подключение кнопок (stair-timer.ts).
+  if (typeCode === STAIR_TIMER_2D && num(r, 16) > 0) Object.assign(params, stairTimerParamsFromFile(num(r, 16)));
   if (extra.length > 0) params.extra = extra.join('#');
 
   return {
@@ -232,6 +246,10 @@ export function importCad(text: string): ImportResult {
     wires,
     sheet: toSheet(file.footer),
   };
+  // Программа ПЛК справа от рамки — на свой лист (program-pages.ts).
+  unpackProgramPagesFromCad(schema);
+  // Минутник и лампочка из файлов до уменьшения рамки: провода в старых точках клемм (web-terminal-migration.ts).
+  migrateResizedWebTerminals(schema);
   // Клеммы LOGO / DM8 подписаны по адресам модулей на листе (plc-modules.ts).
   syncModuleLabels(schema);
   return { schema, warnings, unknownTypes: [...unknown].sort((a, b) => a - b) };

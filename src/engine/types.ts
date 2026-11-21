@@ -118,6 +118,9 @@ export interface TimerState {
   q?: boolean;
   count?: number;
   inputs?: boolean[];
+  /** Преобразователь частоты (vfd.ts): частота на выходе, Гц, и направление (1 — вперёд, −1 — назад). */
+  hz?: number;
+  dir?: 1 | -1;
 }
 
 export interface EngineOptions {
@@ -156,6 +159,17 @@ export interface MotorState {
   faulted: boolean;
   /** Двигатель постоянного тока вращается в обратную сторону (на A1 минус, на A2 плюс). */
   reversed?: boolean;
+  /** Пониженная скорость: ротор 1004 замкнут через пусковые резисторы (после их закорачивания — полная). */
+  slow?: boolean;
+  /**
+   * Скорость двухскоростного двигателя (1003 Dahlander, 1005 две обмотки): low — малая, high — большая (вдвое быстрее).
+   * Для остальных двигателей не задаётся.
+   */
+  speed?: 'low' | 'high';
+  /** Выводы, по которым определяется направление вращения (по умолчанию U1 V1 W1 — 0, 1, 2). */
+  directionTerminals?: readonly [number, number, number];
+  /** Частота питания от преобразователя частоты, Гц (нет — сеть 50 Гц). Скорость пропорциональна частоте. */
+  hz?: number;
 }
 
 export type FaultKind = 'short-circuit' | 'earth-leak' | 'unstable';

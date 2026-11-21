@@ -1,4 +1,5 @@
 import type { Schema, WireKind } from '@model/types';
+import { pageOfX, pageOrigin, programPageCount, programPageSize } from '@model/program-pages';
 import { detectBundleLayout, offsetRoute, orthogonalize, simplifyRoute } from './wire-routing';
 import type { Point } from './viewport';
 
@@ -11,6 +12,9 @@ export interface PlannedWireRoute {
 export function activeWireKinds(value: string): DrawKind[] {
   if (value === 'three') return ['phase', 'phase', 'phase'];
   if (value === 'threeN') return ['phase', 'phase', 'phase', 'neutral'];
+  // Ladder: «+» рисуется как провод фазы (красный), «−» — как нейтраль (синий); код в .cad — wireTypeCode.
+  if (value === 'positive') return ['phase'];
+  if (value === 'negative') return ['neutral'];
   return [value as DrawKind];
 }
 
@@ -41,9 +45,13 @@ export function buildBundleRoutes(
   return kinds.map((kind, index) => ({ route: lanes[index] as Point[], kind }));
 }
 
+/** Весь провод на одном листе: основном или листе программы ПЛК (model/program-pages.ts). */
 export function routeInsideSheet(route: readonly Point[], schema: Schema): boolean {
-  return route.every((point) => point.x >= 0 && point.y >= 0
-    && point.x <= schema.sheet.width && point.y <= schema.sheet.height);
+  const page = pageOfX(route[0]?.x ?? 0);
+  const onPage = page >= 1 && page <= programPageCount(schema);
+  const ox = onPage ? pageOrigin(page) : 0;
+  const { width, height } = onPage ? programPageSize(schema.sheet) : schema.sheet;
+  return route.every((point) => point.x >= ox && point.y >= 0 && point.x <= ox + width && point.y <= height);
 }
 
 export function routeHitsComponent(route: readonly Point[], schema: Schema, elementLayer: SVGGElement): boolean {
@@ -103,4 +111,10 @@ export function routeHitsComponent(route: readonly Point[], schema: Schema, elem
     }
   }
   return false;
+}
+
+/** Код провода в .cad: «+» — Cable positivo 4018, иначе по виду линии (фаза 4000, нейтраль / «−» 4009, PE 4010). */
+export function wireTypeCode(selectValue: string, kind: DrawKind): number {
+  if (selectValue === 'positive') return 4018;
+  return kind === 'phase' ? 4000 : kind === 'neutral' ? 4009 : 4010;
 }

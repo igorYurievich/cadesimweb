@@ -154,7 +154,11 @@ const TABLE: readonly TypeBehavior[] = [
   { typeCode: 1063, links: inert() },
   { typeCode: 1054, links: inert() },
   { typeCode: 1055, links: inert() },
-  { typeCode: 1056, links: inert() },
+  // Реле RA–RC блока управления преобразователя: замкнуто, пока привод выдаёт частоту (vfd.ts).
+  { typeCode: 1056, links: [{ terminals: [0, 1], kind: 'switch', control: 'coil-name' }] },
+  // Преобразователь 2D (только веб): реле TA–TC, как RA–RC у 1056.
+  { typeCode: 10240, links: [{ terminals: [8, 9], kind: 'switch', control: 'coil-name' }] },
+  { typeCode: 10241, links: [{ terminals: [7, 8], kind: 'switch', control: 'coil-name' }] },
   { typeCode: 1057, links: inert() },
   { typeCode: 1058, links: inert() },
   { typeCode: 1059, links: inert() },
@@ -213,7 +217,7 @@ const TABLE: readonly TypeBehavior[] = [
   { typeCode: 7014, links: [...switches([[0, 2]], 'coil-name', { normallyClosed: true }), ...switches([[1, 3]], 'coil-name')] },
   { typeCode: 7015, links: [...switches([[0, 1]], 'coil-name', { normallyClosed: true }), ...switches([[0, 2]], 'coil-name')] },
   // Кнопки панели «Accionamientos»: контакт переключается, пока кнопка нажата. Клеммы: NA-NC — 11 13 / 12 14 (НЗ 0-2, НО 1-3);
-  // CON — общий 0, НЗ 1, НО 2. 8023 (круг-индикатор) без клемм и без поведения.
+  // CON — общий 0, НЗ 1, НО 2. 8023 («Botón pulsador») без клемм: нажимает одноимённые кнопки (switching.ts).
   { typeCode: 8023, links: inert() },
   { typeCode: 8000, links: switches([[0, 1]], 'pressed') },
   { typeCode: 8001, links: switches([[0, 1]], 'pressed', { normallyClosed: true }) },

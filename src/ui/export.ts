@@ -12,6 +12,8 @@ export interface ExportActions {
   exportSvgFile(): void;
   exportPngFile(): void;
   printPdf(): void;
+  /** Лист в том виде, в каком он уходит на печать (без сетки): для предпросмотра печати. */
+  printSheetSvg(): SVGSVGElement;
 }
 
 /** Цвета ламп на листе: те же, что у включённой лампы в симуляции (viewport.css, .lamp-c0…2). */
@@ -234,6 +236,11 @@ export function setupExport(
     };
     image.src = svgUrl;
   };
+  const printSheetSvg = (): SVGSVGElement => {
+    const printSvg = createSheetExportSvg();
+    printSvg.querySelector('#sheet-grid')?.remove();
+    return printSvg;
+  };
   const printPdf = (): void => {
     const printWindow = window.open('', '_blank');
     if (!printWindow) {
@@ -244,8 +251,7 @@ export function setupExport(
     const height = fullSheet(ctx.schema.sheet).height;
     const printWidth = `${Math.round(width * 100) / 100}mm`;
     const printHeight = `${Math.round(height * 100) / 100}mm`;
-    const printSvg = createSheetExportSvg();
-    printSvg.querySelector('#sheet-grid')?.remove();
+    const printSvg = printSheetSvg();
     const svgMarkup = new XMLSerializer().serializeToString(printSvg);
     const title = outputBaseName();
     // Chrome не делает кликабельными SVG-ссылки при печати в PDF, поэтому поверх ячейки штампа кладём HTML-ссылку (размеры в мм, как во viewBox).
@@ -267,5 +273,5 @@ export function setupExport(
     printWindow.addEventListener('afterprint', () => printWindow.close(), { once: true });
     setTimeout(() => { printWindow.focus(); printWindow.print(); }, 350);
   };
-  return { saveJson, exportCadFile, exportSvgFile, exportPngFile, printPdf };
+  return { saveJson, exportCadFile, exportSvgFile, exportPngFile, printPdf, printSheetSvg };
 }

@@ -1,6 +1,7 @@
 /** Один проход релейного расчёта: контакты, питание, нагрузки, катушки. */
 
 import type { Schema } from '../model/types';
+import { DIN_PSU_TYPE } from '../model/plc-power-supply';
 import { buildNets } from './graph';
 import { computeSwitching } from './switching';
 import { findSources } from './sources';
@@ -12,7 +13,11 @@ import { evaluateMotors } from './motors';
 import { resolveThermalState } from './thermal';
 import { drivesNamedRelay, relayTriggerActive } from './sensors';
 import { applyLogoInputs, applyPlcCoils } from './plc';
+import { applyStairTimerInputs } from './stair-timer';
+import { applyS7Inputs } from './s7-1200';
 import { plcBlockSources } from './plc-blocks';
+import { applyVfdInputs, vfdOutput, vfdSources } from './vfd';
+import { VFD_POWER_INDEX, isVfdDrive } from '../model/vfd';
 
 export interface RelayPassResult {
   nets: NetState[];
@@ -50,6 +55,39 @@ function applyInterlocks(schema: Schema, current: Readonly<Record<string, boolea
 }
 
 /**
+ * Двигатели, питаемые от преобразователя частоты: частота привода, к выходу U V W которого (через замкнутые
+ * контакты) подключены выводы двигателя. Скорость на экране пропорциональна ей.
+ */
+function withDriveFrequency(
+  schema: Schema,
+  motors: Record<number, import('./types').MotorState>,
+  terminalNet: Readonly<Record<TerminalKey, number>>,
+  root: (id: number) => number,
+  timers: Readonly<Record<number, TimerState>>,
+): Record<number, import('./types').MotorState> {
+  const groups = new Map<number, number>();
+  for (const drive of schema.elements) {
+    if (!isVfdDrive(drive.typeCode)) continue;
+    const { hz } = vfdOutput(drive, timers);
+    if (hz <= 0) continue;
+    for (const index of VFD_POWER_INDEX[drive.typeCode]!.outputs) {
+      const net = terminalNet[terminalKey(drive.id, index)];
+      if (net !== undefined) groups.set(root(net), hz);
+    }
+  }
+  if (groups.size === 0) return motors;
+  const result = { ...motors };
+  for (const [id, motor] of Object.entries(motors)) {
+    if (!motor.running) continue;
+    const first = (motor.directionTerminals ?? [0, 1, 2])[0];
+    const net = terminalNet[terminalKey(Number(id), first)];
+    const hz = net === undefined ? undefined : groups.get(root(net));
+    if (hz !== undefined) result[Number(id)] = { ...motor, hz };
+  }
+  return result;
+}
+
+/**
  * Выполняет расчёт с заданными состояниями катушек. Новые состояния катушек
  * становятся входом следующего прохода, поэтому соответствующие контакты
  * меняются на следующей итерации, а не внутри этого прохода.
@@ -65,10 +103,11 @@ export function solvePass(
   const switching = computeSwitching(schema, inputs, coils, thermal, timers);
   const sourceResult = findSources(schema, graph.terminalNet);
   let nets = propagatePotentials(graph.nets, graph.terminalNet, sourceResult.sources, switching.edges, switching.transfers);
-  // Блоки питания создают DC-шины только при наличии подходящего AC-входа.
+  // Блоки питания создают DC-шины только при наличии подходящего AC-входа (блок на DIN-рейку — как 3014).
   const converterSources: import('./sources').PotentialSource[] = [];
+  const converterTypes: readonly number[] = [3014, DIN_PSU_TYPE, 3018];
   for (const converter of schema.elements) {
-    if (converter.typeCode !== 3014 && converter.typeCode !== 3018) continue;
+    if (!converterTypes.includes(converter.typeCode)) continue;
     const phaseInputs = converter.typeCode === 3018 ? [0, 1, 2] : [0, 1];
     const inputPotentials = phaseInputs.map((index) => {
       const netId = graph.terminalNet[terminalKey(converter.id, index)];
@@ -103,6 +142,8 @@ export function solvePass(
   }
   // Выходы включённых блоков Ladder отдают «+» (plc-blocks.ts).
   converterSources.push(...plcBlockSources(schema, graph.terminalNet, timers));
+  // Преобразователи частоты: «+»/0V блока управления и фазы на U V W, пока есть частота (vfd.ts).
+  converterSources.push(...vfdSources(schema, graph.terminalNet, new Map(nets.map((net) => [net.id, net] as const)), timers));
   if (converterSources.length) {
     nets = propagatePotentials(graph.nets, graph.terminalNet, [...sourceResult.sources, ...converterSources], switching.edges, switching.transfers);
   }
@@ -154,6 +195,9 @@ export function solvePass(
 
   // LOGO: питание модуля и входы I1…I8 (plc.ts).
   applyLogoInputs(schema, graph.terminalNet, netById, nextCoils);
+  applyStairTimerInputs(schema, graph.terminalNet, netById, nextCoils);
+  applyS7Inputs(schema, graph.terminalNet, netById, nextCoils);
+  applyVfdInputs(schema, graph.terminalNet, netById, nextCoils, inputs);
   applyPlcCoils(schema, graph.terminalNet, netById, coils, nextCoils, timers);
   applyInterlocks(schema, coils, nextCoils);
 
@@ -163,7 +207,7 @@ export function solvePass(
     coils: nextCoils,
     contacts: switching.contacts,
     lamps: loads.lamps,
-    motors: evaluateMotors(schema, nets, graph.terminalNet, switching.edges),
+    motors: withDriveFrequency(schema, evaluateMotors(schema, nets, graph.terminalNet, switching.edges), graph.terminalNet, potentialRoot, timers),
     tripped: thermal.tripped,
     faults: loads.faults,
     warnings: [

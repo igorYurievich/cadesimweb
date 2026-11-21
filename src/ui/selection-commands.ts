@@ -8,6 +8,52 @@ import { clampDeltaToSheet, clampElementPosition, clampPointToSheet, elementExte
 import { cloneSchema, selectionKey } from './helpers';
 import { screenToSheet, snapPointToGrid } from './viewport';
 import { CAD_GRID_STEP } from './constants';
+import { pageOfX, pageOrigin } from '@model/program-pages';
+import { cadTypeForCommand } from '@model/cad-types';
+import { catalog } from '@model/catalog';
+import { terminalPosition } from '@model/geometry';
+import { currentPage } from './program-pages-view';
+
+/** Типы панели Ladder: контакты, катушки, блоки, шины «+» / «−» (кнопки catalog 'ladder'). */
+const LADDER_TYPES: ReadonlySet<number> = new Set(catalog.inGroup('ladder')
+  .map((item) => cadTypeForCommand(item.id)?.code).filter((code): code is number => code !== undefined));
+
+/**
+ * Из скопированного — только Ladder: его элементы и провода, связанные с их клеммами (по цепочке проводов).
+ * Провода, которые идут только к другим аппаратам, отбрасываются.
+ */
+function ladderOnly(clipboard: SelectionClipboard): SelectionClipboard {
+  // Шины «+» / «−» (3008 / 3009) стоят и на силовой схеме: берём только те, к которым по проводам приходят
+  // контакты, катушки и блоки Ladder.
+  const RAILS = new Set([3008, 3009]);
+  const core = clipboard.elements.filter((element) => LADDER_TYPES.has(element.typeCode) && !RAILS.has(element.typeCode));
+  const key = (p: Point): string => `${p.x},${p.y}`;
+  const reached = new Set<string>();
+  for (const element of core) {
+    element.terminals.forEach((_, index) => { const p = terminalPosition(element, index); if (p) reached.add(key(p)); });
+  }
+  const wires: WireSegment[] = [];
+  let pending = [...clipboard.wires];
+  for (let grew = true; grew;) {
+    grew = false;
+    const rest: WireSegment[] = [];
+    for (const wire of pending) {
+      if (reached.has(key(wire.from)) || reached.has(key(wire.to))) {
+        wires.push(wire); reached.add(key(wire.from)); reached.add(key(wire.to)); grew = true;
+      } else rest.push(wire);
+    }
+    pending = rest;
+  }
+  const kept = new Set(wires.map((wire) => wire.id));
+  const rails = clipboard.elements.filter((element) => RAILS.has(element.typeCode)
+    && element.terminals.some((_, index) => { const p = terminalPosition(element, index); return p !== undefined && reached.has(key(p)); }));
+  const ids = new Set([...core, ...rails].map((element) => element.id));
+  return {
+    elements: clipboard.elements.filter((element) => ids.has(element.id)),
+    wires: clipboard.wires.filter((wire) => kept.has(wire.id)),
+    anchor: clipboard.anchor,
+  };
+}
 
 export interface SelectionClipboard { elements: SchemaElement[]; wires: WireSegment[]; anchor: Point }
 export interface SelectionCommandsSetup {
@@ -50,10 +96,20 @@ export function setupSelectionCommands(ctx: AppContext, deps: SelectionCommandsS
   };
 
   const pasteSelection = (): void => {
-    const clipboard = deps.clipboard();
-    if (!clipboard) return;
+    const copied = deps.clipboard();
+    if (!copied) return;
     if (deps.simulationMode() !== 'edit') { deps.status.textContent = 'Остановите симуляцию перед вставкой объектов.'; return; }
     const { schema } = ctx;
+    // Вставляем на лист, который сейчас на экране (основной или лист программы ПЛК, program-pages.ts).
+    const size = deps.viewSize();
+    const page = currentPage(schema, deps.viewport(), size);
+    // На лист программы — только Ladder: контакты, катушки, блоки, шины «+» / «−» и провода между ними.
+    const clipboard = page >= 1 ? ladderOnly(copied) : copied;
+    const skipped = copied.elements.length + copied.wires.length - clipboard.elements.length - clipboard.wires.length;
+    if (!clipboard.elements.length) {
+      deps.status.textContent = 'На лист программы вставляются только элементы Ladder, а их в скопированном нет.';
+      return;
+    }
     const bounds = { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity };
     const include = (x: number, y: number): void => {
       bounds.minX = Math.min(bounds.minX, x); bounds.minY = Math.min(bounds.minY, y);
@@ -68,10 +124,18 @@ export function setupSelectionCommands(ctx: AppContext, deps: SelectionCommandsS
     if (bounds.maxX - bounds.minX > schema.sheet.width || bounds.maxY - bounds.minY > schema.sheet.height) {
       deps.status.textContent = 'Выделенные объекты не помещаются на этот лист.'; return;
     }
-    const size = deps.viewSize();
-    const pointer = deps.pointer() ?? screenToSheet({ x: size.x / 2, y: size.y / 2 }, deps.viewport());
+    // Курсор с другого листа (например, после перехода кнопкой) не годится — тогда в центр вида.
+    const lastPointer = deps.pointer();
+    const pointer = lastPointer && pageOfX(lastPointer.x) === page
+      ? lastPointer : screenToSheet({ x: size.x / 2, y: size.y / 2 }, deps.viewport());
     const target = clampPointToSheet(snapPointToGrid(pointer, 3), schema.sheet);
-    const delta = clampDeltaToSheet({ x: target.x - clipboard.anchor.x, y: target.y - clipboard.anchor.y }, bounds, schema.sheet);
+    // С другого листа: сначала переносим группу на этот лист целиком, потом ограничиваем его полем.
+    const anchor = page >= 1 && clipboard !== copied
+      ? { x: (bounds.minX + bounds.maxX) / 2, y: (bounds.minY + bounds.maxY) / 2 } : clipboard.anchor;
+    const shiftX = pageOrigin(page) - pageOrigin(pageOfX(bounds.minX));
+    const shifted = { ...bounds, minX: bounds.minX + shiftX, maxX: bounds.maxX + shiftX };
+    const inPage = clampDeltaToSheet({ x: target.x - anchor.x - shiftX, y: target.y - anchor.y }, shifted, schema.sheet);
+    const delta = { x: inPage.x + shiftX, y: inPage.y };
     const before = cloneSchema(schema);
     let id = Math.max(0, ...schema.elements.map((element) => element.id), ...schema.wires.map((wire) => wire.id)) + 1;
     const pastedElements = structuredClone(clipboard.elements).map((element) => {
@@ -84,7 +148,8 @@ export function setupSelectionCommands(ctx: AppContext, deps: SelectionCommandsS
     for (const element of pastedElements) { const item: Selectable = { kind: 'element', id: element.id }; deps.selected.set(selectionKey(item), item); }
     for (const wire of pastedWires) { const item: Selectable = { kind: 'wire', id: wire.id }; deps.selected.set(selectionKey(item), item); }
     deps.commitSchema(before); deps.renderSchema();
-    deps.status.textContent = `Вставлено объектов: ${pastedElements.length + pastedWires.length}.`;
+    deps.status.textContent = `Вставлено объектов: ${pastedElements.length + pastedWires.length}.`
+      + (skipped > 0 ? ` Не Ladder, пропущено: ${skipped}.` : '');
   };
 
   const deleteSelected = (): void => {

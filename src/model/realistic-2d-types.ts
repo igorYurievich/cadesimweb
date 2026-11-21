@@ -66,6 +66,10 @@ export const COLOR_VIEW_TYPES: ReadonlySet<number> = new Set([
   8100, 8101, 7018, 6015, 6016, 7019, 7020, 7021,
   ...Object.values(AUTOMATIC_2D), ...Object.values(DIFFERENTIAL_2D),
   10202, 10214, // LOGO и DM8 (plc-types.ts)
+  10220, // блок питания 24 V на DIN-рейку (plc-power-supply.ts)
+  8110, // автомат лестничного освещения Alst 8 (stair-timer.ts)
+  10230, // ПЛК S7-1200 (s7-1200.ts)
+  8120, 8121, 8122, 8123, 8124, 8125, // механизмы Niessen и лампочка (mechanisms.ts)
 ]);
 
 export const hasViewChoice = (element: { typeCode: number; params: Record<string, unknown> }): boolean =>
@@ -183,7 +187,7 @@ const TYPES_FROM_TERMINAL_1: readonly CadTypeInfo[] = [
     terminalCount: 2,
     commandIds: [33318],
     confidence: 'probable',
-    note: '6×21: X1 сверху, X2 снизу по центру; цвет пока только в схеме веб-версии (кодировка в .cad не известна).',
+    note: '6×21: X1 сверху, X2 снизу по центру; цвет — текстовое поле после клемм, как у лампы 9008 (у CADe_SIMU не сверено).',
   },
   {
     code: CONTACTOR_2D,

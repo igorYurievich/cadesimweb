@@ -16,3 +16,17 @@ export function updatePlcAddresses(schema: Pick<Schema, "elements">): void {
 export function addressOf(element: SchemaElement): ModuleAddress | undefined {
   return current.get(element.id) ?? standaloneAddress(element);
 }
+
+const operandNumber = (name: string): number => Number(name.slice(1));
+
+/**
+ * Все входы и выходы, которые видит базовый LOGO: свои и всех DM8 листа (I1…I12, Q1…Q8 с одним DM8).
+ * Для превью в палитре и для модуля не с листа — только свои.
+ */
+export function logoScreenIo(element: SchemaElement): { inputs: string[]; outputs: string[] } {
+  const own = addressOf(element);
+  if (!current.has(element.id)) return { inputs: own?.inputs ?? [], outputs: own?.outputs ?? [] };
+  const all = [...current.values()];
+  const sorted = (names: string[]): string[] => [...new Set(names)].sort((a, b) => operandNumber(a) - operandNumber(b));
+  return { inputs: sorted(all.flatMap((a) => a.inputs)), outputs: sorted(all.flatMap((a) => a.outputs)) };
+}

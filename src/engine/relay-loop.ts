@@ -7,8 +7,11 @@ import type { RelayPassResult } from './relay-pass';
 import type { Fault, TimerState, UserInputs } from './types';
 import { advanceTimers } from './timers';
 import { advanceDelayBlocks } from './delay-blocks';
+import { advanceStairTimers, stairTimerKeys } from './stair-timer';
 import { beginPlcScan, endPlcScan, logoRelayNames } from './plc';
+import { s7RelayNames } from './s7-1200';
 import { advancePlcBlocks } from './plc-blocks';
+import { advanceVfds, vfdKeys } from './vfd';
 
 export interface RelayLoopResult {
   pass: RelayPassResult;
@@ -30,8 +33,8 @@ export function relayCoilNames(schema: Schema): string[] {
     seen.add(element.name);
     names.push(element.name);
   }
-  // Операнды, которые задаёт LOGO: «запитан» и входы I1…I8 (plc.ts).
-  for (const name of logoRelayNames(schema)) {
+  // Операнды, которые задаёт LOGO: «запитан» и входы I1…I8 (plc.ts); входы минутников (stair-timer.ts).
+  for (const name of [...logoRelayNames(schema), ...stairTimerKeys(schema), ...s7RelayNames(schema), ...vfdKeys(schema)]) {
     if (!seen.has(name)) names.push(name);
     seen.add(name);
   }
@@ -89,9 +92,12 @@ export function solveRelayLoop(
   if (stable && pass) {
     const coilTimers = advanceTimers(schema, pass.nets, pass.terminalNet, time, timers);
     // Блоки с выдержкой 2D считают от устойчивого состояния своих катушек.
-    const delayTimers = advanceDelayBlocks(schema, coils, time, coilTimers);
+    const delayTimers = advanceStairTimers(
+      schema, coils, pass.nets, pass.terminalNet, time, advanceDelayBlocks(schema, coils, time, coilTimers),
+    );
     // Блоки Ladder: таймеры, счётчики, биестабильный и делитель (plc-blocks.ts).
-    const nextTimers = advancePlcBlocks(schema, pass.nets, pass.terminalNet, time, delayTimers);
+    // Преобразователи частоты: частота по рампам (vfd.ts).
+    const nextTimers = advanceVfds(schema, coils, time, advancePlcBlocks(schema, pass.nets, pass.terminalNet, time, delayTimers));
     const timersChanged = JSON.stringify(nextTimers) !== JSON.stringify(timers);
     timers = nextTimers;
     // Recalculate timed contacts after elapsed time changes, but advance timers

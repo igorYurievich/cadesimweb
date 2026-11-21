@@ -20,8 +20,8 @@ describe('palette filter: verified components only', () => {
   });
 
   it('hides components without the green mark until «show all» is chosen', () => {
-    expect(isPaletteItemShown('manual-controls', 33278, true)).toBe(false);
-    expect(isPaletteItemShown('manual-controls', 33278, false)).toBe(true);
+    expect(isPaletteItemShown('power-sources', 32995, true)).toBe(false);
+    expect(isPaletteItemShown('power-sources', 32995, false)).toBe(true);
     expect(isPaletteItemShown('manual-controls', 32909, true)).toBe(true);
     expect(isPaletteItemShown('realistic-2d', 33340, true)).toBe(true);
   });

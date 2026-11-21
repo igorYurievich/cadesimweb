@@ -12,6 +12,8 @@ import { setupSchemaRenderer } from './schema-renderer';
 import type { SimulationController } from './sim-controller';
 import type { Point, Viewport } from './viewport';
 import { INTERFACE_TEXT } from './i18n';
+import { currentPage, renderPageTabs, renderProgramPageSheets } from './program-pages-view';
+import { growProgramPagesToContent } from '@model/program-pages';
 
 export interface EditorViewOptions {
   ctx: AppContext;
@@ -77,6 +79,7 @@ export function setupEditorView(options: EditorViewOptions) {
     );
     elements.zoomValue.value = `${Math.round(options.viewport().scale * 100)}%`;
     options.scheduleViewportSave();
+    updatePages();
   };
   const drawDraft = setupWireDraft({
     layer: elements.draftLayer,
@@ -113,7 +116,14 @@ export function setupEditorView(options: EditorViewOptions) {
       ? String(firstThickness)
       : '';
   };
-  renderSchema = setupSchemaRenderer(ctx, {
+  // Листы программ ПЛК: бумага и сетка справа от основного листа, вкладки «Схема / Программа» над полем.
+  const pageTexts = () => {
+    const text = options.uiText();
+    return { program: text.programPage, mainSheet: text.mainSheet };
+  };
+  const updatePages = (): void => renderPageTabs(root.querySelector<HTMLElement>('#page-tabs'), ctx.schema,
+    currentPage(ctx.schema, options.viewport(), options.viewSize()), pageTexts());
+  const renderMain = setupSchemaRenderer(ctx, {
     root,
     svg: elements.svg,
     wireLayer: elements.wireLayer,
@@ -129,6 +139,12 @@ export function setupEditorView(options: EditorViewOptions) {
     persistSchema: options.persistSchema,
     syncSelectedWireThickness,
   });
+  renderSchema = (): void => {
+    growProgramPagesToContent(ctx.schema);
+    renderProgramPageSheets(root.querySelector<SVGGElement>('#program-page-sheets'), ctx.schema, pageTexts());
+    renderMain();
+    updatePages();
+  };
   return {
     ...history,
     renderProperties: properties.renderProperties,

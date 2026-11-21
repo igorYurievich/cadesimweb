@@ -2,6 +2,7 @@ import type { AppContext } from './context';
 import { setupCadExportConfirmation, setupExport } from './export';
 import type { ExportActions } from './export';
 import { setupMenus } from './menus';
+import { setupPrintPreview } from './print-preview';
 import type { Viewport, Point } from './viewport';
 import type { Schema } from '@model/types';
 
@@ -64,6 +65,7 @@ export function setupAppMenus(options: AppMenuOptions): ExportActions {
     viewSize: options.viewSize,
     drawViewport: options.drawViewport,
   });
+  setupPrintPreview(options.ctx, options.root, exportActions);
   options.root.querySelector<HTMLButtonElement>('#rotate-selection')
     ?.addEventListener('click', options.rotateSelection);
   options.root.querySelector<HTMLButtonElement>('#delete-selection')

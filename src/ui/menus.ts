@@ -2,6 +2,8 @@ import type { Schema } from '@model/types';
 import type { AppContext } from './context';
 import type { Point, Viewport } from './viewport';
 import { fitViewport } from './viewport';
+import { growProgramPagesToContent, programPageSize } from '@model/program-pages';
+import { activeProgramPage, pageViewport } from './program-pages-view';
 import { cloneSchema, fullSheet } from './helpers';
 import type { ExportActions } from './export';
 
@@ -71,7 +73,9 @@ export function setupMenus(ctx: AppContext, deps: MenuSetup): void {
   };
   const openSheetDialog = (): void => {
     if (!sheetDialog || !sheetWidth || !sheetHeight) return;
-    sheetWidth.value = String(ctx.schema.sheet.width); sheetHeight.value = String(ctx.schema.sheet.height);
+    // На листе программы ПЛК правим размер листов программ (program-pages.ts), иначе — основного листа.
+    const size = activeProgramPage() >= 1 ? programPageSize(ctx.schema.sheet) : ctx.schema.sheet;
+    sheetWidth.value = String(size.width); sheetHeight.value = String(size.height);
     syncSheetFormat(); sheetDialog.showModal();
   };
   sheetFormat?.addEventListener('change', () => {
@@ -85,6 +89,25 @@ export function setupMenus(ctx: AppContext, deps: MenuSetup): void {
     const width = Number(sheetWidth.value); const height = Number(sheetHeight.value);
     const valid = (value: number): boolean => Number.isFinite(value) && value >= 30 && value <= 2000;
     if (!valid(width) || !valid(height)) { deps.status.textContent = 'Размер листа: допустимо от 30 до 2000 мм.'; return; }
+    const page = activeProgramPage();
+    if (page >= 1) {
+      // Лист программы не шире основного листа: в .cad программа пишется полосами справа от его рамки.
+      const sheet = ctx.schema.sheet;
+      const pageWidth = Math.min(width, sheet.width);
+      if (pageWidth !== programPageSize(sheet).width || height !== programPageSize(sheet).height) {
+        const before = cloneSchema(ctx.schema);
+        sheet.programPageWidth = pageWidth; sheet.programPageHeight = height;
+        // Меньше содержимого лист не делаем: Ladder, который уже нарисован, должен остаться на листе.
+        const grown = growProgramPagesToContent(ctx.schema);
+        deps.commitSchema(before);
+        deps.setViewport(pageViewport(ctx.schema, page, deps.viewSize)); deps.drawViewport(); deps.renderSchema();
+        const size = programPageSize(sheet);
+        if (grown) deps.status.textContent = `Программа не помещается на такой лист: размер ${size.width} × ${size.height} мм.`;
+      }
+      if (pageWidth < width) deps.status.textContent = `Лист программы не шире основного листа: ${pageWidth} мм.`;
+      sheetDialog?.close();
+      return;
+    }
     if (width !== ctx.schema.sheet.width || height !== ctx.schema.sheet.height) {
       const before = cloneSchema(ctx.schema);
       ctx.schema.sheet.width = width; ctx.schema.sheet.height = height;

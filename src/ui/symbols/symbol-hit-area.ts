@@ -6,10 +6,16 @@ import { detectorHitFrame } from "./detector-layout";
 import { BLOCK_SPECS } from "@model/plc-blocks";
 import { isPlcFixedType, LOGO_TYPE } from "@model/plc-types";
 
-/** LOGO — весь корпус; блоки Ladder — корпус и выводы; контакты и катушки Ladder — символ ±3 по высоте. */
+/** LOGO и блок питания 24 V — весь корпус; блоки Ladder — корпус и выводы; контакты и катушки Ladder — символ ±3 по высоте. */
 function plcHitFrame(typeCode: number): HitFrame | undefined {
   if (typeCode === LOGO_TYPE) return { x: 0, y: 0, w: 87, h: 102 };
   if (typeCode === 10214) return { x: 0, y: 0, w: 42, h: 102 };
+  if (typeCode === 10220) return { x: 0, y: 0, w: 18, h: 102 };
+  if (typeCode === 8110) return { x: 1, y: 0, w: 10, h: 27 };
+  if (typeCode === 10230) return { x: 0, y: 0, w: 141, h: 102 };
+  if (typeCode === 10240 || typeCode === 10241) return { x: 0, y: 3, w: 42, h: 84 };
+  if (typeCode >= 8120 && typeCode <= 8124) return { x: 0, y: 3, w: 24, h: 24 };
+  if (typeCode === 8125) return { x: 1.5, y: 0.5, w: 15, h: 23 };
   const spec = BLOCK_SPECS[typeCode];
   if (spec) return { x: -0.5, y: -3.5, w: 16, h: spec.h - 2 };
   return isPlcFixedType(typeCode) ? { x: -0.5, y: -3.6, w: 13, h: 7.2 } : undefined;

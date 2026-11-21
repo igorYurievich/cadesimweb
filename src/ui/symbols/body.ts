@@ -56,7 +56,12 @@ import { drawLadder } from "./ladder";
 import { drawLadderBlock } from "./ladder-blocks";
 import { LADDER_EXTRA, PLC_BLOCK } from "@model/plc-blocks";
 import { drawLogo } from "./logo-symbol";
+import { drawS7 } from "./s7-1200-symbol";
+import { drawMechanism } from "./mechanism-symbol";
 import { drawDm8 } from "./dm8-symbol";
+import { drawDinPowerSupply } from "./din-psu-symbol";
+import { drawStairTimer } from "./stair-timer-symbol";
+import { drawVfd2d, drawVfd2dMono } from "./vfd-2d-symbol";
 import { LOGO_DM8 } from "@model/plc-modules";
 import { LADDER_COIL, LADDER_NC, LADDER_NO, LOGO_TYPE } from "@model/plc-types";
 import {
@@ -214,7 +219,7 @@ register(
   [7000, 7001, 7002, 7003, 7004, 7005, 7006, 7007, 7008, 7009, 7010, 7011, 7012, 7013, 7014, 7015],
   drawAuxContact,
 );
-register([8023], (g) => drawIndicator(g));
+register([8023], (g, element) => drawIndicator(g, element));
 register([8000, 8001], drawPush);
 register([8004, 8005], drawSeta);
 register([8008, 8009], drawMaintained);
@@ -259,6 +264,12 @@ register([LADDER_NO, LADDER_NC, LADDER_COIL, ...LADDER_EXTRA], drawLadder);
 register(Object.values(PLC_BLOCK), drawLadderBlock);
 register([LOGO_TYPE], drawLogo);
 register([LOGO_DM8], drawDm8);
+register([10220], drawDinPowerSupply);
+register([8110], drawStairTimer);
+register([10230], drawS7);
+register([10240], drawVfd2d);
+register([10241], drawVfd2dMono);
+register([8120, 8121, 8122, 8123, 8124, 8125], drawMechanism);
 
 export function drawBody(g: SVGGElement, element: SchemaElement, rotation: number): void {
   (BODY_DRAWERS.get(element.typeCode) ?? drawFallback)(g, element, rotation);

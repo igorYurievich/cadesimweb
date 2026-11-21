@@ -7,6 +7,7 @@ import type { SimulationState } from './types';
 export function createSimulationState(): SimulationState {
   return {
     mode: 'edit',
+    paused: false,
     time: 0,
     speed: 1,
     memory: createEmptyMemory(),
@@ -16,7 +17,7 @@ export function createSimulationState(): SimulationState {
     animationFrame: undefined,
     contextElementId: undefined,
     heldInputs: new Set<number>(),
-    motorStartTimes: new Map<number, number>(),
+    motorAngles: new Map<number, { angle: number; time: number }>(),
     wireGroupOf: new Map<number, number>(),
     wireTerminalKeys: new Map(),
   };

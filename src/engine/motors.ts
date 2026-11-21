@@ -9,12 +9,12 @@ const PHASES = ['L1', 'L2', 'L3'] as const;
 /** Потенциалы питания переменного тока (фазы и нейтраль): PE питанием не считается. */
 const AC_SUPPLY = ['L1', 'L2', 'L3', 'N'] as const;
 
-/** Двигатели, которым достаточно трёх разных фаз на одной тройке клемм (индексы клемм). */
-const THREE_PHASE_SETS: Readonly<Record<number, ReadonlyArray<readonly [number, number, number]>>> = {
-  1003: [[0, 1, 2], [4, 5, 6]],   // Dahlander: малая скорость U1 V1 W1, большая U2 V2 W2
-  1005: [[0, 1, 2], [4, 5, 6]],   // две скорости: две отдельные обмотки
-  1004: [[0, 1, 2]],              // ротор с кольцами: питается статор, K L M — цепь ротора
-};
+/** Двухскоростные двигатели: U1 V1 W1 (0, 1, 2) — малая скорость, U2 V2 W2 (4, 5, 6) — большая. */
+const LOW_SET = [0, 1, 2] as const;
+const HIGH_SET = [4, 5, 6] as const;
+
+/** Резисторы 1050 / 1051: через них ротор 1004 замкнут на пусковые сопротивления (пониженная скорость). */
+const RESISTOR_TYPES: ReadonlySet<number> = new Set([1050, 1051]);
 
 /** Мотор вращается только при одной отдельной фазе на каждом U1/V1/W1. */
 export function evaluateMotors(
@@ -41,6 +41,23 @@ export function evaluateMotors(
     const rb = root(b);
     if (ra !== rb) parent.set(ra, rb);
   }
+  // Те же группы, но без резисторов: так видно, замкнут ли ротор накоротко (контактором) или через сопротивления.
+  const directParent = new Map<number, number>();
+  const directRoot = (id: number): number => {
+    let current = id;
+    while ((directParent.get(current) ?? current) !== current) current = directParent.get(current) as number;
+    return current;
+  };
+  const typeOf = new Map(schema.elements.map((element) => [element.id, element.typeCode] as const));
+  for (const edge of edges) {
+    if (RESISTOR_TYPES.has(typeOf.get(edge.element) ?? 0)) continue;
+    const a = terminalNet[terminalKey(edge.a.element, edge.a.index)];
+    const b = terminalNet[terminalKey(edge.b.element, edge.b.index)];
+    if (a === undefined || b === undefined) continue;
+    const ra = directRoot(a);
+    const rb = directRoot(b);
+    if (ra !== rb) directParent.set(ra, rb);
+  }
   const groupPhases = (id: number): string[] => {
     const group = root(id);
     return PHASES.filter((phase) => nets.some((net) => root(net.id) === group && net.potentials.includes(phase)));
@@ -63,6 +80,27 @@ export function evaluateMotors(
   };
 
   for (const element of schema.elements) {
+    if (element.typeCode === 1004) {
+      // Ротор с кольцами: статор U1 V1 W1 на трёх разных фазах, цепь ротора K L M (4, 5, 6) замкнута в звезду
+      // без фазы — накоротко (полная скорость) или через пусковые резисторы (медленно). Ротор разомкнут — не идёт.
+      const stator = [0, 1, 2].map((index) => phasesOf(netOf(element.id, index)));
+      const statorOk = stator.every((phases) => phases.length === 1)
+        && new Set(stator.map((phases) => phases[0])).size === 3;
+      const rotor = [4, 5, 6].map((index) => netOf(element.id, index));
+      const closedBy = (group: (id: number) => number): boolean => {
+        const first = rotor[0];
+        return first !== undefined && rotor.every((net) => net !== undefined && group(net.id) === group(first.id))
+          && !nets.some((net) => group(net.id) === group(first.id) && net.potentials.some((p) => p !== 'PE'));
+      };
+      const shorted = closedBy(directRoot);
+      const running = statorOk && (shorted || closedBy(root));
+      motors[element.id] = {
+        running,
+        faulted: stator.some((phases) => phases.length > 0) && !running,
+        ...(running && !shorted ? { slow: true } : {}),
+      };
+      continue;
+    }
     if (element.typeCode === 1001) {
       // Шесть выводов: обмотки U1–U2, V1–V2, W1–W2 (индексы 0–5, 1–6, 2–4; PE — индекс 3).
       const top = [0, 1, 2].map((index) => phasesOf(netOf(element.id, index)));
@@ -87,15 +125,34 @@ export function evaluateMotors(
       };
       continue;
     }
-    const threeSets = THREE_PHASE_SETS[element.typeCode];
-    if (threeSets) {
-      const distinct = (set: readonly [number, number, number]): boolean => {
+    if (element.typeCode === 1003 || element.typeCode === 1005) {
+      // Две скорости.
+      // 1003 Dahlander (одна обмотка): малая — треугольник, три фазы на U1 V1 W1, а U2 V2 W2 свободны;
+      //   большая — двойная звезда, три фазы на U2 V2 W2, а U1 V1 W1 закорочены между собой (точка звезды без фазы).
+      // 1005 (две отдельные обмотки): малая — три фазы на U1 V1 W1, большая — на U2 V2 W2.
+      // Фазы на обеих тройках сразу — короткое замыкание: двигатель не идёт.
+      const distinct = (set: readonly number[]): boolean => {
         const phases = set.map((index) => phasesOf(netOf(element.id, index)));
         return phases.every((list) => list.length === 1) && new Set(phases.map((list) => list[0])).size === 3;
       };
-      const anyPhase = threeSets.some((set) => set.some((index) => phasesOf(netOf(element.id, index)).length > 0));
-      const running = threeSets.some(distinct);
-      motors[element.id] = { running, faulted: anyPhase && !running };
+      const touched = (set: readonly number[]): boolean => set.some((index) => phasesOf(netOf(element.id, index)).length > 0);
+      const lowFed = distinct(LOW_SET);
+      const highFed = distinct(HIGH_SET);
+      const starPoint = (): boolean => {
+        const nets3 = LOW_SET.map((index) => netOf(element.id, index));
+        const first = nets3[0];
+        return first !== undefined && nets3.every((net) => net !== undefined && root(net.id) === root(first.id))
+          && groupPhases(first.id).length === 0;
+      };
+      const low = lowFed && !touched(HIGH_SET);
+      const high = highFed && !touched(LOW_SET) && (element.typeCode === 1005 || starPoint());
+      const running = low || high;
+      motors[element.id] = {
+        running,
+        faulted: (touched(LOW_SET) || touched(HIGH_SET)) && !running,
+        ...(running ? { speed: high ? 'high' as const : 'low' as const } : {}),
+        ...(high ? { directionTerminals: HIGH_SET } : {}),
+      };
       continue;
     }
     if (element.typeCode === 1008) {

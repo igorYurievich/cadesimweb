@@ -11,6 +11,17 @@ export function applyMotorVisuals(
   const motor = state.result?.motors[element.id];
   node.classList.toggle('is-motor-running', motor?.running ?? false);
   node.classList.toggle('is-motor-faulted', motor?.faulted ?? false);
+  node.classList.toggle('is-motor-slow', motor?.slow ?? false);
+  node.classList.toggle('is-motor-speed-low', motor?.running === true && motor.speed === 'low');
+  node.classList.toggle('is-motor-speed-high', motor?.running === true && motor.speed === 'high');
+}
+
+/** Период оборота ротора на экране, с: двухскоростные — малая вдвое медленнее большой, пуск на резисторах — медленно, от частотника — по частоте. */
+function motorPeriod(motor: NonNullable<SimulationState['result']>['motors'][number]): number {
+  const base = motor.speed === 'low' ? 1.6 : motor.speed === 'high' ? 0.8 : motor.slow ? 2.6 : 0.9;
+  // От преобразователя частоты: скорость пропорциональна частоте (50 Гц — как от сети).
+  const scale = motor.hz !== undefined && motor.hz > 0 ? Math.min(15, 50 / motor.hz) : 1;
+  return base * scale;
 }
 
 export function applyMotorAnimationVisuals(
@@ -20,16 +31,20 @@ export function applyMotorAnimationVisuals(
   nets: Map<number, EngineState['nets'][number]>,
 ): void {
   const motor = state.result?.motors[element.id];
-  const direction = motorDirection(element.id, motor?.reversed, state.result, nets);
+  const direction = motorDirection(element.id, motor?.reversed, state.result, nets, motor?.directionTerminals);
   if (motor?.running) {
-    node.style.setProperty('--motor-period', '0.9s');
-    node.style.setProperty('--motor-play-state', state.mode === 'run' ? 'running' : 'paused');
+    // Угол накапливается по времени симуляции: при плавной смене скорости (рампа частотника, переключение
+    // скоростей) стрелка не прыгает назад, как было с CSS-анимацией, у которой менялась длительность.
+    const previous = state.motorAngles.get(element.id);
+    const dt = previous ? Math.max(0, state.time - previous.time) : 0;
+    const angle = ((previous?.angle ?? 0) + (360 * dt) / motorPeriod(motor)) % 360;
+    state.motorAngles.set(element.id, { angle, time: state.time });
+    node.style.setProperty('--motor-angle', `${angle.toFixed(2)}deg`);
     node.style.setProperty('--motor-direction', direction ?? 'normal');
     node.style.setProperty('--motor-mirror', direction === 'reverse' ? '-1' : '1');
   } else {
-    state.motorStartTimes.delete(element.id);
-    node.style.removeProperty('--motor-period');
-    node.style.removeProperty('--motor-play-state');
+    state.motorAngles.delete(element.id);
+    node.style.removeProperty('--motor-angle');
     node.style.removeProperty('--motor-direction');
     node.style.removeProperty('--motor-mirror');
   }
@@ -40,8 +55,9 @@ function motorDirection(
   reversed: boolean | undefined,
   result: EngineState | undefined,
   nets: Map<number, EngineState['nets'][number]>,
+  terminals: readonly number[] = [0, 1, 2],
 ): 'normal' | 'reverse' | undefined {
-  const phases = [0, 1, 2].map((index) => {
+  const phases = terminals.map((index) => {
     const netId = result?.terminalNet[terminalKey(motorId, index)];
     return phaseLabels(nets.get(netId ?? -1)?.potentials ?? []);
   });

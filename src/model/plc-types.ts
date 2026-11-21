@@ -1,6 +1,7 @@
 import type { CadTypeInfo } from './cad-types';
 import { PLC_BLOCK_LABELS, PLC_BLOCK_TYPES } from './plc-blocks';
 import { DM8_LABELS, DM8_POINTS, LOGO_DM8 } from './plc-modules';
+import { DIN_PSU_CAD_TYPE } from './plc-power-supply';
 
 // ── LOGO! и элементы Ladder (панели «Entrada/Salida, PLC» и «Ladder») ─────────────────────────────
 // Образец CADe_S1.cad (пуск/реверс мотора через LOGO): запись `*14*10202#LOGO#…*18*66*…*87*105*3*…#192.128.0.1`
@@ -85,4 +86,5 @@ export const PLC_TYPES: readonly CadTypeInfo[] = [
     commandIds: [33067], confidence: 'probable', note: '15×9: включает операнд (Q1, M1…), когда до неё дошла шина.',
   },
   ...PLC_BLOCK_TYPES,
+  DIN_PSU_CAD_TYPE,
 ];

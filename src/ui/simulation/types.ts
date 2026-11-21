@@ -4,6 +4,8 @@ import type { InterfaceText } from '../i18n';
 
 export interface SimulationState {
   mode: 'edit' | 'run';
+  /** Пауза: время симуляции стоит, схема остаётся в своём состоянии (loop.ts). */
+  paused: boolean;
   time: number;
   speed: number;
   memory: EngineMemory;
@@ -13,7 +15,8 @@ export interface SimulationState {
   animationFrame: number | undefined;
   contextElementId: number | undefined;
   heldInputs: Set<number>;
-  motorStartTimes: Map<number, number>;
+  /** Угол стрелки ротора по id двигателя и время симуляции, к которому он посчитан (вращение без скачков при смене скорости). */
+  motorAngles: Map<number, { angle: number; time: number }>;
   wireGroupOf: Map<number, number>;
   wireTerminalKeys: Map<number, Set<TerminalKey>>;
 }

@@ -1,3 +1,5 @@
+import { logoLowVoltageSupplied, logoMainsSupplied } from '@engine/plc';
+import { s7MainsSupplied } from '@engine/s7-1200';
 import type { EngineState } from '@engine/types';
 import type { AppContext } from '../context';
 import type { SimulationDependencies } from './types';
@@ -31,4 +33,24 @@ export function formatSimulationDiagnostics(
     messages.push(deps.uiText().phaseLossSummary.replace('{motor}', element.name || `M${element.id}`));
   }
   return [...new Set(messages)];
+}
+
+/**
+ * Предупреждения (жёлтые): так подключать нельзя. LOGO на 24 V, запитанный напрямую от 230 В (работает, но
+ * испортится), и LOGO на 230 V от 24 V (не запускается) — при каждом запуске, пока подключение не исправлено.
+ */
+export function formatSimulationWarnings(
+  ctx: AppContext,
+  deps: SimulationDependencies,
+  result: EngineState | undefined,
+): string[] {
+  if (!result) return [];
+  const text = deps.uiText();
+  const named = (template: string) => (element: { name: string; id: number }) =>
+    template.replace('{module}', element.name || `LOGO ${element.id}`);
+  return [
+    ...logoMainsSupplied(ctx.schema, result.terminalNet, result.nets).map(named(text.logoMainsWarning)),
+    ...logoLowVoltageSupplied(ctx.schema, result.terminalNet, result.nets).map(named(text.logoLowVoltageWarning)),
+    ...s7MainsSupplied(ctx.schema, result.terminalNet, result.nets).map(named(text.s7MainsWarning)),
+  ];
 }

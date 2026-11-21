@@ -6,7 +6,14 @@ import type { Theme } from './constants';
 /** Страница поддержки проекта на Ko-fi (обычная ссылка вместо скрипта-виджета Ko-fi). */
 const KOFI_URL = 'https://ko-fi.com/S3M12AF9Y5';
 
-const exampleFolderRow = (name: string): string => `<button type="button" class="example-folder-row" data-folder="${name}" title="${name}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6.5h7l2 2h9v10H3z" /></svg><span class="example-file-name">${name}</span><span class="example-file-code"></span></button>`;
+/** Свёрнутая панель элементов (кнопка «Элементы» у края поля): больше места под схему на небольшом экране. */
+const PALETTE_COLLAPSED_KEY = 'cadesimu-palette-collapsed';
+const readPaletteCollapsed = (): boolean => {
+  try { return localStorage.getItem(PALETTE_COLLAPSED_KEY) === '1'; } catch { return false; }
+};
+function setPaletteCollapsed(root: HTMLElement, collapsed: boolean): void {
+  if (collapsed) root.dataset.paletteCollapsed = 'true'; else delete root.dataset.paletteCollapsed;
+}
 
 export function renderAppShell(root: HTMLElement, theme: Theme): void {
   let paletteView = 'list';
@@ -14,6 +21,7 @@ export function renderAppShell(root: HTMLElement, theme: Theme): void {
     paletteView = localStorage.getItem(PALETTE_VIEW_KEY) === 'icons' ? 'icons' : 'list';
   } catch { /* По умолчанию остаётся текстовый список. */ }
   root.dataset.paletteView = paletteView;
+  setPaletteCollapsed(root, readPaletteCollapsed());
   root.innerHTML = `
     <main class="app-shell">
       <header class="app-header">
@@ -33,6 +41,7 @@ export function renderAppShell(root: HTMLElement, theme: Theme): void {
                 <button type="button" class="menu-command" data-command="export-png">Экспорт PNG</button>
               </div>
             </details>
+            <button type="button" class="menu-command" data-command="print-preview">Предпросмотр печати</button>
             <button type="button" class="menu-command" data-command="print-pdf">Печать / PDF</button>
             <button type="button" class="menu-command" data-command="sheet">Размер листа (Ajustar hoja)…</button>
           </div></details>
@@ -51,13 +60,13 @@ export function renderAppShell(root: HTMLElement, theme: Theme): void {
             <button type="button" class="menu-command" data-command="fit">Показать всё <kbd>Ctrl+0</kbd></button>
             <button type="button" class="menu-command" data-command="grid" id="grid-command"></button>
             <button type="button" class="menu-command" data-command="properties-panel" id="properties-panel-command"></button>
+            <button type="button" class="menu-command" data-command="theme" id="theme-command"></button>
+            <button type="button" class="menu-command" data-command="wire-colors" id="wire-colors-command"></button>
             <p class="menu-heading" id="palette-view-title">Панель элементов</p>
             <button type="button" class="menu-command" data-command="palette-view-list" id="palette-view-list">Текстовый список</button>
             <button type="button" class="menu-command" data-command="palette-view-icons" id="palette-view-icons">Значки элементов</button>
             <button type="button" class="menu-command" data-command="palette-verified-only"
               id="palette-verified-only"></button>
-            <button type="button" class="menu-command" data-command="theme" id="theme-command"></button>
-            <button type="button" class="menu-command" data-command="wire-colors" id="wire-colors-command"></button>
           </div></details>
           <details class="menu-group optional-groups-menu"><summary>Элементы</summary><div class="menu-popover">
             <p class="menu-heading optional-groups-heading">Показывать дополнительные категории</p>
@@ -85,11 +94,12 @@ export function renderAppShell(root: HTMLElement, theme: Theme): void {
           </div></details>
         </nav>
         <span id="file-name" class="file-name">Новая схема</span>
+        <button type="button" id="fullscreen-toggle" class="header-icon-button" title="Полный экран" aria-label="Полный экран"></button>
         <input id="cad-file" type="file" accept=".cad,.json,application/json,text/plain" />
       </header>
       <section class="viewport-toolbar" aria-label="Провода и симуляция">
         <div class="tool-group wire-controls" aria-label="Провода">
-          <select id="wire-kind" aria-label="Тип нового провода"><option value="phase">Фаза</option><option value="neutral">Нейтраль</option><option value="protection">PE</option><option value="three">3 фазы (L1 L2 L3)</option><option value="threeN">3 фазы + N</option></select>
+          <select id="wire-kind" aria-label="Тип нового провода"><option value="phase">Фаза</option><option value="neutral">Нейтраль</option><option value="protection">PE</option><option value="three">3 фазы (L1 L2 L3)</option><option value="threeN">3 фазы + N</option><option value="positive">+ (положительный)</option><option value="negative">− (отрицательный)</option></select>
           <label id="wire-thickness-label" for="wire-thickness">Толщина</label>
           <select id="wire-thickness" aria-label="Толщина провода" title="Толщина провода">
             <option value="1">1</option><option value="2">2</option>
@@ -107,6 +117,7 @@ export function renderAppShell(root: HTMLElement, theme: Theme): void {
         </div>
         <div class="tool-group simulation-controls" aria-label="Управление симуляцией">
           <button type="button" id="sim-run" title="Запуск" aria-label="Запуск">▶</button>
+          <button type="button" id="sim-pause" title="Пауза" aria-label="Пауза" aria-pressed="false" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14M16 5v14"/></svg></button>
           <button type="button" id="sim-stop" title="Полная остановка: сброс времени, памяти и нажатых кнопок" aria-label="Стоп" disabled>■</button>
           <div class="simulation-speed" role="group" aria-label="Скорость симуляции"><button type="button" class="speed-btn" id="speed-cycle" title="Изменить скорость симуляции" aria-label="Скорость симуляции: 1×">1×</button></div>
           <span id="sim-state" class="simulation-state" role="status" aria-live="polite">Редактор</span>
@@ -122,7 +133,7 @@ export function renderAppShell(root: HTMLElement, theme: Theme): void {
       </div>
       <div id="simulation-message" class="simulation-message" role="alert" aria-live="assertive" hidden><span id="simulation-message-text"></span></div>
       <div class="editor-workspace">
-        <aside class="component-palette" aria-label="Палитра элементов">
+        <aside id="component-palette" class="component-palette" aria-label="Палитра элементов">
           <div class="palette-heading"><h2>Элементы</h2><span id="palette-count"></span></div>
           <div class="palette-search-row">
             <input id="palette-search" type="search" placeholder="Поиск элементов…" aria-label="Поиск элементов" />
@@ -137,13 +148,14 @@ export function renderAppShell(root: HTMLElement, theme: Theme): void {
         <nav id="document-tabs" class="document-tabs" aria-label="Открытые схемы"></nav>
         <svg class="viewport-svg" viewBox="0 0 ${FALLBACK_VIEWPORT.width} ${FALLBACK_VIEWPORT.height}" preserveAspectRatio="none" role="img" aria-label="Поле схемы">
           <defs><pattern id="cad-grid" x="${-CAD_GRID_STEP / 2}" y="${-CAD_GRID_STEP / 2}" width="${CAD_GRID_STEP}" height="${CAD_GRID_STEP}" patternUnits="userSpaceOnUse">
-            <circle cx="${CAD_GRID_STEP / 2}" cy="${CAD_GRID_STEP / 2}" r="0.24" fill="#7d8996" />
+            <circle class="grid-dot" cx="${CAD_GRID_STEP / 2}" cy="${CAD_GRID_STEP / 2}" r="0.22" fill="#aab3bd" />
           </pattern></defs>
           <rect class="viewport-backdrop" x="0" y="0" width="${FALLBACK_VIEWPORT.width}" height="${FALLBACK_VIEWPORT.height}" />
           <g id="sheet-transform">
             <rect id="sheet-paper" x="0" y="0" width="297" height="210" fill="#fff" />
             <rect id="sheet-grid" x="0" y="0" width="297" height="210" fill="url(#cad-grid)" />
             <rect id="sheet-border" x="0" y="0" width="297" height="210" fill="none" stroke="#aeb8c4" stroke-width="0.8" />
+            <g id="program-page-sheets" />
             <g id="wire-layer" />
             <g id="element-layer" />
             <g id="selection-layer" />
@@ -152,6 +164,8 @@ export function renderAppShell(root: HTMLElement, theme: Theme): void {
             <g id="sheet-stamp" />
           </g>
         </svg>
+        <div id="page-tabs" class="page-tabs" hidden></div>
+        <button type="button" id="palette-toggle" class="palette-toggle" aria-expanded="true" aria-controls="component-palette"><span class="palette-toggle-arrow" aria-hidden="true"></span><span id="palette-toggle-label">Элементы</span></button>
         </section>
         <aside id="properties-panel" class="properties-panel" aria-label="Свойства элемента">
           <div class="properties-head"><h2>Свойства</h2><button type="button" id="properties-close" class="properties-close" title="Готово">Готово</button></div><div id="property-fields" class="property-fields"></div>
@@ -177,6 +191,11 @@ export function renderAppShell(root: HTMLElement, theme: Theme): void {
           </div>
         </div>
         <div class="dialog-actions"><button type="button" data-dialog-close="sheet-dialog">Отмена</button><button type="button" class="primary-action" id="sheet-apply">Применить</button></div>
+      </dialog>
+      <dialog id="print-preview-dialog" class="app-dialog print-preview-dialog" aria-labelledby="print-preview-title">
+        <div class="print-preview-head"><h2 id="print-preview-title">Предпросмотр печати</h2><span id="print-preview-info" class="print-preview-info"></span></div>
+        <div class="print-preview-stage"><div id="print-preview-page" class="print-preview-page"></div></div>
+        <div class="dialog-actions"><button type="button" data-dialog-close="print-preview-dialog" id="print-preview-close">Закрыть</button><button type="button" class="primary-action" id="print-preview-print">Печать / PDF</button></div>
       </dialog>
       <dialog id="shortcuts-dialog" class="app-dialog shortcuts-dialog" aria-labelledby="shortcuts-title">
         <h2 id="shortcuts-title">Горячие клавиши</h2>
@@ -210,17 +229,7 @@ export function renderAppShell(root: HTMLElement, theme: Theme): void {
           <div class="examples-window-title"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6.5h7l2 2h9v10H3z" /></svg><h2 id="examples-dialog-title">Примеры</h2></div>
           <button type="button" class="examples-window-close" data-dialog-close="examples-dialog" aria-label="Закрыть">×</button>
         </div>
-        <div class="examples-window-toolbar">
-          <button type="button" data-examples-back disabled aria-label="Назад">‹</button><button type="button" disabled aria-label="Вперёд">›</button>
-          <div class="examples-breadcrumb"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6.5h7l2 2h9v10H3z" /></svg><span id="examples-folder-label">Папка примеров</span></div>
-        </div>
-        <div class="examples-window-content">
-          <aside class="examples-sidebar"><div class="examples-sidebar-heading">Избранное</div><div class="examples-sidebar-entry is-selected"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6.5h7l2 2h9v10H3z" /></svg><span id="examples-sidebar-label">Примеры</span></div></aside>
-          <section class="examples-files-section" aria-label="Примеры схем">
-            <div class="examples-list-head"><span id="examples-name-heading">Название</span><span id="examples-code-heading">Работа</span></div>
-            <div class="example-file-list">${exampleFolderRow('Ejemplos')}${exampleFolderRow('Ejemplos 2')}</div>
-          </section>
-        </div>
+        <div class="example-groups" aria-label="Примеры схем"></div>
         <footer class="examples-window-footer"><span id="examples-count"></span><button type="button" data-dialog-close="examples-dialog">Закрыть</button></footer>
       </dialog>
       <dialog id="cad-export-warning-dialog" class="app-dialog cad-export-warning-dialog" aria-labelledby="cad-export-warning-title" aria-describedby="cad-export-warning-text">
@@ -245,7 +254,6 @@ export function renderAppShell(root: HTMLElement, theme: Theme): void {
         <p id="about-noncommercial">Это бета-версия. Проект находится на раннем этапе разработки и будет дальше развиваться.</p>
         <p id="about-thanks">Отдельное спасибо Артему Горохову за помощь в разработке.</p>
         <p class="about-contact"><span id="about-contact-label">По вопросам и пожеланиям пишите мне:</span> <a href="mailto:igoryurievich1@gmail.com">igoryurievich1@gmail.com</a></p>
-        <p class="about-repository"><a href="https://github.com/igorYurievich/cadesimweb" target="_blank" rel="noopener noreferrer">GitHub: github.com/igorYurievich/cadesimweb</a></p>
         <p class="about-support">
           <a class="kofi-button" href="${KOFI_URL}" target="_blank" rel="noopener noreferrer">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h12v6a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5zM16 8.5h1.5a2.75 2.75 0 0 1 0 5.5H16" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M10 9.4c-1-1-2.6-.2-2.2 1.1.3 1 2.2 2.3 2.2 2.3s1.9-1.3 2.2-2.3c.4-1.3-1.2-2.1-2.2-1.1z" fill="#ff5f5f"/></svg>
@@ -266,4 +274,12 @@ export function renderAppShell(root: HTMLElement, theme: Theme): void {
       </div>
     </main>`;
   root.dataset.theme = theme;
+  const paletteToggle = root.querySelector<HTMLButtonElement>('#palette-toggle');
+  paletteToggle?.setAttribute('aria-expanded', String(root.dataset.paletteCollapsed !== 'true'));
+  paletteToggle?.addEventListener('click', () => {
+    const collapsed = root.dataset.paletteCollapsed !== 'true';
+    setPaletteCollapsed(root, collapsed);
+    paletteToggle.setAttribute('aria-expanded', String(!collapsed));
+    try { localStorage.setItem(PALETTE_COLLAPSED_KEY, collapsed ? '1' : '0'); } catch { /* Только на эту сессию. */ }
+  });
 }

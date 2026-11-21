@@ -10,6 +10,7 @@ import { applyPoweredVisuals, applyPowerSupplyVisuals } from './element-power';
 import { applySensorVisuals } from './element-sensors';
 import { apply2dVisuals } from './element-2d';
 import { applyPlcVisuals } from './element-plc';
+import { applyVfdVisuals } from './element-vfd';
 
 export function applyElementVisuals(
   ctx: AppContext,
@@ -48,6 +49,7 @@ function applyOneElement(
   applyMotorAnimationVisuals(state, element, node, nets);
   applyPoweredVisuals(state, element, node, nets, manuallyOpen, tripped);
   applySensorVisuals(state, element, node);
-  apply2dVisuals(state, element, node);
+  apply2dVisuals(state, element, node, ctx.schema);
   applyPlcVisuals(state, element, node);
+  applyVfdVisuals(state, element, node, ctx.schema);
 }

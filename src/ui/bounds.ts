@@ -1,7 +1,21 @@
 /** Ограничение объектов полем листа: чистая геометрия без DOM. */
+import { pageOfX, pageOrigin, programPageSize } from '@model/program-pages';
 import type { Point, SchemaElement } from '@model/types';
 
-export interface Area { width: number; height: number }
+/**
+ * Поле листа. Листы программ ПЛК (programPages, model/program-pages.ts) лежат справа с шагом PAGE_PITCH:
+ * точку или группу на таком листе ограничиваем его полем, а не основным листом.
+ */
+export interface Area {
+  width: number; height: number; programPages?: number; programPageWidth?: number; programPageHeight?: number;
+}
+
+/** Лист, на котором лежит координата x: начало и размер (листа программы нет — основной лист). */
+const pageFor = (x: number, area: Area): { ox: number; width: number; height: number } => {
+  const page = pageOfX(x);
+  if (page < 1 || page > (area.programPages ?? 0)) return { ox: 0, width: area.width, height: area.height };
+  return { ox: pageOrigin(page), ...programPageSize(area) };
+};
 export interface Extent { minX: number; minY: number; maxX: number; maxY: number }
 
 /** Ближайшая к точке позиция внутри листа, кратная шагу сетки. */
@@ -11,7 +25,8 @@ export function clampPointToSheet(point: Point, area: Area, step = 3): Point {
     const maxOnGrid = Math.floor(max / step) * step;
     return Math.min(maxOnGrid, Math.max(0, Math.round(v / step) * step));
   };
-  return { x: fit(point.x, area.width), y: fit(point.y, area.height) };
+  const { ox, width, height } = pageFor(point.x, area);
+  return { x: ox + fit(point.x - ox, width), y: fit(point.y, height) };
 }
 
 /** Габариты элемента относительно его позиции: рамка и клеммы. */
@@ -34,7 +49,8 @@ export function clampDeltaToSheet(delta: Point, group: Extent, area: Area, step 
     if (v < lo) v = Math.ceil(lo / step) * step;
     return v > hi || v < lo ? Math.min(hi, Math.max(lo, d)) : v;
   };
-  return { x: axis(delta.x, group.minX, group.maxX, area.width), y: axis(delta.y, group.minY, group.maxY, area.height) };
+  const { ox, width, height } = pageFor(group.minX, area);
+  return { x: axis(delta.x, group.minX - ox, group.maxX - ox, width), y: axis(delta.y, group.minY, group.maxY, height) };
 }
 
 /** Позиция элемента, при которой он целиком лежит на листе. */

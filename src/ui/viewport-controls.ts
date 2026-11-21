@@ -1,9 +1,10 @@
 import { schemaBounds } from '@model/geometry';
 import type { AppContext } from './context';
 import type { Point, Viewport } from './viewport';
-import { fitViewport, screenToSheet, zoomAt } from './viewport';
-import { fitBounds, fullSheet } from './helpers';
+import { screenToSheet, zoomAt } from './viewport';
+import { fitBounds } from './helpers';
 import { svgPoint } from './canvas-primitives';
+import { PROGRAM_PAGE_EVENT, currentPage, pageViewport, requestProgramPage } from './program-pages-view';
 
 export interface ViewportControlsSetup {
   root: HTMLElement; svg: SVGSVGElement; backdrop?: SVGRectElement | null;
@@ -40,8 +41,20 @@ export function setupViewportControls(ctx: AppContext, deps: ViewportControlsSet
   });
   deps.root.querySelector<HTMLButtonElement>('[data-zoom="fit"]')?.addEventListener('click', () => {
     const size = deps.viewSize();
-    const bounds = schemaBounds(ctx.schema);
-    deps.setViewport(bounds ? fitBounds(bounds, size) : fitViewport(fullSheet(ctx.schema.sheet), { width: size.x, height: size.y }));
+    // Вписываем содержимое листа, который сейчас на экране (основного или листа программы ПЛК).
+    const page = currentPage(ctx.schema, deps.viewport(), size);
+    const bounds = schemaBounds(ctx.schema, undefined, page);
+    deps.setViewport(bounds ? fitBounds(bounds, size) : pageViewport(ctx.schema, page, size));
     deps.drawViewport();
+  });
+  // Переход на лист программы ПЛК (кнопка в свойствах LOGO / S7) и вкладки «Схема / Программа» над полем.
+  deps.root.addEventListener(PROGRAM_PAGE_EVENT, (event) => {
+    const page = (event as CustomEvent<number>).detail;
+    deps.setViewport(pageViewport(ctx.schema, page, deps.viewSize()));
+    deps.drawViewport();
+  });
+  deps.root.querySelector<HTMLElement>('#page-tabs')?.addEventListener('click', (event) => {
+    const button = (event.target as Element).closest<HTMLButtonElement>('[data-program-page]');
+    if (button) requestProgramPage(deps.root, Number(button.dataset.programPage));
   });
 }

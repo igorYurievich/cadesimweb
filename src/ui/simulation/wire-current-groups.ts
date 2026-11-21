@@ -87,6 +87,46 @@ function collectStarCurrentGroups(
   }
 }
 
+/**
+ * Цепь ротора мотора с кольцами 1004: потенциала сети в ней нет (ток наводится полем статора), поэтому обычная
+ * раскраска оставляет её серой. Пока мотор работает, подсвечиваем всю замкнутую цепь K L M: через пусковые
+ * резисторы 1050 / 1051 и через замкнутые контакторы, которые закорачивают ротор.
+ */
+function collectRotorCurrentGroups(
+  ctx: AppContext,
+  state: SimulationState,
+  result: EngineState,
+  groups: Set<number>,
+): void {
+  const motors = ctx.schema.elements
+    .filter((element) => element.typeCode === 1004 && result.motors[element.id]?.running);
+  if (!motors.length) return;
+  // Закорочен ротор — ток идёт через контактор, резисторы зашунтированы; на пуске — через резисторы.
+  const direct = createNetUnion(result);
+  joinClosedSwitches(ctx, result, direct);
+  const resistive = createNetUnion(result);
+  joinClosedSwitches(ctx, result, resistive);
+  for (const resistor of ctx.schema.elements) {
+    if (resistor.typeCode !== 1050 && resistor.typeCode !== 1051) continue;
+    for (const link of getBehavior(resistor.typeCode).links) {
+      const [a, b] = link.terminals;
+      const netA = result.terminalNet[terminalKey(resistor.id, a!)];
+      const netB = result.terminalNet[terminalKey(resistor.id, b!)];
+      if (netA !== undefined && netB !== undefined) resistive.join(netA, netB);
+    }
+  }
+  for (const motor of motors) {
+    const rotor = result.terminalNet[terminalKey(motor.id, 4)];
+    if (rotor === undefined) continue;
+    const union = result.motors[motor.id]?.slow ? resistive : direct;
+    const currentNets = new Set(result.nets.filter((net) => union.root(net.id) === union.root(rotor)
+      && !net.potentials.some((potential) => potential !== 'PE')).map((net) => net.id));
+    for (const [group, keys] of state.wireTerminalKeys) {
+      if ([...keys].some((key) => currentNets.has(result.terminalNet[key] ?? -1))) groups.add(group);
+    }
+  }
+}
+
 function collectAutotransformerCurrentGroups(
   ctx: AppContext,
   result: EngineState,
@@ -123,6 +163,7 @@ export function buildWireCurrentGroups(
   const union = createNetUnion(result);
   joinClosedSwitches(ctx, result, union);
   const motor = collectMotorCurrentGroups(ctx, state, result, union, nets);
+  collectRotorCurrentGroups(ctx, state, result, motor);
   const transformerNets = collectAutotransformerCurrentGroups(ctx, result, nets);
   const autotransformer = new Set<number>();
   for (const [group, keys] of state.wireTerminalKeys) {

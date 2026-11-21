@@ -4,6 +4,8 @@ import type { AppContext } from './context';
 import type { Point } from './viewport';
 import type { DragState, Selectable, StampKey } from './constants';
 import { armedByDefaultTypes, latchedTypes } from './constants';
+import { STAIR_TIMER_2D } from '@model/stair-timer';
+import { VFD_MAX_HZ, isVfd2d, vfdSettings } from '@model/vfd';
 import type { SimulationController } from './sim-controller';
 import { clampPointToSheet } from './bounds';
 import { cloneSchema, createPlacedElement, selectionKey } from './helpers';
@@ -79,6 +81,30 @@ export function setupCanvasPointerDown(ctx: AppContext, deps: CanvasPointerDownS
       const hit = getSelectionHit(event.target); const { schema } = ctx;
       if (hit?.kind === 'element') {
         const element = schema.elements.find((candidate) => candidate.id === hit.id);
+        // Преобразователь частоты 2D: панель — RUN / STOP, ▲ / ▼ (±1 Гц), ручка (клик слева −5, справа +5 Гц).
+        if (element && isVfd2d(element.typeCode)) {
+          const keyNode = event.target instanceof Element ? event.target.closest<SVGGElement>('[data-vfd-key]') : null;
+          const pressed = keyNode?.dataset.vfdKey;
+          const step = (delta: number): void => {
+            const hz = vfdSettings(element).aiHz;
+            element.params.vfd_aiHz = Math.min(VFD_MAX_HZ, Math.max(0, Math.round((hz + delta) * 10) / 10));
+          };
+          if (pressed === 'run') deps.simulation.inputs.toggled[element.id] = true;
+          else if (pressed === 'stop') deps.simulation.inputs.toggled[element.id] = false;
+          else if (pressed === 'up') step(1);
+          else if (pressed === 'down') step(-1);
+          else if (pressed === 'rev') {
+            // REV/JOG (однофазный 2D): смена направления пуска с панели; при ходе — разворот через ноль по рампе.
+            const positions = (deps.simulation.inputs.positions ??= {});
+            positions[element.id] = positions[element.id] === 1 ? 0 : 1;
+          }
+          else if (pressed === 'knob' && keyNode) {
+            const box = keyNode.getBoundingClientRect();
+            step(event.clientX < box.left + box.width / 2 ? -5 : 5);
+          }
+          if (pressed) deps.simulation.applySimulationInput();
+          event.preventDefault(); return;
+        }
         if (element && deps.simulation.isMomentaryType(element.typeCode)) {
           const deviceName = element.name.trim().toLocaleUpperCase();
           if (deviceName !== '') {
@@ -141,6 +167,9 @@ export function setupCanvasPointerDown(ctx: AppContext, deps: CanvasPointerDownS
           }
           deps.simulation.applySimulationInput(); event.preventDefault(); return;
         }
+        // Минутник: постоянный свет переключает только синий движок, клик по корпусу ничего не делает.
+        const onStairSlider = event.target instanceof Element && event.target.closest('.stair-slider') !== null;
+        if (element?.typeCode === STAIR_TIMER_2D && !onStairSlider) { event.preventDefault(); return; }
         if (element && latchedTypes.has(element.typeCode)) {
           const next = !(deps.simulation.inputs.toggled[element.id] ?? armedByDefaultTypes.has(element.typeCode));
           deps.simulation.inputs.toggled[element.id] = next;

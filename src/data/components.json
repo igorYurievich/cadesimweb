@@ -1,5 +1,5 @@
 {
-  "_comment": "Каталог команд-кнопок CADe_SIMU 4.2. Формат строки: [commandId, es, en, it, ru]. Русские подписи заполнены для всех элементов.",
+  "_comment": "Каталог команд-кнопок CADe_SIMU 4.2. Формат строки: [commandId, es, en, it, ru]. Русские подписи заполнены для всех элементов. Кнопки с кодом от 34001 — только веб-версия (их нет в оригинале).",
   "groups": [
     {
       "name": "Alimentaciones y fuentes",
@@ -939,6 +939,54 @@
       ]
     },
     {
+      "name": "Mecanismos (interruptores, conmutadores, pulsadores y enchufes de pared)",
+      "toolbar": 0,
+      "items": [
+        [
+          34003,
+          "Interruptor",
+          "Light switch",
+          "Interruttore",
+          "Выключатель"
+        ],
+        [
+          34004,
+          "Conmutador",
+          "Two-way switch",
+          "Deviatore",
+          "Проходной переключатель"
+        ],
+        [
+          34005,
+          "Interruptor de cruce",
+          "Intermediate switch",
+          "Invertitore",
+          "Перекрёстный выключатель"
+        ],
+        [
+          34006,
+          "Pulsador",
+          "Push button",
+          "Pulsante",
+          "Кнопка"
+        ],
+        [
+          34007,
+          "Base de enchufe",
+          "Socket outlet",
+          "Presa",
+          "Розетка"
+        ],
+        [
+          34008,
+          "Lámpara incandescente",
+          "Light bulb",
+          "Lampadina",
+          "Лампочка"
+        ]
+      ]
+    },
+    {
       "name": "Detectores / sensores",
       "toolbar": 215,
       "items": [
@@ -1756,6 +1804,13 @@
           "Логический модуль LOGO, 4 цифровых входа/4 цифровых выхода"
         ],
         [
+          34001,
+          "Fuente de alimentación 230 V AC / 24 V DC (carril DIN)",
+          "Power supply 230 V AC / 24 V DC (DIN rail)",
+          "Alimentatore 230 V AC / 24 V DC (guida DIN)",
+          "Блок питания 230 В~ / 24 В= (DIN-рейка)"
+        ],
+        [
           33240,
           "PLC S7-1200",
           "PLC S7-1200",
@@ -2150,6 +2205,27 @@
           null,
           null,
           "Вспомогательные контакты"
+        ],
+        [
+          34002,
+          "Automático de escalera (minutero) 2D",
+          "Staircase light timer 2D",
+          "Temporizzatore luce scale 2D",
+          "Автомат лестничного освещения 2D"
+        ],
+        [
+          34009,
+          "Variador de frecuencia 2D",
+          "Frequency inverter 2D",
+          "Inverter di frequenza 2D",
+          "Преобразователь частоты 2D"
+        ],
+        [
+          34010,
+          "Variador de frecuencia monofásico 2D",
+          "Single-phase frequency inverter 2D",
+          "Inverter di frequenza monofase 2D",
+          "Однофазный преобразователь частоты 2D"
         ],
         [
           33381,

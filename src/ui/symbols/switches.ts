@@ -69,9 +69,20 @@ export function drawSelector(g: SVGGElement, element: SchemaElement, rotation: n
 }
 
 /** Круговой индикатор кнопки. */
-export function drawIndicator(g: SVGGElement): void {
+/**
+ * «Botón pulsador» 8023: круглая кнопка без клемм. Цвет — любой из свойств (params.buttonColor, «#rrggbb»),
+ * по умолчанию зелёный, как в CADe_SIMU. В симуляции нажимает одноимённые кнопки схемы; пока зажата —
+ * класс is-sim-pressed, колпачок «утапливается» (viewport.css).
+ */
+export const INDICATOR_DEFAULT_COLOR = "#0a8a1c";
+export const indicatorColor = (element: { params: Record<string, unknown> }): string => {
+  const value = element.params.buttonColor;
+  return typeof value === "string" && /^#[0-9a-f]{6}$/i.test(value) ? value : INDICATOR_DEFAULT_COLOR;
+};
+
+export function drawIndicator(g: SVGGElement, element: SchemaElement): void {
   g.append(circle(3, 3, 3.3, { fill: "#fff", stroke: "#6b7280", "stroke-width": 0.6 }));
-  g.append(circle(3, 3, 2.5, { fill: "#0a8a1c", stroke: "none" }));
+  g.append(circle(3, 3, 2.5, { class: "indicator-cap", fill: indicatorColor(element), stroke: "none" }));
 }
 
 /** Одиночный контакт панели «Accionamientos» (кнопка, грибок, выключатель с фиксацией, концевик). */

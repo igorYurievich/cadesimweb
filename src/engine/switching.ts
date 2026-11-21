@@ -6,9 +6,15 @@ import type { BehaviorLink } from './behaviors';
 import type { TerminalRef, TimerState, UserInputs } from './types';
 import { resolveThermalState } from './thermal';
 import { delayBlockActive } from './delay-blocks';
+import { stairTimerActive } from './stair-timer';
+import { STAIR_TIMER_2D } from '../model/stair-timer';
 import { isDelayBlock2d } from '../model/realistic-2d-types';
 import type { ThermalState } from './thermal';
 import { logoOutputActive, plcEdgeActive } from './plc';
+import { S7_1200 } from '../model/s7-1200';
+import { s7OutputActive } from './s7-1200';
+import { vfdRelayActive } from './vfd';
+import { isVfdControl } from '../model/vfd';
 
 export interface ClosedEdge {
   a: TerminalRef;
@@ -52,6 +58,10 @@ export function auxContactActive(
 ): boolean {
   // Блоки с выдержкой 2D: отсчёт от своей катушки ведёт delay-blocks.ts.
   if (isDelayBlock2d(element.typeCode)) return delayBlockActive(element, timers);
+  // Минутник: P–3 по отсчёту от кнопки на клемме 4 (stair-timer.ts).
+  if (element.typeCode === STAIR_TIMER_2D) return stairTimerActive(element, timers);
+  // Реле RA–RC преобразователя частоты (vfd.ts).
+  if (isVfdControl(element.typeCode)) return vfdRelayActive(element, schema, timers);
   if (ON_DELAY_CONTACT_TYPES.has(element.typeCode) && element.name !== '') {
     const timer = schema.elements.find((candidate) => candidate.typeCode === 9004 && candidate.name === element.name);
     if (timer) {
@@ -73,6 +83,13 @@ export function auxContactActive(
   return element.name !== '' && (coils[element.name] ?? false);
 }
 
+/**
+ * Ручные кнопки без фиксации: Pulsador / грибки / концевики (8000…8007, 8012…8015) и «Botón pulsador» 8023 —
+ * круглая кнопка без клемм, которая нажимает одноимённые кнопки схемы (как пульт).
+ */
+export const isMomentaryManual = (type: number): boolean =>
+  (type >= 8000 && type <= 8007) || (type >= 8012 && type <= 8015) || type === 8023;
+
 /** Сработало ли мгновенное вспомогательное реле от одноимённой кнопки/привода, а не от катушки. */
 export function auxContactActuatorActive(element: SchemaElement, schema: Schema, inputs: UserInputs): boolean {
   if (element.typeCode < 7000 || element.typeCode > 7003) return false;
@@ -81,7 +98,7 @@ export function auxContactActuatorActive(element: SchemaElement, schema: Schema,
   return schema.elements.some((candidate) => {
     if (candidate.id === element.id || candidate.name.trim().toLocaleUpperCase() !== name) return false;
     const type = candidate.typeCode;
-    const momentary = (type >= 8000 && type <= 8007) || (type >= 8012 && type <= 8015);
+    const momentary = isMomentaryManual(type);
     const maintained = type >= 8008 && type <= 8011;
     return (momentary && Boolean(inputs.pressed[candidate.id]))
       || (maintained && Boolean(inputs.toggled[candidate.id]));
@@ -94,11 +111,10 @@ function controlActive(element: SchemaElement, link: BehaviorLink, inputs: UserI
     const type = candidate.typeCode;
     return deviceName !== '' && candidate.id !== element.id
       && candidate.name.trim().toLocaleUpperCase() === deviceName
-      && ((type >= 8000 && type <= 8015) || (type >= 8020 && type <= 8022));
+      && ((type >= 8000 && type <= 8015) || (type >= 8020 && type <= 8023));
   };
   const sameNameMomentaryPressed = (): boolean => schema.elements.some((candidate) => sameNameManualControl(candidate)
-    && ((candidate.typeCode >= 8000 && candidate.typeCode <= 8007) || (candidate.typeCode >= 8012 && candidate.typeCode <= 8015))
-    && Boolean(inputs.pressed[candidate.id]));
+    && isMomentaryManual(candidate.typeCode) && Boolean(inputs.pressed[candidate.id]));
   const sameNameMaintainedOn = (): boolean => schema.elements.some((candidate) => sameNameManualControl(candidate)
     && candidate.typeCode >= 8008 && candidate.typeCode <= 8011
     && Boolean(inputs.toggled[candidate.id]));
@@ -132,7 +148,8 @@ function controlActive(element: SchemaElement, link: BehaviorLink, inputs: UserI
       return position === link.position;
     }
     // Выход LOGO: операнд Qk и питание модуля (plc.ts).
-    case 'plc-output': return logoOutputActive(element, link, coils, schema);
+    case 'plc-output': return element.typeCode === S7_1200
+      ? s7OutputActive(element, link, coils) : logoOutputActive(element, link, coils, schema);
     case 'plc-edge': return plcEdgeActive(element, coils);
     case 'always': return true;
   }

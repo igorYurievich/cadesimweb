@@ -19,7 +19,7 @@ export interface SimulationInputActions {
 // Детекторы (все варианты подключения) и барьер 15000 срабатывают, пока их зажимают мышью, как кнопки.
 const momentaryTypes = new Set([
   8000, 8001, 8002, 8003, 8004, 8005, 8006, 8007, 8012, 8013, 8014, 8015,
-  ...DETECTOR_CODES, 15000, 8100,
+  ...DETECTOR_CODES, 15000, 8100, 8123, 8023,
 ]);
 const maintainedTypes = new Set([8008, 8009, 8010, 8011]);
 const trippableTypes = new Set([

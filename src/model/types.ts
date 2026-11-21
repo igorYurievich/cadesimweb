@@ -93,6 +93,14 @@ export interface SheetInfo {
   height: number;
   /** Подвал .cad как есть, чтобы сохранить неразобранные настройки. */
   cadFooter?: CadFooter;
+  /**
+   * Сколько отдельных листов программы ПЛК у схемы (program-pages.ts): лист k лежит справа от основного,
+   * с x = k · PAGE_PITCH. Нет поля — листов программы нет.
+   */
+  programPages?: number;
+  /** Размер листов программы ПЛК, мм (по умолчанию как у основного листа, program-pages.ts). */
+  programPageWidth?: number;
+  programPageHeight?: number;
 }
 
 export interface Schema {

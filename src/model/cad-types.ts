@@ -16,6 +16,10 @@ import { catalog } from './catalog';
 import { SENSOR_TYPES } from './cad-types-sensors';
 import { REALISTIC_2D_TYPES } from './realistic-2d-types';
 import { PLC_TYPES } from './plc-types';
+import { STAIR_TIMER_CAD_TYPE } from './stair-timer';
+import { S7_1200_CAD_TYPE } from './s7-1200';
+import { VFD_2D_1PH_CAD_TYPE, VFD_2D_CAD_TYPE } from './vfd';
+import { MECHANISM_CAD_TYPES } from './mechanisms';
 import type { Point, WireKind } from './types';
 
 export type CadFamily =
@@ -228,7 +232,7 @@ const TABLE: readonly CadTypeInfo[] = [
   // Образец: accionamientos.cad. Привязка кодов типов к командам идёт по образцу, а не по прежним догадкам:
   // 8001 = Pulsador NC, 8005 = Pulsador seta NC, 8013 = Final de carrera NC (раньше 8001 был неизвестен,
   // 8005 считался конечным выключателем, а 8013 — Pulsador NC). Рамка по высоте везде 15, у 8023 — 6×6.
-  { code: 8023, family: 'pushbutton', label: 'Botón pulsador', layout: { kind: 'none' }, commandIds: [33278], confidence: 'confirmed', note: 'Круг-индикатор 6×6 без клемм, залитый зелёным, с кольцом. Поведения нет, только символ.' },
+  { code: 8023, family: 'pushbutton', label: 'Botón pulsador', layout: { kind: 'none' }, commandIds: [33278], confidence: 'confirmed', note: 'Круглая кнопка 6×6 без клемм, с кольцом. Веб-версия: цвет — любой (params.buttonColor, в .cad — поле после имени), в симуляции нажимает одноимённые кнопки схемы.' },
   { code: 8000, family: 'pushbutton', label: 'Pulsador NA', layout: ROWS2, commandIds: [32909], confidence: 'confirmed', note: '6×15: клеммы 13 14.' },
   { code: 8001, family: 'pushbutton', label: 'Pulsador NC', layout: ROWS2, commandIds: [32910], confidence: 'confirmed', note: '6×15: клеммы 11 12, -S1 и -S3 в Actividad 1.6: кнопка «Стоп», размыкающий контакт.' },
   { code: 8002, family: 'pushbutton', label: 'Pulsador NA-NC', layout: ROWS2_P9, commandIds: [32912], confidence: 'confirmed', note: '15×15: клеммы 11 13 / 12 14 (шаг 9); 11-12 НЗ, 13-14 НО, общий толкатель.' },
@@ -311,6 +315,11 @@ const TABLE: readonly CadTypeInfo[] = [
   ...SENSOR_TYPES,
   ...REALISTIC_2D_TYPES,
   ...PLC_TYPES,
+  STAIR_TIMER_CAD_TYPE,
+  S7_1200_CAD_TYPE,
+  VFD_2D_CAD_TYPE,
+  VFD_2D_1PH_CAD_TYPE,
+  ...MECHANISM_CAD_TYPES,
 ];
 
 const BY_CODE = new Map<number, CadTypeInfo>(TABLE.map((t) => [t.code, t]));

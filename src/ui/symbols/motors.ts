@@ -92,6 +92,21 @@ export function drawMotor(g: SVGGElement, element: SchemaElement): void {
   }
   appendMotorFace(body, spec, cx, cy);
   g.append(body);
+  if (element.typeCode === 1003 || element.typeCode === 1005) g.append(motorSpeedBadge(cx - r - 0.8, cy + r - 0.6));
+}
+
+/**
+ * Значок скорости двухскоростного двигателя (видно только при вращении): «×1» — малая, «×2» — большая.
+ * Какой из двух показан — решает CSS по классу is-motor-speed-low / is-motor-speed-high.
+ */
+function motorSpeedBadge(x: number, y: number): SVGGElement {
+  const badge = group("motor-speed");
+  const low = label("×1", x, y, { size: 3.6, anchor: "end" });
+  low.classList.add("motor-speed-low");
+  const high = label("×2", x, y, { size: 3.6, anchor: "end" });
+  high.classList.add("motor-speed-high");
+  badge.append(low, high);
+  return badge;
 }
 
 function drawMotorUpperLeads(

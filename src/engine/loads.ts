@@ -6,7 +6,7 @@ import type { Fault, NetState, PotentialLabel, TerminalKey } from './types';
 import { terminalKey } from './types';
 
 /** Лампы: обычные пилоты и световые колонны, пилот 2D 8101. */
-const LAMP_TYPES: readonly number[] = [9008, 9009, 9010, 9011, 9012, 9013, 8101];
+const LAMP_TYPES: readonly number[] = [9008, 9009, 9010, 9011, 9012, 9013, 8101, 8125];
 
 export interface EnergizedResult {
   energized: boolean;

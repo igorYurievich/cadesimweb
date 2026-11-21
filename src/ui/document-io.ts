@@ -8,7 +8,7 @@ import type { SimulationController } from './sim-controller';
 import { createHistory } from './history';
 import { fitViewport } from './viewport';
 import { cloneSchema, fitBounds, fullSheet } from './helpers';
-import { EXAMPLES } from '../data/examples';
+import { AUTHOR_FOLDER, EXAMPLES, EXAMPLE_FOLDERS } from '../data/examples';
 import { INTERFACE_TEXT } from './i18n';
 
 export interface DocumentOpenSetup {
@@ -74,36 +74,48 @@ export function setupDocumentOpen(ctx: AppContext, deps: DocumentOpenSetup): (te
   return openDocumentText;
 }
 
+/** Launch Handler API (Chrome/Edge): файлы, с которыми запустили установленное приложение. */
+interface LaunchQueueLike {
+  setConsumer(consumer: (params: { files?: ReadonlyArray<{ getFile(): Promise<File> }> }) => void | Promise<void>): void;
+}
+
 export function setupDocumentInputEvents(root: HTMLElement, fileInput: HTMLInputElement, openDocumentText: (text: string, name: string) => void, stopSimulation: () => void): void {
   fileInput.addEventListener('change', async () => {
     const file = fileInput.files?.[0];
     if (!file) return;
     openDocumentText(await file.text(), file.name);
   });
-  let currentExampleFolder = '';
-  const renderExampleFolder = (): void => {
-    const list = root.querySelector<HTMLElement>('.example-file-list');
-    const folderLabel = root.querySelector<HTMLElement>('#examples-folder-label');
-    const back = root.querySelector<HTMLButtonElement>('[data-examples-back]');
+  // Установленная PWA: двойной клик по .cad в проводнике открывает файл здесь (manifest → file_handlers).
+  const launchQueue = (window as Window & { launchQueue?: LaunchQueueLike }).launchQueue;
+  launchQueue?.setConsumer(async (params) => {
+    for (const handle of params.files ?? []) {
+      const file = await handle.getFile();
+      openDocumentText(await file.text(), file.name);
+    }
+  });
+  // Окно «Примеры»: все папки сразу, одна под другой, без переходов между папками — клик по схеме открывает её.
+  const escape = (value: string): string => value.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
+  const fileIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2.5h8l4 4v15H6z"/><path d="M14 2.5v4h4M9 12h6M9 15h6M9 18h4"/></svg>';
+  const renderExamples = (): void => {
+    const groups = root.querySelector<HTMLElement>('.example-groups');
     const count = root.querySelector<HTMLElement>('#examples-count');
-    if (!list || !folderLabel || !back || !count) return;
-    const visible = EXAMPLES.filter((example) => example.folder === currentExampleFolder);
-    root.dataset.examplesFolder = currentExampleFolder;
-    folderLabel.textContent = currentExampleFolder || INTERFACE_TEXT[root.lang as keyof typeof INTERFACE_TEXT]?.examplesFolder || INTERFACE_TEXT.ru.examplesFolder;
-    back.disabled = !currentExampleFolder;
-    const folderRow = (name: string): string => `<button type="button" class="example-folder-row" data-folder="${name}" title="${name}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6.5h7l2 2h9v10H3z"/></svg><span class="example-file-name">${name}</span><span class="example-file-code"></span></button>`;
-    const childFolder = currentExampleFolder === '' ? `${folderRow('Ejemplos')}${folderRow('Ejemplos 2')}` : '';
-    list.innerHTML = `${childFolder}${visible.map((example) => `<button type="button" class="example-file" data-example="${example.number}" title="${example.fileName}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2.5h8l4 4v15H6z"/><path d="M14 2.5v4h4M9 12h6M9 15h6M9 18h4"/></svg><span class="example-file-name">${example.title}</span><span class="example-file-code">${example.code}</span></button>`).join('')}`;
-    count.dataset.visibleCount = String(visible.length);
-    const text = INTERFACE_TEXT[root.lang as keyof typeof INTERFACE_TEXT]?.examplesCount || INTERFACE_TEXT.ru.examplesCount;
-    count.textContent = currentExampleFolder ? text.replace('{count}', new Intl.NumberFormat(root.lang || 'ru').format(visible.length)) : '';
+    if (!groups || !count) return;
+    const text = INTERFACE_TEXT[root.lang as keyof typeof INTERFACE_TEXT] ?? INTERFACE_TEXT.ru;
+    groups.innerHTML = EXAMPLE_FOLDERS.map((folder) => {
+      const items = EXAMPLES.filter((example) => example.folder === folder);
+      if (!items.length) return '';
+      const title = folder === AUTHOR_FOLDER ? text.examplesAuthor : folder;
+      const author = folder === AUTHOR_FOLDER ? ' data-examples-author' : '';
+      return `<section class="example-group"><h3 class="example-group-title"${author}>${escape(title)}</h3>`
+        + `<div class="example-group-items">${items.map((example) => `<button type="button" class="example-file" `
+        + `data-example="${example.number}" title="${escape(example.fileName)}">${fileIcon}`
+        + `<span class="example-file-name">${escape(example.title.replace(/\.cad$/i, ''))}</span></button>`).join('')}</div></section>`;
+    }).join('');
+    count.dataset.visibleCount = String(EXAMPLES.length);
+    count.textContent = text.examplesCount.replace('{count}', new Intl.NumberFormat(root.lang || 'ru').format(EXAMPLES.length));
   };
-  const list = root.querySelector<HTMLElement>('.example-file-list');
-  list?.addEventListener('click', (event) => {
-    const target = event.target as Element;
-    const folderButton = target.closest<HTMLButtonElement>('[data-folder]');
-    if (folderButton) { currentExampleFolder = folderButton.dataset.folder ?? ''; renderExampleFolder(); return; }
-    const button = target.closest<HTMLButtonElement>('[data-example]');
+  root.querySelector<HTMLElement>('.example-groups')?.addEventListener('click', (event) => {
+    const button = (event.target as Element).closest<HTMLButtonElement>('[data-example]');
     if (!button) return;
     const example = EXAMPLES.find((candidate) => candidate.number === Number(button.dataset.example));
     if (example) {
@@ -111,9 +123,5 @@ export function setupDocumentInputEvents(root: HTMLElement, fileInput: HTMLInput
       stopSimulation(); openDocumentText(example.text, example.fileName);
     }
   });
-  root.querySelector<HTMLButtonElement>('[data-examples-back]')?.addEventListener('click', () => {
-    currentExampleFolder = '';
-    renderExampleFolder();
-  });
-  renderExampleFolder();
+  renderExamples();
 }

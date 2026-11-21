@@ -88,3 +88,23 @@ export function syncModuleLabels(schema: Pick<Schema, 'elements'>): void {
     });
   }
 }
+
+/**
+ * Питание модуля (свойство «Питание», params.supply). В .cad — «24V» / «230V» в последнем текстовом поле записи
+ * (у LOGO texts[19], у DM8 короче; в образцах CADe_SIMU оно пустое; nums[16] = 3 у LOGO не трогаем):
+ * 24 — LOGO! 24RCE / DM8 24R, работает от блока питания 24 V (от сети 230 В тоже, но с предупреждением);
+ * 230 — LOGO! 230RCE / DM8 230R, питание и входы от L и N; от 24 V не запускается.
+ */
+export type LogoSupply = 24 | 230;
+
+/** «230V» / «24V» из .cad → params.supply; пустое поле (файлы CADe_SIMU и старые) — без свойства (24 V). */
+export function logoSupplyFromFile(text: string | undefined): LogoSupply | undefined {
+  const value = Number.parseInt(text ?? '', 10);
+  return value === 230 || value === 24 ? value : undefined;
+}
+export const logoSupply = (element: { params: Record<string, unknown> }): LogoSupply =>
+  Number(element.params.supply) === 230 ? 230 : 24;
+
+/** Название модели на корпусе и в свойствах. */
+export const logoModelName = (typeCode: number, supply: LogoSupply): string =>
+  typeCode === LOGO_DM8 ? `DM8 ${supply}R` : `${supply}RCE`;

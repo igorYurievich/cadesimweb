@@ -10,6 +10,7 @@ import { rebuildWireTerminalMap } from './wire-map';
 
 export interface SimulationController {
   readonly mode: 'edit' | 'run';
+  readonly paused: boolean;
   speed: number;
   readonly inputs: UserInputs;
   readonly heldInputs: Set<number>;
@@ -25,6 +26,7 @@ export interface SimulationController {
   evaluateSimulation(): void;
   startSimulation(): void;
   stopSimulation(): void;
+  togglePause(): void;
   pressMomentary(id: number): void;
   releaseMomentary(id: number): void;
   resetSimulationInputs(): void;
@@ -44,6 +46,7 @@ export function setupSimulation(ctx: AppContext, deps: SimulationSetup): Simulat
     showSimulationContextMenu(ctx, deps, state, inputs, event, elementId);
   return {
     get mode() { return state.mode; },
+    get paused() { return state.paused; },
     get speed() { return state.speed; },
     set speed(value) { state.speed = value; },
     get inputs() { return state.inputs; },
@@ -61,6 +64,7 @@ export function setupSimulation(ctx: AppContext, deps: SimulationSetup): Simulat
     evaluateSimulation: loop.evaluateSimulation,
     startSimulation: loop.startSimulation,
     stopSimulation: loop.stopSimulation,
+    togglePause: loop.togglePause,
     pressMomentary: inputs.pressMomentary,
     releaseMomentary: inputs.releaseMomentary,
     resetSimulationInputs: inputs.resetSimulationInputs,

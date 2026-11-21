@@ -1,6 +1,7 @@
 import type { AppContext } from './context';
 import { cloneSchema } from './helpers';
 import { isWireInteriorPoint } from './wire-routing';
+import { wireTypeCode } from './wire-planner';
 import type { Point } from './viewport';
 
 export interface WireEditorCommandsOptions {
@@ -96,7 +97,7 @@ export function createWireEditorCommands(options: WireEditorCommandsOptions): Wi
     let id = Math.max(0, ...schema.elements.map((element) => element.id), ...schema.wires.map((wire) => wire.id)) + 1;
     const existingWires = [...schema.wires];
     for (const { route, kind } of bundle) {
-      const typeCode = kind === 'phase' ? 4000 : kind === 'neutral' ? 4009 : 4010;
+      const typeCode = wireTypeCode(activeKinds, kind);
       for (let index = 1; index < route.length; index += 1) {
         const from = route[index - 1];
         const to = route[index];

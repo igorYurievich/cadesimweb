@@ -1,3 +1,4 @@
+import { isMechanism } from "@model/mechanisms";
 import type { SchemaElement } from "@model/types";
 import { rotateOffset } from "@model/geometry";
 
@@ -52,6 +53,14 @@ export const NAME_SPOTS: Readonly<
   7020: { x: -1, y: 6.5, anchor: "end" }, 7021: { x: -1, y: 6.5, anchor: "end" },
   // LOGO: имя над левым верхним углом; Ladder: операнд по центру над символом.
   10202: { x: 0, y: -2, anchor: "start" }, 10214: { x: 0, y: -2, anchor: "start" },
+  10230: { x: 0, y: -2, anchor: "start" },
+  8120: { x: -1.5, y: 15, anchor: "end" }, 8121: { x: -1.5, y: 15, anchor: "end" },
+  8122: { x: -1.5, y: 15, anchor: "end" }, 8123: { x: -1.5, y: 15, anchor: "end" },
+  8124: { x: -1.5, y: 15, anchor: "end" }, 8125: { x: 1, y: 9, anchor: "end" },
+  // Блок питания 24 V: имя слева от корпуса, на уровне лицевой панели (сверху и снизу — провода).
+  10220: { x: -1.5, y: 50, anchor: "end" },
+  // Минутник Alst 8: имя слева от корпуса, у колеса выдержки.
+  8110: { x: 0, y: 13.5, anchor: "end" },
   10050: { x: 6, y: -5, anchor: "middle" }, 10051: { x: 6, y: -5, anchor: "middle" },
   10060: { x: 6, y: -5, anchor: "middle" },
   ...Object.fromEntries(LADDER_EXTRA.map((code) => [code, LADDER_NAME])),
@@ -100,8 +109,9 @@ export function drawTerminalLabels(g: SVGGElement, element: SchemaElement, rotat
   if (isStrip(element.typeCode) || [3015, 3019, 3020].includes(element.typeCode)) return;
   // У блоков с выдержкой 2D номера клемм напечатаны на корпусе у винтов (realistic-2d-delay.ts).
   if (isDelayBlock2d(element.typeCode) || element.typeCode === AUX_BLOCK_2D) return;
-  // LOGO и DM8 подписывают клеммы сами (logo-symbol.ts, dm8-symbol.ts).
-  if (element.typeCode === 10202 || element.typeCode === 10214) return;
+  // LOGO, DM8, блок питания 24 V и S7-1200 подписывают клеммы сами (logo-symbol.ts, dm8-symbol.ts, din-psu-symbol.ts,
+  // s7-1200-symbol.ts).
+  if ([10202, 10214, 10220, 10230, 10240, 10241].includes(element.typeCode) || isMechanism(element.typeCode)) return;
   if (element.terminals.length === 0) return;
   const minY = Math.min(...element.terminals.map((t) => t.offset.y));
   const sideSpots = SIDE_LABELS[element.typeCode];

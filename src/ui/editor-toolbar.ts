@@ -42,8 +42,12 @@ export function setupEditorToolbar(options: EditorToolbarOptions): (direction: -
   };
   options.drawWireButton.addEventListener('click', options.toggleWireDrawing);
   options.finishWireButton.addEventListener('click', options.finishWireDrawing);
+  // Выбрал тип провода в списке — сразу режим рисования провода (как кнопка «Провод»).
+  // Фокус уходит со списка, чтобы работали клавиши режима: C/Esc — выйти, стрелки — сменить тип.
   options.wireKindSelect.addEventListener('change', () => {
-    if (options.wireDrawing()) options.drawDraft();
+    if (options.wireDrawing()) { options.drawDraft(); return; }
+    options.toggleWireDrawing();
+    options.wireKindSelect.blur();
   });
   options.wireThicknessSelect.addEventListener('change', () => {
     const thickness = Number(options.wireThicknessSelect.value);
@@ -75,6 +79,8 @@ export function setupEditorToolbar(options: EditorToolbarOptions): (direction: -
     options.simulation.startSimulation();
   });
   options.stopButton.addEventListener('click', options.simulation.stopSimulation);
+  options.runButton.parentElement?.querySelector<HTMLButtonElement>('#sim-pause')
+    ?.addEventListener('click', () => options.simulation.togglePause());
   setupSimulationSpeedControl(options.speedButton, options.simulation);
   options.simulation.updateSimulationControls();
   return cycleWireKind;

@@ -2,6 +2,7 @@ import { setupCanvasInteractions } from './canvas-interactions';
 import type { CanvasInteractionsOptions } from './canvas-interactions';
 import { setupDocumentInputEvents, setupDocumentOpen } from './document-io';
 import { setupViewportControls } from './viewport-controls';
+import { setupMobile } from './mobile';
 import { setupAppKeyboardShortcuts } from './app-setup-shortcuts';
 import type { AppSetupBase } from './app-setup-base';
 import type { AppSetupEditor } from './app-setup-editor';
@@ -128,6 +129,15 @@ function setupViewportEvents(state: AppSetupBase, editor: AppSetupEditor): void 
     viewport: () => state.viewport,
     setViewport: (value) => { state.viewport = value; },
     drawViewport: editor.drawViewport,
+  });
+  setupMobile({
+    root: state.root,
+    svg: state.elements.svg,
+    viewSize: () => state.viewSize,
+    viewport: () => state.viewport,
+    setViewport: (value) => { state.viewport = value; },
+    drawViewport: editor.drawViewport,
+    simulationMode: () => state.simulation.mode,
   });
 }
 

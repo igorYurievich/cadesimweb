@@ -24,6 +24,7 @@ export type GroupKey =
   | 'power-electronics'
   | 'aux-contacts'
   | 'manual-controls'
+  | 'mechanisms'
   | 'sensors'
   | 'coils-signaling'
   | 'electronic-relays'
@@ -89,6 +90,7 @@ const GROUP_DEFS: ReadonlyArray<{ prefix: string; key: GroupKey; release: Releas
   { prefix: 'Potencia:', key: 'power-electronics', release: 'v2' },
   { prefix: 'Contactos auxiliares', key: 'aux-contacts', release: 'v1' },
   { prefix: 'Accionamientos', key: 'manual-controls', release: 'v1' },
+  { prefix: 'Mecanismos', key: 'mechanisms', release: 'v1' },
   { prefix: 'Detectores', key: 'sensors', release: 'v1' },
   { prefix: 'Bobinas, temporizadores', key: 'coils-signaling', release: 'v1' },
   { prefix: 'Relés electrónicos', key: 'electronic-relays', release: 'v1' },

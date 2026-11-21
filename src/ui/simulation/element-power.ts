@@ -4,6 +4,7 @@ import type { SchemaElement } from '@model/types';
 import { latchedTypes } from '../constants';
 import { THERMAL_RELAY_TYPES } from '@engine/thermal';
 import type { SimulationState } from './types';
+import { DIN_PSU_TYPE } from '@model/plc-power-supply';
 
 const phaseLabels = ['L1', 'L2', 'L3'] as const;
 
@@ -13,6 +14,11 @@ export function applyPowerSupplyVisuals(
   result: EngineState | undefined,
   nets: Map<number, EngineState['nets'][number]>,
 ): void {
+  // Блок на DIN-рейку окрашен сам: при входном напряжении загорается только его лампочка.
+  if (element.typeCode === DIN_PSU_TYPE) {
+    node.classList.toggle('is-psu-on', isTwoWireSupplyActive(element.id, result, nets));
+    return;
+  }
   node.classList.toggle('is-power-supply-active', isPowerSupplyActive(element.id, element.typeCode, result, nets));
 }
 

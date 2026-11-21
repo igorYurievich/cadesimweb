@@ -1,5 +1,6 @@
 import type { SchemaElement } from "@model/types";
 import { isSimpleView } from "@model/realistic-2d-types";
+import { LOGO_DM8, logoModelName, logoSupply } from "@model/plc-modules";
 
 import { circle, group, label, path, rect } from "./svg-primitives";
 import { addressOf } from "./plc-address-registry";
@@ -85,6 +86,7 @@ function drawColor(g: SVGGElement, element: SchemaElement, rotation: number): vo
     rect(5.2, 37.2, 1.8, 1.8, { fill: "#2a3138", stroke: "none" }),
     group("logo-run", rect(5.2, 37.2, 1.8, 1.8, { fill: "#22c55e", stroke: "none" })),
     t("RUN/STOP", 8, 38.2, rotation, 1.9, "#d4dde4", "start"),
+    t(logoModelName(LOGO_DM8, logoSupply(element)), 38.6, 76.6, rotation, 1.5, "#d4dde4", "end"),
     rect(0, 79.6, 42, 9.6, { fill: "#4f5d69", stroke: EDGE, "stroke-width": 0.35 }),
     rect(0, 89.2, 42, 9.8, { fill: "#4a5763", stroke: EDGE, "stroke-width": 0.35 }),
     t("X11", 1.2, 82, rotation, 1.2, INK, "start"), t("X12", 1.2, 91.4, rotation, 1.1, INK, "start"),
@@ -102,8 +104,8 @@ function drawSimple(g: SVGGElement, element: SchemaElement, rotation: number): v
     leads(),
     rect(0, 3, 42, 96, { fill: "#fff", stroke: "#4b5563", "stroke-width": 0.6 }),
     path("M 0 13.6 H 42 M 0 79.6 H 42", 0.4, { stroke: "#4b5563" }),
-    t("DM8", 21, 46, rotation, 4, "#4b5563"),
-    group("logo-run", t("RUN", 21, 53, rotation, 2.4, "#16a34a")),
+    t("DM8", 21, 46, rotation, 4, "#4b5563"), t(`${logoSupply(element)}R`, 21, 49.6, rotation, 1.8, "#4b5563"),
+    group("logo-run", t("RUN", 21, 54, rotation, 2.4, "#16a34a")),
     ...outputRouting(element, rotation, false),
     ...ioLabels(element, rotation, "#2b2f33"),
   );

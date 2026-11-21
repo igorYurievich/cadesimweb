@@ -1,5 +1,5 @@
 import type { EngineState } from '@engine/types';
-import { formatSimulationDiagnostics } from './diagnostics';
+import { formatSimulationDiagnostics, formatSimulationWarnings } from './diagnostics';
 import { applyElementVisuals } from './element-visuals';
 import { buildWireCurrentGroups } from './wire-current-groups';
 import { applyWireVisuals } from './wire-visuals';
@@ -24,7 +24,10 @@ function updateDiagnosticMessage(
   result: EngineState | undefined,
   ctx: AppContext,
 ): void {
-  const text = formatSimulationDiagnostics(ctx, deps, result).join(' ');
+  // Ошибки (КЗ, утечка) — красным; если ошибок нет, а есть предупреждения — тем же окном, но жёлтым.
+  const errors = formatSimulationDiagnostics(ctx, deps, result);
+  const text = [...errors, ...formatSimulationWarnings(ctx, deps, result)].join(' ');
   deps.simulationMessage.hidden = text.length === 0;
+  deps.simulationMessage.classList.toggle('is-warning', errors.length === 0);
   if (deps.simulationMessageText.textContent !== text) deps.simulationMessageText.textContent = text;
 }

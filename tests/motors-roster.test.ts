@@ -3,6 +3,7 @@ import { catalog } from '@model/catalog';
 import { cadTypeForCommand, getCadType, isKnownCadType } from '@model/cad-types';
 import { importCad } from '@model/cad-import';
 import { createEngineInput, simulate } from '@engine/index';
+import type { EngineMemory } from '@engine/index';
 import { invalidTerminalIndexes, missingBehaviors } from '../src/engine/behaviors';
 import { el, schemaOf, seg } from './builders';
 import { fixture } from './helpers';
@@ -78,10 +79,43 @@ function threePhase(typeCode: number, terminals: ReadonlyArray<readonly [number,
 const TOP3: ReadonlyArray<readonly [number, number, string]> = [[0, 0, 'U1'], [6, 0, 'V1'], [12, 0, 'W1'], [18, 0, 'PE']];
 
 describe('motors: engine', () => {
-  it('wound-rotor motor 1004 runs on three phases at the stator', () => {
+  it('wound-rotor motor 1004 needs three phases at the stator and a closed rotor K L M', () => {
     const terminals = [...TOP3, [0, 24, 'K'], [6, 24, 'L'], [12, 24, 'M']] as const;
-    expect(simulate(createEngineInput(threePhase(1004, terminals, [0, 1, 2]))).motors[2]).toEqual({ running: true, faulted: false });
-    expect(simulate(createEngineInput(threePhase(1004, terminals, [0, 1]))).motors[2]).toEqual({ running: false, faulted: true });
+    // Ротор накоротко: K L M соединены перемычкой на y = 57 (мотор в (30, 30), K L M на (30..42, 54)).
+    const shorted = (wired: number[]) => {
+      const schema = threePhase(1004, terminals, wired);
+      const next = Math.max(...schema.wires.map((w) => w.id), ...schema.elements.map((e) => e.id)) + 1;
+      schema.wires.push(
+        ...[seg(30, 54, 30, 57), seg(36, 54, 36, 57), seg(42, 54, 42, 57), seg(30, 57, 42, 57)]
+          .map((wire, k) => ({ ...wire, id: next + k })),
+      );
+      return schema;
+    };
+    expect(simulate(createEngineInput(shorted([0, 1, 2]))).motors[2]).toEqual({ running: true, faulted: false });
+    expect(simulate(createEngineInput(shorted([0, 1]))).motors[2]).toEqual({ running: false, faulted: true });
+    // Ротор разомкнут: на статоре три фазы, но двигатель не идёт.
+    expect(simulate(createEngineInput(threePhase(1004, terminals, [0, 1, 2]))).motors[2]).toEqual({ running: false, faulted: true });
+  });
+
+  it('wound-rotor start (user sample): slow on the rotor resistors, full speed once KM2 shorts them', () => {
+    const { schema } = importCad(fixture('arranque-rotor-bobinado.cad'));
+    const motor = schema.elements.find((e) => e.typeCode === 1004);
+    const start = schema.elements.find((e) => e.name === 'START');
+    if (!motor || !start) throw new Error('нет мотора или кнопки');
+    let memory: EngineMemory | undefined;
+    const trace = ([[0, false], [0.5, true], [1, false], [2.6, false], [4, false]] as const).map(([time, press]) => {
+      const input = createEngineInput(schema, time);
+      for (const id of [45, 3, 0]) input.inputs.toggled[id] = true; // F1, F2, F3 включены
+      if (press) input.inputs.pressed[start.id] = true;
+      const state = simulate({ ...input, memory });
+      memory = state.memory;
+      return state.motors[motor.id];
+    });
+    expect(trace).toEqual([
+      { running: false, faulted: false },
+      { running: true, faulted: false, slow: true }, { running: true, faulted: false, slow: true },
+      { running: true, faulted: false }, { running: true, faulted: false },
+    ]);
   });
 
   it('Dahlander 1003 and two-speed 1005 run from either winding', () => {

@@ -1,3 +1,4 @@
+import { pageOfX } from './program-pages';
 /**
  * Геометрия клемм и листа. Правила выведены из образцов .cad: концы проводов
  * в них совпадают с клеммами элементов, а расстояние между рядами клемм равно
@@ -109,7 +110,8 @@ export interface Bounds {
  * Границы схемы. Служебные объекты вне листа (тип 20000 на y = 486) не считаются,
  * иначе рамка «показать всё» уезжала бы далеко вниз.
  */
-export function schemaBounds(schema: Schema, ignoreTypes: ReadonlySet<number> = new Set([20000])): Bounds | null {
+/** Габариты содержимого листа page (0 — основной, program-pages.ts). */
+export function schemaBounds(schema: Schema, ignoreTypes: ReadonlySet<number> = new Set([20000]), page = 0): Bounds | null {
   const acc: { b: Bounds | null } = { b: null };
   const add = (p: Point): void => {
     const b = acc.b;
@@ -122,7 +124,7 @@ export function schemaBounds(schema: Schema, ignoreTypes: ReadonlySet<number> = 
     }
   };
   for (const e of schema.elements) {
-    if (ignoreTypes.has(e.typeCode)) continue;
+    if (ignoreTypes.has(e.typeCode) || pageOfX(e.position.x) !== page) continue;
     add(e.position);
     for (let i = 0; i < e.terminals.length; i += 1) {
       const p = terminalPosition(e, i);
@@ -130,6 +132,7 @@ export function schemaBounds(schema: Schema, ignoreTypes: ReadonlySet<number> = 
     }
   }
   for (const w of schema.wires) {
+    if (pageOfX(w.from.x) !== page) continue;
     add(w.from);
     add(w.to);
   }

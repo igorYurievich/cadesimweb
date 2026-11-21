@@ -103,6 +103,11 @@ kbd { padding: 2px 6px; border: 1px solid var(--border); border-radius: 4px; bac
 /* Значок кабеля на кнопке «Провод» (wire-button.ts). */
 .viewport-toolbar .wire-icon { width: 22px; height: 22px; display: block; margin: auto; fill: none; stroke-width: 2.6; stroke-linecap: round; }
 .viewport-toolbar .tool-icon { width: 16px; height: 16px; display: block; margin: auto; fill: currentColor; stroke: none; }
+.header-icon-button { display: grid; flex: 0 0 auto; width: var(--control-h); height: var(--control-h); place-items: center; padding: 0; border: 1px solid var(--border); border-radius: var(--radius); color: var(--text); background: var(--surface); cursor: pointer; }
+.header-icon-button:hover { border-color: var(--border-strong); background: var(--surface-hover); }
+.header-icon-button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.header-icon-button svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.header-icon-button[hidden] { display: none; }
 .file-name { max-width: 320px; margin-left: auto; overflow: hidden; color: var(--muted); font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
 
 .simulation-controls { margin-left: auto; padding: 3px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
@@ -110,6 +115,9 @@ kbd { padding: 2px 6px; border: 1px solid var(--border); border-radius: 4px; bac
 .simulation-controls > #sim-run:not(:disabled) { border-color: #19834a; background: #19834a; color: #fff; }
 .simulation-controls > #sim-run:hover:not(:disabled) { border-color: #146c3d; background: #146c3d; }
 #app[data-theme="dark"] .simulation-controls > #sim-run:not(:disabled) { border-color: #2f9a62; background: #2f9a62; }
+.simulation-controls > #sim-pause svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 3.2; stroke-linecap: round; }
+.simulation-controls > #sim-pause[aria-pressed="true"] { border-color: #d48a12; background: #f2a516; color: #fff; }
+.viewport-svg.is-sim-paused .motor-rotor { animation-play-state: paused !important; }
 .simulation-speed { display: flex; align-items: center; padding: 0 4px; white-space: nowrap; }
 .speed-btn { min-width: 52px; padding: 3px 8px; background: var(--accent-soft) !important; color: var(--accent) !important; border-color: var(--accent) !important; font-size: 12px; font-variant-numeric: tabular-nums; font-weight: 650 !important; }
 .simulation-state { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; background: var(--surface-hover); color: var(--muted); font-size: 11px; font-weight: 650; white-space: nowrap; }
@@ -357,7 +365,7 @@ kbd { padding: 2px 6px; border: 1px solid var(--border); border-radius: 4px; bac
 .verification-guide-marker { display: flex; align-items: center; gap: 9px; margin: 14px 0 8px; color: var(--text); }
 .component-guide-dialog p { margin: 8px 0; color: var(--muted); font-size: 13px; line-height: 1.55; }
 .component-guide-dialog #component-guide-count { margin-top: 14px; color: var(--text); font-weight: 650; }
-.examples-dialog { display: none; width: min(700px, calc(100vw - 28px)); max-width: none; height: min(520px, calc(100vh - 28px)); max-height: none; padding: 0; overflow: hidden; border-radius: 10px; }
+.examples-dialog { display: none; width: min(760px, calc(100vw - 28px)); max-width: none; height: min(520px, calc(100vh - 28px)); max-height: none; padding: 0; overflow: hidden; border-radius: 10px; }
 .examples-dialog[open] { display: flex; flex-direction: column; }
 .examples-window-titlebar { display: flex; height: 48px; flex: 0 0 48px; align-items: center; justify-content: space-between; padding: 0 12px 0 16px; border-bottom: 1px solid var(--border); background: var(--surface); }
 .examples-window-title { display: flex; min-width: 0; align-items: center; gap: 10px; }
@@ -365,25 +373,14 @@ kbd { padding: 2px 6px; border: 1px solid var(--border); border-radius: 4px; bac
 .examples-window-title h2 { margin: 0; overflow: hidden; font-size: 13px; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
 .examples-window-close { display: grid; width: 30px; height: 30px; place-items: center; border: 0; border-radius: 6px; background: transparent; color: var(--muted); font: inherit; font-size: 20px; cursor: pointer; }
 .examples-window-close:hover { background: #d3483e; color: #fff; }
-.examples-window-toolbar { display: flex; height: 44px; flex: 0 0 44px; align-items: center; gap: 6px; padding: 0 12px; border-bottom: 1px solid var(--border); background: var(--surface-soft); }
-.examples-window-toolbar > button { width: 28px; height: 28px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); color: var(--muted); font-size: 19px; line-height: 1; }
-.examples-breadcrumb { display: flex; min-width: 0; height: 29px; flex: 1; align-items: center; gap: 8px; margin-left: 6px; padding: 0 9px; border: 1px solid var(--border); border-radius: 5px; background: var(--surface); color: var(--text); font-size: 11px; }
-.examples-breadcrumb svg, .examples-sidebar-entry svg { width: 17px; height: 17px; flex: 0 0 auto; fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1.4; stroke-linejoin: round; }
-.examples-window-content { display: flex; min-height: 0; flex: 1; }
-.examples-sidebar { width: 155px; flex: 0 0 155px; padding: 14px 8px; border-right: 1px solid var(--border); background: var(--surface-soft); }
-.examples-sidebar-heading { padding: 3px 9px 8px; color: var(--muted); font-size: 10px; font-weight: 650; }
-.examples-sidebar-entry { display: flex; min-height: 32px; align-items: center; gap: 8px; padding: 0 9px; border-radius: 5px; color: var(--text); font-size: 11px; }
-.examples-sidebar-entry.is-selected { background: var(--accent-soft); color: var(--text); font-weight: 600; }
-.examples-files-section { display: flex; min-width: 0; flex: 1; flex-direction: column; }
-.examples-list-head { display: grid; grid-template-columns: minmax(0, 1fr) 112px; gap: 10px; padding: 10px 16px 8px; border-bottom: 1px solid var(--border); color: var(--muted); font-size: 10px; }
-.example-file-list { min-height: 0; overflow-y: auto; padding: 5px 8px; }
-.example-file { display: grid; width: 100%; min-height: 39px; grid-template-columns: 23px minmax(0, 1fr) 102px; align-items: center; gap: 8px; padding: 4px 8px; border: 1px solid transparent; border-radius: 5px; background: transparent; color: var(--text); font: inherit; font-size: 11px; text-align: start; cursor: pointer; }
-.example-folder-row { display: grid; width: 100%; min-height: 39px; grid-template-columns: 23px minmax(0, 1fr) 102px; align-items: center; gap: 8px; padding: 4px 8px; border: 1px solid transparent; border-radius: 5px; background: transparent; color: var(--text); font: inherit; font-size: 11px; text-align: start; cursor: pointer; }
+.example-groups { min-height: 0; flex: 1; overflow-y: auto; padding: 6px 16px 14px; }
+.example-group + .example-group { margin-top: 6px; }
+.example-group-title { margin: 12px 0 8px; color: var(--muted); font-size: 11px; font-weight: 650; letter-spacing: .02em; }
+.example-group-items { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 6px; }
+.example-file { display: flex; min-height: 40px; align-items: center; gap: 9px; padding: 6px 10px; border: 1px solid var(--border); border-radius: 7px; background: var(--surface); color: var(--text); font: inherit; font-size: 11.5px; text-align: start; cursor: pointer; }
 .example-file:hover, .example-file:focus-visible { border-color: var(--accent); background: var(--accent-soft); outline: none; }
-.example-folder-row:hover, .example-folder-row:focus-visible { border-color: var(--accent); background: var(--accent-soft); outline: none; }
-.example-file svg, .example-folder-row svg { width: 18px; height: 20px; fill: var(--surface); stroke: var(--muted); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
-.example-file-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.example-file-code { color: var(--muted); font-size: 10px; text-align: end; white-space: nowrap; }
+.example-file svg { width: 18px; height: 20px; flex: 0 0 auto; fill: var(--surface); stroke: var(--accent); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.example-file-name { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-height: 1.3; }
 .examples-window-footer { display: flex; min-height: 42px; flex: 0 0 42px; align-items: center; justify-content: space-between; padding: 0 14px; border-top: 1px solid var(--border); background: var(--surface-soft); color: var(--muted); font-size: 10px; }
 .examples-window-footer button { min-height: 27px; padding: 0 10px; border: 1px solid var(--border-strong); border-radius: 6px; background: var(--surface); color: var(--text); font: inherit; font-size: 10px; cursor: pointer; }
 .examples-window-footer button:hover { background: var(--surface-hover); }
@@ -401,6 +398,9 @@ kbd { padding: 2px 6px; border: 1px solid var(--border); border-radius: 4px; bac
 
 .simulation-message { position: fixed; z-index: 100; top: 136px; right: 16px; width: min(560px, calc(100vw - 32px)); max-height: min(48vh, 420px); padding: 11px 14px; overflow: auto; border: 1px solid #e6b7b1; border-left: 4px solid #d3483e; border-radius: 8px; background: #fff0ed; color: #9e3027; box-shadow: 0 8px 28px #10182840; font-size: 12px; line-height: 1.45; }
 .simulation-message[hidden] { display: none; }
+/* Предупреждение (схема работает, но подключение опасное): жёлтое окно. */
+.simulation-message.is-warning { border-color: #ecd27a; border-left-color: #e0a800; background: #fff8db; color: #7a5600; }
+#app[data-theme="dark"] .simulation-message.is-warning { border-color: #6b5a24; border-left-color: #f0c03a; background: #36301a; color: #f5d77a; }
 #app[data-theme="dark"] .simulation-message { border-color: #713b37; border-left-color: #e46c61; background: #382321; color: #ffaaa0; }
 /* Символы: серые в покое, красные под напряжением (как в CADe_SIMU). */
 .schematic-element { color: #7b8189; }
@@ -450,6 +450,9 @@ kbd { padding: 2px 6px; border: 1px solid var(--border); border-radius: 4px; bac
 .is-sim-pressed .contact.by-pressed.rest-closed .blade-open { display: inline; }
 .actuator-roller { transform-box: fill-box; transform-origin: center; transition: transform 100ms ease-out; }
 .is-sim-pressed .actuator-roller { transform: translateX(1px) scaleX(0.82); }
+/* «Botón pulsador» 8023: колпачок утапливается, пока кнопка зажата. */
+.schematic-element .indicator-cap { transform-box: fill-box; transform-origin: center; }
+.schematic-element.is-sim-pressed .indicator-cap { transform: scale(0.82); filter: brightness(0.78); }
 /* Conmutador: видна только группа лопастей текущей позиции (data-position ставит app.ts). */
 .sel-pos { display: none; }
 .schematic-element[data-position="0"] .sel-pos-0,
@@ -478,6 +481,16 @@ kbd { padding: 2px 6px; border: 1px solid var(--border); border-radius: 4px; bac
 .schematic-element .logo-run { display: none; }
 .schematic-element.is-logo-run .logo-run { display: inline; }
 .schematic-element .logo-led.is-on { fill-opacity: 0.6; }
+.schematic-element .logo-cell.is-on { fill-opacity: 1; }
+/* Минутник Alst 8: синий движок вверху (авто) или внизу (☼ постоянный свет). */
+.schematic-element .stair-perm { display: none; }
+.schematic-element.is-stair-permanent .stair-perm { display: inline; }
+.schematic-element.is-stair-permanent .stair-auto { display: none; }
+.schematic-element .stair-badge { display: none; }
+.schematic-element.is-stair-permanent .stair-badge { display: inline; }
+.schematic-element.is-sim-active .stair-slider { cursor: pointer; }
+/* Блок питания 24 V на DIN-рейку: лампочка горит, пока на входе есть L и N. */
+.schematic-element.is-psu-on .psu-led { fill: #4ade80; filter: drop-shadow(0 0 0.8px #4ade80); }
 .schematic-element.is-ladder-on .ladder-glow { fill-opacity: 0.22; }
 .schematic-element.is-ladder-on .ladder-mark { stroke: #16a34a; }
 .schematic-element.is-ladder-on .ladder-box { fill: #86efac; }
@@ -491,15 +504,38 @@ kbd { padding: 2px 6px; border: 1px solid var(--border); border-radius: 4px; bac
 .schematic-element.is-lamp-lit .lamp-glass.lamp-c2 { fill: #ffe600; stroke: #b88a00; filter: drop-shadow(0 0 3px #ffd400); }
 .motor-rotor { opacity: 0; transform-box: fill-box; transform-origin: center; }
 .schematic-element.is-motor-running .motor-body > circle { fill: #bdbdbd; }
-.schematic-element.is-motor-running .motor-rotor { opacity: 1; animation: motor-rotation var(--motor-period, 1.8s) linear infinite; animation-play-state: var(--motor-play-state, paused); }
+/* Угол ротора считает element-motors.ts по времени симуляции (--motor-angle); на паузе время стоит — стоит и стрелка. */
+.schematic-element.is-motor-running .motor-rotor { opacity: 1; transform: scaleX(var(--motor-mirror, 1)) rotate(var(--motor-angle, 0deg)); }
 .schematic-element.is-motor-faulted .motor-body > circle { fill: #fde5e2; stroke: #c53d35; }
-/* Направление задаётся только зеркалом scaleX(-1): стрелка и вращение разворачиваются вместе (animation-direction: reverse вместе с зеркалом гасил разворот). */
-@keyframes motor-rotation {
-  from { transform: scaleX(var(--motor-mirror, 1)) rotate(0deg); }
-  to { transform: scaleX(var(--motor-mirror, 1)) rotate(360deg); }
-}
+/* Преобразователь частоты: дисплей частоты справа от силовой части, только в симуляции при питании. */
+.vfd-display { display: none; }
+.schematic-element.is-vfd-ready .vfd-display { display: inline; }
+.vfd-display .vfd-display-screen { fill: #0f172a; stroke: #334155; stroke-width: 0.3; }
+.vfd-display .vfd-display-text { fill: #64748b; stroke: none !important; font-family: ui-monospace, Consolas, monospace; }
+.schematic-element.is-vfd-run .vfd-display .vfd-display-text { fill: #4ade80; }
+/* Преобразователь 2D: дисплей и светодиоды панели (simulation/element-vfd.ts), кнопки кликаются в симуляции. */
+.vfd2d-digits { stroke: none !important; font-weight: 700; letter-spacing: 0.2px; }
+.schematic-element.is-vfd-ready .vfd2d-digits { fill: #ff3b30 !important; }
+.schematic-element.is-vfd-stopped .vfd2d-digits { fill: #c2410c !important; }
+.vfd2d-led { stroke: none !important; }
+.vfd2d-led.is-on { fill: #22c55e !important; filter: drop-shadow(0 0 0.6px #22c55e); }
+.vfd2d-led-rev.is-on { fill: #f59e0b !important; filter: drop-shadow(0 0 0.6px #f59e0b); }
+.vfd2d-led-hz.is-on { fill: #ef4444 !important; filter: drop-shadow(0 0 0.6px #ef4444); }
+.vfd2d-led-mod.is-on, .vfd2d-led-fwd.is-on { fill: #ef4444 !important; filter: drop-shadow(0 0 0.6px #ef4444); }
+.schematic-element.is-sim-active .vfd2d-key, .schematic-element.is-sim-active .vfd2d-knob { cursor: pointer; }
+.vfd2d-key text, .vfd2d-key circle, .vfd2d-knob circle { stroke-opacity: 1; }
+.vfd-relay-closed { display: none; }
+.schematic-element.is-vfd-run .vfd-relay-closed { display: inline; }
+.schematic-element.is-vfd-run .vfd-relay-open { display: none; }
+/* Двухскоростные двигатели (Dahlander 1003, две обмотки 1005): большая скорость — янтарный корпус и «×2». */
+/* Без обводки: подсветка проводов под током красит stroke у всего элемента — у цифры получалась «тень». */
+.motor-speed .motor-speed-low, .motor-speed .motor-speed-high { display: none; font-weight: 700; stroke: none !important; }
+.schematic-element.is-motor-speed-low .motor-speed-low { display: inline; fill: #475569; }
+.schematic-element.is-motor-speed-high .motor-speed-high { display: inline; fill: #b45309; }
+.schematic-element.is-motor-speed-high .motor-body > circle { fill: #fcd34d; }
+/* Направление задаётся только зеркалом scaleX(-1): стрелка и вращение разворачиваются вместе. */
 @media (prefers-reduced-motion: reduce) {
-  .schematic-element.is-motor-running .motor-rotor { animation: none; }
+  .schematic-element.is-motor-running .motor-rotor { transform: scaleX(var(--motor-mirror, 1)); }
 }
 .simulation-context-menu { position: fixed; z-index: 20; display: grid; min-width: 196px; gap: 2px; padding: 5px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); box-shadow: 0 10px 28px #1020303b; }
 .simulation-context-menu[hidden] { display: none; }
@@ -525,6 +561,15 @@ kbd { padding: 2px 6px; border: 1px solid var(--border); border-radius: 4px; bac
 .wire-end-handle { fill: #fff; stroke: #126fc2; stroke-width: 1.5px; vector-effect: non-scaling-stroke; cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cg fill='none' stroke-linecap='round'%3E%3Cpath d='M16 3V12M16 20V29M3 16H12M20 16H29' stroke='%23fff' stroke-width='3.6'/%3E%3Cpath d='M16 3V12M16 20V29M3 16H12M20 16H29' stroke='%230b3d6e' stroke-width='1.6'/%3E%3Ccircle cx='16' cy='16' r='1.6' fill='%23e5484d' stroke='%23fff' stroke-width='.8'/%3E%3C/g%3E%3C/svg%3E") 16 16, crosshair; }
 .wire-draft { pointer-events: none; }
 .wire-draft-point { fill: #fff; stroke: #2676bd; stroke-width: 1.2px; vector-effect: non-scaling-stroke; pointer-events: none; }
+
+/* Кнопка «Элементы» у левого края поля: сворачивает и разворачивает панель элементов. */
+.palette-toggle { position: absolute; z-index: 5; top: 50%; left: 0; display: flex; align-items: center; gap: 6px; padding: 10px 5px; transform: translateY(-50%); writing-mode: vertical-rl; border: 1px solid var(--border); border-left: 0; border-radius: 0 9px 9px 0; background: color-mix(in srgb, var(--surface) 94%, transparent); color: var(--muted); font: inherit; font-size: 11px; font-weight: 650; letter-spacing: .02em; box-shadow: 0 3px 12px #0002; cursor: pointer; }
+.palette-toggle:hover { color: var(--accent); border-color: var(--accent); }
+.palette-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.palette-toggle-arrow::before { content: '‹'; display: inline-block; font-size: 15px; line-height: 1; writing-mode: horizontal-tb; }
+#app[data-palette-collapsed="true"] .palette-toggle-arrow::before { content: '›'; }
+#app[data-palette-collapsed="true"] .component-palette { display: none; }
+#app[data-palette-collapsed="true"][data-palette-view="icons"] .editor-workspace { grid-template-columns: 0 minmax(0, 1fr) auto; }
 
 /* ── Адаптивность ───────────────────────────────────────── */
 @media (max-width: 1180px) {
@@ -606,16 +651,28 @@ kbd { padding: 2px 6px; border: 1px solid var(--border); border-radius: 4px; bac
   .component-palette { width: 100%; flex: 0 0 auto; max-height: 36vh; border-right: 0; border-bottom: 1px solid var(--border); }
   .properties-panel { width: 100%; flex: 0 0 auto; max-height: 28vh; border-left: 0; border-bottom: 1px solid var(--border); }
   .viewport-stage { min-height: 260px; }
+  /* Панель сверху: кнопка — плашкой в левом нижнем углу поля, стрелка вверх/вниз. */
+  .palette-toggle { top: auto; bottom: 14px; left: 10px; padding: 6px 10px; transform: none; writing-mode: horizontal-tb; border-left: 1px solid var(--border); border-radius: 9px; }
+  .palette-toggle-arrow::before { content: '˄'; }
+  #app[data-palette-collapsed="true"] .palette-toggle-arrow::before { content: '˅'; }
+  #app[data-palette-collapsed="true"][data-palette-view="icons"] .editor-workspace { grid-template-columns: minmax(0, 1fr); grid-template-rows: 0 minmax(260px, 1fr) auto; }
 }
 
 @media (max-width: 480px) {
-  .examples-sidebar { display: none; }
-  .examples-list-head { grid-template-columns: minmax(0, 1fr) 76px; padding-inline: 10px; }
-  .example-file, .example-folder-row { grid-template-columns: 21px minmax(0, 1fr) 70px; gap: 6px; padding-inline: 5px; }
+  .example-groups { padding-inline: 10px; }
+  .example-group-items { grid-template-columns: 1fr; }
   .brand-lockup h1 { display: none; }
 }
 
 .sheet-dialog { width: min(380px, calc(100% - 32px)); }
+/* Предпросмотр печати: белая страница в пропорциях бумаги (--ratio = ширина / высота), клик — увеличение ×2. */
+.print-preview-dialog { width: min(1180px, calc(100% - 32px)); }
+.print-preview-head { display: flex; align-items: baseline; gap: 12px; }
+.print-preview-info { color: var(--muted); font-size: 12px; }
+.print-preview-stage { display: flex; max-height: calc(100vh - 190px); justify-content: center; align-items: flex-start; overflow: auto; padding: 18px; border-radius: var(--radius); background: var(--stage-bg); }
+.print-preview-page { flex: 0 0 auto; width: min(100%, calc((100vh - 226px) * var(--ratio, 1.41))); aspect-ratio: var(--ratio, 1.41); background: #fff; color: #263342; box-shadow: 0 2px 14px #18243340; cursor: zoom-in; }
+.print-preview-page.is-zoomed { width: calc(2 * min(100%, calc((100vh - 226px) * var(--ratio, 1.41)))); cursor: zoom-out; }
+.print-preview-page > svg { display: block; width: 100%; height: 100%; }
 .sheet-fields { display: grid; gap: 12px; margin-top: 14px; }
 .sheet-size-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .sheet-dialog .property-field input, .sheet-dialog .property-field select { height: 34px; }
@@ -634,8 +691,6 @@ kbd { padding: 2px 6px; border: 1px solid var(--border); border-radius: 4px; bac
 .beta-dialog .dialog-actions { justify-content: center; }
 .about-dialog .about-contact a { color: var(--accent); font-weight: 650; }
 
-.about-dialog .about-repository { margin: 12px 0 0; }
-.about-dialog .about-repository a { color: var(--accent); font-weight: 650; overflow-wrap: anywhere; }
 /* Кнопка Ko-fi: чёрная, с переливающимся бликом по поверхности. */
 .about-dialog .about-support { margin: 16px 0 0; }
 .kofi-button { position: relative; display: inline-flex; align-items: center; gap: 8px; padding: 9px 18px; overflow: hidden; border-radius: 10px; color: #fff; font-weight: 700; text-decoration: none; border: 1px solid #ffffff30; background: linear-gradient(110deg, #000 0%, #1f2937 35%, #000 70%); background-size: 220% 100%; box-shadow: 0 2px 10px #0006; animation: kofi-flow 4s ease-in-out infinite; }
@@ -646,3 +701,53 @@ kbd { padding: 2px 6px; border: 1px solid var(--border); border-radius: 4px; bac
 @keyframes kofi-flow { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
 @keyframes kofi-shine { 0% { transform: translateX(-120%); } 60%, 100% { transform: translateX(120%); } }
 @media (prefers-reduced-motion: reduce) { .kofi-button, .kofi-button::after { animation: none; } }
+
+/* ── Мобильная версия (mobile.ts): только просмотр и симуляция ─────────────── */
+#app[data-mobile="true"] .palette-toggle,
+#app[data-mobile="true"] .component-palette,
+#app[data-mobile="true"] .properties-panel,
+#app[data-mobile="true"] .wire-controls,
+#app[data-mobile="true"] .optional-groups-menu,
+#app[data-mobile="true"] .menu-group:has(> .menu-popover [data-command="undo"]),
+#app[data-mobile="true"] #palette-view-title,
+#app[data-mobile="true"] #palette-view-list,
+#app[data-mobile="true"] #palette-view-icons,
+#app[data-mobile="true"] #palette-verified-only,
+#app[data-mobile="true"] #properties-panel-command,
+#app[data-mobile="true"] .cursor-coords,
+#app[data-mobile="true"] .viewport-help { display: none !important; }
+#app[data-mobile="true"] .editor-workspace { display: flex; flex-direction: column; }
+#app[data-mobile="true"] .viewport-stage { flex: 1 1 auto; min-height: 0; }
+#app[data-mobile="true"] .viewport-toolbar { justify-content: center; padding: 6px 8px; }
+#app[data-mobile="true"] .simulation-controls { margin: 0 auto; }
+#app[data-mobile="true"] .simulation-controls > button { min-width: 42px; min-height: 38px; }
+#app[data-mobile="true"] .app-footer { padding: 4px 10px; }
+#app[data-mobile="true"] .status-bar { visibility: hidden; }
+.mobile-zoom { display: none; }
+#app[data-mobile="true"] .mobile-zoom {
+  position: absolute; right: 12px; bottom: 14px; z-index: 5; display: flex; flex-direction: column; gap: 8px;
+}
+#app[data-mobile="true"] .mobile-zoom button {
+  display: grid; width: 46px; height: 46px; place-items: center; padding: 0; border: 1px solid var(--border-strong);
+  border-radius: 50%; color: var(--text); background: color-mix(in srgb, var(--surface) 92%, transparent);
+  box-shadow: 0 3px 12px #0b142033; font-size: 24px; line-height: 1; font-weight: 600;
+}
+#app[data-mobile="true"] .mobile-zoom button:active { background: var(--surface-hover); }
+#app[data-mobile="true"] .mobile-zoom svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Листы программ ПЛК (program-pages-view.ts): вкладки «Схема / Программа …» под вкладками документов. */
+.page-tabs { position: absolute; z-index: 4; bottom: 14px; left: 50%; display: flex; gap: 2px; padding: 3px; transform: translateX(-50%); border: 1px solid var(--border); border-radius: 9px; background: color-mix(in srgb, var(--surface) 94%, transparent); box-shadow: 0 3px 12px #0002; }
+.page-tabs[hidden] { display: none; }
+.page-tabs button { min-height: 26px; padding: 0 12px; border: 0; border-radius: 6px; background: transparent; color: var(--muted); font: inherit; font-size: 11.5px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+.page-tabs button:hover { background: var(--surface-hover); color: var(--text); }
+.page-tabs button.is-active { background: var(--accent); color: #fff; }
+.program-page-title { fill: #4b5563; font-size: 4.2px; font-weight: 700; }
+.property-program-button { width: 100%; min-height: 32px; border: 1px solid var(--accent); border-radius: 7px; background: var(--accent-soft); color: var(--text); font: inherit; font-weight: 650; cursor: pointer; }
+.property-program-button:hover { background: var(--accent); color: #fff; }
+.property-field .property-hint { display: block; margin-top: 4px; color: var(--muted); font-size: 10.5px; line-height: 1.35; }
+.program-page-rows { stroke: #c4c9cf; stroke-width: 0.3; }
+/* «Планшет» вокруг листа программы ПЛК (tabletFrame в program-pages-view.ts). */
+.tablet-edge { fill: #9aa1aa; }
+.tablet-bezel { fill: #15181c; stroke: #2c3137; stroke-width: 0.4; }
+.tablet-camera { fill: #2a313a; stroke: #3d4651; stroke-width: 0.3; }
+#program-page-sheets .program-page-title { fill: #c9d1da; font-size: 3.4px; font-weight: 600; }
