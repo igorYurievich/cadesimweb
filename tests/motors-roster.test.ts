@@ -135,19 +135,50 @@ describe('motors: engine', () => {
     expect(simulate(createEngineInput(schemaOf(wires, [source, neutral, motor]))).motors[2]).toEqual({ running: true, faulted: false });
   });
 
-  it('single-phase motors 1002 and 1008 need a phase and the neutral on U1/V1', () => {
-    for (const [code, terminals] of [
-      [1002, [[0, 0, 'U1'], [12, 0, 'V1'], [18, 0, 'PE']]],
-      [1008, [[0, 0, 'U1'], [12, 0, 'V1'], [18, 0, 'PE'], [0, 27, 'U2'], [12, 27, 'V2']]],
-    ] as const) {
+  it('single-phase motor 1002 needs a phase and the neutral on U1/V1', () => {
+    const terminals = [[0, 0, 'U1'], [12, 0, 'V1'], [18, 0, 'PE']] as const;
+    const source = el(3000, 0, 0, { id: 1, terminals: [[0, 0, 'L']] });
+    const neutral = el(3001, 60, 0, { id: 3, terminals: [[0, 0, 'N']] });
+    const motor = el(1002, 30, 30, { id: 2, name: '-M1', terminals });
+    const live = [seg(0, 0, 0, 30), seg(0, 30, 30, 30)];
+    const nWire = [
+      seg(60, 0, 60, 33, { kind: 'neutral' }), seg(60, 33, 42, 33, { kind: 'neutral' }),
+      seg(42, 33, 42, 30, { kind: 'neutral' }),
+    ];
+    expect(simulate(createEngineInput(schemaOf([...live, ...nWire], [source, neutral, motor]))).motors[2]?.running)
+      .toBe(true);
+    expect(simulate(createEngineInput(schemaOf(live, [source, neutral, motor]))).motors[2]?.running).toBe(false);
+  });
+
+  // 1008 с конденсатором: рабочая обмотка U1–V1 и пусковая U2–V2 (motors.ts); без пусковой не запускается,
+  // обратная полярность пусковой обмотки — обратное вращение.
+  it('capacitor motor 1008 needs both windings; swapping U2/V2 reverses it', () => {
+    const terminals = [[0, 0, 'U1'], [12, 0, 'V1'], [18, 0, 'PE'], [0, 27, 'U2'], [12, 27, 'V2']] as const;
+    const build = (auxiliary: 'none' | 'same' | 'swapped') => {
       const source = el(3000, 0, 0, { id: 1, terminals: [[0, 0, 'L']] });
-      const neutral = el(3001, 60, 0, { id: 3, terminals: [[0, 0, 'N']] });
-      const motor = el(code, 30, 30, { id: 2, name: '-M1', terminals });
-      const live = [seg(0, 0, 0, 30), seg(0, 30, 30, 30)];
-      const nWire = [seg(60, 0, 60, 33, { kind: 'neutral' }), seg(60, 33, 42, 33, { kind: 'neutral' }), seg(42, 33, 42, 30, { kind: 'neutral' })];
-      expect(simulate(createEngineInput(schemaOf([...live, ...nWire], [source, neutral, motor]))).motors[2]?.running).toBe(true);
-      expect(simulate(createEngineInput(schemaOf(live, [source, neutral, motor]))).motors[2]?.running).toBe(false);
-    }
+      const neutral = el(3001, 90, 0, { id: 3, terminals: [[0, 0, 'N']] });
+      const motor = el(1008, 30, 30, { id: 2, name: '-M1', terminals });
+      // Шины: L по x = 0, N по x = 90; U1 (30,30) от L, V1 (42,30) от N.
+      const wires = [
+        seg(0, 0, 0, 90), seg(0, 24, 30, 24), seg(30, 24, 30, 30),
+        seg(90, 0, 90, 90, { kind: 'neutral' }), seg(90, 18, 42, 18, { kind: 'neutral' }),
+        seg(42, 18, 42, 30, { kind: 'neutral' }),
+      ];
+      // U2 (30,57) и V2 (42,57): от L и N в том же порядке или наоборот.
+      const [toU2, toV2] = auxiliary === 'swapped' ? [90, 0] : [0, 90];
+      if (auxiliary !== 'none') {
+        wires.push(
+          seg(toU2, 75, 30, 75, { kind: toU2 === 90 ? 'neutral' : 'phase' }),
+          seg(30, 75, 30, 57, { kind: toU2 === 90 ? 'neutral' : 'phase' }),
+          seg(toV2, 84, 42, 84, { kind: toV2 === 90 ? 'neutral' : 'phase' }),
+          seg(42, 84, 42, 57, { kind: toV2 === 90 ? 'neutral' : 'phase' }),
+        );
+      }
+      return simulate(createEngineInput(schemaOf(wires, [source, neutral, motor]))).motors[2];
+    };
+    expect(build('none')?.running).toBe(false);
+    expect(build('same')).toEqual({ running: true, faulted: false, reversed: false });
+    expect(build('swapped')).toEqual({ running: true, faulted: false, reversed: true });
   });
 
   it('DC motor 1006 runs on + and − and reverses when polarity is swapped', () => {

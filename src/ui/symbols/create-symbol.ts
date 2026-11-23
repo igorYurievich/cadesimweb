@@ -62,7 +62,8 @@ function appendName(
   rotation: number,
   motorSpec: (typeof MOTOR_SPECS)[number] | undefined,
 ): void {
-  if (element.name && element.typeCode !== 2009) {
+  // GRAFCET рисует номер, условие и действие сам (grafcet-symbol.ts).
+  if (element.name && element.typeCode !== 2009 && getCadType(element.typeCode).family !== "grafcet") {
     const rowGap = rowGapOf(canonical);
     const mid = motorSpec ? motorSpec.cy : rowGap > 0 ? rowGap / 2 : element.size.h / 2;
     const x = element.labelOffset.x + 6.5;

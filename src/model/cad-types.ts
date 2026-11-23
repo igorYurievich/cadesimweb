@@ -17,6 +17,7 @@ import { SENSOR_TYPES } from './cad-types-sensors';
 import { REALISTIC_2D_TYPES } from './realistic-2d-types';
 import { PLC_TYPES } from './plc-types';
 import { STAIR_TIMER_CAD_TYPE } from './stair-timer';
+import { GRAFCET_CAD_TYPES } from './grafcet';
 import { S7_1200_CAD_TYPE } from './s7-1200';
 import { VFD_2D_1PH_CAD_TYPE, VFD_2D_CAD_TYPE } from './vfd';
 import { MECHANISM_CAD_TYPES } from './mechanisms';
@@ -56,6 +57,7 @@ export type CadFamily =
   | 'sensor'
   | 'detector'
   | 'plc' | 'plc-coil' | 'plc-block'
+  | 'grafcet'
   | 'unknown';
 
 export type Confidence = 'confirmed' | 'probable' | 'unknown';
@@ -320,6 +322,7 @@ const TABLE: readonly CadTypeInfo[] = [
   VFD_2D_CAD_TYPE,
   VFD_2D_1PH_CAD_TYPE,
   ...MECHANISM_CAD_TYPES,
+  ...GRAFCET_CAD_TYPES,
 ];
 
 const BY_CODE = new Map<number, CadTypeInfo>(TABLE.map((t) => [t.code, t]));

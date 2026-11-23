@@ -1,5 +1,5 @@
 import { version as appVersion } from '../../package.json';
-import { CAD_GRID_STEP, FALLBACK_VIEWPORT, PALETTE_VIEW_KEY, PLACEABLE_TYPES } from './constants';
+import { CAD_GRID_STEP, FALLBACK_VIEWPORT, PLACEABLE_TYPES } from './constants';
 import { getCadType } from '@model/cad-types';
 import type { Theme } from './constants';
 
@@ -16,11 +16,9 @@ function setPaletteCollapsed(root: HTMLElement, collapsed: boolean): void {
 }
 
 export function renderAppShell(root: HTMLElement, theme: Theme): void {
-  let paletteView = 'list';
-  try {
-    paletteView = localStorage.getItem(PALETTE_VIEW_KEY) === 'icons' ? 'icons' : 'list';
-  } catch { /* По умолчанию остаётся текстовый список. */ }
-  root.dataset.paletteView = paletteView;
+  // Вид палитры «Значки» временно отключён: всегда текстовый список (выбор в «Вид» скрыт, viewport.css).
+  // Чтобы вернуть: читать сохранённый вид, как раньше: localStorage.getItem(PALETTE_VIEW_KEY) === 'icons'.
+  root.dataset.paletteView = 'list';
   setPaletteCollapsed(root, readPaletteCollapsed());
   root.innerHTML = `
     <main class="app-shell">
@@ -61,6 +59,7 @@ export function renderAppShell(root: HTMLElement, theme: Theme): void {
             <button type="button" class="menu-command" data-command="grid" id="grid-command"></button>
             <button type="button" class="menu-command" data-command="properties-panel" id="properties-panel-command"></button>
             <button type="button" class="menu-command" data-command="theme" id="theme-command"></button>
+            <button type="button" class="menu-command" data-command="fullscreen" id="fullscreen-command"></button>
             <button type="button" class="menu-command" data-command="wire-colors" id="wire-colors-command"></button>
             <p class="menu-heading" id="palette-view-title">Панель элементов</p>
             <button type="button" class="menu-command" data-command="palette-view-list" id="palette-view-list">Текстовый список</button>
@@ -73,18 +72,25 @@ export function renderAppShell(root: HTMLElement, theme: Theme): void {
             <div class="menu-toggle-list">
               <label class="menu-toggle"><input type="checkbox" data-optional-group="realistic-2d"><span data-extra-label="extraReal2d">Реалистичные символы · 2D</span></label>
               <label class="menu-toggle"><input type="checkbox" data-optional-group="power-electronics"><span data-extra-label="extraPowerElectronics">Силовая электроника</span></label>
-              <label class="menu-toggle"><input type="checkbox" data-optional-group="electronic-relays"><span data-extra-label="extraElectronicRelays">Электронные реле</span></label>
               <label class="menu-toggle"><input type="checkbox" data-optional-group="sensors"><span data-extra-label="extraSensors">Датчики</span></label>
+              <label class="menu-toggle"><input type="checkbox" data-optional-group="mechanisms"><span data-extra-label="extraMechanisms">Механизмы</span></label>
               <label class="menu-toggle"><input type="checkbox" data-optional-group="grafcet"><span data-extra-label="extraGrafcet">GRAFCET</span></label>
               <label class="menu-toggle"><input type="checkbox" data-optional-group="ladder"><span data-extra-label="extraLadder">Ladder</span></label>
-              <label class="menu-toggle"><input type="checkbox" data-optional-group="logic"><span data-extra-label="extraLogic">Логика</span></label>
               <label class="menu-toggle"><input type="checkbox" data-optional-group="io-plc"><span data-extra-label="extraIoPlc">Входы / выходы ПЛК</span></label>
             </div>
           </div></details>
           <details class="menu-group language-menu"><summary>Язык</summary><div class="menu-popover">
+            <!-- Язык: сразу список кнопок (palette.ts); скрытый select хранит выбор, как раньше. -->
             <label class="menu-language">Язык названий элементов
-              <select id="palette-language" aria-label="Язык названий"><option value="es">ES — Español</option><option value="en">EN — English</option><option value="it">IT — Italiano</option><option value="ru">RU — Русский</option><option value="fr">FR — Français</option></select>
+              <select id="palette-language" aria-label="Язык названий" hidden><option value="es">ES — Español</option><option value="en">EN — English</option><option value="it">IT — Italiano</option><option value="ru">RU — Русский</option><option value="fr">FR — Français</option></select>
             </label>
+            <div class="language-options" role="group">
+              <button type="button" class="menu-command language-option" role="menuitemradio" aria-checked="false" data-lang="es"><span class="language-code">ES</span><span>Español</span></button>
+              <button type="button" class="menu-command language-option" role="menuitemradio" aria-checked="false" data-lang="en"><span class="language-code">EN</span><span>English</span></button>
+              <button type="button" class="menu-command language-option" role="menuitemradio" aria-checked="false" data-lang="it"><span class="language-code">IT</span><span>Italiano</span></button>
+              <button type="button" class="menu-command language-option" role="menuitemradio" aria-checked="false" data-lang="ru"><span class="language-code">RU</span><span>Русский</span></button>
+              <button type="button" class="menu-command language-option" role="menuitemradio" aria-checked="false" data-lang="fr"><span class="language-code">FR</span><span>Français</span></button>
+            </div>
           </div></details>
           <details class="menu-group examples-menu"><summary>Примеры</summary></details>
           <details class="menu-group"><summary>Справка</summary><div class="menu-popover">
@@ -116,9 +122,9 @@ export function renderAppShell(root: HTMLElement, theme: Theme): void {
           <button type="button" id="node-tool" class="icon-btn" title="Узел: щёлкните по месту соединения проводов (N)" aria-label="Узел" aria-pressed="false">●</button>
         </div>
         <div class="tool-group simulation-controls" aria-label="Управление симуляцией">
-          <button type="button" id="sim-run" title="Запуск" aria-label="Запуск">▶</button>
-          <button type="button" id="sim-pause" title="Пауза" aria-label="Пауза" aria-pressed="false" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14M16 5v14"/></svg></button>
-          <button type="button" id="sim-stop" title="Полная остановка: сброс времени, памяти и нажатых кнопок" aria-label="Стоп" disabled>■</button>
+          <button type="button" id="sim-run" title="Запуск" aria-label="Запуск"><svg class="sim-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z"/></svg></button>
+          <button type="button" id="sim-pause" title="Пауза" aria-label="Пауза" aria-pressed="false" disabled><svg class="sim-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5.5h3.6v13H7zM13.4 5.5H17v13h-3.6z"/></svg></button>
+          <button type="button" id="sim-stop" title="Полная остановка: сброс времени, памяти и нажатых кнопок" aria-label="Стоп" disabled><svg class="sim-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5h11v11h-11z"/></svg></button>
           <div class="simulation-speed" role="group" aria-label="Скорость симуляции"><button type="button" class="speed-btn" id="speed-cycle" title="Изменить скорость симуляции" aria-label="Скорость симуляции: 1×">1×</button></div>
           <span id="sim-state" class="simulation-state" role="status" aria-live="polite">Редактор</span>
         </div>
@@ -251,7 +257,6 @@ export function renderAppShell(root: HTMLElement, theme: Theme): void {
       <dialog id="about-dialog" class="app-dialog about-dialog" aria-labelledby="about-title">
         <h2 id="about-title">Web Cade</h2>
         <p id="about-bio">Автор проекта — Игорь Липский Вячин.</p>
-        <p id="about-noncommercial">Это бета-версия. Проект находится на раннем этапе разработки и будет дальше развиваться.</p>
         <p id="about-thanks">Отдельное спасибо Артему Горохову за помощь в разработке.</p>
         <p class="about-contact"><span id="about-contact-label">По вопросам и пожеланиям пишите мне:</span> <a href="mailto:igoryurievich1@gmail.com">igoryurievich1@gmail.com</a></p>
         <p class="about-support">

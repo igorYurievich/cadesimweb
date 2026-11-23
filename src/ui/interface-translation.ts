@@ -51,7 +51,8 @@ export function setupInterfaceTranslation(deps: InterfaceTranslationSetup): () =
     for (const [command, label] of commandLabels) setButton(`[data-command="${command}"]`, label);
     set('#export-menu-label', t.exportMenu);
     set('.optional-groups-heading', t.optionalGroups);
-    const extraLabelKeys: Record<string, string> = { grafcet: 'extraGrafcet', ladder: 'extraLadder', logic: 'extraLogic', 'realistic-2d': 'extraReal2d', 'realistic-3d': 'extraReal3d', wiring: 'extraWiring', pneumatics: 'extraPneumatics', 'io-plc': 'extraIoPlc', 'power-electronics': 'extraPowerElectronics', 'electronic-relays': 'extraElectronicRelays', sensors: 'extraSensors' };
+    const extraLabelKeys: Record<string, string> = { grafcet: 'extraGrafcet', ladder: 'extraLadder', logic: 'extraLogic', 'realistic-2d': 'extraReal2d', 'realistic-3d': 'extraReal3d', wiring: 'extraWiring', pneumatics: 'extraPneumatics', 'io-plc': 'extraIoPlc', 'power-electronics': 'extraPowerElectronics', 'electronic-relays': 'extraElectronicRelays', sensors: 'extraSensors',
+      mechanisms: 'extraMechanisms' };
     for (const input of [...deps.root.querySelectorAll<HTMLInputElement>('[data-optional-group]')]) {
       const key = input.dataset.optionalGroup as GroupKey;
       input.checked = deps.visibleOptionalGroups.has(key);
@@ -76,8 +77,7 @@ export function setupInterfaceTranslation(deps: InterfaceTranslationSetup): () =
     deps.root.querySelector<HTMLButtonElement>('#pan-tool')?.setAttribute('title', t.hand);
     deps.root.querySelector<HTMLButtonElement>('#node-tool')?.setAttribute('aria-label', t.node);
     deps.root.querySelector<HTMLButtonElement>('#node-tool')?.setAttribute('title', t.node);
-    // Кнопки симуляции — только значки ▶ и ■; название — во всплывающей подсказке и для экранных дикторов.
-    set('#sim-run', '▶'); set('#sim-stop', '■');
+    // Кнопки симуляции — только значки (SVG в app-shell.ts); название — в подсказке и для экранных дикторов.
     deps.root.querySelector<HTMLButtonElement>('#sim-run')?.setAttribute('title', t.run);
     deps.root.querySelector<HTMLButtonElement>('#sim-run')?.setAttribute('aria-label', t.run);
     deps.root.querySelector<HTMLButtonElement>('#sim-stop')?.setAttribute('aria-label', t.stop);
@@ -159,7 +159,7 @@ export function setupInterfaceTranslation(deps: InterfaceTranslationSetup): () =
     set('#cad-export-warning-optout-label', t.cadExportWarningOptout);
     set('#cad-export-warning-cancel', t.cadExportWarningCancel);
     set('#cad-export-warning-confirm', t.cadExportWarningConfirm);
-    const aboutDialog = deps.root.querySelector<HTMLDialogElement>('#about-dialog'); if (aboutDialog) { set('#about-bio', t.aboutBio); set('#about-noncommercial', t.aboutNonCommercial); set('#about-thanks', t.aboutThanks); set('#about-support-label', t.supportKofi); set('#about-contact-label', t.aboutContact); const fields = aboutDialog.querySelectorAll('dt'); if (fields[0]) fields[0]!.textContent = t.version; }
+    const aboutDialog = deps.root.querySelector<HTMLDialogElement>('#about-dialog'); if (aboutDialog) { set('#about-bio', t.aboutBio); set('#about-thanks', t.aboutThanks); set('#about-support-label', t.supportKofi); set('#about-contact-label', t.aboutContact); const fields = aboutDialog.querySelectorAll('dt'); if (fields[0]) fields[0]!.textContent = t.version; }
     for (const button of [...deps.root.querySelectorAll<HTMLButtonElement>('[data-dialog-close]')]) {
       if (button.id === 'cad-export-warning-cancel') button.textContent = t.cadExportWarningCancel;
       else if (button.classList.contains('examples-window-close')) { button.textContent = '×'; button.setAttribute('aria-label', t.close); }
@@ -168,6 +168,11 @@ export function setupInterfaceTranslation(deps: InterfaceTranslationSetup): () =
     set('#beta-title', t.betaTitle); set('#beta-text', t.betaText); set('#beta-ok', t.betaOk);
     set('#simulate-overload', t.overload); set('#reset-simulation-inputs', t.reset);
     for (const option of [...deps.root.querySelectorAll<HTMLOptionElement>('#palette-language option')]) option.selected = option.value === deps.paletteLang();
+    for (const button of deps.root.querySelectorAll<HTMLElement>('.language-option')) {
+      const active = button.dataset.lang === deps.paletteLang();
+      button.classList.toggle('is-active', active);
+      button.setAttribute('aria-checked', String(active));
+    }
     deps.paletteLanguage.setAttribute('aria-label', t.languageNames);
     const fname = deps.schema().sheet.fileName || t.new;
     deps.fileName.textContent = fname;

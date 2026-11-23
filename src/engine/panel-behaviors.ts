@@ -8,8 +8,9 @@ import { PLC_BEHAVIORS } from './plc';
 import { STAIR_TIMER_BEHAVIORS } from './stair-timer';
 import { S7_BEHAVIORS } from './s7-1200';
 import { MECHANISM_BEHAVIORS } from './mechanisms';
+import { GRAFCET_BEHAVIORS } from './grafcet';
 
 export const PANEL_BEHAVIORS: readonly TypeBehavior[] = [
   ...SENSOR_BEHAVIORS, ...REALISTIC_2D_BEHAVIORS, ...PLC_BEHAVIORS, ...STAIR_TIMER_BEHAVIORS, ...S7_BEHAVIORS,
-  ...MECHANISM_BEHAVIORS,
+  ...MECHANISM_BEHAVIORS, ...GRAFCET_BEHAVIORS,
 ];

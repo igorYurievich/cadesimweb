@@ -5,9 +5,13 @@ import { hasVerifiedBadge } from '@model/catalog-verification';
 import { DIN_PSU_COMMAND } from '@model/plc-power-supply';
 import { STAIR_TIMER_COMMAND } from '@model/stair-timer';
 import { VFD_2D_1PH_COMMAND, VFD_2D_COMMAND } from '@model/vfd';
+import { GRAFCET_TABLE_COMMAND } from '@model/grafcet';
 
 /** Кнопки только веб-версии: в оригинальном exe их нет. */
-const WEB_ONLY = [DIN_PSU_COMMAND, STAIR_TIMER_COMMAND, ...Object.values(MECHANISM_COMMANDS), VFD_2D_COMMAND, VFD_2D_1PH_COMMAND];
+const WEB_ONLY = [
+  DIN_PSU_COMMAND, STAIR_TIMER_COMMAND, ...Object.values(MECHANISM_COMMANDS), VFD_2D_COMMAND, VFD_2D_1PH_COMMAND,
+  GRAFCET_TABLE_COMMAND,
+];
 
 describe('catalog: data integrity', () => {
   it('matches the numbers extracted from the original exe', () => {

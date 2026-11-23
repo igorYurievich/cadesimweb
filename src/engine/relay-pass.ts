@@ -16,6 +16,7 @@ import { applyLogoInputs, applyPlcCoils } from './plc';
 import { applyStairTimerInputs } from './stair-timer';
 import { applyS7Inputs } from './s7-1200';
 import { plcBlockSources } from './plc-blocks';
+import { applyGrafcetOutputs } from './grafcet';
 import { applyVfdInputs, vfdOutput, vfdSources } from './vfd';
 import { VFD_POWER_INDEX, isVfdDrive } from '../model/vfd';
 
@@ -199,6 +200,8 @@ export function solvePass(
   applyS7Inputs(schema, graph.terminalNet, netById, nextCoils);
   applyVfdInputs(schema, graph.terminalNet, netById, nextCoils, inputs);
   applyPlcCoils(schema, graph.terminalNet, netById, coils, nextCoils, timers);
+  // Действия активных этапов GRAFCET (grafcet.ts).
+  applyGrafcetOutputs(schema, timers, nextCoils);
   applyInterlocks(schema, coils, nextCoils);
 
   return {

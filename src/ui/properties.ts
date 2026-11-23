@@ -11,6 +11,7 @@ import { appendStairTimerField } from './stair-timer-properties';
 import { appendVfdFields } from './vfd-properties';
 import { appendLogoSupplyField, appendPlcFields } from './plc-properties';
 import { appendProgramButton } from './program-pages-view';
+import { appendGrafcetFields } from './grafcet-properties';
 import { isDelayBlock2d } from '@model/realistic-2d-types';
 import type { InterfaceText } from './i18n';
 
@@ -99,6 +100,8 @@ export function setupPropertyFields(ctx: AppContext, deps: PropertyFieldsSetup):
     if (!element) { note(deps.uiText().missingElement); return; }
     const info = getCadType(element.typeCode);
     const heading = document.createElement('p'); heading.className = 'property-type'; heading.textContent = `${info.label} · ${element.id}`; deps.propertyFields.append(heading);
+    // GRAFCET: свои поля вместо имени, функции и меток клемм (grafcet-properties.ts).
+    if (appendGrafcetFields(ctx.schema, element, { ...deps, rerender: renderProperties })) return;
     const addField = (labelText: string, value: string, update: (next: string) => void, options: { type?: string; min?: string; step?: string } = {}): HTMLInputElement => {
       const label = document.createElement('label'); label.className = 'property-field'; label.append(document.createTextNode(labelText));
       const input = document.createElement('input'); input.type = options.type ?? 'text'; input.value = value;

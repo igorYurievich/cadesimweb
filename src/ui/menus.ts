@@ -31,6 +31,29 @@ export interface MenuSetup {
   drawViewport(): void;
 }
 
+/**
+ * На узком экране шапка прокручивается вбок (overflow-x: auto) и обрезает выпадающее меню по своей высоте:
+ * меню открывается, но его не видно и не нажать. Тогда меню ставится position: fixed под заголовком.
+ */
+function placePopover(group: HTMLDetailsElement): void {
+  const popover = group.querySelector<HTMLElement>(':scope > .menu-popover');
+  if (!popover) return;
+  const header = group.closest<HTMLElement>('.app-header');
+  const clipped = header !== null && getComputedStyle(header).overflowX !== 'visible';
+  popover.classList.toggle('is-fixed', group.open && clipped);
+  if (!group.open || !clipped) { popover.style.cssText = ''; return; }
+  const anchor = (group.querySelector('summary') ?? group).getBoundingClientRect();
+  const margin = 8;
+  const top = anchor.bottom + 6;
+  const width = Math.min(popover.offsetWidth || 232, window.innerWidth - 2 * margin);
+  const left = Math.max(margin, Math.min(anchor.left, window.innerWidth - width - margin));
+  Object.assign(popover.style, {
+    position: 'fixed', top: `${top}px`, left: `${left}px`, right: 'auto', zIndex: '60',
+    maxWidth: `${window.innerWidth - 2 * margin}px`, maxHeight: `${window.innerHeight - top - margin}px`,
+    overflowY: 'auto',
+  });
+}
+
 export function setupMenus(ctx: AppContext, deps: MenuSetup): void {
   const { root } = ctx;
   const menuGroups = [...root.querySelectorAll<HTMLDetailsElement>('.menu-group')];
@@ -42,6 +65,7 @@ export function setupMenus(ctx: AppContext, deps: MenuSetup): void {
   };
   for (const group of menuGroups) {
     group.addEventListener('toggle', () => {
+      placePopover(group);
       if (group.open) closeMenus(group);
       else group.querySelectorAll<HTMLDetailsElement>('.menu-submenu[open]').forEach((submenu) => { submenu.open = false; });
     });
@@ -54,6 +78,14 @@ export function setupMenus(ctx: AppContext, deps: MenuSetup): void {
       if (group.dataset.hover === '1') { event.preventDefault(); delete group.dataset.hover; }
     });
   }
+  // На телефоне «Ayuda» сразу открывает «Acerca de»: горячие клавиши и метки палитры там не нужны.
+  const aboutCommand = root.querySelector<HTMLButtonElement>('.menu-group [data-command="about"]');
+  aboutCommand?.closest('.menu-group')?.querySelector('summary')?.addEventListener('click', (event) => {
+    if (root.dataset.mobile !== 'true') return;
+    event.preventDefault();
+    closeMenus();
+    aboutCommand.click();
+  });
   root.querySelector<HTMLElement>('.examples-menu > summary')?.addEventListener('click', (event) => {
     event.preventDefault();
     closeMenus();
@@ -61,6 +93,8 @@ export function setupMenus(ctx: AppContext, deps: MenuSetup): void {
   });
   window.addEventListener('pointerdown', (event) => { if (!(event.target as Element).closest('.app-menu')) closeMenus(); });
   window.addEventListener('keydown', (event) => { if (event.key === 'Escape') closeMenus(); });
+  // Меню на узком экране закреплено под заголовком (placePopover): при прокрутке шапки закрываем его.
+  root.querySelector('.app-header')?.addEventListener('scroll', () => closeMenus(), { passive: true });
 
   const sheetDialog = root.querySelector<HTMLDialogElement>('#sheet-dialog');
   const sheetFormat = root.querySelector<HTMLSelectElement>('#sheet-format');

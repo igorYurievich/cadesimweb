@@ -9,6 +9,8 @@ import { createHistory } from './history';
 import { fitViewport } from './viewport';
 import { cloneSchema, fitBounds, fullSheet } from './helpers';
 import { AUTHOR_FOLDER, EXAMPLES, EXAMPLE_FOLDERS } from '../data/examples';
+import { EXAMPLE_FOLDER_TRANSLATIONS, exampleTitle } from '../data/example-titles';
+import type { ExampleLang } from '../data/example-titles';
 import { INTERFACE_TEXT } from './i18n';
 
 export interface DocumentOpenSetup {
@@ -104,12 +106,15 @@ export function setupDocumentInputEvents(root: HTMLElement, fileInput: HTMLInput
     groups.innerHTML = EXAMPLE_FOLDERS.map((folder) => {
       const items = EXAMPLES.filter((example) => example.folder === folder);
       if (!items.length) return '';
-      const title = folder === AUTHOR_FOLDER ? text.examplesAuthor : folder;
+      const title = folder === AUTHOR_FOLDER ? text.examplesAuthor
+        : EXAMPLE_FOLDER_TRANSLATIONS[folder]?.[root.lang as ExampleLang] ?? folder;
       const author = folder === AUTHOR_FOLDER ? ' data-examples-author' : '';
+      const name = (example: (typeof items)[number]): string =>
+        escape(exampleTitle(example.file, root.lang, example.title.replace(/\.cad$/i, '')));
       return `<section class="example-group"><h3 class="example-group-title"${author}>${escape(title)}</h3>`
         + `<div class="example-group-items">${items.map((example) => `<button type="button" class="example-file" `
         + `data-example="${example.number}" title="${escape(example.fileName)}">${fileIcon}`
-        + `<span class="example-file-name">${escape(example.title.replace(/\.cad$/i, ''))}</span></button>`).join('')}</div></section>`;
+        + `<span class="example-file-name">${name(example)}</span></button>`).join('')}</div></section>`;
     }).join('');
     count.dataset.visibleCount = String(EXAMPLES.length);
     count.textContent = text.examplesCount.replace('{count}', new Intl.NumberFormat(root.lang || 'ru').format(EXAMPLES.length));
@@ -124,4 +129,6 @@ export function setupDocumentInputEvents(root: HTMLElement, fileInput: HTMLInput
     }
   });
   renderExamples();
+  // Названия — на текущем языке интерфейса: пересобираем список при каждом открытии окна.
+  root.querySelector('.examples-menu > summary')?.addEventListener('click', renderExamples);
 }

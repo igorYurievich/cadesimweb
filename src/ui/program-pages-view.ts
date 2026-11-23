@@ -15,6 +15,9 @@ import { fitViewport, screenToSheet } from './viewport';
 
 export const PROGRAM_PAGE_EVENT = 'cadesimu:program-page';
 
+/** Вид переключился между основным листом и листом программы (всплывает до корня; палитра перерисовывается). */
+export const PROGRAM_VIEW_EVENT = 'cadesimu:program-view';
+
 export const requestProgramPage = (root: HTMLElement, page: number): void => {
   root.dispatchEvent(new CustomEvent<number>(PROGRAM_PAGE_EVENT, { detail: page }));
 };
@@ -105,7 +108,9 @@ export function renderProgramPageSheets(layer: SVGGElement | null, schema: Schem
 
 /** Вкладки «Схема / Программа …» над полем; активна та, что в центре вида. */
 export function renderPageTabs(bar: HTMLElement | null, schema: Schema, page: number, text: PageTexts): void {
+  const switched = (shownPage > 0) !== (page > 0);
   shownPage = page;
+  if (switched) bar?.dispatchEvent(new CustomEvent(PROGRAM_VIEW_EVENT, { bubbles: true }));
   if (!bar) return;
   const count = programPageCount(schema);
   bar.hidden = count === 0;

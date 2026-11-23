@@ -12,6 +12,7 @@ import { TAIL_TERMINALS, buildTail } from './cad-tail-terminals';
 import { VFD_CONTROL, isVfd2d, vfdSettings, vfdTailWithSettings } from './vfd';
 import { CAD_VARIANTS, VARIANT_RECORD_LABELS, VARIANT_STEP } from './cad-variants';
 import { writeTextFrame } from './cad-text';
+import { isGrafcetType } from './grafcet';
 import { writeDelayBlockRecord } from './cad-delay-blocks';
 import { AUX_BLOCK_2D, MOTOR_2D_FILE_PARAM, isDelayBlock2d } from './realistic-2d-types';
 
@@ -62,7 +63,7 @@ function slotsOf(record: Pick<CadRecord, 'nums'>): number[] {
  * пишутся в хвост, а запись остаётся стандартной (8 флагов, 23 числа), как в образцах.
  */
 function newRecordExtraFlags(element: SchemaElement): number {
-  if (TAIL_TERMINALS[element.typeCode]) return 0;
+  if (TAIL_TERMINALS[element.typeCode] || isGrafcetType(element.typeCode)) return 0;
   return Math.max(0, Math.min(element.terminals.length, SPLIT_AT[element.typeCode] ?? Infinity) - 8);
 }
 
@@ -116,6 +117,11 @@ function elementRecords(
       record.texts[2 + index] = label;
     });
     record.texts[2 + VARIANT_RECORD_LABELS.length] = '';
+    continuations.length = 0;
+  } else if (isGrafcetType(element.typeCode)) {
+    // GRAFCET (только веб): флагов и меток нет, выводы задаёт тип и ширина рамки (model/grafcet.ts).
+    record.nums.fill(0, 0, flagCountOf(record));
+    for (let i = 2; i < record.texts.length; i += 1) record.texts[i] = '';
     continuations.length = 0;
   } else if (isDelayBlock2d(element.typeCode)) {
     // Блоки с выдержкой 2D: флагов клемм нет, выдержка в texts[5] (cad-delay-blocks.ts).

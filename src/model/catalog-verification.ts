@@ -6,7 +6,8 @@ export function hasVerifiedBadge(group: GroupKey, id: number): boolean {
   return group === 'fuses'
     || (group === 'power-sources' && ![32995, 33045, 33043, 32997, 33263].includes(id))
     || (group === 'power-electronics' && [33004, 33002, 33003, 33006, 33007, 33011].includes(id)) // автотрансформатор; резисторы I и III; преобразователь частоты II/III и его управление
-    || (group === 'motors' && [32828, 32829, 32830, 33103, 32831, 32994].includes(id)) // 32831 Dahlander, 32994 две скорости (две обмотки)
+    // 32831 Dahlander, 32994 две скорости (две обмотки), 33237 трёхфазный как однофазный (конденсатор V1–W1)
+    || (group === 'motors' && [32828, 32829, 32830, 33103, 32831, 32994, 33237].includes(id))
     || group === 'manual-controls'
     || group === 'aux-contacts'
     // Механизмы (только веб, model/mechanisms.ts): все.
@@ -24,6 +25,9 @@ export function hasVerifiedBadge(group: GroupKey, id: number): boolean {
     // LOGO! (CADe_S1.cad), блок питания 24 V (34001, только веб), S7-1200 (33240, только веб) и Ladder (ladder.cad): контакты, фронты,
     // First Scan, катушки, блоки и шины «+» / «−».
     || (group === 'io-plc' && [33238, 33336, 34001, 33240].includes(id))
+    // GRAFCET (только веб-логика, model/grafcet.ts): этапы, переход, действие, разветвления и слияния «O» / «Y»,
+    // линия связи и таблица назначений (34011).
+    || (group === 'grafcet' && [33088, 33083, 33084, 33085, 33094, 33095, 33086, 33093, 33092, 34011].includes(id))
     || (group === 'ladder' && [
       33062, 33063, 33065, 33066, 33291, 33067, 33069, 33070, 33100, 33111, 33099, 33300, 33112, 33114, 33226,
       33097, 33277, 32876, 32877,

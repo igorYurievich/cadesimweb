@@ -43,6 +43,7 @@ const PHRASES: Record<string, Locales> = {
   'Enlace de entrada': { fr: 'Liaison d’entrée', ar: 'وصلة إدخال' },
   'Enlace de salida': { fr: 'Liaison de sortie', ar: 'وصلة إخراج' },
   'Macro etapa': { fr: 'Macro-étape', ar: 'مرحلة كبرى' },
+  'Tabla de asignaciones': { fr: 'Table d’affectation', ar: 'جدول التخصيص' },
   'Componente tamaño grande': { fr: 'Composant grand format', ar: 'مكوّن كبير الحجم' },
   'Componente tamaño medio': { fr: 'Composant format moyen', ar: 'مكوّن متوسط الحجم' },
   'Componente tamaño pequeño': { fr: 'Composant petit format', ar: 'مكوّن صغير الحجم' },

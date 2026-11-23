@@ -27,10 +27,12 @@ export const OPTIONAL_GROUP_STORAGE_KEY = 'cadesimu-visible-optional-groups:v1';
  * Временно убраны из меню «Elementos» и палитры: провода рисуются панелью инструментов над листом,
  * символы 3D и пневматика пока не нужны.
  */
-export const HIDDEN_OPTIONAL_GROUPS: readonly GroupKey[] = ['wiring', 'realistic-3d', 'pneumatics'];
+export const HIDDEN_OPTIONAL_GROUPS: readonly GroupKey[] = [
+  'wiring', 'realistic-3d', 'pneumatics', 'logic', 'electronic-relays', // логика и электронные реле — временно
+];
 export const PALETTE_VIEW_KEY = 'cadesimu-palette-view:v1';
 
-export const OPTIONAL_PALETTE_GROUPS = ['grafcet', 'ladder', 'logic', 'realistic-2d', 'realistic-3d', 'wiring', 'pneumatics', 'io-plc', 'power-electronics', 'electronic-relays', 'sensors'] as const satisfies readonly GroupKey[];
+export const OPTIONAL_PALETTE_GROUPS = ['grafcet', 'ladder', 'logic', 'realistic-2d', 'realistic-3d', 'wiring', 'pneumatics', 'io-plc', 'power-electronics', 'electronic-relays', 'sensors', 'mechanisms'] as const satisfies readonly GroupKey[];
 
 export const CAD_GRID_STEP = 3;
 
@@ -55,9 +57,6 @@ export const UNIFORM_LIVE_COLOR = '#d92d27';
 
 export const PHASE_LABELS: readonly PotentialLabel[] = ['L1', 'L2', 'L3'];
 
-export const CADESIM_URL = 'https://github.com/igorYurievich/cadesimweb';
-
-export const CADESIM_LINK_TEXT = 'Cadesim web';
 export const STAMP_LINK_TEXT = 'WEB CADE';
 
 export const STAMP_CELLS: ReadonlyArray<{ key?: StampKey; label?: string; x0: number; x1: number; r0: number; r1: number; hint?: string }> = [

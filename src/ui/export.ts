@@ -2,8 +2,8 @@ import { exportCad } from '@model/cad-export';
 import { serializeSchemaJson } from '@model/schema-json';
 import { POSITION_SPECS, currentPosition } from '@engine/behaviors';
 import type { AppContext } from './context';
-import { CADESIM_LINK_TEXT, CADESIM_URL, CAD_EXPORT_WARNING_KEY, SVG_NS, WIRE_COLORS } from './constants';
-import { fullSheet, stampMetrics } from './helpers';
+import { CAD_EXPORT_WARNING_KEY, SVG_NS, WIRE_COLORS } from './constants';
+import { fullSheet } from './helpers';
 
 export interface ExportActions {
   saveJson(): void;
@@ -254,10 +254,6 @@ export function setupExport(
     const printSvg = printSheetSvg();
     const svgMarkup = new XMLSerializer().serializeToString(printSvg);
     const title = outputBaseName();
-    // Chrome не делает кликабельными SVG-ссылки при печати в PDF, поэтому поверх ячейки штампа кладём HTML-ссылку (размеры в мм, как во viewBox).
-    const stamp = stampMetrics(ctx.schema.sheet.width, ctx.schema.sheet.height);
-    const mm = (value: number): string => `${Math.round(value * 100) / 100}mm`;
-    const linkBox = `left: ${mm(stamp.margin)}; top: ${mm(ctx.schema.sheet.height + stamp.gap)}; width: ${mm(0.075 * stamp.stampWidth)}; height: ${mm(stamp.rowH)};`;
     printWindow.document.open();
     printWindow.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${title}</title><style>
       @page { size: ${printWidth} ${printHeight}; margin: 0; }
@@ -266,9 +262,8 @@ export function setupExport(
       @media print { html, body { width: ${printWidth}; height: ${printHeight}; overflow: hidden; } }
       .page { position: relative; width: ${printWidth}; height: ${printHeight}; overflow: hidden; break-inside: avoid; page-break-inside: avoid; }
       .page > svg { position: absolute; inset: 0; display: block; width: 100%; height: 100%; color: #263342; }
-      .pdf-link { position: absolute; display: block; ${linkBox} overflow: hidden; color: transparent; font-size: 1mm; line-height: ${mm(stamp.rowH)}; text-decoration: none; z-index: 2; }
       @media screen { body { background: #e8edf3; padding: 16px; } .page { background: #fff; box-shadow: 0 2px 12px #18243333; margin: 0 auto; } }
-    </style></head><body><div class="page">${svgMarkup}<a class="pdf-link" href="${CADESIM_URL}" target="_blank" rel="noopener noreferrer">${CADESIM_LINK_TEXT}</a></div></body></html>`);
+    </style></head><body><div class="page">${svgMarkup}</div></body></html>`);
     printWindow.document.close();
     printWindow.addEventListener('afterprint', () => printWindow.close(), { once: true });
     setTimeout(() => { printWindow.focus(); printWindow.print(); }, 350);

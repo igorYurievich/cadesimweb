@@ -11,6 +11,8 @@ export interface ExampleScheme {
   title: string;
   /** Имя файла для строки состояния и штампа. */
   fileName: string;
+  /** Имя файла .cad в папке примеров: ключ переводов названия (example-titles.ts). */
+  file: string;
   /** Папка в окне примеров; пустая строка означает корень. */
   folder: string;
   text: string;
@@ -45,7 +47,7 @@ function catalogExample(number: number, file: string, folder: string): ExampleSc
   const text = files[`./examples/${folder}/${file}`];
   const title = EXAMPLE_TITLES[file];
   if (text === undefined || title === undefined) return null;
-  return { number, code: 'CAD', title, fileName: `${title}.cad`, folder, text };
+  return { number, code: 'CAD', title, fileName: `${title}.cad`, file, folder, text };
 }
 
 const CATALOG: ReadonlyArray<string> = Array.from({ length: 10 }, (_, index) => `Ejemplo ${index + 1}.cad`);
@@ -67,7 +69,8 @@ const authorExamples: ExampleScheme[] = Object.keys(files)
     const fileName = key.slice(key.lastIndexOf('/') + 1);
     // «Iluminacion_escalera_3_hilos_(clasico).cad» → «Iluminacion escalera 3 hilos (clasico)».
     const title = fileName.replace(/\.cad$/i, '').replace(/_/g, ' ').replace(/\s+/g, ' ').trim();
-    return { number: 101 + index, code: 'CAD', title, fileName, folder: AUTHOR_FOLDER, text: files[key]! };
+    const text = files[key]!;
+    return { number: 101 + index, code: 'CAD', title, fileName, file: fileName, folder: AUTHOR_FOLDER, text };
   });
 
 /** Папки окна «Примеры» в порядке показа. */

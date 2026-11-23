@@ -62,6 +62,8 @@ import { drawDm8 } from "./dm8-symbol";
 import { drawDinPowerSupply } from "./din-psu-symbol";
 import { drawStairTimer } from "./stair-timer-symbol";
 import { drawVfd2d, drawVfd2dMono } from "./vfd-2d-symbol";
+import { drawGrafcet } from "./grafcet-symbol";
+import { GRAFCET_TYPES } from "@model/grafcet";
 import { LOGO_DM8 } from "@model/plc-modules";
 import { LADDER_COIL, LADDER_NC, LADDER_NO, LOGO_TYPE } from "@model/plc-types";
 import {
@@ -270,6 +272,7 @@ register([10230], drawS7);
 register([10240], drawVfd2d);
 register([10241], drawVfd2dMono);
 register([8120, 8121, 8122, 8123, 8124, 8125], drawMechanism);
+register(GRAFCET_TYPES, drawGrafcet);
 
 export function drawBody(g: SVGGElement, element: SchemaElement, rotation: number): void {
   (BODY_DRAWERS.get(element.typeCode) ?? drawFallback)(g, element, rotation);

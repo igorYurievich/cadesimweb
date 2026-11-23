@@ -71,6 +71,16 @@ button:focus-visible, select:focus-visible, summary:focus-visible { outline: 2px
 .menu-language { display: grid; gap: 7px; padding: 8px 10px; color: var(--muted); font-size: 12px; }
 .menu-language select { width: 100%; height: 34px; padding: 0 9px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface-soft); color: var(--text); font: inherit; font-size: 12px; }
 .menu-language select:focus { border-color: var(--accent); outline: 2px solid var(--accent-soft); }
+/* Выбор вида палитры (список / значки) временно скрыт (app-shell.ts). */
+#palette-view-title, #palette-view-list, #palette-view-icons { display: none !important; }
+/* Меню «Idioma»: языки списком, текущий отмечен галочкой. */
+.menu-language { padding-bottom: 2px; }
+.language-options { display: grid; gap: 1px; }
+.menu-command.language-option { justify-content: flex-start; gap: 10px; }
+.language-code { display: inline-grid; place-items: center; min-width: 28px; height: 20px; border-radius: 5px; background: var(--surface-soft); color: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: .03em; }
+.language-option.is-active { color: var(--accent); font-weight: 650; }
+.language-option.is-active .language-code { background: var(--accent); color: #fff; }
+.language-option.is-active::after { content: '✓'; margin-inline-start: auto; }
 .menu-toggle-list { display: grid; gap: 2px; padding: 2px 5px 5px; }
 .menu-toggle { display: flex; min-height: 32px; align-items: center; gap: 9px; padding: 4px 6px; border-radius: 6px; color: var(--text); font-size: 12px; cursor: pointer; }
 .menu-toggle:hover { background: var(--surface-hover); }
@@ -85,6 +95,8 @@ button:focus-visible, select:focus-visible, summary:focus-visible { outline: 2px
 .menu-submenu[open] > summary.menu-command { background: var(--surface-hover); }
 .menu-submenu-popover { position: absolute; z-index: 31; top: -5px; inset-inline-start: calc(100% + 6px); display: none; min-width: 210px; padding: 5px; border: 1px solid var(--border); border-radius: 9px; background: var(--surface); box-shadow: var(--shadow); }
 .menu-submenu[open] > .menu-submenu-popover { display: grid; }
+/* Меню на узком экране (menus.ts, is-fixed): подменю раскрывается внутри меню, под своим пунктом, а не сбоку. */
+.menu-popover.is-fixed .menu-submenu-popover { position: static; min-width: 0; margin: 2px 0 2px 12px; padding: 0; border: 0; box-shadow: none; }
 .menu-heading { margin: 6px 10px 2px; padding-top: 8px; border-top: 1px solid var(--border); color: var(--muted); font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
 .menu-command:disabled { color: var(--muted); opacity: .5; cursor: default; }
 kbd { padding: 2px 6px; border: 1px solid var(--border); border-radius: 4px; background: var(--surface-soft); color: var(--muted); font: inherit; font-size: 11px; white-space: nowrap; }
@@ -115,7 +127,11 @@ kbd { padding: 2px 6px; border: 1px solid var(--border); border-radius: 4px; bac
 .simulation-controls > #sim-run:not(:disabled) { border-color: #19834a; background: #19834a; color: #fff; }
 .simulation-controls > #sim-run:hover:not(:disabled) { border-color: #146c3d; background: #146c3d; }
 #app[data-theme="dark"] .simulation-controls > #sim-run:not(:disabled) { border-color: #2f9a62; background: #2f9a62; }
-.simulation-controls > #sim-pause svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 3.2; stroke-linecap: round; }
+/* Запуск, пауза, стоп: одинаковые SVG-значки 20×20 по центру кнопки (символы ▶ ■ стояли на разной высоте). */
+.simulation-controls > #sim-run, .simulation-controls > #sim-pause, .simulation-controls > #sim-stop {
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.simulation-controls .sim-icon { display: block; width: 20px; height: 20px; fill: currentColor; stroke: none; }
 .simulation-controls > #sim-pause[aria-pressed="true"] { border-color: #d48a12; background: #f2a516; color: #fff; }
 .viewport-svg.is-sim-paused .motor-rotor { animation-play-state: paused !important; }
 .simulation-speed { display: flex; align-items: center; padding: 0 4px; white-space: nowrap; }
@@ -494,6 +510,12 @@ kbd { padding: 2px 6px; border: 1px solid var(--border); border-radius: 4px; bac
 .schematic-element.is-ladder-on .ladder-glow { fill-opacity: 0.22; }
 .schematic-element.is-ladder-on .ladder-mark { stroke: #16a34a; }
 .schematic-element.is-ladder-on .ladder-box { fill: #86efac; }
+/* GRAFCET (grafcet-symbol.ts): метка активного этапа, зелёные активные этапы и действия, истинные условия. */
+.schematic-element .grafcet-token { opacity: 0; }
+.schematic-element.is-grafcet-active .grafcet-token { opacity: 1; }
+.schematic-element.is-grafcet-active .grafcet-box { fill: #bbf7d0; stroke: #15803d; }
+.schematic-element.is-grafcet-true .grafcet-bar { stroke: #16a34a; }
+.schematic-element .grafcet-table-row.is-on .grafcet-row-bg { fill: #bbf7d0; }
 .schematic-element .pilot-lit { display: none; }
 .schematic-element.is-lamp-lit .pilot-lit { display: inline; }
 .schematic-element.is-lamp-lit .pilot-off { display: none; }
@@ -715,12 +737,37 @@ kbd { padding: 2px 6px; border: 1px solid var(--border); border-radius: 4px; bac
 #app[data-mobile="true"] #palette-verified-only,
 #app[data-mobile="true"] #properties-panel-command,
 #app[data-mobile="true"] .cursor-coords,
-#app[data-mobile="true"] .viewport-help { display: none !important; }
+#app[data-mobile="true"] .viewport-help,
+#app[data-mobile="true"] .menu-command kbd,
+#app[data-mobile="true"] .document-tab-add,
+#app[data-mobile="true"] #fullscreen-toggle,
+#app[data-mobile="true"] .menu-command[data-command="new"],
+#app[data-mobile="true"] .menu-command[data-command="sheet"],
+#app[data-mobile="true"] .menu-command[data-command="print-preview"],
+#app[data-mobile="true"] .menu-command[data-command="zoom-in"],
+#app[data-mobile="true"] .menu-command[data-command="zoom-out"],
+#app[data-mobile="true"] .menu-command[data-command="fit"],
+#app[data-mobile="true"] .menu-command[data-command="wire-colors"] { display: none !important; }
 #app[data-mobile="true"] .editor-workspace { display: flex; flex-direction: column; }
 #app[data-mobile="true"] .viewport-stage { flex: 1 1 auto; min-height: 0; }
 #app[data-mobile="true"] .viewport-toolbar { justify-content: center; padding: 6px 8px; }
 #app[data-mobile="true"] .simulation-controls { margin: 0 auto; }
 #app[data-mobile="true"] .simulation-controls > button { min-width: 42px; min-height: 38px; }
+/* Телефон: вместо надписи «Editor / Simulación» только точка — серая в редакторе, зелёная мигает в симуляции,
+   жёлтая на паузе (текст остаётся для экранных дикторов, loop.ts). */
+#app[data-mobile="true"] .simulation-state,
+#app[data-mobile="true"] .simulation-state[data-mode] {
+  justify-content: center; width: 30px; height: 30px; padding: 0; gap: 0; background: transparent; font-size: 0;
+  color: var(--muted);
+}
+#app[data-mobile="true"] .simulation-state::before { width: 11px; height: 11px; }
+#app[data-mobile="true"] .simulation-state[data-mode="run"] { color: #22c55e; }
+#app[data-mobile="true"] .simulation-state[data-mode="run"]::before {
+  box-shadow: 0 0 6px #22c55e; animation: sim-dot-blink 1.1s ease-in-out infinite;
+}
+#app[data-mobile="true"] .simulation-state[data-mode="pause"] { color: #f2a516; }
+@keyframes sim-dot-blink { 0%, 100% { opacity: 1; } 50% { opacity: .25; } }
+@media (prefers-reduced-motion: reduce) { #app[data-mobile="true"] .simulation-state::before { animation: none; } }
 #app[data-mobile="true"] .app-footer { padding: 4px 10px; }
 #app[data-mobile="true"] .status-bar { visibility: hidden; }
 .mobile-zoom { display: none; }
@@ -745,6 +792,9 @@ kbd { padding: 2px 6px; border: 1px solid var(--border); border-radius: 4px; bac
 .property-program-button { width: 100%; min-height: 32px; border: 1px solid var(--accent); border-radius: 7px; background: var(--accent-soft); color: var(--text); font: inherit; font-weight: 650; cursor: pointer; }
 .property-program-button:hover { background: var(--accent); color: #fff; }
 .property-field .property-hint { display: block; margin-top: 4px; color: var(--muted); font-size: 10.5px; line-height: 1.35; }
+.property-hint.property-error { display: block; margin: -4px 0 8px; color: #dc2626; font-size: 10.5px; }
+.property-hint.property-error[hidden] { display: none; }
+.property-field.property-check { flex-direction: row; align-items: center; gap: 6px; }
 .program-page-rows { stroke: #c4c9cf; stroke-width: 0.3; }
 /* «Планшет» вокруг листа программы ПЛК (tabletFrame в program-pages-view.ts). */
 .tablet-edge { fill: #9aa1aa; }

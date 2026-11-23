@@ -3,6 +3,7 @@ import type { MotorSpec } from "./motors";
 import { MOTOR_R } from "./motors";
 import { shape } from "./svg-primitives";
 import { detectorHitFrame } from "./detector-layout";
+import { grafcetHitFrame } from "./grafcet-symbol";
 import { BLOCK_SPECS } from "@model/plc-blocks";
 import { isPlcFixedType, LOGO_TYPE } from "@model/plc-types";
 
@@ -88,7 +89,8 @@ function frameHit(element: SchemaElement): HitFrame | undefined {
       h: Math.max(element.size.h, 3),
     };
   }
-  return FRAME_HIT[element.typeCode] ?? detectorHitFrame(element.typeCode) ?? plcHitFrame(element.typeCode);
+  return grafcetHitFrame(element) ?? FRAME_HIT[element.typeCode] ?? detectorHitFrame(element.typeCode)
+    ?? plcHitFrame(element.typeCode);
 }
 
 function appendActuatorHitAreas(root: SVGGElement, element: SchemaElement, canonical: SchemaElement): void {

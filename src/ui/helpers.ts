@@ -7,6 +7,7 @@ import { clampElementPosition } from './bounds';
 import { PLACE_DEFAULTS, PLACE_LABEL_OFFSETS } from './constants';
 import { isPlcFixedType } from '@model/plc-types';
 import { plcPlacedFields } from './plc-placement';
+import { grafcetPlacedFields, isGrafcetType } from '@model/grafcet';
 import { DELAY_BLOCK_DEFAULT_TIME, MOTOR_2D, isDelayBlock2d } from '@model/realistic-2d-types';
 import type { StampKey, Selectable } from './constants';
 
@@ -84,6 +85,8 @@ export function createPlacedElement(typeCode: number, position: Point, rotation:
     element.typeCode = motorCode;
     element.params = { motor2d: true };
   }
+  // GRAFCET: номер этапа по порядку, пустые условие и действие, строки таблицы назначений (model/grafcet.ts).
+  if (isGrafcetType(typeCode)) Object.assign(element, grafcetPlacedFields(typeCode, schema));
   element.position = clampElementPosition(element.position, element, schema.sheet);
   return element;
 }

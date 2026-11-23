@@ -1,6 +1,6 @@
 import type { InterfaceText } from './i18n';
 
-// Кнопка полноэкранного режима справа в шапке. Режим включает браузер (Fullscreen API) для всей страницы;
+// Кнопка полноэкранного режима справа в шапке и пункт «Ver → Pantalla completa». Режим включает браузер (Fullscreen API) для всей страницы;
 // выйти можно той же кнопкой или клавишей Esc. Значок и подсказка меняются по событию fullscreenchange,
 // поэтому выход по Esc тоже обновляет кнопку. Если браузер не умеет полноэкранный режим, кнопка скрыта.
 
@@ -12,10 +12,14 @@ const isFullscreen = (): boolean => document.fullscreenElement !== null;
 
 /** Значок и подсказка по текущему состоянию; вызывается и при смене языка интерфейса. */
 export function updateFullscreenButton(root: HTMLElement, t: InterfaceText): void {
-  const button = root.querySelector<HTMLButtonElement>('#fullscreen-toggle');
-  if (!button) return;
   const on = isFullscreen();
   const title = on ? t.fullscreenExit : t.fullscreenEnter;
+  // Пункт «Ver → Pantalla completa» (на телефоне кнопки в шапке нет).
+  const command = root.querySelector<HTMLButtonElement>('#fullscreen-command');
+  // На телефоне клавиатуры нет: без подсказки «(Esc)».
+  if (command) command.textContent = root.dataset.mobile === 'true' ? title.replace(/\s*\(Esc\)$/i, '') : title;
+  const button = root.querySelector<HTMLButtonElement>('#fullscreen-toggle');
+  if (!button) return;
   button.title = title;
   button.setAttribute('aria-label', title);
   button.setAttribute('aria-pressed', String(on));
@@ -24,9 +28,11 @@ export function updateFullscreenButton(root: HTMLElement, t: InterfaceText): voi
 
 export function setupFullscreenButton(root: HTMLElement, uiText: () => InterfaceText): void {
   const button = root.querySelector<HTMLButtonElement>('#fullscreen-toggle');
+  const command = root.querySelector<HTMLButtonElement>('#fullscreen-command');
   if (!button) return;
   if (!document.fullscreenEnabled) {
     button.hidden = true;
+    if (command) command.hidden = true;
     return;
   }
   const svg = document.createElementNS(SVG_NS, 'svg');
@@ -34,11 +40,13 @@ export function setupFullscreenButton(root: HTMLElement, uiText: () => Interface
   svg.setAttribute('aria-hidden', 'true');
   svg.append(document.createElementNS(SVG_NS, 'path'));
   button.replaceChildren(svg);
-  button.addEventListener('click', () => {
+  const toggle = (): void => {
     const request = isFullscreen() ? document.exitFullscreen() : document.documentElement.requestFullscreen();
     // Браузер может отказать (например, во встроенном фрейме) — тогда остаёмся как есть.
     request.catch(() => undefined).finally(() => button.blur());
-  });
+  };
+  button.addEventListener('click', toggle);
+  command?.addEventListener('click', toggle);
   document.addEventListener('fullscreenchange', () => updateFullscreenButton(root, uiText()));
   updateFullscreenButton(root, uiText());
 }

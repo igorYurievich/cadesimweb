@@ -11,6 +11,7 @@ import { applySensorVisuals } from './element-sensors';
 import { apply2dVisuals } from './element-2d';
 import { applyPlcVisuals } from './element-plc';
 import { applyVfdVisuals } from './element-vfd';
+import { applyGrafcetVisuals } from './element-grafcet';
 
 export function applyElementVisuals(
   ctx: AppContext,
@@ -52,4 +53,5 @@ function applyOneElement(
   apply2dVisuals(state, element, node, ctx.schema);
   applyPlcVisuals(state, element, node);
   applyVfdVisuals(state, element, node, ctx.schema);
+  applyGrafcetVisuals(state, element, node, ctx.schema);
 }

@@ -12,6 +12,7 @@ import { beginPlcScan, endPlcScan, logoRelayNames } from './plc';
 import { s7RelayNames } from './s7-1200';
 import { advancePlcBlocks } from './plc-blocks';
 import { advanceVfds, vfdKeys } from './vfd';
+import { advanceGrafcet, grafcetRelayNames } from './grafcet';
 
 export interface RelayLoopResult {
   pass: RelayPassResult;
@@ -34,7 +35,8 @@ export function relayCoilNames(schema: Schema): string[] {
     names.push(element.name);
   }
   // Операнды, которые задаёт LOGO: «запитан» и входы I1…I8 (plc.ts); входы минутников (stair-timer.ts).
-  for (const name of [...logoRelayNames(schema), ...stairTimerKeys(schema), ...s7RelayNames(schema), ...vfdKeys(schema)]) {
+  for (const name of [...logoRelayNames(schema), ...stairTimerKeys(schema), ...s7RelayNames(schema), ...vfdKeys(schema),
+    ...grafcetRelayNames(schema)]) {
     if (!seen.has(name)) names.push(name);
     seen.add(name);
   }
@@ -97,7 +99,10 @@ export function solveRelayLoop(
     );
     // Блоки Ladder: таймеры, счётчики, биестабильный и делитель (plc-blocks.ts).
     // Преобразователи частоты: частота по рампам (vfd.ts).
-    const nextTimers = advanceVfds(schema, coils, time, advancePlcBlocks(schema, pass.nets, pass.terminalNet, time, delayTimers));
+    const plcTimers = advancePlcBlocks(schema, pass.nets, pass.terminalNet, time, delayTimers);
+    const blockTimers = advanceVfds(schema, coils, time, plcTimers);
+    // GRAFCET: переходы по устойчивому состоянию схемы, раз за кадр (grafcet.ts).
+    const nextTimers = advanceGrafcet(schema, pass.terminalNet, coils, inputs, time, blockTimers);
     const timersChanged = JSON.stringify(nextTimers) !== JSON.stringify(timers);
     timers = nextTimers;
     // Recalculate timed contacts after elapsed time changes, but advance timers

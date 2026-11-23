@@ -4,6 +4,7 @@ import { cadTypeForCommand } from '@model/cad-types';
 import { hasVerifiedBadge } from '@model/catalog-verification';
 import { isPaletteItemShown, readVerifiedOnly, writeVerifiedOnly } from './palette-filter';
 import { createPlacedElement } from './helpers';
+import { PROGRAM_VIEW_EVENT, activeProgramPage } from './program-pages-view';
 import { createElementSymbol } from './symbols';
 import {
   createContactorIcon,
@@ -77,6 +78,7 @@ export function setupPalette(ctx: AppContext, deps: PaletteSetup): { renderPalet
     renderPalette,
   );
   deps.search.addEventListener('input', renderPalette);
+  ctx.root.addEventListener(PROGRAM_VIEW_EVENT, renderPalette);
   // «Вид → Показать все / только проверенные компоненты».
   ctx.root.querySelector('#palette-verified-only')?.addEventListener('click', () => {
     verifiedOnly = !verifiedOnly;
@@ -93,6 +95,16 @@ export function setupPalette(ctx: AppContext, deps: PaletteSetup): { renderPalet
       }
     });
   }
+  // Кнопки языков в меню «Idioma»: выбор одним нажатием, через тот же select (обработчик ниже).
+  ctx.root.querySelector('.language-options')?.addEventListener('click', (event) => {
+    const lang = (event.target as Element).closest<HTMLElement>('[data-lang]')?.dataset.lang;
+    if (!lang || lang === deps.language.value) {
+      ctx.root.querySelector<HTMLDetailsElement>('.language-menu')?.removeAttribute('open');
+      return;
+    }
+    deps.language.value = lang;
+    deps.language.dispatchEvent(new Event('change'));
+  });
   deps.language.addEventListener('change', () => {
     const lang = deps.language.value as Lang;
     deps.setPaletteLang(lang);
@@ -115,8 +127,10 @@ function renderPaletteGroups(
 ): void {
   const query = deps.search.value.trim();
   const matches = query ? catalog.search(query) : catalog.components;
-  const isVisible = (key: GroupKey): boolean =>
-    !(OPTIONAL_PALETTE_GROUPS as readonly GroupKey[]).includes(key) || deps.visibleOptionalGroups.has(key);
+  // На листе программы ПЛК (вкладка «Программа · LOGO») в палитре остаются только Ladder и GRAFCET.
+  const programView = activeProgramPage() > 0;
+  const isVisible = (key: GroupKey): boolean => programView ? key === 'ladder' || key === 'grafcet'
+    : !(OPTIONAL_PALETTE_GROUPS as readonly GroupKey[]).includes(key) || deps.visibleOptionalGroups.has(key);
   const shown = (group: GroupKey, item: ComponentDef): boolean =>
     isVisible(group) && isPaletteItemShown(group, item.id, verifiedOnly);
   const visible = matches.filter((item) => item.groups.some((group) => shown(group, item)));
