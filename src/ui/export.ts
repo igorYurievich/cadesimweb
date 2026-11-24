@@ -23,6 +23,15 @@ const LAMP_PRINT_COLORS: readonly { fill: string; stroke: string }[] = [
   { fill: '#ffe600', stroke: '#b88a00' },
 ];
 
+/** Телефон/планшет: тач без мыши — печать в отдельном окне (там она работает надёжно). */
+function prefersPrintWindow(): boolean {
+  try {
+    return window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+  } catch {
+    return false;
+  }
+}
+
 export function setupCadExportConfirmation(root: HTMLElement): () => Promise<boolean> {
   return (): Promise<boolean> => {
     try {
@@ -242,11 +251,6 @@ export function setupExport(
     return printSvg;
   };
   const printPdf = (): void => {
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) {
-      status.textContent = 'Разрешите всплывающее окно, чтобы открыть печать и сохранить PDF.';
-      return;
-    }
     const width = ctx.schema.sheet.width;
     const height = fullSheet(ctx.schema.sheet).height;
     const printWidth = `${Math.round(width * 100) / 100}mm`;
@@ -254,8 +258,7 @@ export function setupExport(
     const printSvg = printSheetSvg();
     const svgMarkup = new XMLSerializer().serializeToString(printSvg);
     const title = outputBaseName();
-    printWindow.document.open();
-    printWindow.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${title}</title><style>
+    const html = `<!doctype html><html><head><meta charset="utf-8"><title>${title}</title><style>
       @page { size: ${printWidth} ${printHeight}; margin: 0; }
       html, body { margin: 0; padding: 0; }
       .page, .page > svg { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
@@ -263,10 +266,63 @@ export function setupExport(
       .page { position: relative; width: ${printWidth}; height: ${printHeight}; overflow: hidden; break-inside: avoid; page-break-inside: avoid; }
       .page > svg { position: absolute; inset: 0; display: block; width: 100%; height: 100%; color: #263342; }
       @media screen { body { background: #e8edf3; padding: 16px; } .page { background: #fff; box-shadow: 0 2px 12px #18243333; margin: 0 auto; } }
-    </style></head><body><div class="page">${svgMarkup}</div></body></html>`);
+    </style></head><body><div class="page">${svgMarkup}</div></body></html>`;
+    // ПК: печать через скрытый iframe на этой же странице — без всплывающего окна, которое браузер
+    // блокирует на опубликованном сайте (на localhost обычно пропускает). Мобильные браузеры печатают
+    // iframe ненадёжно (iOS печатает всю страницу), поэтому там остаётся отдельное окно.
+    if (prefersPrintWindow()) printInWindow(html);
+    else printInFrame(html);
+  };
+  const printInWindow = (html: string): void => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      status.textContent = 'Разрешите всплывающее окно, чтобы открыть печать и сохранить PDF.';
+      return;
+    }
+    printWindow.document.open();
+    printWindow.document.write(html);
     printWindow.document.close();
     printWindow.addEventListener('afterprint', () => printWindow.close(), { once: true });
     setTimeout(() => { printWindow.focus(); printWindow.print(); }, 350);
+  };
+  const printInFrame = (html: string): void => {
+    document.getElementById('print-frame')?.remove();
+    const frame = document.createElement('iframe');
+    frame.id = 'print-frame';
+    frame.setAttribute('aria-hidden', 'true');
+    frame.tabIndex = -1;
+    // Не display:none и не visibility:hidden — иначе часть браузеров печатает пустую страницу.
+    frame.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;opacity:0;pointer-events:none;';
+    document.body.append(frame);
+    const frameWindow = frame.contentWindow;
+    const frameDocument = frame.contentDocument ?? frameWindow?.document;
+    if (!frameWindow || !frameDocument) {
+      frame.remove();
+      printInWindow(html);
+      return;
+    }
+    frameDocument.open();
+    frameDocument.write(html);
+    frameDocument.close();
+    let removed = false;
+    const cleanup = (): void => {
+      if (removed) return;
+      removed = true;
+      setTimeout(() => frame.remove(), 500);
+    };
+    frameWindow.addEventListener('afterprint', cleanup, { once: true });
+    setTimeout(() => {
+      try {
+        frameWindow.focus();
+        frameWindow.print();
+      } catch {
+        frame.remove();
+        printInWindow(html);
+        return;
+      }
+      // Страховка: если afterprint не пришёл, убрать iframe через минуту.
+      setTimeout(cleanup, 60_000);
+    }, 350);
   };
   return { saveJson, exportCadFile, exportSvgFile, exportPngFile, printPdf, printSheetSvg };
 }
