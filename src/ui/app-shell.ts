@@ -98,6 +98,11 @@ export function renderAppShell(root: HTMLElement, theme: Theme): void {
             <button type="button" class="menu-command" data-command="component-guide">Подробнее о метках</button>
             <button type="button" class="menu-command" data-command="about">О программе</button>
           </div></details>
+          <details class="menu-group options-menu"><summary>Опции</summary><div class="menu-popover">
+            <div class="menu-toggle-list">
+              <label class="menu-toggle"><input type="checkbox" id="option-breakers-trip-cc"><span id="option-breakers-trip-cc-label">Автоматы выбивают при КЗ</span></label>
+            </div>
+          </div></details>
         </nav>
         <span id="file-name" class="file-name">Новая схема</span>
         <button type="button" id="fullscreen-toggle" class="header-icon-button" title="Полный экран" aria-label="Полный экран"></button>

@@ -15,7 +15,14 @@ export interface ViewportControlsSetup {
 export function setupViewportControls(ctx: AppContext, deps: ViewportControlsSetup): void {
   deps.svg.addEventListener('wheel', (event) => {
     event.preventDefault();
-    deps.setViewport(zoomAt(deps.viewport(), svgPoint(event, deps.svg, deps.viewSize()), Math.exp(-event.deltaY * 0.001)));
+    // Щипок на тачпаде браузер присылает как колесо с Ctrl и маленьким шагом (единицы пикселей за событие):
+    // с общей чувствительностью приходилось разводить пальцы 5 раз. Для щипка — в 10 раз сильнее;
+    // колесо мыши (шаг ~100) и прокрутка двумя пальцами — как раньше. Строки/страницы (Firefox) → пиксели.
+    const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? deps.viewSize().y : 1;
+    const delta = event.deltaY * unit;
+    const pinch = event.ctrlKey && Math.abs(delta) < 50;
+    const factor = Math.min(2, Math.max(0.5, Math.exp(-delta * (pinch ? 0.01 : 0.001))));
+    deps.setViewport(zoomAt(deps.viewport(), svgPoint(event, deps.svg, deps.viewSize()), factor));
     deps.drawViewport();
   }, { passive: false });
   if (typeof ResizeObserver !== 'undefined') {

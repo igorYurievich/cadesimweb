@@ -52,6 +52,7 @@ export function createSimulationInputs(
   const resetSimulationInputs = (): void => {
     state.inputs = createSimInputs(ctx);
     state.heldInputs.clear();
+    state.ccTrips.clear();
     state.memory = createEmptyMemory();
     state.time = 0;
     state.result = undefined;

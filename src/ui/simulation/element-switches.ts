@@ -93,7 +93,9 @@ export function applyContactAndIndicatorVisuals(
   node.classList.toggle('is-sim-tripped', tripped);
   node.classList.toggle('is-thermal-relay-tripped', element.typeCode === 6007 && tripped);
   node.classList.toggle('is-thermal-tripped', thermalContactTripped);
-  node.classList.toggle('is-sim-fault-glow', Boolean(state.inputs.tripped[element.id]));
+  // Подсветка красным: смоделированная перегрузка или автомат, выбитый КЗ (опция «Opciones»).
+  node.classList.toggle('is-sim-fault-glow', Boolean(state.inputs.tripped[element.id])
+    || (state.ccTrips.has(element.id) && state.inputs.toggled[element.id] === false));
   node.classList.toggle('is-sim-closed', result?.contacts[element.id] ?? false);
   const switches = element.typeCode >= 7000 && element.typeCode <= 7015
     && getBehavior(element.typeCode).links.some((link) => link.kind === 'switch');

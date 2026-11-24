@@ -155,6 +155,12 @@ export function setupWireTrace(deps: WireTraceSetup): void {
   };
 
   deps.button?.addEventListener('click', () => { setActive(!active); deps.button?.blur(); });
+  // Esc выключает лупу (если не открыт диалог: там Esc закрывает его).
+  window.addEventListener('keydown', (event) => {
+    if (!active || event.key !== 'Escape' || deps.svg.ownerDocument.querySelector('dialog[open]')) return;
+    setActive(false);
+    deps.status.textContent = '';
+  });
   deps.svg.addEventListener('pointermove', (event) => {
     if (!active) return;
     const viewport = deps.viewport();

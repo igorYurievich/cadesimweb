@@ -750,9 +750,23 @@ kbd { padding: 2px 6px; border: 1px solid var(--border); border-radius: 4px; bac
 #app[data-mobile="true"] .menu-command[data-command="wire-colors"] { display: none !important; }
 #app[data-mobile="true"] .editor-workspace { display: flex; flex-direction: column; }
 #app[data-mobile="true"] .viewport-stage { flex: 1 1 auto; min-height: 0; }
-#app[data-mobile="true"] .viewport-toolbar { justify-content: center; padding: 6px 8px; }
-#app[data-mobile="true"] .simulation-controls { margin: 0 auto; }
-#app[data-mobile="true"] .simulation-controls > button { min-width: 42px; min-height: 38px; }
+/* Телефон: панель симуляции — вертикальная, плавает у левого края поля схемы (как кнопки масштаба справа);
+   отдельного ряда над схемой больше нет — схеме больше места. */
+#app[data-mobile="true"] .viewport-toolbar {
+  position: absolute; z-index: 6; left: 10px; bottom: 14px; display: block; padding: 0; border: 0; background: transparent;
+}
+#app[data-mobile="true"] .simulation-controls {
+  flex-direction: column; gap: 2px; margin: 0; padding: 4px; border-color: var(--border-strong); border-radius: 22px;
+  background: color-mix(in srgb, var(--surface) 92%, transparent); box-shadow: 0 3px 12px #0b142033;
+}
+#app[data-mobile="true"] .simulation-controls > button { width: 36px; min-width: 36px; height: 32px; min-height: 32px; padding: 0; border-radius: 50%; }
+#app[data-mobile="true"] .simulation-controls .sim-icon { width: 18px; height: 18px; }
+#app[data-mobile="true"] .simulation-controls .simulation-speed { padding: 0; }
+#app[data-mobile="true"] .simulation-controls .speed-btn { width: 36px; min-width: 36px; height: 24px; padding: 0; font-size: 11px; }
+#app[data-mobile="true"] .simulation-controls .simulation-state, #app[data-mobile="true"] .simulation-controls .simulation-state[data-mode] { width: 36px; height: 16px; }
+/* Телефон в альбомной ориентации ниже 420 px: приложение не должно вылезать за экран (кнопки масштаба обрезались). */
+#app[data-mobile="true"] .app-shell { min-height: 0; }
+#app[data-mobile="true"] .file-name { visibility: hidden; }
 /* Телефон: вместо надписи «Editor / Simulación» только точка — серая в редакторе, зелёная мигает в симуляции,
    жёлтая на паузе (текст остаётся для экранных дикторов, loop.ts). */
 #app[data-mobile="true"] .simulation-state,
@@ -768,7 +782,9 @@ kbd { padding: 2px 6px; border: 1px solid var(--border); border-radius: 4px; bac
 #app[data-mobile="true"] .simulation-state[data-mode="pause"] { color: #f2a516; }
 @keyframes sim-dot-blink { 0%, 100% { opacity: 1; } 50% { opacity: .25; } }
 @media (prefers-reduced-motion: reduce) { #app[data-mobile="true"] .simulation-state::before { animation: none; } }
-#app[data-mobile="true"] .app-footer { padding: 4px 10px; }
+/* Телефон: нижняя панель (масштаб в %, строка состояния) и точка режима симуляции не нужны. */
+#app[data-mobile="true"] .app-footer,
+#app[data-mobile="true"] .simulation-controls .simulation-state { display: none !important; }
 #app[data-mobile="true"] .status-bar { visibility: hidden; }
 .mobile-zoom { display: none; }
 #app[data-mobile="true"] .mobile-zoom {

@@ -1,4 +1,6 @@
 import { createEmptyMemory, simulate } from '@engine/simulate';
+import { findShortCircuitTrips } from '@engine/cc-trip';
+import { breakersTripOnShortCircuit } from '../options-menu';
 import type { AppContext } from '../context';
 import { startsOpen } from '../constants';
 import { formatSimulationDiagnostics } from './diagnostics';
@@ -92,7 +94,7 @@ function updateControls(ctx: AppContext, deps: SimulationDependencies, state: Si
   const label = paused ? text.paused : running ? text.running : text.editor;
   if (deps.simStateValue.textContent !== label) deps.simStateValue.textContent = label;
   deps.simStateValue.dataset.mode = paused ? 'pause' : state.mode;
-  const diagnostics = formatSimulationDiagnostics(ctx, deps, state.result);
+  const diagnostics = formatSimulationDiagnostics(ctx, deps, state.result, state);
   if (diagnostics.length) deps.simStateValue.title = diagnostics.join('\n');
   else if (state.result?.warnings.length) deps.simStateValue.title = state.result.warnings.join('\n');
   else deps.simStateValue.removeAttribute('title');
@@ -113,9 +115,13 @@ function reset(
   state.memory = createEmptyMemory();
   state.inputs = createSimInputs(ctx);
   state.result = undefined;
+  state.ccTrips.clear();
   updateControls();
   applyVisuals();
 }
+
+/** Последний поиск автомата для КЗ, который ничего не нашёл (см. evaluate). */
+let lastFruitlessSearch = '';
 
 function evaluate(
   ctx: AppContext,
@@ -123,7 +129,30 @@ function evaluate(
   state: SimulationState,
   applyVisuals: () => void,
 ): void {
-  state.result = simulate({ schema: ctx.schema, inputs: state.inputs, time: state.time, memory: state.memory });
+  const input = { schema: ctx.schema, inputs: state.inputs, time: state.time, memory: state.memory };
+  state.result = simulate(input);
+  // Опция «Автоматы выбивают при КЗ»: автомат выше по цепи уходит в «выкл», схема пересчитывается (cc-trip.ts).
+  const shorted = state.result.faults.some((fault) => fault.kind === 'short-circuit');
+  // Поиск пересчитывает схему по разу на каждый автомат: если для этих же входов и КЗ выбить нечего
+  // (КЗ выше всех автоматов), не повторяем его в каждом кадре.
+  const searchKey = shorted ? JSON.stringify([state.inputs, state.result.faults.map((fault) => fault.message)]) : '';
+  if (state.mode === 'run' && breakersTripOnShortCircuit() && shorted && searchKey !== lastFruitlessSearch) {
+    const trips = findShortCircuitTrips(input, state.result);
+    lastFruitlessSearch = trips.length ? '' : searchKey;
+    for (const trip of trips) {
+      const breaker = ctx.schema.elements.find((element) => element.id === trip.id);
+      const name = breaker?.name.trim().toLocaleUpperCase() ?? '';
+      for (const twin of ctx.schema.elements) {
+        if (twin.id === trip.id || (name !== '' && twin.typeCode === breaker?.typeCode && twin.name.trim().toLocaleUpperCase() === name)) {
+          state.inputs.toggled[twin.id] = false;
+        }
+      }
+      state.ccTrips.set(trip.id, trip.pairs);
+    }
+    if (trips.length) state.result = simulate({ ...input, inputs: state.inputs });
+  }
+  // Взведённый заново автомат больше не считается выбитым.
+  for (const id of [...state.ccTrips.keys()]) if (state.inputs.toggled[id] !== false) state.ccTrips.delete(id);
   state.memory = state.result.memory;
   updateControls(ctx, deps, state);
   applyVisuals();

@@ -20,6 +20,7 @@ export function createSimulationState(): SimulationState {
     motorAngles: new Map<number, { angle: number; time: number }>(),
     wireGroupOf: new Map<number, number>(),
     wireTerminalKeys: new Map(),
+    ccTrips: new Map(),
   };
 }
 

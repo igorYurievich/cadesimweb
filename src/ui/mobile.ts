@@ -47,11 +47,21 @@ export function setupMobile(deps: MobileSetup): void {
   const isMobile = (): boolean => deps.root.dataset.mobile === 'true';
   const fitButton = (): HTMLButtonElement | null => deps.root.querySelector<HTMLButtonElement>('[data-zoom="fit"]');
   const fit = (): void => { requestAnimationFrame(() => fitButton()?.click()); };
+  // Телефон: панель симуляции переезжает в поле схемы (вертикально у левого края, viewport.css), на компьютере — обратно.
+  const toolbar = deps.root.querySelector<HTMLElement>('.viewport-toolbar');
+  const stage = deps.root.querySelector<HTMLElement>('.viewport-stage');
+  const toolbarHome = toolbar ? { parent: toolbar.parentElement, next: toolbar.nextSibling } : undefined;
+  const placeToolbar = (mobile: boolean): void => {
+    if (!toolbar || !stage || !toolbarHome?.parent) return;
+    if (mobile) stage.append(toolbar);
+    else toolbarHome.parent.insertBefore(toolbar, toolbarHome.next);
+  };
   const apply = (): void => {
     const mobile = query.matches;
     if (mobile === isMobile()) return;
     if (mobile) deps.root.dataset.mobile = 'true';
     else delete deps.root.dataset.mobile;
+    placeToolbar(mobile);
     if (mobile) fit();
   };
   addZoomButtons(deps.root);

@@ -19,6 +19,8 @@ export interface SimulationState {
   motorAngles: Map<number, { angle: number; time: number }>;
   wireGroupOf: Map<number, number>;
   wireTerminalKeys: Map<number, Set<TerminalKey>>;
+  /** Автоматы, выбитые коротким замыканием (опция «Opciones», engine/cc-trip.ts): id → пары КЗ. */
+  ccTrips: Map<number, string[]>;
 }
 
 export interface SimulationDependencies {

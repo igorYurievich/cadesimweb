@@ -16,16 +16,17 @@ export function applySimulationVisuals(
   const groups = buildWireCurrentGroups(ctx, state, result, nets);
   applyWireVisuals(ctx, deps, state, result, nets, groups.motor, groups.autotransformer);
   applyElementVisuals(ctx, deps, state, nets);
-  updateDiagnosticMessage(deps, result, ctx);
+  updateDiagnosticMessage(deps, result, ctx, state);
 }
 
 function updateDiagnosticMessage(
   deps: SimulationDependencies,
   result: EngineState | undefined,
   ctx: AppContext,
+  state: SimulationState,
 ): void {
   // Ошибки (КЗ, утечка) — красным; если ошибок нет, а есть предупреждения — тем же окном, но жёлтым.
-  const errors = formatSimulationDiagnostics(ctx, deps, result);
+  const errors = formatSimulationDiagnostics(ctx, deps, result, state);
   const text = [...errors, ...formatSimulationWarnings(ctx, deps, result)].join(' ');
   deps.simulationMessage.hidden = text.length === 0;
   deps.simulationMessage.classList.toggle('is-warning', errors.length === 0);

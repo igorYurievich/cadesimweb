@@ -30,7 +30,7 @@ export function setupInterfaceTranslation(deps: InterfaceTranslationSetup): () =
       else el.textContent = value;
     };
     const summaries = [...deps.root.querySelectorAll<HTMLElement>('.app-menu > .menu-group > summary')];
-    [t.file, t.edit, t.view, t.elementsMenu, t.language, t.examples, t.help].forEach((value, index) => { if (summaries[index]) summaries[index]!.textContent = value; });
+    [t.file, t.edit, t.view, t.elementsMenu, t.language, t.examples, t.help, t.options].forEach((value, index) => { if (summaries[index]) summaries[index]!.textContent = value; });
     set('#palette-view-title', t.paletteViewTitle);
     const iconView = deps.root.dataset.paletteView === 'icons';
     const listViewButton = deps.root.querySelector<HTMLButtonElement>('#palette-view-list');
@@ -79,6 +79,7 @@ export function setupInterfaceTranslation(deps: InterfaceTranslationSetup): () =
     deps.root.querySelector<HTMLButtonElement>('#node-tool')?.setAttribute('title', t.node);
     deps.root.querySelector<HTMLButtonElement>('#wire-trace-tool')?.setAttribute('aria-label', t.wireTrace);
     deps.root.querySelector<HTMLButtonElement>('#wire-trace-tool')?.setAttribute('title', t.wireTrace);
+    set('#option-breakers-trip-cc-label', t.optionBreakersTripCc);
     // Кнопки симуляции — только значки (SVG в app-shell.ts); название — в подсказке и для экранных дикторов.
     deps.root.querySelector<HTMLButtonElement>('#sim-run')?.setAttribute('title', t.run);
     deps.root.querySelector<HTMLButtonElement>('#sim-run')?.setAttribute('aria-label', t.run);

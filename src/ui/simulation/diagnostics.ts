@@ -2,14 +2,23 @@ import { logoLowVoltageSupplied, logoMainsSupplied } from '@engine/plc';
 import { s7MainsSupplied } from '@engine/s7-1200';
 import type { EngineState } from '@engine/types';
 import type { AppContext } from '../context';
-import type { SimulationDependencies } from './types';
+import type { SimulationDependencies, SimulationState } from './types';
 
 export function formatSimulationDiagnostics(
   ctx: AppContext,
   deps: SimulationDependencies,
   result: EngineState | undefined,
+  state?: Pick<SimulationState, 'ccTrips' | 'inputs'>,
 ): string[] {
   if (!result) return [];
+  // Автоматы, выбитые КЗ (опция «Opciones»): сообщение держится, пока автомат не взведён.
+  const tripped = state ? [...state.ccTrips].filter(([id]) => state.inputs.toggled[id] === false) : [];
+  const tripMessages: string[] = [];
+  if (tripped.length) {
+    const pairs = [...new Set(tripped.flatMap(([, list]) => list))].sort((a, b) => a.localeCompare(b)).join('; ');
+    const names = tripped.map(([id]) => ctx.schema.elements.find((element) => element.id === id)?.name || `Q${id}`).join(', ');
+    tripMessages.push(deps.uiText().ccTripSummary.replace('{pairs}', pairs).replace('{breakers}', names));
+  }
   const shortPairs = new Set<string>();
   const earthPairs = new Set<string>();
   let unstable = false;
@@ -21,9 +30,9 @@ export function formatSimulationDiagnostics(
   }
   if (shortPairs.size) {
     const pairs = [...shortPairs].sort((a, b) => a.localeCompare(b)).join('; ');
-    return [deps.uiText().shortCircuitSummary.replace('{pairs}', pairs)];
+    return [...tripMessages, deps.uiText().shortCircuitSummary.replace('{pairs}', pairs)];
   }
-  const messages: string[] = [];
+  const messages: string[] = [...tripMessages];
   if (earthPairs.size) {
     messages.push(deps.uiText().earthLeakSummary.replace('{pairs}', [...earthPairs].sort().join('; ')));
   }

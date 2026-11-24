@@ -5,6 +5,7 @@ import { setupViewportControls } from './viewport-controls';
 import { setupMobile } from './mobile';
 import { setupAppKeyboardShortcuts } from './app-setup-shortcuts';
 import { setupWireTrace } from './wire-trace';
+import { setupOptionsMenu } from './options-menu';
 import type { AppSetupBase } from './app-setup-base';
 import type { AppSetupEditor } from './app-setup-editor';
 import type { AppSetupCommands } from './app-setup-commands';
@@ -108,6 +109,8 @@ function setupCanvasEvents(
   commands: AppSetupCommands,
 ): void {
   setupCanvasInteractions(createCanvasOptions(state, editor, commands));
+  // Меню «Opciones» (options-menu.ts).
+  setupOptionsMenu(state.root);
   // Лупа: подсветка всей связи провода при наведении (wire-trace.ts).
   setupWireTrace({
     schema: () => state.ctx.schema,
