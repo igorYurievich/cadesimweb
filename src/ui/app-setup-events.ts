@@ -4,6 +4,7 @@ import { setupDocumentInputEvents, setupDocumentOpen } from './document-io';
 import { setupViewportControls } from './viewport-controls';
 import { setupMobile } from './mobile';
 import { setupAppKeyboardShortcuts } from './app-setup-shortcuts';
+import { setupWireTrace } from './wire-trace';
 import type { AppSetupBase } from './app-setup-base';
 import type { AppSetupEditor } from './app-setup-editor';
 import type { AppSetupCommands } from './app-setup-commands';
@@ -107,6 +108,20 @@ function setupCanvasEvents(
   commands: AppSetupCommands,
 ): void {
   setupCanvasInteractions(createCanvasOptions(state, editor, commands));
+  // Лупа: подсветка всей связи провода при наведении (wire-trace.ts).
+  setupWireTrace({
+    schema: () => state.ctx.schema,
+    svg: state.elements.svg,
+    button: state.root.querySelector<HTMLButtonElement>('#wire-trace-tool'),
+    elementLayer: state.elements.elementLayer,
+    status: state.elements.status,
+    viewSize: () => state.viewSize,
+    viewport: () => state.viewport,
+    text: () => {
+      const t = state.uiText();
+      return { title: t.wireTraceTitle, wires: t.wireTraceWires, terminals: t.wireTraceTerminals, none: t.wireTraceNone, hint: t.wireTraceHint };
+    },
+  });
 }
 
 function setupMomentaryInputRelease(state: AppSetupBase): void {

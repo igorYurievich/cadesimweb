@@ -77,6 +77,8 @@ export function setupInterfaceTranslation(deps: InterfaceTranslationSetup): () =
     deps.root.querySelector<HTMLButtonElement>('#pan-tool')?.setAttribute('title', t.hand);
     deps.root.querySelector<HTMLButtonElement>('#node-tool')?.setAttribute('aria-label', t.node);
     deps.root.querySelector<HTMLButtonElement>('#node-tool')?.setAttribute('title', t.node);
+    deps.root.querySelector<HTMLButtonElement>('#wire-trace-tool')?.setAttribute('aria-label', t.wireTrace);
+    deps.root.querySelector<HTMLButtonElement>('#wire-trace-tool')?.setAttribute('title', t.wireTrace);
     // Кнопки симуляции — только значки (SVG в app-shell.ts); название — в подсказке и для экранных дикторов.
     deps.root.querySelector<HTMLButtonElement>('#sim-run')?.setAttribute('title', t.run);
     deps.root.querySelector<HTMLButtonElement>('#sim-run')?.setAttribute('aria-label', t.run);
