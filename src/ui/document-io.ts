@@ -47,9 +47,13 @@ export function setupDocumentOpen(ctx: AppContext, deps: DocumentOpenSetup): (te
       ctx.schema = openedSchema;
       ctx.schema.sheet.fileName = name;
       const contentBounds = schemaBounds(ctx.schema);
-      if (contentBounds && (contentBounds.maxY > ctx.schema.sheet.height - 30 || contentBounds.maxX > ctx.schema.sheet.width - 20)) {
-        ctx.schema.sheet.width = Math.max(ctx.schema.sheet.width, 420, Math.ceil(contentBounds.maxX + 40));
-        ctx.schema.sheet.height = Math.max(ctx.schema.sheet.height, 297, Math.ceil(contentBounds.maxY + 40));
+      // Размер листа из файла сохраняется. Лист растёт, только если схема реально выходит за него
+      // (старые файлы CADe_SIMU, где схема вылезает за рамку), и ровно под содержимое. Раньше лист
+      // увеличивался до A3, едва схема подходила к краю, — а экспорт .cad как раз прижимает схему к
+      // нижнему полю, поэтому сохранённый размер листа после повторного открытия терялся.
+      if (contentBounds && (contentBounds.maxY > ctx.schema.sheet.height || contentBounds.maxX > ctx.schema.sheet.width)) {
+        ctx.schema.sheet.width = Math.max(ctx.schema.sheet.width, Math.ceil(contentBounds.maxX + 20));
+        ctx.schema.sheet.height = Math.max(ctx.schema.sheet.height, Math.ceil(contentBounds.maxY + 24));
         const settings = ctx.schema.sheet.cadFooter?.settings;
         if (settings && settings.length >= 2) { settings[settings.length - 2] = ctx.schema.sheet.width; settings[settings.length - 1] = ctx.schema.sheet.height; }
       }
