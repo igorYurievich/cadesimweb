@@ -1,3 +1,4 @@
+import { detectorSpec } from './detector-types';
 import { packProgramPagesForCad } from './program-pages';
 import { importCad } from './cad-import';
 import { LOGO_DEFAULT_IP, LOGO_TYPE, isPlcFixedType } from './plc-types';
@@ -197,6 +198,10 @@ function elementRecords(
   // и функции (только веб-версия).
   if (element.typeCode === 8023 && typeof element.params.buttonColor === 'string') {
     record.texts[parameterStart] = element.params.buttonColor.replace(/^#/, '');
+  }
+  // Приёмник фотобарьера: имя привязанного излучателя в первом поле после меток клемм (только веб, photo-beam.ts).
+  if (detectorSpec(element.typeCode)?.kind === 'receiver' && parameterStart < record.texts.length) {
+    record.texts[parameterStart] = typeof element.params.emitter === 'string' ? element.params.emitter.replace(/[#\r\n]/g, '').trim() : '';
   }
   if (element.typeCode === 9004 || element.typeCode === 9005 || element.typeCode === 9006) {
     if (element.params.scale !== undefined) record.texts[parameterStart] = String(element.params.scale);

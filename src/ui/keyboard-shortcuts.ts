@@ -26,6 +26,13 @@ export function setupKeyboardShortcuts(deps: KeyboardShortcutsSetup): void {
       deps.spaceDown(true); event.preventDefault();
     }
     if (deps.root.querySelector('dialog[open]')) return;
+    // Ctrl+Tab / Ctrl+Shift+Tab — следующая / предыдущая схема в панели вкладок. Только в установленном
+    // приложении (PWA): в обычном браузере это сочетание забирает сам браузер (вкладки браузера).
+    if (event.key === 'Tab' && event.ctrlKey && !event.altKey && !event.metaKey && isInstalledApp()) {
+      event.preventDefault();
+      switchDocumentTab(deps.root, event.shiftKey ? -1 : 1);
+      return;
+    }
     if (!deps.simulationContextMenu.hidden && event.key === 'Escape') {
       deps.simulationContextMenu.hidden = true; event.preventDefault(); return;
     }
@@ -83,4 +90,24 @@ export function setupKeyboardShortcuts(deps: KeyboardShortcutsSetup): void {
     if ((!editingField || placementSelectFocused) && event.code === 'KeyR') { deps.rotateSelection(); event.preventDefault(); }
   });
   window.addEventListener('keyup', (event) => { if (event.code === 'Space') deps.spaceDown(false); });
+}
+
+/** Программа запущена как установленное приложение (PWA), а не во вкладке браузера. */
+export function isInstalledApp(): boolean {
+  try {
+    if ((navigator as Navigator & { standalone?: boolean }).standalone) return true;
+    return ['standalone', 'minimal-ui', 'window-controls-overlay']
+      .some((mode) => window.matchMedia(`(display-mode: ${mode})`).matches);
+  } catch {
+    return false;
+  }
+}
+
+/** Активировать соседнюю вкладку схемы (по кругу); ничего не делает, если схема одна. */
+function switchDocumentTab(root: HTMLElement, direction: 1 | -1): void {
+  const tabs = [...root.querySelectorAll<HTMLButtonElement>('.document-tab .document-tab-select')];
+  if (tabs.length < 2) return;
+  const current = tabs.findIndex((tab) => tab.closest('.document-tab')?.classList.contains('is-active'));
+  const next = tabs[(Math.max(0, current) + direction + tabs.length) % tabs.length];
+  next?.click();
 }

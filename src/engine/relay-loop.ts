@@ -13,6 +13,7 @@ import { s7RelayNames } from './s7-1200';
 import { advancePlcBlocks } from './plc-blocks';
 import { advanceVfds, vfdKeys } from './vfd';
 import { advanceGrafcet, grafcetRelayNames } from './grafcet';
+import { photoEmitterKeys } from './photo-beam';
 
 export interface RelayLoopResult {
   pass: RelayPassResult;
@@ -36,7 +37,7 @@ export function relayCoilNames(schema: Schema): string[] {
   }
   // Операнды, которые задаёт LOGO: «запитан» и входы I1…I8 (plc.ts); входы минутников (stair-timer.ts).
   for (const name of [...logoRelayNames(schema), ...stairTimerKeys(schema), ...s7RelayNames(schema), ...vfdKeys(schema),
-    ...grafcetRelayNames(schema)]) {
+    ...grafcetRelayNames(schema), ...photoEmitterKeys(schema)]) {
     if (!seen.has(name)) names.push(name);
     seen.add(name);
   }

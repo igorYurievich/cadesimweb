@@ -45,8 +45,8 @@ describe('detectors: catalog and .cad types', () => {
     }
   });
 
-  it('shows the green badge on every detector except the barrier emitter', () => {
-    for (const [commandId] of PANEL) expect(hasVerifiedBadge('sensors', commandId)).toBe(commandId !== 33027);
+  it('shows the green badge on every detector, the barrier emitter included', () => {
+    for (const [commandId] of PANEL) expect(hasVerifiedBadge('sensors', commandId)).toBe(true);
     expect(hasVerifiedBadge('sensors', 33025)).toBe(true);
   });
 });

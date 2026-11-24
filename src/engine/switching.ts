@@ -15,6 +15,7 @@ import { S7_1200 } from '../model/s7-1200';
 import { s7OutputActive } from './s7-1200';
 import { vfdRelayActive } from './vfd';
 import { isVfdControl } from '../model/vfd';
+import { isPhotoReceiver, receiverBeamBlocked } from './photo-beam';
 
 export interface ClosedEdge {
   a: TerminalRef;
@@ -126,6 +127,8 @@ function controlActive(element: SchemaElement, link: BehaviorLink, inputs: UserI
   const sameNameLatchedOn = (): boolean => sameNameMaintainedOn() || sameNamePositionOn();
   switch (link.control) {
     case 'pressed': {
+      // Приёмник фотобарьера: луч перекрыт кликом или привязанный излучатель не светит (photo-beam.ts).
+      if (isPhotoReceiver(element.typeCode)) return receiverBeamBlocked(schema, element, inputs, coils);
       if (inputs.pressed[element.id]) return true;
       // Позиции с одинаковым обозначением работают как одно ручное устройство:
       // импульсная кнопка действует пока удерживается, фиксируемый выключатель — пока включён.

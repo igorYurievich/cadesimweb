@@ -1,3 +1,4 @@
+import { detectorSpec } from './detector-types';
 import { unpackProgramPagesFromCad } from './program-pages';
 import { migrateResizedWebTerminals } from './web-terminal-migration';
 /**
@@ -123,6 +124,8 @@ function toElement(r: CadRecord, continuations: readonly CadRecord[] = []): Sche
   if (typeCode === 8023 && extra[0] !== undefined && /^[0-9a-f]{6}$/i.test(extra[0])) {
     params.buttonColor = `#${extra[0]}`;
   }
+  // Приёмник фотобарьера: имя привязанного излучателя (cad-export.ts, photo-beam.ts).
+  if (detectorSpec(typeCode)?.kind === 'receiver' && extra[0] !== undefined && extra[0].trim() !== '') params.emitter = extra[0].trim();
   if (r.type === 8) params.text = r.tail ?? r.texts.find((value) => value.trim() !== '') ?? '';
   if (info.code === 9004 || info.code === 9005 || info.code === 9006) {
     // Порядок и смысл (шкала, значение) подтверждены только по двум образцам: 0/5 и 0/10.

@@ -4,7 +4,7 @@ import type { Schema } from '@model/types';
 import type { AppContext } from './context';
 import type { Selectable } from './constants';
 import { cloneSchema } from './helpers';
-import { appendDetectorWiringField } from './detector-properties';
+import { appendDetectorWiringField, appendReceiverEmitterField } from './detector-properties';
 import { appendPoleVariantField } from './pole-properties';
 import { appendButtonColorField, appendViewField } from './view-properties';
 import { appendStairTimerField } from './stair-timer-properties';
@@ -119,6 +119,7 @@ export function setupPropertyFields(ctx: AppContext, deps: PropertyFieldsSetup):
     addField(element.typeCode === 2009 ? deps.uiText().contactor1 : deps.uiText().name, element.name, (value) => { element.name = value; if (element.raw) element.raw.texts[0] = value; });
     addField(element.typeCode === 2009 ? deps.uiText().contactor2 : deps.uiText().function, element.func, (value) => { element.func = value; if (element.raw) element.raw.texts[1] = value; });
     appendDetectorWiringField(ctx.schema, element, { ...deps, rerender: renderProperties });
+    appendReceiverEmitterField(ctx.schema, element, { ...deps, rerender: renderProperties });
     appendPoleVariantField(ctx.schema, element, { ...deps, rerender: renderProperties });
     appendViewField(ctx.schema, element, { ...deps, rerender: renderProperties });
     appendButtonColorField(ctx.schema, element, { ...deps, rerender: renderProperties });

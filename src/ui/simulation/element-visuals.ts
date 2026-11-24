@@ -49,7 +49,7 @@ function applyOneElement(
   applyPowerSupplyVisuals(element, node, result, nets);
   applyMotorAnimationVisuals(state, element, node, nets);
   applyPoweredVisuals(state, element, node, nets, manuallyOpen, tripped);
-  applySensorVisuals(state, element, node);
+  applySensorVisuals(state, element, node, ctx.schema);
   apply2dVisuals(state, element, node, ctx.schema);
   applyPlcVisuals(state, element, node);
   applyVfdVisuals(state, element, node, ctx.schema);

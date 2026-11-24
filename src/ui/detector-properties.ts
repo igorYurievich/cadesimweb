@@ -1,5 +1,6 @@
 import { getCadType } from '@model/cad-types';
-import { DETECTOR_WIRINGS, detectorSpec, detectorVariant } from '@model/detector-types';
+import { DETECTOR_WIRINGS, EMITTER_TYPE, detectorSpec, detectorVariant } from '@model/detector-types';
+import { isPhotoReceiver, receiverEmitterName } from '@engine/photo-beam';
 import type { DetectorWiring } from '@model/detector-types';
 import { buildTerminals, frameSize } from '@model/geometry';
 import type { Schema, SchemaElement } from '@model/types';
@@ -66,4 +67,46 @@ export function appendDetectorWiringField(schema: Schema, element: SchemaElement
   });
   field.append(select);
   deps.propertyFields.append(field);
+}
+
+/**
+ * Поле «Излучатель» у приёмника фотобарьера: список излучателей схемы по имени (photo-beam.ts).
+ * «— нет —» оставляет приёмник как раньше: он срабатывает только от клика.
+ */
+export function appendReceiverEmitterField(schema: Schema, element: SchemaElement, deps: DetectorFieldDeps): void {
+  if (!isPhotoReceiver(element.typeCode)) return;
+  const text = deps.uiText();
+  const field = document.createElement('label');
+  field.className = 'property-field';
+  field.append(document.createTextNode(text.receiverEmitter));
+  const select = document.createElement('select');
+  const add = (value: string, title: string): void => {
+    const option = document.createElement('option');
+    option.value = value;
+    option.textContent = title;
+    select.append(option);
+  };
+  add('', text.receiverEmitterNone);
+  const names = [...new Set(schema.elements
+    .filter((candidate) => candidate.typeCode === EMITTER_TYPE && candidate.name.trim() !== '')
+    .map((candidate) => candidate.name.trim()))];
+  for (const name of names) add(name, name);
+  // Привязка к излучателю, которого уже нет (удалён или переименован): показываем её, чтобы было видно.
+  const current = receiverEmitterName(element);
+  if (current && !names.some((name) => name.toLocaleUpperCase() === current.toLocaleUpperCase())) add(current, `${current} (?)`);
+  select.value = names.find((name) => name.toLocaleUpperCase() === current.toLocaleUpperCase()) ?? current;
+  select.addEventListener('change', () => {
+    const before = cloneSchema(schema);
+    if (select.value) element.params.emitter = select.value;
+    else delete element.params.emitter;
+    deps.commitSchema(before);
+    deps.renderSchema();
+    select.blur();
+  });
+  field.append(select);
+  deps.propertyFields.append(field);
+  const hint = document.createElement('p');
+  hint.className = 'property-empty';
+  hint.textContent = text.receiverEmitterHint;
+  deps.propertyFields.append(hint);
 }

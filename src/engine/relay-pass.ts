@@ -17,6 +17,7 @@ import { applyStairTimerInputs } from './stair-timer';
 import { applyS7Inputs } from './s7-1200';
 import { plcBlockSources } from './plc-blocks';
 import { applyGrafcetOutputs } from './grafcet';
+import { applyEmitterSupply } from './photo-beam';
 import { applyVfdInputs, vfdOutput, vfdSources } from './vfd';
 import { VFD_POWER_INDEX, isVfdDrive } from '../model/vfd';
 
@@ -199,6 +200,8 @@ export function solvePass(
   applyStairTimerInputs(schema, graph.terminalNet, netById, nextCoils);
   applyS7Inputs(schema, graph.terminalNet, netById, nextCoils);
   applyVfdInputs(schema, graph.terminalNet, netById, nextCoils, inputs);
+  // Излучатели фотобарьеров: светят, пока запитаны (photo-beam.ts).
+  applyEmitterSupply(schema, graph.terminalNet, netById, nextCoils);
   applyPlcCoils(schema, graph.terminalNet, netById, coils, nextCoils, timers);
   // Действия активных этапов GRAFCET (grafcet.ts).
   applyGrafcetOutputs(schema, timers, nextCoils);

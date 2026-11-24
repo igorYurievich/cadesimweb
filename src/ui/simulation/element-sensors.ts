@@ -2,7 +2,8 @@ import { isEnergized } from '@engine/loads';
 import { terminalKey } from '@engine/types';
 import { EMITTER_TYPE, detectorSpec } from '@model/detector-types';
 import { getCadType } from '@model/cad-types';
-import type { SchemaElement } from '@model/types';
+import type { Schema, SchemaElement } from '@model/types';
+import { isPhotoReceiver, receiverBeamBlocked } from '@engine/photo-beam';
 import type { SimulationState } from './types';
 
 /**
@@ -11,10 +12,13 @@ import type { SimulationState } from './types';
  *  - детекторы: красный цвет, серая заливка и переключённый значок контакта, пока датчик зажат;
  *  - излучатель: серая заливка, пока на 1-2 есть напряжение.
  */
-export function applySensorVisuals(state: SimulationState, element: SchemaElement, node: SVGGElement): void {
+export function applySensorVisuals(state: SimulationState, element: SchemaElement, node: SVGGElement, schema: Schema): void {
   if (detectorSpec(element.typeCode)) {
     // Зажатый датчик в CADe_SIMU рисуется красным с серой заливкой, даже без проводов.
-    const pressed = Boolean(state.inputs.pressed[element.id]);
+    // Приёмник фотобарьера срабатывает и сам, когда привязанный излучатель не светит (photo-beam.ts).
+    const pressed = Boolean(state.inputs.pressed[element.id])
+      || (state.result !== undefined && isPhotoReceiver(element.typeCode)
+        && receiverBeamBlocked(schema, element, state.inputs, state.result.coils));
     node.classList.toggle('is-sim-pressed', pressed);
     if (pressed) node.classList.add('is-powered');
     return;
