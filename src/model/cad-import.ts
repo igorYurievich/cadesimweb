@@ -29,7 +29,9 @@ import {
 } from './realistic-2d-types';
 import { delayBlockParams } from './cad-delay-blocks';
 import { isPushbutton2d } from './pushbutton-2d';
+import { TERMINAL_COLOR, isTerminal2d } from './terminal-2d';
 import { STAIR_TIMER_2D, stairTimerParamsFromFile } from './stair-timer';
+import { LIFT_TYPE, liftParamsFromTail } from './lift';
 import { PLC_FIXED_LABELS } from './plc-types';
 import { plcBlockParams } from './plc-blocks';
 import { logoSupplyFromFile, syncModuleLabels } from './plc-modules';
@@ -137,8 +139,12 @@ function toElement(r: CadRecord, continuations: readonly CadRecord[] = []): Sche
   if ((typeCode === 1000 || typeCode === 1001) && num(r, 16) === MOTOR_2D_FILE_PARAM) params.motor2d = true;
   // Цвет кнопки 2D — nums[16] (pushbutton-2d.ts).
   if (isPushbutton2d(typeCode) && num(r, 16) !== 0) params.buttonColor = num(r, 16);
+  // Цвет клеммы 2D — nums[16] (terminal-2d.ts), серая (фаза) по умолчанию.
+  if (isTerminal2d(typeCode) && num(r, 16) !== TERMINAL_COLOR.phase) params.terminalColor = num(r, 16);
   // Минутник: nums[16] — выдержка и подключение кнопок (stair-timer.ts).
   if (typeCode === STAIR_TIMER_2D && num(r, 16) > 0) Object.assign(params, stairTimerParamsFromFile(num(r, 16)));
+  // Лифт: имена встроенных элементов из хвоста записи (lift.ts).
+  if (typeCode === LIFT_TYPE) Object.assign(params, liftParamsFromTail(r.tail));
   if (extra.length > 0) params.extra = extra.join('#');
 
   return {

@@ -3,13 +3,16 @@
  * контактор — катушка A1-A2 со своими контактами по имени (как катушка 9000 и контакты KM),
  * дисюнтор, автомат и дифавтомат — как Disyuntor III / Interruptor automático (включены по умолчанию,
  * размыкаются при срабатывании; в симуляции стартуют выключенными). Блоки 7020/7021 — контакты по имени
- * катушки с выдержкой (delay-blocks.ts).
+ * катушки с выдержкой (delay-blocks.ts). Interruptor и Seccionador 2D — как Interruptor 2003–2005: полюса
+ * переключаются кликом, стартуют выключенными.
  */
 
 import {
   AUX_BLOCK_2D, BREAKER_2D, CONTACTOR_2D, DELAY_BLOCK_2D, POLE_COUNT, POLE_VARIANT_OF, PILOT_2D,
   PUSHBUTTON_2D, THERMAL_RELAY_2D,
 } from '../model/realistic-2d-types';
+import { SWITCH_2D_CODES, SWITCH_2D_SPECS } from '../model/switch-2d';
+import { TERMINAL_2D } from '../model/terminal-2d';
 import type { BehaviorLink, TypeBehavior } from './behaviors';
 
 type Control = BehaviorLink['control'];
@@ -49,6 +52,8 @@ export const REALISTIC_2D_BEHAVIORS: readonly TypeBehavior[] = [
       sw([6, 7], 'thermal'), sw([8, 9], 'thermal', { normallyClosed: true }),
     ],
   },
+  // Клемма 2D: верхний и нижний вывод соединены всегда (terminal-2d.ts).
+  { typeCode: TERMINAL_2D, links: [sw([0, 1], 'always')] },
   // Пилот 2D X1 X2: лампа, горит под напряжением (loads.ts).
   { typeCode: PILOT_2D, links: [{ terminals: [0, 1], kind: 'load', control: 'always' }] },
   // Кнопки моторов 2D: при размещении становятся 1000/1001 (ui/helpers.ts); строки нужны таблице типов.
@@ -73,6 +78,11 @@ export const REALISTIC_2D_BEHAVIORS: readonly TypeBehavior[] = [
         sw([2, 3], 'coil-name', { normallyClosed: !leftNc }),
       ],
     };
+  }),
+  // Interruptor и Seccionador 2D: верхние клеммы 0..n−1, нижние n..2n−1; полюса замкнуты, пока ручка в ON.
+  ...SWITCH_2D_CODES.map((typeCode): TypeBehavior => {
+    const n = SWITCH_2D_SPECS[typeCode]!.poles;
+    return { typeCode, links: Array.from({ length: n }, (_, k) => sw([k, k + n], 'toggled')) };
   }),
   // Автомат и дифавтомат: верхние клеммы 0..n−1, нижние n..2n−1, полюс k — k ↔ k+n.
   ...Object.entries(POLE_VARIANT_OF).map(([code, variant]): TypeBehavior => {

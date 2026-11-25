@@ -6,16 +6,17 @@ import { DIN_PSU_COMMAND } from '@model/plc-power-supply';
 import { STAIR_TIMER_COMMAND } from '@model/stair-timer';
 import { VFD_2D_1PH_COMMAND, VFD_2D_COMMAND } from '@model/vfd';
 import { GRAFCET_TABLE_COMMAND } from '@model/grafcet';
+import { LIFT_COMMAND } from '@model/lift';
 
 /** Кнопки только веб-версии: в оригинальном exe их нет. */
 const WEB_ONLY = [
   DIN_PSU_COMMAND, STAIR_TIMER_COMMAND, ...Object.values(MECHANISM_COMMANDS), VFD_2D_COMMAND, VFD_2D_1PH_COMMAND,
-  GRAFCET_TABLE_COMMAND,
+  GRAFCET_TABLE_COMMAND, LIFT_COMMAND,
 ];
 
 describe('catalog: data integrity', () => {
   it('matches the numbers extracted from the original exe', () => {
-    expect(catalog.groups).toHaveLength(20);
+    expect(catalog.groups).toHaveLength(21);
     expect(catalog.slotCount - WEB_ONLY.length).toBe(328);
     expect(catalog.components.filter((c) => !WEB_ONLY.includes(c.id))).toHaveLength(309);
   });

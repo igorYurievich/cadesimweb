@@ -24,10 +24,11 @@ describe('palette filter: verified components only', () => {
     expect(isPaletteItemShown('power-sources', 32995, false)).toBe(true);
     expect(isPaletteItemShown('manual-controls', 32909, true)).toBe(true);
     expect(isPaletteItemShown('realistic-2d', 33340, true)).toBe(true);
+    expect(isPaletteItemShown('realistic-2d', 33319, true)).toBe(true); // клемма 2D «Borna»
   });
 
-  it('never shows the socket relays, LED, push-button station, terminal and generic boxes of the 2D panel', () => {
-    for (const id of [33313, 33314, 33371, 33323, 33319, 33363, 33364, 33365]) {
+  it('never shows the socket relays, LED, push-button station and generic boxes of the 2D panel', () => {
+    for (const id of [33313, 33314, 33371, 33323, 33363, 33364, 33365]) {
       expect(isPaletteItemShown('realistic-2d', id, false)).toBe(false);
     }
   });

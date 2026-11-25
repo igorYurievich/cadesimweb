@@ -5,6 +5,10 @@ import {
 } from './constants';
 import type { Theme } from './constants';
 
+/** Доп. категории, включённые по умолчанию; в OPTIONAL_GROUP_OFF_KEY — те из них, что пользователь выключил сам. */
+const DEFAULT_ON_OPTIONAL_GROUPS: readonly GroupKey[] = ['installations'];
+const OPTIONAL_GROUP_OFF_KEY = 'cadesimu-optional-groups-off:v1';
+
 export interface AppSettings {
   theme: Theme;
   gridVisible: boolean;
@@ -80,13 +84,25 @@ export function createSettingsCommands(
 }
 
 export function readOptionalPaletteGroups(): GroupKey[] {
+  const read = (key: string): unknown[] => {
+    try {
+      const raw: unknown = JSON.parse(localStorage.getItem(key) ?? '[]');
+      return Array.isArray(raw) ? raw : [];
+    } catch { return []; }
+  };
+  const on = read(OPTIONAL_GROUP_STORAGE_KEY);
+  const off = read(OPTIONAL_GROUP_OFF_KEY);
+  // Убранная категория не показывается, даже если раньше была включена; категории «по умолчанию» видны,
+  // пока пользователь сам их не выключил.
+  return OPTIONAL_PALETTE_GROUPS.filter((key) => !HIDDEN_OPTIONAL_GROUPS.includes(key)
+    && (on.includes(key) || (DEFAULT_ON_OPTIONAL_GROUPS.includes(key) && !off.includes(key))));
+}
+
+export function writeOptionalPaletteGroups(visible: ReadonlySet<GroupKey>): void {
   try {
-    const raw: unknown = JSON.parse(localStorage.getItem(OPTIONAL_GROUP_STORAGE_KEY) ?? '[]');
-    // Убранная категория не показывается, даже если раньше была включена.
-    return Array.isArray(raw)
-      ? OPTIONAL_PALETTE_GROUPS.filter((key) => raw.includes(key) && !HIDDEN_OPTIONAL_GROUPS.includes(key))
-      : [];
-  } catch { return []; }
+    localStorage.setItem(OPTIONAL_GROUP_STORAGE_KEY, JSON.stringify([...visible]));
+    localStorage.setItem(OPTIONAL_GROUP_OFF_KEY, JSON.stringify(DEFAULT_ON_OPTIONAL_GROUPS.filter((key) => !visible.has(key))));
+  } catch { /* Выбор действует до закрытия вкладки. */ }
 }
 
 export function readGridVisible(): boolean {

@@ -12,6 +12,7 @@ import { apply2dVisuals } from './element-2d';
 import { applyPlcVisuals } from './element-plc';
 import { applyVfdVisuals } from './element-vfd';
 import { applyGrafcetVisuals } from './element-grafcet';
+import { applyLiftVisuals } from './element-lift';
 
 export function applyElementVisuals(
   ctx: AppContext,
@@ -20,10 +21,12 @@ export function applyElementVisuals(
   nets: Map<number, EngineState['nets'][number]>,
 ): void {
   const thermalState = resolveThermalState(ctx.schema, state.inputs);
+  const text = deps.uiText();
   for (const element of ctx.schema.elements) {
     const node = deps.elementLayer.querySelector<SVGGElement>(`[data-element-id="${element.id}"]`);
     if (!node) continue;
     applyOneElement(ctx, state, element, node, nets, thermalState.trippedNames);
+    applyLiftVisuals(state, element, node, text);
   }
 }
 

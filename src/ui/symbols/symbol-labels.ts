@@ -6,6 +6,7 @@ import { isStrip } from "./terminal-strips";
 import { label } from "./svg-primitives";
 import { DETECTOR_NAME_SPOTS, DETECTOR_SIDE_LABELS } from "./detector-layout";
 import { AUX_BLOCK_2D, isDelayBlock2d } from "@model/realistic-2d-types";
+import { isTerminal2d } from "@model/terminal-2d";
 import { LADDER_EXTRA, PLC_BLOCK } from "@model/plc-blocks";
 
 const LADDER_NAME = { x: 6, y: -5, anchor: "middle" } as const;
@@ -42,6 +43,8 @@ export const NAME_SPOTS: Readonly<
   15000: { x: -4.5, y: 12, anchor: "end" },
   // Детекторы: имя слева над корпусом, как в CADe_SIMU (detector-layout.ts).
   ...DETECTOR_NAME_SPOTS,
+  // Лифт 8300: имя над машинным помещением.
+  8300: { x: 33, y: -2.5, anchor: "middle" },
   // Символы 2D: имя слева у верхнего края.
   8100: { x: 4.5, y: 1.5, anchor: "end" },
   7018: { x: -1, y: 4.5, anchor: "end" },
@@ -51,6 +54,9 @@ export const NAME_SPOTS: Readonly<
   6016: { x: -1, y: 4.5, anchor: "end" },
   7019: { x: -1, y: 6.5, anchor: "end" },
   7020: { x: -1, y: 6.5, anchor: "end" }, 7021: { x: -1, y: 6.5, anchor: "end" },
+  6019: { x: 0, y: 4.5, anchor: "end" }, 6020: { x: 0, y: 4.5, anchor: "end" },
+  60191: { x: -1, y: 6, anchor: "end" }, 60201: { x: -1, y: 6, anchor: "end" },
+  4011: { x: 1, y: 7, anchor: "end" }, // клемма 2D: имя слева от корпуса
   // LOGO: имя над левым верхним углом; Ladder: операнд по центру над символом.
   10202: { x: 0, y: -2, anchor: "start" }, 10214: { x: 0, y: -2, anchor: "start" },
   10230: { x: 0, y: -2, anchor: "start" },
@@ -108,7 +114,8 @@ export function drawTerminalLabels(g: SVGGElement, element: SchemaElement, rotat
   // Колодки подписаны над клеммами; у земли, батареи и розетки подписей клемм на символе нет.
   if (isStrip(element.typeCode) || [3015, 3019, 3020].includes(element.typeCode)) return;
   // У блоков с выдержкой 2D номера клемм напечатаны на корпусе у винтов (realistic-2d-delay.ts).
-  if (isDelayBlock2d(element.typeCode) || element.typeCode === AUX_BLOCK_2D) return;
+  // У клеммы 2D выводы без номеров (terminal-2d.ts).
+  if (isDelayBlock2d(element.typeCode) || element.typeCode === AUX_BLOCK_2D || isTerminal2d(element.typeCode)) return;
   // LOGO, DM8, блок питания 24 V и S7-1200 подписывают клеммы сами (logo-symbol.ts, dm8-symbol.ts, din-psu-symbol.ts,
   // s7-1200-symbol.ts).
   if ([10202, 10214, 10220, 10230, 10240, 10241].includes(element.typeCode) || isMechanism(element.typeCode)) return;

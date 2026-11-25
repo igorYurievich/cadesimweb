@@ -63,6 +63,8 @@ import { drawDinPowerSupply } from "./din-psu-symbol";
 import { drawStairTimer } from "./stair-timer-symbol";
 import { drawVfd2d, drawVfd2dMono } from "./vfd-2d-symbol";
 import { drawGrafcet } from "./grafcet-symbol";
+import { drawLift } from "./lift-symbol";
+import { LIFT_TYPE } from "@model/lift";
 import { GRAFCET_TYPES } from "@model/grafcet";
 import { LOGO_DM8 } from "@model/plc-modules";
 import { LADDER_COIL, LADDER_NC, LADDER_NO, LOGO_TYPE } from "@model/plc-types";
@@ -70,6 +72,8 @@ import {
   BREAKER_2D, CONTACTOR_2D, PUSHBUTTON_2D, REALISTIC_2D_ORIGIN_DX, isDelayBlock2d, isSimpleView,
 } from "@model/realistic-2d-types";
 import { drawColor2d } from "./realistic-2d-color";
+import { drawSwitchSimple } from "./realistic-2d-switch";
+import { drawTerminalSimple } from "./realistic-2d-terminal";
 import { drawDelayBlockColor } from "./realistic-2d-color-delay";
 import { DETECTOR_CODES, EMITTER_TYPE } from "@model/detector-types";
 import { PHOTO_BARRIER_TYPE } from "@model/cad-types-sensors";
@@ -262,6 +266,8 @@ register2d([7020, 7021], drawDelayBlock2d);
 register2d([6016], drawThermalRelay2d);
 register2d([7019], drawAuxBlock2d);
 register2d([8101], drawPilotSimple);
+register2d([6019, 6020, 60191, 60201], drawSwitchSimple);
+register2d([4011], drawTerminalSimple);
 register([LADDER_NO, LADDER_NC, LADDER_COIL, ...LADDER_EXTRA], drawLadder);
 register(Object.values(PLC_BLOCK), drawLadderBlock);
 register([LOGO_TYPE], drawLogo);
@@ -273,6 +279,7 @@ register([10240], drawVfd2d);
 register([10241], drawVfd2dMono);
 register([8120, 8121, 8122, 8123, 8124, 8125], drawMechanism);
 register(GRAFCET_TYPES, drawGrafcet);
+register([LIFT_TYPE], drawLift);
 
 export function drawBody(g: SVGGElement, element: SchemaElement, rotation: number): void {
   (BODY_DRAWERS.get(element.typeCode) ?? drawFallback)(g, element, rotation);

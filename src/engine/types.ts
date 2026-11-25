@@ -121,6 +121,31 @@ export interface TimerState {
   /** Преобразователь частоты (vfd.ts): частота на выходе, Гц, и направление (1 — вперёд, −1 — назад). */
   hz?: number;
   dir?: 1 | -1;
+  /** Лифт (engine/lift.ts): положение кабины, двери, авария. */
+  lift?: LiftMemory;
+}
+
+export type LiftFault = 'crash-top' | 'crash-bottom' | 'squeeze' | 'door-open';
+/** Причина удара кабины: мотор от сети без ПЧ, частота выше 25 Гц или схема не остановила кабину. */
+export type LiftCrashCause = 'mains' | 'overspeed' | 'limit';
+
+export interface LiftMemory {
+  /** Положение кабины в этажах: 0 — первый этаж, 4 — пятый. */
+  pos: number;
+  /** Ход дверей: 0 — закрыты, 1 — открыты. */
+  door: number;
+  /** Скорость кабины, этажей в секунду (+ вверх). */
+  speed: number;
+  /** Кабина сорвалась (1 вверх, −1 вниз): летит до удара. */
+  runaway: 0 | 1 | -1;
+  /** Частота мотора подъёма в этом кадре, Гц (0 — стоит, 50 — от сети). */
+  hz: number;
+  /** Мотор крутится, но частота ниже 10 Гц: кабина не трогается. */
+  stalled: boolean;
+  /** Угол шкива лебёдки, градусы: для анимации. */
+  sheave: number;
+  fault?: LiftFault;
+  cause?: LiftCrashCause;
 }
 
 export interface EngineOptions {

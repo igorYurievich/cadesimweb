@@ -52,7 +52,7 @@ export function setupInterfaceTranslation(deps: InterfaceTranslationSetup): () =
     set('#export-menu-label', t.exportMenu);
     set('.optional-groups-heading', t.optionalGroups);
     const extraLabelKeys: Record<string, string> = { grafcet: 'extraGrafcet', ladder: 'extraLadder', logic: 'extraLogic', 'realistic-2d': 'extraReal2d', 'realistic-3d': 'extraReal3d', wiring: 'extraWiring', pneumatics: 'extraPneumatics', 'io-plc': 'extraIoPlc', 'power-electronics': 'extraPowerElectronics', 'electronic-relays': 'extraElectronicRelays', sensors: 'extraSensors',
-      mechanisms: 'extraMechanisms' };
+      mechanisms: 'extraMechanisms', installations: 'extraInstallations' };
     for (const input of [...deps.root.querySelectorAll<HTMLInputElement>('[data-optional-group]')]) {
       const key = input.dataset.optionalGroup as GroupKey;
       input.checked = deps.visibleOptionalGroups.has(key);

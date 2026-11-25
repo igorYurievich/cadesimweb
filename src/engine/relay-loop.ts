@@ -14,6 +14,7 @@ import { advancePlcBlocks } from './plc-blocks';
 import { advanceVfds, vfdKeys } from './vfd';
 import { advanceGrafcet, grafcetRelayNames } from './grafcet';
 import { photoEmitterKeys } from './photo-beam';
+import { advanceLifts, withLiftSensors } from './lift';
 
 export interface RelayLoopResult {
   pass: RelayPassResult;
@@ -78,7 +79,8 @@ export function solveRelayLoop(
   // would reopen its NO contact before the opposite contactor seals in.
   const settleRelays = (): boolean => {
     while (iterations < limit) {
-      pass = solvePass(schema, inputs, coils, timers);
+      // Датчики лифта срабатывают по положению кабины (lift.ts), как зажатые мышью.
+      pass = solvePass(schema, withLiftSensors(schema, inputs, timers), coils, timers);
       iterations += 1;
       const nextName = names.find((name) => (pass!.coils[name] ?? false) !== (coils[name] ?? false));
       if (nextName === undefined) {
@@ -101,7 +103,9 @@ export function solveRelayLoop(
     // Блоки Ladder: таймеры, счётчики, биестабильный и делитель (plc-blocks.ts).
     // Преобразователи частоты: частота по рампам (vfd.ts).
     const plcTimers = advancePlcBlocks(schema, pass.nets, pass.terminalNet, time, delayTimers);
-    const blockTimers = advanceVfds(schema, coils, time, plcTimers);
+    const vfdTimers = advanceVfds(schema, coils, time, plcTimers);
+    // Лифт: кабина и двери по моторам схемы (lift.ts).
+    const blockTimers = advanceLifts(schema, pass, inputs, time, vfdTimers);
     // GRAFCET: переходы по устойчивому состоянию схемы, раз за кадр (grafcet.ts).
     const nextTimers = advanceGrafcet(schema, pass.terminalNet, coils, inputs, time, blockTimers);
     const timersChanged = JSON.stringify(nextTimers) !== JSON.stringify(timers);
@@ -110,7 +114,7 @@ export function solveRelayLoop(
     // only once per simulation frame so the handoff is resolved atomically.
     if (timersChanged) stable = settleRelays();
   }
-  pass ??= solvePass(schema, inputs, coils, timers);
+  pass ??= solvePass(schema, withLiftSensors(schema, inputs, timers), coils, timers);
 
   if (!stable) {
     const fault: Fault = {

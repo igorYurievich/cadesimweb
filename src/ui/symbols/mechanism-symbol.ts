@@ -1,9 +1,10 @@
 import type { SchemaElement } from "@model/types";
 import { isSimpleView } from "@model/realistic-2d-types";
 import {
-  MECHANISM_SPECS, MECH_BULB, MECH_CROSS, MECH_PUSH, MECH_SOCKET, MECH_SWITCH, MECH_TWO_WAY,
+  MECHANISM_SPECS, MECH_BULB, MECH_CROSS, MECH_PUSH, MECH_SOCKET, MECH_SWITCH, MECH_TWO_WAY, isBackView,
 } from "@model/mechanisms";
 
+import { drawMechanismBack } from "./mechanism-back";
 import { circle, group, label, path, rect } from "./svg-primitives";
 
 // ── Механизмы Niessen Zenit (8120…8124), рамка 24×30: белая рамка 24×24 (y = 3…27), выводы до y = 0 / 30 ──────
@@ -193,6 +194,7 @@ function drawSimple(g: SVGGElement, code: number, rotation: number): void {
 }
 
 export function drawMechanism(g: SVGGElement, element: SchemaElement, rotation: number): void {
-  if (isSimpleView(element)) drawSimple(g, element.typeCode, rotation);
+  if (isBackView(element)) drawMechanismBack(g, element.typeCode, rotation);
+  else if (isSimpleView(element)) drawSimple(g, element.typeCode, rotation);
   else drawColor(g, element.typeCode, rotation);
 }

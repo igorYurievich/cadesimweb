@@ -21,6 +21,7 @@ import { GRAFCET_CAD_TYPES } from './grafcet';
 import { S7_1200_CAD_TYPE } from './s7-1200';
 import { VFD_2D_1PH_CAD_TYPE, VFD_2D_CAD_TYPE } from './vfd';
 import { MECHANISM_CAD_TYPES } from './mechanisms';
+import { LIFT_CAD_TYPE } from './lift';
 import type { Point, WireKind } from './types';
 
 export type CadFamily =
@@ -58,6 +59,7 @@ export type CadFamily =
   | 'detector'
   | 'plc' | 'plc-coil' | 'plc-block'
   | 'grafcet'
+  | 'installation'
   | 'unknown';
 
 export type Confidence = 'confirmed' | 'probable' | 'unknown';
@@ -323,6 +325,7 @@ const TABLE: readonly CadTypeInfo[] = [
   VFD_2D_1PH_CAD_TYPE,
   ...MECHANISM_CAD_TYPES,
   ...GRAFCET_CAD_TYPES,
+  LIFT_CAD_TYPE,
 ];
 
 const BY_CODE = new Map<number, CadTypeInfo>(TABLE.map((t) => [t.code, t]));

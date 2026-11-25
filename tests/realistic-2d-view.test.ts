@@ -8,8 +8,8 @@ import { createPlacedElement } from '../src/ui/helpers';
 describe('2D view choice (color / simple)', () => {
   it('offers the choice for the 2D symbols with a color drawing and 2D motors', () => {
     expect([...COLOR_VIEW_TYPES].sort((a, b) => a - b)).toEqual([
-      6015, 6016, 6017, 6018, 7018, 7019, 7020, 7021, 8100, 8101, 8110, 8120, 8121, 8122, 8123, 8124, 8125,
-      10202, 10214, 10220, 10230, 60171, 60172, 60182,
+      4011, 6015, 6016, 6017, 6018, 6019, 6020, 7018, 7019, 7020, 7021, 8100, 8101, 8110, 8120, 8121, 8122, 8123, 8124, 8125,
+      10202, 10214, 10220, 10230, 60171, 60172, 60182, 60191, 60201,
     ]);
     expect(hasViewChoice({ typeCode: 7018, params: {} })).toBe(true);
     expect(hasViewChoice({ typeCode: 1000, params: { motor2d: true } })).toBe(true);

@@ -4,6 +4,8 @@ import { EMITTER_TYPE, detectorSpec } from '@model/detector-types';
 import { getCadType } from '@model/cad-types';
 import type { Schema, SchemaElement } from '@model/types';
 import { isPhotoReceiver, receiverBeamBlocked } from '@engine/photo-beam';
+import { liftActiveSensorNames } from '@engine/lift';
+import { normalizeLiftName } from '@model/lift';
 import type { SimulationState } from './types';
 
 /**
@@ -18,7 +20,10 @@ export function applySensorVisuals(state: SimulationState, element: SchemaElemen
     // Приёмник фотобарьера срабатывает и сам, когда привязанный излучатель не светит (photo-beam.ts).
     const pressed = Boolean(state.inputs.pressed[element.id])
       || (state.result !== undefined && isPhotoReceiver(element.typeCode)
-        && receiverBeamBlocked(schema, element, state.inputs, state.result.coils));
+        && receiverBeamBlocked(schema, element, state.inputs, state.result.coils))
+      // Датчик, привязанный по имени к лифту, срабатывает по положению кабины (engine/lift.ts).
+      || (state.result !== undefined
+        && liftActiveSensorNames(schema, state.inputs, state.result.memory.timers).has(normalizeLiftName(element.name)));
     node.classList.toggle('is-sim-pressed', pressed);
     if (pressed) node.classList.add('is-powered');
     return;

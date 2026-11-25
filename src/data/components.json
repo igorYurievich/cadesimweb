@@ -987,6 +987,19 @@
       ]
     },
     {
+      "name": "Instalaciones (ascensor y otras instalaciones animadas)",
+      "toolbar": 0,
+      "items": [
+        [
+          34012,
+          "Ascensor 5 plantas",
+          "Elevator (5 floors)",
+          "Ascensore 5 piani",
+          "Лифт 5 этажей"
+        ]
+      ]
+    },
+    {
       "name": "Detectores / sensores",
       "toolbar": 215,
       "items": [

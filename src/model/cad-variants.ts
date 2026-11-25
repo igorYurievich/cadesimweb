@@ -1,9 +1,11 @@
 /**
- * Типы, у которых в файле один код, а вариант записан в поле nums[16] (автомат 6017 и дифавтомат 6018 2D).
+ * Типы, у которых в файле один код, а вариант записан в поле nums[16] (автомат 6017 и дифавтомат 6018 2D;
+ * Interruptor 6019 и Seccionador 6020 2D с той же записью).
  * Внутри программы у варианта свой код; здесь перевод в обе стороны и метки клемм записи.
  */
 
 import { AUTOMATIC_2D, DIFFERENTIAL_2D } from './realistic-2d-types';
+import { SWITCH_2D_CODES, SWITCH_2D_SPECS } from './switch-2d';
 
 export interface CadVariant {
   /** Код в файле .cad. */
@@ -21,6 +23,11 @@ export const CAD_VARIANTS: Readonly<Record<number, CadVariant>> = {
   [AUTOMATIC_2D.IIIN]: { fileCode: 6017, param: 9 },
   [DIFFERENTIAL_2D.IN]: { fileCode: 6018, param: 0 },
   [DIFFERENTIAL_2D.IIIN]: { fileCode: 6018, param: 9 },
+  // Interruptor и Seccionador 2D: запись того же вида, варианты 9 (27×27) и 0 (51×51), switch-2d.ts.
+  ...Object.fromEntries(SWITCH_2D_CODES.map((code) => {
+    const { fileCode, param } = SWITCH_2D_SPECS[code]!;
+    return [code, { fileCode, param }];
+  })),
 };
 
 /**
@@ -38,4 +45,6 @@ export function internalVariantCode(fileCode: number, param: number): number {
   return fileCode;
 }
 
-export const isVariantFileCode = (code: number): boolean => code === 6017 || code === 6018;
+const VARIANT_FILE_CODES: ReadonlySet<number> = new Set(Object.values(CAD_VARIANTS).map((variant) => variant.fileCode));
+
+export const isVariantFileCode = (code: number): boolean => VARIANT_FILE_CODES.has(code);

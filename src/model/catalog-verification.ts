@@ -12,6 +12,8 @@ export function hasVerifiedBadge(group: GroupKey, id: number): boolean {
     || group === 'aux-contacts'
     // Механизмы (только веб, model/mechanisms.ts): все.
     || group === 'mechanisms'
+    // Инсталляции (только веб, model/lift.ts): лифт на 5 этажей.
+    || group === 'installations'
     || (group === 'coils-signaling' && [32949, 32952, 32953, 32954, 32957, 32958, 32959, 32960, 32961, 32962].includes(id))
     || group === 'contactors'
     || (group === 'protection' && id !== 33054 && id !== 33055)
@@ -19,9 +21,10 @@ export function hasVerifiedBadge(group: GroupKey, id: number): boolean {
     // engine/photo-beam.ts).
     || (group === 'sensors' && [33032, 33020, 33021, 33022, 33023, 33024, 33025, 33027, 33034, 33033].includes(id))
     // Символы 2D, уже сделанные: моторы, кнопка, контактор, дисюнтор, автомат, дифавтомат, блоки контактов, термореле,
-    // минутник Alst 8 (34002, только веб).
+    // Interruptor и Seccionador (33386, 33390), клемма «Borna» (33319), минутник Alst 8 (34002, только веб).
     || (group === 'realistic-2d' && [
-      33311, 33393, 33317, 33318, 33338, 33339, 33352, 33354, 33380, 33381, 33382, 33340, 34002, 34009, 34010,
+      33311, 33393, 33317, 33318, 33338, 33339, 33352, 33354, 33380, 33381, 33382, 33340, 33386, 33390, 34002,
+      34009, 34010, 33319,
     ].includes(id))
     // LOGO! (CADe_S1.cad), блок питания 24 V (34001, только веб), S7-1200 (33240, только веб) и Ladder (ladder.cad): контакты, фронты,
     // First Scan, катушки, блоки и шины «+» / «−».

@@ -2,6 +2,7 @@ import {
   AUX_BLOCK_2D, BREAKER_2D, CONTACTOR_2D, DELAY_BLOCK_2D, POLE_VARIANT_OF, PUSHBUTTON_2D, THERMAL_RELAY_2D,
   isDelayBlock2d,
 } from '@model/realistic-2d-types';
+import { isSwitch2d } from '@model/switch-2d';
 import { delayBlockActive, delayBlockSeconds } from '@engine/delay-blocks';
 import { stairTimerActive, stairTimerSeconds } from '@engine/stair-timer';
 import { STAIR_TIMER_2D } from '@model/stair-timer';
@@ -53,6 +54,12 @@ export function apply2dVisuals(state: SimulationState, element: SchemaElement, n
   if (element.typeCode === CONTACTOR_2D || element.typeCode === AUX_BLOCK_2D) {
     const on = result !== undefined && element.name !== '' && (result.coils[element.name] ?? false);
     node.classList.toggle('is-d2-on', on);
+    node.classList.remove('is-powered');
+    return;
+  }
+  if (isSwitch2d(element.typeCode)) {
+    // Interruptor / Seccionador 2D: ручка повёрнута в ON, пока выключатель включён кликом.
+    node.classList.toggle('is-d2-on', result !== undefined && state.inputs.toggled[element.id] === true);
     node.classList.remove('is-powered');
     return;
   }

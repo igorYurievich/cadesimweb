@@ -56,6 +56,9 @@ const FRAME_HIT: Readonly<Record<number, HitFrame>> = {
   6016: { x: -1, y: -1, w: 26, h: 38 },
   7019: { x: -1, y: -1, w: 26, h: 29 },
   7020: { x: -1, y: -1, w: 26, h: 29 }, 7021: { x: -1, y: -1, w: 26, h: 29 },
+  6019: { x: 1, y: -1, w: 25, h: 26 }, 6020: { x: 1, y: -1, w: 25, h: 26 },
+  60191: { x: 0, y: 0, w: 48, h: 49 }, 60201: { x: 0, y: 0, w: 48, h: 49 },
+  4011: { x: 1, y: -1, w: 4, h: 14 }, // клемма 2D
 };
 
 function hitRect(frame: HitFrame): SVGRectElement {

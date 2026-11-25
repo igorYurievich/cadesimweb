@@ -77,6 +77,7 @@ export function renderAppShell(root: HTMLElement, theme: Theme): void {
               <label class="menu-toggle"><input type="checkbox" data-optional-group="grafcet"><span data-extra-label="extraGrafcet">GRAFCET</span></label>
               <label class="menu-toggle"><input type="checkbox" data-optional-group="ladder"><span data-extra-label="extraLadder">Ladder</span></label>
               <label class="menu-toggle"><input type="checkbox" data-optional-group="io-plc"><span data-extra-label="extraIoPlc">Входы / выходы ПЛК</span></label>
+              <label class="menu-toggle"><input type="checkbox" data-optional-group="installations"><span data-extra-label="extraInstallations">Инсталляции</span></label>
             </div>
           </div></details>
           <details class="menu-group language-menu"><summary>Язык</summary><div class="menu-popover">

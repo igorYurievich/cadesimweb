@@ -32,7 +32,7 @@ export const HIDDEN_OPTIONAL_GROUPS: readonly GroupKey[] = [
 ];
 export const PALETTE_VIEW_KEY = 'cadesimu-palette-view:v1';
 
-export const OPTIONAL_PALETTE_GROUPS = ['grafcet', 'ladder', 'logic', 'realistic-2d', 'realistic-3d', 'wiring', 'pneumatics', 'io-plc', 'power-electronics', 'electronic-relays', 'sensors', 'mechanisms'] as const satisfies readonly GroupKey[];
+export const OPTIONAL_PALETTE_GROUPS = ['grafcet', 'ladder', 'logic', 'realistic-2d', 'realistic-3d', 'wiring', 'pneumatics', 'io-plc', 'power-electronics', 'electronic-relays', 'sensors', 'mechanisms', 'installations'] as const satisfies readonly GroupKey[];
 
 export const CAD_GRID_STEP = 3;
 
@@ -74,7 +74,7 @@ export const POTENTIAL_ORDER: readonly PotentialLabel[] = ['L1', 'L2', 'L3', 'N'
 
 export const latchedTypes = new Set([2003, 2004, 2005, 2007, 5000, 5001, 5002, 5003, 5004, 5005, 5006, 5007, 5008, 5009, 6000, 6001, 6002, 6003, 6004, 6005, 6006, 6007, 6008, 6009, 6010, 6011, 6012, 6015,
   6017, 60171, 60172, 6018, 60182, 6016, 8110,
-  8120, 8121, 8122]);
+  8120, 8121, 8122, 6019, 6020, 60191, 60201]);
 
 export const armedByDefaultTypes = new Set([5000, 5001, 5002, 5003, 5004, 6007, 6016]);
 

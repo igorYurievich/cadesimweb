@@ -1,5 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { readGridVisible, readInterfaceLanguage, readTheme, readUniformWireColors } from '@ui/settings';
+import {
+  readGridVisible, readInterfaceLanguage, readOptionalPaletteGroups, readTheme, readUniformWireColors, writeOptionalPaletteGroups,
+} from '@ui/settings';
 
 const values = new Map<string, string>();
 const storage: Storage = {
@@ -38,5 +40,15 @@ describe('persisted UI settings', () => {
     values.set('cadesimu-wire-colors', 'phase');
     expect(readGridVisible()).toBe(false);
     expect(readUniformWireColors()).toBe(false);
+  });
+
+  it('shows «Instalaciones» by default, also for saved selections, until the user turns it off', () => {
+    expect(readOptionalPaletteGroups()).toEqual(['installations']);
+    values.set('cadesimu-visible-optional-groups:v1', JSON.stringify(['grafcet']));
+    expect(readOptionalPaletteGroups()).toEqual(['grafcet', 'installations']);
+    writeOptionalPaletteGroups(new Set(['grafcet']));
+    expect(readOptionalPaletteGroups()).toEqual(['grafcet']);
+    writeOptionalPaletteGroups(new Set(['grafcet', 'installations']));
+    expect(readOptionalPaletteGroups()).toEqual(['grafcet', 'installations']);
   });
 });

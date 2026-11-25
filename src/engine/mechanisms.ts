@@ -15,7 +15,7 @@ export const MECHANISM_BEHAVIORS: readonly TypeBehavior[] = [
   { typeCode: MECH_SWITCH, links: [sw([0, 1], 'toggled')] },
   // L 1 2: покой L–1, включён L–2.
   { typeCode: MECH_TWO_WAY, links: [sw([0, 1], 'toggled', true), sw([0, 2], 'toggled')] },
-  // 1 2 / 3 4: покой прямо 1–3 и 2–4, включён накрест 1–4 и 2–3.
+  // 1 3 / 2 4 (метки по порядку клемм: 1, 3, 2, 4): покой прямо 1–2 и 3–4, включён накрест 1–4 и 3–2.
   {
     typeCode: MECH_CROSS,
     links: [sw([0, 2], 'toggled', true), sw([1, 3], 'toggled', true), sw([0, 3], 'toggled'), sw([1, 2], 'toggled')],

@@ -78,3 +78,17 @@ export const MECHANISM_CAD_TYPES: readonly CadTypeInfo[] = MECHANISM_TYPES.map((
     commandIds: [MECHANISM_COMMANDS[code]!], confidence: 'probable', note: spec.note,
   };
 });
+
+// ── Вид сзади (только веб) ────────────────────────────────────────────────────────────────────────────
+// У выключателя, проходного, перекрёстного и кнопки в свойствах можно выбрать «Вид сзади»: задняя сторона
+// механизма со схемным символом и отверстиями клемм. Хранится как params.view2d = 'back' рядом с
+// «простым видом» (realistic-2d-types.ts): только в схеме веб-версии, в .cad не попадает.
+
+export const MECHANISM_BACK_VIEW_TYPES = [MECH_SWITCH, MECH_TWO_WAY, MECH_CROSS, MECH_PUSH] as const;
+export const BACK_VIEW = 'back';
+
+export const hasBackView = (typeCode: number): boolean =>
+  (MECHANISM_BACK_VIEW_TYPES as readonly number[]).includes(typeCode);
+
+export const isBackView = (element: { typeCode: number; params: Record<string, unknown> }): boolean =>
+  hasBackView(element.typeCode) && element.params.view2d === BACK_VIEW;

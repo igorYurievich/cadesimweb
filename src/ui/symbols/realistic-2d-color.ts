@@ -10,6 +10,8 @@ import { drawPolesColor } from "./realistic-2d-color-poles";
 import { drawPilotColor } from "./realistic-2d-pilot";
 import { drawThermalRelayColor } from "./realistic-2d-color-thermal";
 import { drawAuxBlockColor } from "./realistic-2d-color-aux";
+import { drawSwitchColor } from "./realistic-2d-switch";
+import { drawTerminalColor } from "./realistic-2d-terminal";
 
 // ── Цветной вид контактора 7018 и дисюнтора 6015 ────────────────────────────
 // По фото аппаратов: тёмные клеммные колодки сверху и снизу, светлый корпус, зелёная полоса.
@@ -96,6 +98,7 @@ export function drawColor2d(g: SVGGElement, element: SchemaElement, rotation: nu
   else if (element.typeCode === PILOT_2D) drawPilotColor(g, element);
   else if (element.typeCode === THERMAL_RELAY_2D) drawThermalRelayColor(g, element, rotation);
   else if (element.typeCode === AUX_BLOCK_2D) drawAuxBlockColor(g, element, rotation);
-  else return drawPolesColor(g, element, rotation);
+  else return drawPolesColor(g, element, rotation) || drawSwitchColor(g, element, rotation)
+    || drawTerminalColor(g, element, rotation);
   return true;
 }

@@ -9,6 +9,8 @@
  */
 
 import type { CadTypeInfo } from './cad-types';
+import { SWITCH_2D_CODES, SWITCH_2D_LABELS, SWITCH_2D_ORIGIN_DX, SWITCH_2D_TYPES } from './switch-2d';
+import { TERMINAL_2D, TERMINAL_2D_LABELS, TERMINAL_2D_ORIGIN_DX, TERMINAL_2D_TYPE } from './terminal-2d';
 
 export const PUSHBUTTON_2D = 8100;
 export const CONTACTOR_2D = 7018;
@@ -48,6 +50,8 @@ export const AUX_BLOCK_LABELS: readonly string[] = ['53', '54', '61', '62', '71'
 /** Метки клемм для типов, у которых в записи нет флагов (клеммы постоянные). */
 export const FIXED_2D_LABELS: Readonly<Record<number, readonly string[]>> = {
   [DELAY_BLOCK_2D.ON]: DELAY_BLOCK_LABELS, [DELAY_BLOCK_2D.OFF]: DELAY_BLOCK_LABELS, [AUX_BLOCK_2D]: AUX_BLOCK_LABELS,
+  ...SWITCH_2D_LABELS, // Interruptor и Seccionador 2D (switch-2d.ts)
+  [TERMINAL_2D]: TERMINAL_2D_LABELS, // клемма 2D (terminal-2d.ts)
 };
 
 /**
@@ -63,7 +67,7 @@ export const MOTOR_2D_FILE_PARAM = 1;
  * «Vista simple» в свойствах пишет params.view2d = 'simple' (только в схеме веб-версии, в .cad не попадает).
  */
 export const COLOR_VIEW_TYPES: ReadonlySet<number> = new Set([
-  8100, 8101, 7018, 6015, 6016, 7019, 7020, 7021,
+  8100, 8101, 7018, 6015, 6016, 7019, 7020, 7021, ...SWITCH_2D_CODES, TERMINAL_2D,
   ...Object.values(AUTOMATIC_2D), ...Object.values(DIFFERENTIAL_2D),
   10202, 10214, // LOGO и DM8 (plc-types.ts)
   10220, // блок питания 24 V на DIN-рейку (plc-power-supply.ts)
@@ -119,6 +123,8 @@ const delayBlockType = (code: number, label: string, commandId: number, note: st
 });
 
 const TYPES_FROM_TERMINAL_1: readonly CadTypeInfo[] = [
+  ...SWITCH_2D_TYPES,
+  TERMINAL_2D_TYPE,
   {
     code: 10000, family: 'motor', label: 'Motor trifásico 2D (-M)', layout: { kind: 'rows', rows: 1, pitchX: 6 },
     terminalCount: 4, commandIds: [33311], confidence: 'probable',
@@ -234,6 +240,8 @@ const TYPES_FROM_TERMINAL_1: readonly CadTypeInfo[] = [
 export const REALISTIC_2D_ORIGIN_DX: Readonly<Record<number, number>> = {
   8100: 6, 7018: 6, 6015: 6, 6016: 6, 8101: 3,
   6017: 3, 60171: 3, 60172: 3, 6018: 3, 60182: 3, 7020: 3, 7021: 3, 7019: 3,
+  ...SWITCH_2D_ORIGIN_DX, // Interruptor и Seccionador 2D (switch-2d.ts)
+  [TERMINAL_2D]: TERMINAL_2D_ORIGIN_DX, // клемма 2D (terminal-2d.ts)
 };
 
 const shiftType = (info: CadTypeInfo): CadTypeInfo => {

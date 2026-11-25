@@ -3,6 +3,7 @@ import { s7MainsSupplied } from '@engine/s7-1200';
 import type { EngineState } from '@engine/types';
 import type { AppContext } from '../context';
 import type { SimulationDependencies, SimulationState } from './types';
+import { liftFaultMessages, liftWarnings } from './lift-diagnostics';
 
 export function formatSimulationDiagnostics(
   ctx: AppContext,
@@ -32,7 +33,7 @@ export function formatSimulationDiagnostics(
     const pairs = [...shortPairs].sort((a, b) => a.localeCompare(b)).join('; ');
     return [...tripMessages, deps.uiText().shortCircuitSummary.replace('{pairs}', pairs)];
   }
-  const messages: string[] = [...tripMessages];
+  const messages: string[] = [...tripMessages, ...liftFaultMessages(ctx.schema, result, deps.uiText())];
   if (earthPairs.size) {
     messages.push(deps.uiText().earthLeakSummary.replace('{pairs}', [...earthPairs].sort().join('; ')));
   }
@@ -61,5 +62,6 @@ export function formatSimulationWarnings(
     ...logoMainsSupplied(ctx.schema, result.terminalNet, result.nets).map(named(text.logoMainsWarning)),
     ...logoLowVoltageSupplied(ctx.schema, result.terminalNet, result.nets).map(named(text.logoLowVoltageWarning)),
     ...s7MainsSupplied(ctx.schema, result.terminalNet, result.nets).map(named(text.s7MainsWarning)),
+    ...liftWarnings(ctx.schema, result, text),
   ];
 }

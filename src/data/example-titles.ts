@@ -77,6 +77,10 @@ export const EXAMPLE_TITLE_TRANSLATIONS: Readonly<Record<string, Titles>> = {
     'Single-phase frequency inverter 2D (230 V input)',
     'Inverter monofase 2D (ingresso 230 V)', 'Однофазный преобразователь частоты 2D (вход 230 В)',
     'Variateur de fréquence monophasé 2D (entrée 230 V)', 'مغيّر تردد أحادي الطور 2D (دخل 230 V)'),
+  'Ascensor_5_plantas_con_variador.cad': t('Ascensor de 5 plantas con variador (10–25 Hz)',
+    'Five-floor elevator with frequency inverter (10–25 Hz)',
+    'Ascensore a 5 piani con inverter (10–25 Hz)', 'Лифт на 5 этажей с преобразователем частоты (10–25 Гц)',
+    'Ascenseur 5 étages avec variateur (10–25 Hz)', 'مصعد بخمسة طوابق مع مغيّر تردد (10–25 Hz)'),
 };
 
 /** Папки окна «Примеры» (кроме папки автора: её название в INTERFACE_TEXT.examplesAuthor). */

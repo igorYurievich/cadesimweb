@@ -5,7 +5,9 @@ import { LOGO_DEFAULT_IP, LOGO_TYPE, isPlcFixedType } from './plc-types';
 import { writePlcBlockRecord } from './plc-blocks';
 import { DM8_DEFAULT_TAIL, LOGO_DM8, logoSupply, plcAddresses, type ModuleAddress } from './plc-modules';
 import { buttonColorValue, isPushbutton2d } from './pushbutton-2d';
+import { isTerminal2d, terminalColorValue } from './terminal-2d';
 import { STAIR_TIMER_2D, stairTimerFileParam } from './stair-timer';
+import { LIFT_TYPE, liftTail } from './lift';
 import { CAD_NUM_FIELDS, CAD_TEXT_FIELDS, flagCountOf, serializeCad } from './cad-format';
 import type { CadFooter, CadRecord } from './cad-format';
 import type { Schema, SchemaElement, WireSegment } from './types';
@@ -94,10 +96,13 @@ function elementRecords(
   record.nums[17 + o] = element.rotation;
   // Мотор 2D — обычный 1000/1001 с nums[16] = 1 (realistic-2d-types.ts).
   if (element.params.motor2d === true) record.nums[16 + o] = MOTOR_2D_FILE_PARAM;
-  // Цвет кнопки 2D — nums[16] (pushbutton-2d.ts).
+  // Цвет кнопки и клеммы 2D — nums[16] (pushbutton-2d.ts, terminal-2d.ts).
   if (isPushbutton2d(element.typeCode)) record.nums[16 + o] = buttonColorValue(element);
+  if (isTerminal2d(element.typeCode)) record.nums[16 + o] = terminalColorValue(element);
   // Минутник (только веб): выдержка и подключение кнопок — nums[16] (stair-timer.ts).
   if (element.typeCode === STAIR_TIMER_2D) record.nums[16 + o] = stairTimerFileParam(element);
+  // Лифт (только веб): имена встроенных элементов — в хвосте записи через «/» (lift.ts, §40 FORMATO).
+  if (element.typeCode === LIFT_TYPE) record.tail = liftTail(element);
   const continuations: CadRecord[] = (raw?.continuations ?? []).map((c) => ({
     id: c.id, type: c.type, texts: [...c.texts], nums: [...c.nums], ...(c.tail !== undefined ? { tail: c.tail } : {}),
   }));
@@ -128,8 +133,8 @@ function elementRecords(
     // Блоки с выдержкой 2D: флагов клемм нет, выдержка в texts[5] (cad-delay-blocks.ts).
     writeDelayBlockRecord(record, element, !raw);
     continuations.length = 0;
-  } else if (element.typeCode === AUX_BLOCK_2D || isPlcFixedType(element.typeCode)) {
-    // Блок контактов 2D, LOGO и Ladder: в записи образца ни флагов, ни меток — клеммы постоянные.
+  } else if (element.typeCode === AUX_BLOCK_2D || isTerminal2d(element.typeCode) || isPlcFixedType(element.typeCode)) {
+    // Блок контактов и клемма 2D, LOGO и Ladder: в записи образца ни флагов, ни меток — клеммы постоянные.
     record.nums.fill(0, 0, flagCountOf(record));
     for (let i = 2; i < record.texts.length; i += 1) record.texts[i] = '';
     // Блоки Ladder: подписи входов и параметры в текстах, флаг nums[0] у счётчика,
