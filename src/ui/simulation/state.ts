@@ -21,6 +21,8 @@ export function createSimulationState(): SimulationState {
     wireGroupOf: new Map<number, number>(),
     wireTerminalKeys: new Map(),
     ccTrips: new Map(),
+    evaluatedAt: undefined,
+    quiet: undefined,
   };
 }
 

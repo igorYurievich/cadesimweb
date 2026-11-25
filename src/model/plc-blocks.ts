@@ -33,7 +33,9 @@ export const PLC_BLOCK = {
 
 export const PLC_TIMER_TYPES: ReadonlySet<number> = new Set([10066, 10081, 10067, 10068, 10069]);
 export const PLC_COUNTER_TYPES: ReadonlySet<number> = new Set([10063, 10075]);
-export const isPlcBlock = (typeCode: number): boolean => (Object.values(PLC_BLOCK) as number[]).includes(typeCode);
+// Множество, а не Object.values на каждый вызов: проверка идёт для каждого элемента в каждом кадре.
+const PLC_BLOCK_CODES: ReadonlySet<number> = new Set(Object.values(PLC_BLOCK));
+export const isPlcBlock = (typeCode: number): boolean => PLC_BLOCK_CODES.has(typeCode);
 
 interface BlockSpec { inputs: number; output: number; h: number; texts: (e: SchemaElement) => string[] }
 

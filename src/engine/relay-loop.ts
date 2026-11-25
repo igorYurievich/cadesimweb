@@ -3,6 +3,8 @@
 import type { Schema } from '../model/types';
 import { drivesNamedRelay } from './sensors';
 import { solvePass } from './relay-pass';
+import { cachedNets } from './topology';
+import { jsonEqual } from './json-equal';
 import type { RelayPassResult } from './relay-pass';
 import type { Fault, TimerState, UserInputs } from './types';
 import { advanceTimers } from './timers';
@@ -69,6 +71,8 @@ export function solveRelayLoop(
   for (const name of names) coils[name] = initialCoils[name] ?? false;
   beginPlcScan(schema, names, initialCoils, coils);
 
+  // Граф цепей один на весь кадр: геометрия внутри цикла не меняется.
+  const graph = cachedNets(schema);
   let pass: RelayPassResult | undefined;
   let iterations = 0;
   let stable = false;
@@ -80,7 +84,7 @@ export function solveRelayLoop(
   const settleRelays = (): boolean => {
     while (iterations < limit) {
       // Датчики лифта срабатывают по положению кабины (lift.ts), как зажатые мышью.
-      pass = solvePass(schema, withLiftSensors(schema, inputs, timers), coils, timers);
+      pass = solvePass(schema, withLiftSensors(schema, inputs, timers), coils, timers, graph);
       iterations += 1;
       const nextName = names.find((name) => (pass!.coils[name] ?? false) !== (coils[name] ?? false));
       if (nextName === undefined) {
@@ -108,13 +112,13 @@ export function solveRelayLoop(
     const blockTimers = advanceLifts(schema, pass, inputs, time, vfdTimers);
     // GRAFCET: переходы по устойчивому состоянию схемы, раз за кадр (grafcet.ts).
     const nextTimers = advanceGrafcet(schema, pass.terminalNet, coils, inputs, time, blockTimers);
-    const timersChanged = JSON.stringify(nextTimers) !== JSON.stringify(timers);
+    const timersChanged = !jsonEqual(nextTimers, timers);
     timers = nextTimers;
     // Recalculate timed contacts after elapsed time changes, but advance timers
     // only once per simulation frame so the handoff is resolved atomically.
     if (timersChanged) stable = settleRelays();
   }
-  pass ??= solvePass(schema, withLiftSensors(schema, inputs, timers), coils, timers);
+  pass ??= solvePass(schema, withLiftSensors(schema, inputs, timers), coils, timers, graph);
 
   if (!stable) {
     const fault: Fault = {

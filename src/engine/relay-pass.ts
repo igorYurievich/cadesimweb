@@ -2,7 +2,8 @@
 
 import type { Schema } from '../model/types';
 import { DIN_PSU_TYPE } from '../model/plc-power-supply';
-import { buildNets } from './graph';
+import type { NetsResult } from './graph';
+import { cachedNets } from './topology';
 import { computeSwitching } from './switching';
 import { findSources } from './sources';
 import { propagatePotentials } from './propagate';
@@ -99,8 +100,8 @@ export function solvePass(
   inputs: UserInputs,
   coils: Readonly<Record<string, boolean>> = {},
   timers: Readonly<Record<number, TimerState>> = {},
+  graph: NetsResult = cachedNets(schema),
 ): RelayPassResult {
-  const graph = buildNets(schema);
   const thermal = resolveThermalState(schema, inputs);
   const switching = computeSwitching(schema, inputs, coils, thermal, timers);
   const sourceResult = findSources(schema, graph.terminalNet);

@@ -16,6 +16,8 @@ import { s7OutputActive } from './s7-1200';
 import { vfdRelayActive } from './vfd';
 import { isVfdControl } from '../model/vfd';
 import { isPhotoReceiver, receiverBeamBlocked } from './photo-beam';
+import { buildNameIndex, normalizedName, sameNamed } from './name-index';
+import type { NameIndex } from './name-index';
 
 export interface ClosedEdge {
   a: TerminalRef;
@@ -92,12 +94,19 @@ export const isMomentaryManual = (type: number): boolean =>
   (type >= 8000 && type <= 8007) || (type >= 8012 && type <= 8015) || type === 8023;
 
 /** Сработало ли мгновенное вспомогательное реле от одноимённой кнопки/привода, а не от катушки. */
-export function auxContactActuatorActive(element: SchemaElement, schema: Schema, inputs: UserInputs): boolean {
+export function auxContactActuatorActive(
+  element: SchemaElement,
+  schema: Schema,
+  inputs: UserInputs,
+  names?: NameIndex,
+): boolean {
   if (element.typeCode < 7000 || element.typeCode > 7003) return false;
-  const name = element.name.trim().toLocaleUpperCase();
+  const name = normalizedName(element.name);
   if (!name) return false;
-  return schema.elements.some((candidate) => {
-    if (candidate.id === element.id || candidate.name.trim().toLocaleUpperCase() !== name) return false;
+  // Без готового индекса (вызов из интерфейса для одного контакта) хватает одного прохода по схеме.
+  const twins = names ? sameNamed(names, name) : schema.elements.filter((other) => normalizedName(other.name) === name);
+  return twins.some((candidate) => {
+    if (candidate.id === element.id) return false;
     const type = candidate.typeCode;
     const momentary = isMomentaryManual(type);
     const maintained = type >= 8008 && type <= 8011;
@@ -106,20 +115,29 @@ export function auxContactActuatorActive(element: SchemaElement, schema: Schema,
   });
 }
 
-function controlActive(element: SchemaElement, link: BehaviorLink, inputs: UserInputs, coils: Readonly<Record<string, boolean>>, thermal: ThermalState, schema: Schema, timers: Readonly<Record<number, TimerState>>): boolean {
-  const deviceName = element.name.trim().toLocaleUpperCase();
+function controlActive(
+  element: SchemaElement,
+  link: BehaviorLink,
+  inputs: UserInputs,
+  coils: Readonly<Record<string, boolean>>,
+  thermal: ThermalState,
+  schema: Schema,
+  timers: Readonly<Record<number, TimerState>>,
+  names: NameIndex,
+): boolean {
+  // Кандидаты только с тем же обозначением (name-index.ts), а не вся схема.
+  const twins = sameNamed(names, normalizedName(element.name));
   const sameNameManualControl = (candidate: SchemaElement): boolean => {
     const type = candidate.typeCode;
-    return deviceName !== '' && candidate.id !== element.id
-      && candidate.name.trim().toLocaleUpperCase() === deviceName
+    return candidate.id !== element.id
       && ((type >= 8000 && type <= 8015) || (type >= 8020 && type <= 8023));
   };
-  const sameNameMomentaryPressed = (): boolean => schema.elements.some((candidate) => sameNameManualControl(candidate)
+  const sameNameMomentaryPressed = (): boolean => twins.some((candidate) => sameNameManualControl(candidate)
     && isMomentaryManual(candidate.typeCode) && Boolean(inputs.pressed[candidate.id]));
-  const sameNameMaintainedOn = (): boolean => schema.elements.some((candidate) => sameNameManualControl(candidate)
+  const sameNameMaintainedOn = (): boolean => twins.some((candidate) => sameNameManualControl(candidate)
     && candidate.typeCode >= 8008 && candidate.typeCode <= 8011
     && Boolean(inputs.toggled[candidate.id]));
-  const sameNamePositionOn = (): boolean => schema.elements.some((candidate) => {
+  const sameNamePositionOn = (): boolean => twins.some((candidate) => {
     if (!sameNameManualControl(candidate)) return false;
     const spec = POSITION_SPECS[candidate.typeCode];
     return Boolean(spec && currentPosition(candidate.typeCode, inputs.positions?.[candidate.id]) !== spec.rest);
@@ -139,7 +157,8 @@ function controlActive(element: SchemaElement, link: BehaviorLink, inputs: UserI
       return Boolean(inputs.toggled[element.id] ?? link.defaultClosed ?? false)
         || (maintainedManual && (sameNameMomentaryPressed() || sameNameLatchedOn()));
     }
-    case 'coil-name': return auxContactActive(element, schema, coils, timers) || auxContactActuatorActive(element, schema, inputs);
+    case 'coil-name': return auxContactActive(element, schema, coils, timers)
+      || auxContactActuatorActive(element, schema, inputs, names);
     // thermal.tripped — ручной вход и тепловые реле, сработавшие кликом (resolveThermalState).
     case 'thermal': return (thermal.tripped[element.id] ?? false) || (element.name.trim() !== '' && thermal.trippedNames.has(element.name.trim().toLocaleUpperCase()));
     case 'position': {
@@ -158,9 +177,18 @@ function controlActive(element: SchemaElement, link: BehaviorLink, inputs: UserI
   }
 }
 
-function isClosed(element: SchemaElement, link: BehaviorLink, inputs: UserInputs, coils: Readonly<Record<string, boolean>>, thermal: ThermalState, schema: Schema, timers: Readonly<Record<number, TimerState>>): boolean {
+function isClosed(
+  element: SchemaElement,
+  link: BehaviorLink,
+  inputs: UserInputs,
+  coils: Readonly<Record<string, boolean>>,
+  thermal: ThermalState,
+  schema: Schema,
+  timers: Readonly<Record<number, TimerState>>,
+  names: NameIndex,
+): boolean {
   if (link.opensWhenTripped && (inputs.tripped[element.id] ?? false)) return false;
-  const active = controlActive(element, link, inputs, coils, thermal, schema, timers);
+  const active = controlActive(element, link, inputs, coils, thermal, schema, timers, names);
   return link.normallyClosed ? !active : active;
 }
 
@@ -176,6 +204,7 @@ export function computeSwitching(
   const edges: ClosedEdge[] = [];
   const transfers: PotentialTransfer[] = [];
   const warnings: string[] = [];
+  const names = buildNameIndex(schema);
 
   for (const element of schema.elements) {
     const behavior = getBehavior(element.typeCode);
@@ -192,7 +221,7 @@ export function computeSwitching(
           warnings.push(`invalid-terminal-index: элемент ${element.id}, тип ${element.typeCode}, индексы ${link.terminals.join('-')}`);
           continue;
         }
-        if (controlActive(element, link, inputs, coils, thermal, schema, timers)) {
+        if (controlActive(element, link, inputs, coils, thermal, schema, timers, names)) {
           transfers.push({ from: { element: element.id, index: from }, to: { element: element.id, index: to }, element: element.id });
         }
         continue;
@@ -206,7 +235,7 @@ export function computeSwitching(
         warnings.push(`invalid-terminal-index: элемент ${element.id}, тип ${element.typeCode}, индексы ${link.terminals.join('-')}`);
         continue;
       }
-      if (!isClosed(element, link, inputs, coils, thermal, schema, timers)) continue;
+      if (!isClosed(element, link, inputs, coils, thermal, schema, timers, names)) continue;
       anyClosed = true;
       edges.push({
         a: { element: element.id, index: a as number },

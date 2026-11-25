@@ -10,6 +10,7 @@ import {
 } from '../constants';
 import type { AppContext } from '../context';
 import type { SimulationDependencies, SimulationState } from './types';
+import { layerNode } from './layer-index';
 
 export function applyWireVisuals(
   ctx: AppContext,
@@ -21,14 +22,12 @@ export function applyWireVisuals(
   autotransformerCurrentGroups: Set<number>,
 ): void {
   for (const wire of ctx.schema.wires) {
-    const node = deps.wireLayer.querySelector<SVGElement>(`[data-wire-id="${wire.id}"]`);
+    const node = layerNode<SVGElement>(deps.wireLayer, 'data-wire-id', wire.id);
     if (!node) continue;
     if (state.mode === 'edit') {
       const color = WIRE_COLORS[wire.kind];
       applyWireNode(
-        deps.wireLayer,
         node,
-        wire.id,
         wire.kind === 'junction',
         wire.thickness,
         color,
@@ -49,7 +48,7 @@ export function applyWireVisuals(
       ? (deps.uniformWireColors() && PHASE_LABELS.includes(first) ? UNIFORM_LIVE_COLOR : POTENTIAL_COLORS[first])
       : idle;
     const color = ordered.length > 1 ? CONFLICT_COLOR : motorCurrent ? UNIFORM_LIVE_COLOR : liveColor;
-    applyWireNode(deps.wireLayer, node, wire.id, wire.kind === 'junction', wire.thickness, color, energized);
+    applyWireNode(node, wire.kind === 'junction', wire.thickness, color, energized);
     const message = ordered.length
       ? `Провод под напряжением: ${ordered.join(', ')}`
       : transformerCurrent
@@ -76,9 +75,7 @@ function collectPotentials(
 }
 
 function applyWireNode(
-  layer: SVGGElement,
   node: SVGElement,
-  wireId: number,
   junction: boolean,
   thickness: number,
   color: string,
@@ -86,7 +83,6 @@ function applyWireNode(
 ): void {
   node.classList.toggle('is-energized', energized);
   node.style.filter = '';
-  layer.querySelector(`[data-halo-for="${wireId}"]`)?.remove();
   if (junction) node.setAttribute('fill', color);
   else {
     const base = Math.max(1, thickness || 1) * 1.35;

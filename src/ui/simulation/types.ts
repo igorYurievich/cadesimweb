@@ -1,4 +1,5 @@
 import type { EngineMemory, EngineState, TerminalKey, UserInputs } from '@engine/types';
+import type { Schema, SchemaElement, WireSegment } from '@model/types';
 import type { AppContext } from '../context';
 import type { InterfaceText } from '../i18n';
 
@@ -21,6 +22,18 @@ export interface SimulationState {
   wireTerminalKeys: Map<number, Set<TerminalKey>>;
   /** Автоматы, выбитые коротким замыканием (опция «Opciones», engine/cc-trip.ts): id → пары КЗ. */
   ccTrips: Map<number, string[]>;
+  /** Время последнего рассчитанного кадра (quiet-skip.ts). */
+  evaluatedAt: number | undefined;
+  /** Снимок входов и схемы, пока схема в покое и кадры можно не пересчитывать (quiet-skip.ts). */
+  quiet: QuietSnapshot | undefined;
+}
+
+export interface QuietSnapshot {
+  schema: Schema;
+  elements: SchemaElement[];
+  wires: WireSegment[];
+  inputs: UserInputs;
+  breakersTrip: boolean;
 }
 
 export interface SimulationDependencies {

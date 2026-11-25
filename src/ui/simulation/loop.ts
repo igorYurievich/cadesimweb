@@ -6,6 +6,7 @@ import { startsOpen } from '../constants';
 import { formatSimulationDiagnostics } from './diagnostics';
 import { createSimInputs } from './state';
 import type { SimulationDependencies, SimulationState } from './types';
+import { hasTimeAnimation, noteEvaluatedFrame, skipQuietFrame } from './quiet-skip';
 
 export interface SimulationLoop {
   updateSimulationControls(): void;
@@ -36,7 +37,9 @@ export function createSimulationLoop(
     const elapsed = Math.min(0.25, Math.max(0, (timestamp - previous) / 1000));
     state.lastFrameTime = timestamp;
     state.time += elapsed * state.speed;
-    evaluateSimulation();
+    // В покое кадр не пересчитывается (quiet-skip.ts); моторы и мигание всё равно перерисовываются.
+    if (!skipQuietFrame(ctx, state)) evaluateSimulation();
+    else if (hasTimeAnimation(ctx, state)) applyVisuals();
     state.animationFrame = requestAnimationFrame(simulationTick);
   };
   const resume = (): void => {
@@ -116,6 +119,8 @@ function reset(
   state.inputs = createSimInputs(ctx);
   state.result = undefined;
   state.ccTrips.clear();
+  state.evaluatedAt = undefined;
+  state.quiet = undefined;
   updateControls();
   applyVisuals();
 }
@@ -153,7 +158,9 @@ function evaluate(
   }
   // Взведённый заново автомат больше не считается выбитым.
   for (const id of [...state.ccTrips.keys()]) if (state.inputs.toggled[id] !== false) state.ccTrips.delete(id);
+  const before = state.memory;
   state.memory = state.result.memory;
+  noteEvaluatedFrame(ctx, state, before);
   updateControls(ctx, deps, state);
   applyVisuals();
 }
