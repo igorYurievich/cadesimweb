@@ -4,6 +4,7 @@ import type { Point } from './viewport';
 import { CAD_GRID_STEP, SVG_NS } from './constants';
 import { cloneSchema } from './helpers';
 import { snapPointToGrid } from './viewport';
+import { currentText, fillText } from './i18n';
 
 export interface NodeToolSetup {
   layer: SVGGElement; active(): boolean; wireDrawing(): boolean;
@@ -73,16 +74,16 @@ export function setupNodeTool(ctx: AppContext, deps: NodeToolSetup) {
   };
   const placeNodeAt = (raw: Point): void => {
     const best = findNodePoint(raw);
-    if (!best) { deps.status.textContent = 'Здесь нет соединения: узел ставится там, где сходятся или пересекаются минимум два провода.'; return; }
+    if (!best) { deps.status.textContent = currentText().nodeNoJunction; return; }
     const { point } = best;
     if (hasJunctionAt(point)) {
-      deps.status.textContent = 'В этой точке узел уже стоит.'; return;
+      deps.status.textContent = currentText().nodeExists; return;
     }
     const before = cloneSchema(ctx.schema);
     const id = Math.max(0, ...ctx.schema.elements.map((element) => element.id), ...ctx.schema.wires.map((wire) => wire.id)) + 1;
     ctx.schema.wires.push({ id, typeCode: 4001, kind: 'junction', from: { ...point }, to: { ...point }, thickness: 0, dot: true });
     deps.commitSchema(before); deps.renderSchema();
-    deps.status.textContent = `Узел поставлен: соединено проводов — ${best.count}.`;
+    deps.status.textContent = fillText(currentText().nodePlaced, { count: best.count });
   };
   return { drawNodeCursor, placeNodeAt };
 }

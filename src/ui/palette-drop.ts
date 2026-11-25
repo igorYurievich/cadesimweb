@@ -5,6 +5,7 @@ import type { Selectable } from './constants';
 import { createPlacedElement, cloneSchema, selectionKey } from './helpers';
 import { screenToSheet } from './viewport';
 import { svgPoint } from './canvas-primitives';
+import { currentText, fillText } from './i18n';
 
 export interface PaletteDropSetup {
   svg: SVGSVGElement; viewSize(): Point; viewport(): Viewport; placementType(): number | undefined;
@@ -35,6 +36,6 @@ export function setupPaletteDrop(ctx: AppContext, deps: PaletteDropSetup): void 
     const item: Selectable = { kind: 'element', id: element.id };
     deps.selected.clear(); deps.selected.set(selectionKey(item), item);
     deps.commitSchema(before); deps.renderSchema();
-    deps.status.textContent = `Добавлен ${element.name}. Режим размещения продолжается; R — поворот, Esc — завершить.`;
+    deps.status.textContent = fillText(currentText().elementAddedContinue, { name: element.name });
   });
 }

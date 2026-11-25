@@ -6,7 +6,7 @@ import type { Fault, NetState, PotentialLabel, TerminalKey } from './types';
 import { terminalKey } from './types';
 
 /** Лампы: обычные пилоты и световые колонны, пилот 2D 8101. */
-const LAMP_TYPES: readonly number[] = [9008, 9009, 9010, 9011, 9012, 9013, 8101, 8125];
+const LAMP_TYPES: ReadonlySet<number> = new Set([9008, 9009, 9010, 9011, 9012, 9013, 8101, 8125]);
 
 export interface EnergizedResult {
   energized: boolean;
@@ -60,6 +60,8 @@ export function evaluateLoads(
 
   // Разные AC-потенциалы или оба полюса DC в одной сети означают проводящее КЗ.
   for (const net of nets) {
+    // КЗ и утечка требуют двух потенциалов в сети; у большинства сетей их нет.
+    if (net.potentials.length < 2) continue;
     const ac = AC_ORDER.filter((p) => net.potentials.includes(p));
     const dc = (['+', '-'] as const).filter((p) => net.potentials.includes(p));
     const pair = ac.length > 1 ? [ac[0], ac[1]] : dc.length > 1 ? [dc[0], dc[1]] : undefined;
@@ -85,7 +87,7 @@ export function evaluateLoads(
 
   for (const element of schema.elements) {
     const behavior = getBehavior(element.typeCode);
-    if (LAMP_TYPES.includes(element.typeCode)) lamps[element.id] = false;
+    if (LAMP_TYPES.has(element.typeCode)) lamps[element.id] = false;
     // Motor windings are modeled as three-phase terminals in step 5.6.
     if (element.typeCode === 1000) continue;
     for (const link of behavior.links) {
@@ -98,7 +100,7 @@ export function evaluateLoads(
       const b = netB === undefined ? undefined : byId.get(netB);
       if (!a || !b) continue;
       const result = isEnergized(a, b);
-      if (LAMP_TYPES.includes(element.typeCode)) lamps[element.id] = result.energized;
+      if (LAMP_TYPES.has(element.typeCode)) lamps[element.id] = result.energized;
       if (result.earthLeak) {
         const ids = [a.id, b.id].sort((x, y) => x - y);
         const phase = PHASES.find((p) => a.potentials.includes(p) || b.potentials.includes(p)) as PotentialLabel;

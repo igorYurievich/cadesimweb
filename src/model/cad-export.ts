@@ -251,26 +251,25 @@ function footerFor(schema: Schema): CadFooter {
   return footer;
 }
 
-/** CADe SIMU's printable frame starts inside the sheet area, unlike the web canvas. */
+/**
+ * Верхнее поле CADe_SIMU: у самого края листа старый редактор рисует рамку, и схема туда не должна заходить.
+ * Сдвигаем только вниз и только если схема (корпуса, клеммы, провода) поднялась выше поля; подписи не считаем,
+ * у файлов CADe_SIMU они бывают и выше. Поле 21 — самый высокий верх среди примеров и образцов, поэтому их
+ * координаты не меняются. Сдвиг кратен сетке 3, и повторное сохранение уже ничего не двигает.
+ */
+const LEGACY_TOP_MARGIN = 21;
+const GRID_STEP = 3;
+
 function legacyFramePlacement(schema: Schema): { offsetY: number } {
   let minY = Number.POSITIVE_INFINITY;
-  let maxY = Number.NEGATIVE_INFINITY;
-  const include = (y: number): void => { minY = Math.min(minY, y); maxY = Math.max(maxY, y); };
   for (const element of schema.elements) {
     if (element.typeCode === 20000) continue;
-    include(element.position.y);
-    include(element.position.y + element.size.h);
-    include(element.position.y + Math.min(0, element.labelOffset.y));
-    for (const terminal of element.terminals) include(element.position.y + terminal.offset.y);
+    minY = Math.min(minY, element.position.y);
+    for (const terminal of element.terminals) minY = Math.min(minY, element.position.y + terminal.offset.y);
   }
-  for (const wire of schema.wires) { include(wire.from.y); include(wire.to.y); }
-  if (!Number.isFinite(minY) || !Number.isFinite(maxY)) return { offsetY: 0 };
-
-  // The old editor reserves about 24 CAD units above and below its drawing frame.
-  // Give top labels a small clearance too; enlarge the page if that is needed.
-  const top = 30;
-  const offsetY = minY < top ? top - minY : maxY > schema.sheet.height - 24 ? schema.sheet.height - 24 - maxY : 0;
-  return { offsetY };
+  for (const wire of schema.wires) minY = Math.min(minY, wire.from.y, wire.to.y);
+  if (!Number.isFinite(minY) || minY >= LEGACY_TOP_MARGIN) return { offsetY: 0 };
+  return { offsetY: Math.ceil((LEGACY_TOP_MARGIN - minY) / GRID_STEP) * GRID_STEP };
 }
 
 /** Convert the editor model to .cad and verify it by importing the result back. */

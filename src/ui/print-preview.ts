@@ -1,5 +1,5 @@
 import type { AppContext } from './context';
-import type { ExportActions } from './export';
+import type { ExportCommands } from './export-lazy';
 import { fullSheet } from './helpers';
 
 // Предпросмотр печати (Файл → «Предпросмотр печати»): тот же лист, что уйдёт на принтер или в PDF
@@ -11,16 +11,16 @@ const PAPER: Readonly<Record<string, string>> = { '297x210': 'A4', '210x297': 'A
 
 const mm = (value: number): string => String(Math.round(value * 10) / 10).replace('.', ',');
 
-export function setupPrintPreview(ctx: AppContext, root: HTMLElement, actions: ExportActions): void {
+export function setupPrintPreview(ctx: AppContext, root: HTMLElement, actions: ExportCommands): void {
   const dialog = root.querySelector<HTMLDialogElement>('#print-preview-dialog');
   const page = dialog?.querySelector<HTMLDivElement>('#print-preview-page');
   const info = dialog?.querySelector<HTMLElement>('#print-preview-info');
   if (!dialog || !page || !info) return;
 
-  const open = (): void => {
+  const open = async (): Promise<void> => {
+    const svg = await actions.printSheetSvg(); // Кусок «экспорт» может ещё качаться.
     const { width, height: sheetHeight } = ctx.schema.sheet;
     const height = fullSheet(ctx.schema.sheet).height;
-    const svg = actions.printSheetSvg();
     svg.setAttribute('width', '100%');
     svg.setAttribute('height', '100%');
     page.replaceChildren(svg);
@@ -32,7 +32,7 @@ export function setupPrintPreview(ctx: AppContext, root: HTMLElement, actions: E
   };
 
   root.querySelector<HTMLElement>('.app-menu')?.addEventListener('click', (event) => {
-    if ((event.target as Element).closest('[data-command="print-preview"]')) open();
+    if ((event.target as Element).closest('[data-command="print-preview"]')) open().catch(() => undefined);
   });
   page.addEventListener('click', () => page.classList.toggle('is-zoomed'));
   dialog.querySelector<HTMLButtonElement>('#print-preview-print')?.addEventListener('click', () => {

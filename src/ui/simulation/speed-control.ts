@@ -1,4 +1,5 @@
 import type { SimulationController } from './controller';
+import { currentText } from '../i18n';
 
 export function setupSimulationSpeedControl(
   button: HTMLButtonElement,
@@ -8,7 +9,7 @@ export function setupSimulationSpeedControl(
   const updateSpeedButton = (): void => {
     const label = `${simulation.speed}×`;
     button.textContent = label;
-    button.setAttribute('aria-label', `Скорость симуляции: ${label}`);
+    button.setAttribute('aria-label', `${currentText().speed}: ${label}`);
   };
   button.addEventListener('click', () => {
     const currentIndex = speedLevels.indexOf(simulation.speed);

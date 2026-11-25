@@ -92,3 +92,6 @@ export function createPlacedElement(typeCode: number, position: Point, rotation:
 }
 
 export function cloneSchema(schema: Schema): Schema { return structuredClone(schema); }
+
+/** Текст ошибки для сообщения в строке состояния. */
+export function errorReason(error: unknown): string { return error instanceof Error ? error.message : String(error); }

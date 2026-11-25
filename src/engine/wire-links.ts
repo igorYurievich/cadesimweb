@@ -19,6 +19,7 @@
 import type { ElementId, Point, WireSegment } from '../model/types';
 import { samePoint } from '../model/geometry';
 import { UnionFind } from './union-find';
+import { SegmentGrid } from './segment-grid';
 
 /**
  * Правило Т-соединения. Если автор подтвердит, что в оригинале конец провода
@@ -74,7 +75,7 @@ function segmentIntersection(a: WireSegment, b: WireSegment): Point | undefined 
 }
 
 /** Оси, по которым провод непрерывно проходит через точку. */
-function throughAxesAt(point: Point, wires: readonly WireSegment[]): Point[] {
+function throughAxesAt(point: Point, wires: Iterable<WireSegment>): Point[] {
   const axes: Point[] = [];
   const rays: Point[] = [];
   const addAxis = (x: number, y: number): void => {
@@ -116,6 +117,10 @@ export function buildWireLinks(wires: readonly WireSegment[]): WireLinks {
     .map((p) => p.w);
   const n = order.length;
   const uf = new UnionFind(n);
+  // Пары проверяются только для отрезков из соседних клеток (segment-grid.ts): дальние не соединяются.
+  const grid = new SegmentGrid(order);
+  const nearby = order.map((_, i) => grid.near(i));
+  const wiresAt = (point: Point): WireSegment[] => grid.atPoint(point).map((i) => order[i] as WireSegment);
 
   const junctionPoints = new Set<string>();
   for (const w of order) if (isJunction(w)) junctionPoints.add(pointKey(w.from));
@@ -126,11 +131,12 @@ export function buildWireLinks(wires: readonly WireSegment[]): WireLinks {
   for (let i = 0; i < n; i += 1) {
     const a = order[i] as WireSegment;
     if (isJunction(a)) continue;
-    for (let j = i + 1; j < n; j += 1) {
+    for (const j of nearby[i] as number[]) {
+      if (j <= i) continue;
       const b = order[j] as WireSegment;
       if (isJunction(b)) continue;
       const point = segmentIntersection(a, b);
-      if (point && throughAxesAt(point, order).length > 1) crossingPoints.add(pointKey(point));
+      if (point && throughAxesAt(point, wiresAt(point)).length > 1) crossingPoints.add(pointKey(point));
     }
   }
 
@@ -161,7 +167,8 @@ export function buildWireLinks(wires: readonly WireSegment[]): WireLinks {
 
   for (let i = 0; i < n; i += 1) {
     const a = order[i] as WireSegment;
-    for (let j = i + 1; j < n; j += 1) {
+    for (const j of nearby[i] as number[]) {
+      if (j <= i) continue;
       const b = order[j] as WireSegment;
       if (isJunction(a) || isJunction(b)) {
         // Точка соединения: соединяет всё, что проходит через её координату.

@@ -8,8 +8,9 @@
 import { buildNets } from '@engine/graph';
 import { terminalKey } from '@engine/types';
 import { buildWireLinks, pointOnSegment } from '@engine/wire-links';
+import { SegmentGrid } from '@engine/segment-grid';
 import { terminalPosition } from '@model/geometry';
-import type { Point as SheetPoint, Schema } from '@model/types';
+import type { Point as SheetPoint, Schema, WireSegment } from '@model/types';
 import { SVG_NS } from './constants';
 import { svgPoint } from './canvas-primitives';
 import { screenToSheet } from './viewport';
@@ -31,6 +32,8 @@ export function traceWire(schema: Schema, wireId: number): WireTrace {
   const groupNet = new Map<number, number>();
   const terminalsOnGroup = new Map<number, { point: SheetPoint; label: string; net: number | undefined }[]>();
   const allTerminals: { point: SheetPoint; label: string; net: number | undefined }[] = [];
+  // Провода рядом с клеммой — из сетки, а не перебором всех проводов.
+  const grid = new SegmentGrid(schema.wires);
   for (const element of schema.elements) {
     if (element.typeCode === 20000) continue;
     element.terminals.forEach((terminal, index) => {
@@ -40,7 +43,8 @@ export function traceWire(schema: Schema, wireId: number): WireTrace {
       const name = element.name.trim();
       const entry = { point, label: name ? `${name}:${terminal.label}` : terminal.label || '?', net };
       allTerminals.push(entry);
-      for (const wire of schema.wires) {
+      for (const wireIndex of grid.atPoint(point)) {
+        const wire = schema.wires[wireIndex] as WireSegment;
         if (!pointOnSegment(point, wire.from, wire.to)) continue;
         const group = links.groupOf.get(wire.id);
         if (group === undefined) continue;

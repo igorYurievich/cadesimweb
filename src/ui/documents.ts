@@ -7,6 +7,7 @@ import { fitViewport } from './viewport';
 import { isDocumentDirty, markDocumentSaved } from './document-dirty';
 import { renderDocumentTabs } from './document-tab-bar';
 import type { Point, Viewport } from './viewport';
+import { currentText, fillText } from './i18n';
 
 export interface DocumentTab {
   id: string;
@@ -139,7 +140,7 @@ export function setupDocumentTabController(options: DocumentTabControllerOptions
     options.drawViewport();
     options.updateHistoryButtons();
     options.translateInterface();
-    options.status.textContent = `Открыта схема «${target.name}».`;
+    options.status.textContent = fillText(currentText().schemaOpened, { name: target.name });
     renderTabs();
   };
 
@@ -175,7 +176,7 @@ export function setupDocumentTabController(options: DocumentTabControllerOptions
     options.drawViewport();
     options.updateHistoryButtons();
     options.translateInterface();
-    options.status.textContent = 'Новая схема создана.';
+    options.status.textContent = currentText().newSchemaCreated;
     options.persistSchemaNow();
     renderTabs();
   };
@@ -238,7 +239,7 @@ export function createDocumentState(
     viewport: tab.id === saved.activeId
       ? viewport
       : fitViewport(fullSheet(tab.schema.sheet), { width: viewSize.x, height: viewSize.y }),
-  })) ?? [{ id: crypto.randomUUID(), name: schema.sheet.fileName || 'Новая схема', schema, history, viewport }];
+  })) ?? [{ id: crypto.randomUUID(), name: schema.sheet.fileName || currentText().new, schema, history, viewport }];
   // Без сохранённого отпечатка считаем вкладку сохранённой.
   for (const tab of documents) if (tab.savedHash === undefined) markDocumentSaved(tab);
   return { documents, activeDocumentId: saved?.activeId ?? documents[0]!.id };

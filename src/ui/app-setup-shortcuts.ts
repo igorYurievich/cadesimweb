@@ -5,6 +5,7 @@ import { resizeTexts } from './text-tool';
 import type { AppSetupBase } from './app-setup-base';
 import type { AppSetupEditor } from './app-setup-editor';
 import type { AppSetupCommands } from './app-setup-commands';
+import { currentText } from './i18n';
 
 function undoAction(state: AppSetupBase, editor: AppSetupEditor, redo: boolean): void {
   if (redo) {
@@ -29,7 +30,7 @@ function cancelPlacement(state: AppSetupBase): void {
   state.renderPalette();
   if (state.placeTypeSelect) state.placeTypeSelect.value = '';
   state.elements.svg.classList.remove('is-placing');
-  state.elements.status.textContent = 'Режим размещения завершён.';
+  state.elements.status.textContent = currentText().placementEnded;
 }
 
 function cancelWireDrawing(state: AppSetupBase, editor: AppSetupEditor): void {

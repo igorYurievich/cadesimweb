@@ -11,6 +11,7 @@ import {
 import type { AppContext } from '../context';
 import type { SimulationDependencies, SimulationState } from './types';
 import { layerNode } from './layer-index';
+import { currentText, fillText } from '../i18n';
 
 export function applyWireVisuals(
   ctx: AppContext,
@@ -33,7 +34,7 @@ export function applyWireVisuals(
         color,
         false,
       );
-      node.setAttribute('aria-label', 'Провод');
+      node.setAttribute('aria-label', currentText().wire);
       continue;
     }
     const group = state.wireGroupOf.get(wire.id);
@@ -49,13 +50,14 @@ export function applyWireVisuals(
       : idle;
     const color = ordered.length > 1 ? CONFLICT_COLOR : motorCurrent ? UNIFORM_LIVE_COLOR : liveColor;
     applyWireNode(node, wire.kind === 'junction', wire.thickness, color, energized);
+    const t = currentText();
     const message = ordered.length
-      ? `Провод под напряжением: ${ordered.join(', ')}`
+      ? fillText(t.wireLive, { potentials: ordered.join(', ') })
       : transformerCurrent
-        ? 'Провод с током через автотрансформатор'
+        ? t.wireAutotransformer
         : motorCurrent
-          ? 'Провод с током двигателя (звезда / цепь ротора)'
-          : 'Провод без потенциала';
+          ? t.wireMotorCurrent
+          : t.wireDead;
     node.setAttribute('aria-label', message);
   }
 }

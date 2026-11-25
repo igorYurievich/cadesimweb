@@ -3,10 +3,10 @@ import { renderWireButton } from './wire-button';
 import type { GroupKey } from '@model/catalog';
 import type { Schema } from '@model/types';
 import { countVerifiedCatalogComponents } from '@model/catalog-verification';
-import { INTERFACE_TEXT } from './i18n';
+import type { InterfaceText } from './i18n';
 
 export interface InterfaceTranslationSetup {
-  root: HTMLElement; uiText(): typeof INTERFACE_TEXT.ru; visibleOptionalGroups: Set<GroupKey>;
+  root: HTMLElement; uiText(): InterfaceText; visibleOptionalGroups: Set<GroupKey>;
   wireDrawing(): boolean; simulationMode(): 'edit' | 'run'; speedButton: HTMLButtonElement;
   gridVisible(): boolean; applyPropertiesPanel(): void; updateWireColorsCommand(): void;
   paletteSearch: HTMLInputElement; paletteLanguage: HTMLSelectElement; paletteLang(): string;
@@ -19,8 +19,6 @@ export function setupInterfaceTranslation(deps: InterfaceTranslationSetup): () =
     const t = deps.uiText();
     const language = deps.paletteLang();
     deps.root.lang = language;
-    // Arabic strings keep their natural bidirectional text rendering, while the app layout stays LTR.
-    deps.root.dir = 'ltr';
     const set = (selector: string, value: string): void => { const el = deps.root.querySelector<HTMLElement>(selector); if (el) el.textContent = value; };
     const setButton = (selector: string, value: string): void => {
       const el = deps.root.querySelector<HTMLButtonElement>(selector);
@@ -56,7 +54,7 @@ export function setupInterfaceTranslation(deps: InterfaceTranslationSetup): () =
     for (const input of [...deps.root.querySelectorAll<HTMLInputElement>('[data-optional-group]')]) {
       const key = input.dataset.optionalGroup as GroupKey;
       input.checked = deps.visibleOptionalGroups.has(key);
-      const labelKey = extraLabelKeys[key] as keyof typeof INTERFACE_TEXT.ru | undefined;
+      const labelKey = extraLabelKeys[key] as keyof InterfaceText | undefined;
       const label = input.parentElement?.querySelector<HTMLElement>('[data-extra-label]');
       if (label && labelKey) label.textContent = t[labelKey]!;
     }
@@ -111,6 +109,11 @@ export function setupInterfaceTranslation(deps: InterfaceTranslationSetup): () =
     deps.root.querySelector<HTMLElement>('.component-palette')?.setAttribute('aria-label', t.elements);
     deps.root.querySelector<HTMLElement>('.properties-panel')?.setAttribute('aria-label', t.properties);
     deps.root.querySelector<SVGSVGElement>('.viewport-svg')?.setAttribute('aria-label', t.schematic);
+    deps.root.querySelector<HTMLElement>('.viewport-stage')?.setAttribute('aria-label', t.schematic);
+    deps.root.querySelector<HTMLElement>('.app-menu')?.setAttribute('aria-label', t.mainMenu);
+    deps.root.querySelector<HTMLElement>('#document-tabs')?.setAttribute('aria-label', t.openDocuments);
+    deps.root.querySelector<HTMLElement>('#place-type')?.setAttribute('aria-label', t.place);
+    deps.root.querySelector<HTMLElement>('#cursor-coords')?.setAttribute('title', t.cursorCoords);
     const theme = deps.root.querySelector<HTMLButtonElement>('#theme-command');
     if (theme) theme.textContent = deps.root.dataset.theme === 'dark' ? t.themeLight : t.themeDark;
     updateFullscreenButton(deps.root, t);
@@ -141,6 +144,7 @@ export function setupInterfaceTranslation(deps: InterfaceTranslationSetup): () =
         ['#shortcut-cursor-pan', t.shortcutCursorPan], ['#shortcut-panning', t.shortcutPanning], ['#shortcut-zoom', t.shortcutZoom], ['#shortcut-fit', t.shortcutFit],
       ];
       for (const [selector, label] of shortcutLabels) set(selector, label);
+      set('#shortcut-drag', t.shortcutDrag);
     }
     const componentGuide = deps.root.querySelector<HTMLDialogElement>('#component-guide-dialog'); if (componentGuide) {
       set('#component-guide-title', t.componentGuideTitle);
@@ -168,6 +172,8 @@ export function setupInterfaceTranslation(deps: InterfaceTranslationSetup): () =
       else if (button.classList.contains('examples-window-close')) { button.textContent = '×'; button.setAttribute('aria-label', t.close); }
       else button.textContent = t.close;
     }
+    set('#unsaved-close-title', t.unsavedTitle); set('[data-close-choice="save"]', t.unsavedSave);
+    set('[data-close-choice="discard"]', t.unsavedDiscard); set('[data-close-choice="cancel"]', t.cancel);
     set('#beta-title', t.betaTitle); set('#beta-text', t.betaText); set('#beta-ok', t.betaOk);
     set('#simulate-overload', t.overload); set('#reset-simulation-inputs', t.reset);
     for (const option of [...deps.root.querySelectorAll<HTMLOptionElement>('#palette-language option')]) option.selected = option.value === deps.paletteLang();

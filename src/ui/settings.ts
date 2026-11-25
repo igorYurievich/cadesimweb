@@ -4,6 +4,7 @@ import {
   WIRE_COLOR_MODE_KEY,
 } from './constants';
 import type { Theme } from './constants';
+import type { InterfaceText } from './i18n';
 
 /** Доп. категории, включённые по умолчанию; в OPTIONAL_GROUP_OFF_KEY — те из них, что пользователь выключил сам. */
 const DEFAULT_ON_OPTIONAL_GROUPS: readonly GroupKey[] = ['installations'];
@@ -35,12 +36,13 @@ export interface SettingsCommands {
 export function createSettingsCommands(
   root: HTMLElement,
   settings: AppSettings,
-  uiText: () => { wireColorsUniform: string; wireColorsPerPhase: string },
+  uiText: () => Pick<InterfaceText,
+    'wireColorsUniform' | 'wireColorsPerPhase' | 'themeLight' | 'themeDark' | 'gridHide' | 'gridShow'>,
   applySimulationVisuals: () => void,
 ): SettingsCommands {
   const themeCommand = root.querySelector<HTMLButtonElement>('#theme-command');
   const updateThemeCommand = (): void => {
-    if (themeCommand) themeCommand.textContent = settings.theme === 'dark' ? 'Светлая тема' : 'Тёмная тема';
+    if (themeCommand) themeCommand.textContent = settings.theme === 'dark' ? uiText().themeLight : uiText().themeDark;
   };
   updateThemeCommand();
   const toggleTheme = (refreshInterface: () => void): void => {
@@ -54,7 +56,7 @@ export function createSettingsCommands(
   const gridCommand = root.querySelector<HTMLButtonElement>('#grid-command');
   const applyGrid = (): void => {
     root.querySelector<SVGRectElement>('#sheet-grid')?.setAttribute('visibility', settings.gridVisible ? 'visible' : 'hidden');
-    if (gridCommand) gridCommand.textContent = settings.gridVisible ? 'Скрыть сетку' : 'Показать сетку';
+    if (gridCommand) gridCommand.textContent = settings.gridVisible ? uiText().gridHide : uiText().gridShow;
   };
   const toggleGrid = (refreshInterface: () => void): void => {
     settings.gridVisible = !settings.gridVisible;

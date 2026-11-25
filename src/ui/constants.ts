@@ -59,15 +59,15 @@ export const PHASE_LABELS: readonly PotentialLabel[] = ['L1', 'L2', 'L3'];
 
 export const STAMP_LINK_TEXT = 'WEB CADE';
 
-export const STAMP_CELLS: ReadonlyArray<{ key?: StampKey; label?: string; x0: number; x1: number; r0: number; r1: number; hint?: string }> = [
+export const STAMP_CELLS: ReadonlyArray<{ key?: StampKey; label?: string; x0: number; x1: number; r0: number; r1: number; hint?: import('./i18n').TextKey }> = [
   { label: 'Fecha', x0: 0.075, x1: 0.15, r0: 0, r1: 1 }, { label: 'Nombre', x0: 0.15, x1: 0.25, r0: 0, r1: 1 }, { label: 'Firmas', x0: 0.25, x1: 0.35, r0: 0, r1: 1 },
   { label: 'Dibujado', x0: 0, x1: 0.075, r0: 1, r1: 2 }, { label: 'Comprobado', x0: 0, x1: 0.075, r0: 2, r1: 3 },
-  { key: 'drawnDate', x0: 0.075, x1: 0.15, r0: 1, r1: 2, hint: 'Дата (Dibujado)' }, { key: 'author', x0: 0.15, x1: 0.25, r0: 1, r1: 2, hint: 'Автор (Dibujado)' }, { key: 'drawnSign', x0: 0.25, x1: 0.35, r0: 1, r1: 2, hint: 'Подпись (Dibujado)' },
-  { key: 'checkedDate', x0: 0.075, x1: 0.15, r0: 2, r1: 3, hint: 'Дата (Comprobado)' }, { key: 'checkedName', x0: 0.15, x1: 0.25, r0: 2, r1: 3, hint: 'Проверил (Comprobado)' }, { key: 'checkedSign', x0: 0.25, x1: 0.35, r0: 2, r1: 3, hint: 'Подпись (Comprobado)' },
-  { key: 'entity', label: 'Entidad', x0: 0.35, x1: 0.54, r0: 0, r1: 3, hint: 'Организация' },
-  { key: 'title', label: 'Título', x0: 0.54, x1: 0.79, r0: 0, r1: 3, hint: 'Название схемы' },
-  { key: 'date', label: 'Fecha', x0: 0.79, x1: 0.895, r0: 0, r1: 1, hint: 'Дата' }, { key: 'number', label: 'Núm', x0: 0.895, x1: 0.945, r0: 0, r1: 1, hint: 'Номер листа' }, { key: 'total', label: 'de', x0: 0.945, x1: 1, r0: 0, r1: 1, hint: 'Всего листов' },
-  { key: 'fileName', label: 'Archivo', x0: 0.79, x1: 1, r0: 1, r1: 3, hint: 'Имя файла' },
+  { key: 'drawnDate', x0: 0.075, x1: 0.15, r0: 1, r1: 2, hint: 'stampDrawnDate' }, { key: 'author', x0: 0.15, x1: 0.25, r0: 1, r1: 2, hint: 'stampAuthor' }, { key: 'drawnSign', x0: 0.25, x1: 0.35, r0: 1, r1: 2, hint: 'stampDrawnSign' },
+  { key: 'checkedDate', x0: 0.075, x1: 0.15, r0: 2, r1: 3, hint: 'stampCheckedDate' }, { key: 'checkedName', x0: 0.15, x1: 0.25, r0: 2, r1: 3, hint: 'stampCheckedName' }, { key: 'checkedSign', x0: 0.25, x1: 0.35, r0: 2, r1: 3, hint: 'stampCheckedSign' },
+  { key: 'entity', label: 'Entidad', x0: 0.35, x1: 0.54, r0: 0, r1: 3, hint: 'stampEntity' },
+  { key: 'title', label: 'Título', x0: 0.54, x1: 0.79, r0: 0, r1: 3, hint: 'stampTitle' },
+  { key: 'date', label: 'Fecha', x0: 0.79, x1: 0.895, r0: 0, r1: 1, hint: 'stampDate' }, { key: 'number', label: 'Núm', x0: 0.895, x1: 0.945, r0: 0, r1: 1, hint: 'stampNumber' }, { key: 'total', label: 'de', x0: 0.945, x1: 1, r0: 0, r1: 1, hint: 'stampTotal' },
+  { key: 'fileName', label: 'Archivo', x0: 0.79, x1: 1, r0: 1, r1: 3, hint: 'stampFileName' },
 ];
 
 export const POTENTIAL_ORDER: readonly PotentialLabel[] = ['L1', 'L2', 'L3', 'N', 'PE', '+', '-'];

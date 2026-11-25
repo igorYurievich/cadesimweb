@@ -13,6 +13,7 @@ import { screenToSheet } from './viewport';
 import { snapDrawingPoint } from './wire-routing';
 import { svgPoint } from './canvas-primitives';
 import { getSelectionHit, selectedObjects } from './selection';
+import { currentText, fillText } from './i18n';
 
 export interface CanvasPointerDownSetup {
   svg: SVGSVGElement; viewSize(): Point; viewport(): import('./viewport').Viewport;
@@ -61,7 +62,7 @@ export function setupCanvasPointerDown(ctx: AppContext, deps: CanvasPointerDownS
         if (!event.shiftKey) { deps.finishWireDrawing(); event.preventDefault(); return; }
       }
       deps.setDraftCursor(undefined); deps.drawDraft(); deps.updateHistoryButtons();
-      if (draftPoints.length === 1) deps.status.textContent = 'Начало задано. Кликните там, где провод должен закончиться (Shift+клик — излом).';
+      if (draftPoints.length === 1) deps.status.textContent = currentText().wireStartSet;
       event.preventDefault(); return;
     }
     const placementType = deps.placementType();
@@ -73,8 +74,7 @@ export function setupCanvasPointerDown(ctx: AppContext, deps: CanvasPointerDownS
       deps.selected.clear(); deps.selected.set(selectionKey(item), item); deps.commitSchema(before);
       // Режим размещения остаётся: тот же элемент можно ставить ещё раз, выход — Esc.
       deps.renderSchema();
-      deps.status.textContent =
-        `Добавлен ${element.name}. Щёлкните ещё раз для следующего; R — поворот, Esc — завершить.`;
+      deps.status.textContent = fillText(currentText().elementAddedRepeat, { name: element.name });
       event.preventDefault(); return;
     }
     if (event.button === 0 && deps.simulation.mode !== 'edit') {

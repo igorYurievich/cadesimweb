@@ -7,6 +7,8 @@ import { junctionElement, lineElement } from './canvas-primitives';
 import { createElementSymbol } from './symbols';
 import { stampMetrics } from './helpers';
 import type { SimulationController } from './sim-controller';
+import { featureOfType, onFeatureLoaded } from './features/loader';
+import { currentText, fillText } from './i18n';
 
 export interface SchemaRendererSetup {
   root: HTMLElement; svg: SVGSVGElement; wireLayer: SVGGElement; elementLayer: SVGGElement;
@@ -16,7 +18,7 @@ export interface SchemaRendererSetup {
 }
 
 export function setupSchemaRenderer(ctx: AppContext, deps: SchemaRendererSetup): () => void {
-  return () => {
+  const render = (): void => {
     const { schema } = ctx;
     const { width, height } = schema.sheet;
     const totalHeight = fullSheet(schema.sheet).height;
@@ -97,7 +99,14 @@ export function setupSchemaRenderer(ctx: AppContext, deps: SchemaRendererSetup):
       marquee.setAttribute('class', 'selection-marquee'); deps.selectionLayer.append(marquee);
     }
     deps.drawDraft(); deps.updateHistoryButtons();
-    deps.svg.setAttribute('aria-label', schema.sheet.fileName ? `Схема ${schema.sheet.fileName}` : 'Поле схемы');
+    const t = currentText();
+    const name = schema.sheet.fileName;
+    deps.svg.setAttribute('aria-label', name ? fillText(t.schemaAria, { name }) : t.schematic);
     deps.simulation.applySimulationVisuals(); deps.renderProperties(); deps.syncSelectedWireThickness(); deps.persistSchema();
   };
+  // Символы ПЛК / GRAFCET / лифта приходят отдельным куском сборки: дорисовываем их, когда он скачан.
+  onFeatureLoaded((key) => {
+    if (ctx.schema.elements.some((element) => featureOfType(element.typeCode) === key)) render();
+  });
+  return render;
 }

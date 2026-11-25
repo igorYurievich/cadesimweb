@@ -5,6 +5,8 @@ import { hasVerifiedBadge } from '@model/catalog-verification';
 import { isPaletteItemShown, readVerifiedOnly, writeVerifiedOnly } from './palette-filter';
 import { createPlacedElement } from './helpers';
 import { writeOptionalPaletteGroups } from './settings';
+import { currentText, fillText, loadInterfaceText } from './i18n';
+import type { InterfaceText } from './i18n';
 import { PROGRAM_VIEW_EVENT, activeProgramPage } from './program-pages-view';
 import { createElementSymbol } from './symbols';
 import {
@@ -31,7 +33,6 @@ const groupTitles: Record<Lang, Record<GroupKey, string>> = {
   it: { 'power-sources': 'Alimentazioni e fonti', fuses: 'Fusibili e sezionatori', protection: 'Protezione', contactors: 'Contattori e interruttori', motors: 'Motori', 'power-electronics': 'Elettronica di potenza', 'aux-contacts': 'Contatti ausiliari', 'manual-controls': 'Comandi manuali', mechanisms: 'Frutti (interruttori e prese)', installations: 'Impianti', sensors: 'Sensori', 'coils-signaling': 'Bobine, temporizzatori e segnalazione', 'electronic-relays': 'Relè elettronici', logic: 'Logica', ladder: 'Ladder', grafcet: 'GRAFCET', 'io-plc': 'Ingressi / uscite PLC', pneumatics: 'Attuatori pneumatici', wiring: 'Cavi e connessioni', 'realistic-2d': 'Simboli realistici · 2D', 'realistic-3d': 'Simboli realistici · 3D' },
   ru: { 'power-sources': 'Источники питания', fuses: 'Предохранители и разъединители', protection: 'Защита', contactors: 'Контакторы и выключатели', motors: 'Двигатели', 'power-electronics': 'Силовая электроника', 'aux-contacts': 'Вспомогательные контакты', 'manual-controls': 'Ручное управление', mechanisms: 'Механизмы', installations: 'Инсталляции', sensors: 'Датчики', 'coils-signaling': 'Катушки, реле времени и сигнализация', 'electronic-relays': 'Электронные реле', logic: 'Логика', ladder: 'Ladder', grafcet: 'GRAFCET', 'io-plc': 'Входы / выходы ПЛК', pneumatics: 'Пневматика', wiring: 'Провода и соединения', 'realistic-2d': 'Реалистичные символы · 2D', 'realistic-3d': 'Реалистичные символы · 3D' },
   fr: { 'power-sources': 'Alimentations et sources', fuses: 'Fusibles et sectionneurs', protection: 'Protection', contactors: 'Contacteurs et interrupteurs', motors: 'Moteurs', 'power-electronics': 'Électronique de puissance', 'aux-contacts': 'Contacts auxiliaires', 'manual-controls': 'Commandes manuelles', mechanisms: 'Mécanismes (interrupteurs et prises)', installations: 'Installations', sensors: 'Capteurs', 'coils-signaling': 'Bobines, temporisateurs et signalisation', 'electronic-relays': 'Relais électroniques', logic: 'Logique', ladder: 'Ladder', grafcet: 'GRAFCET', 'io-plc': 'Entrées / sorties API', pneumatics: 'Actionneurs pneumatiques', wiring: 'Fils et connexions', 'realistic-2d': 'Symboles réalistes · 2D', 'realistic-3d': 'Symboles réalistes · 3D' },
-  ar: { 'power-sources': 'مصادر التغذية', fuses: 'المصهرات والفواصل', protection: 'الحماية', contactors: 'الكونتاكتورات والمفاتيح', motors: 'المحركات', 'power-electronics': 'إلكترونيات القدرة', 'aux-contacts': 'الملامسات المساعدة', 'manual-controls': 'عناصر التحكم اليدوي', mechanisms: 'المفاتيح والمقابس الجدارية', installations: 'التجهيزات', sensors: 'المستشعرات', 'coils-signaling': 'الملفات والمؤقتات والإشارات', 'electronic-relays': 'المرحلات الإلكترونية', logic: 'المنطق', ladder: 'Ladder', grafcet: 'GRAFCET', 'io-plc': 'مداخل ومخارج PLC', pneumatics: 'المشغلات الهوائية', wiring: 'الأسلاك والتوصيلات', 'realistic-2d': 'رموز واقعية · 2D', 'realistic-3d': 'رموز واقعية · 3D' },
 };
 
 export interface PaletteSetup {
@@ -48,7 +49,7 @@ export interface PaletteSetup {
   setActivePaletteCommand(value: number | undefined): void;
   setPlacement(value: number | undefined): void;
   resetPlacementRotation(): void;
-  uiText(): { elementCount: string; [key: string]: string };
+  uiText(): InterfaceText;
   leaveNodeTool(): void;
   isWireDrawing(): boolean;
   cancelWireDrawing(): void;
@@ -107,12 +108,17 @@ export function setupPalette(ctx: AppContext, deps: PaletteSetup): { renderPalet
   });
   deps.language.addEventListener('change', () => {
     const lang = deps.language.value as Lang;
-    deps.setPaletteLang(lang);
     try { localStorage.setItem(INTERFACE_LANGUAGE_KEY, lang); } catch { /* Keep the selected language for this session. */ }
-    deps.translateInterface();
-    renderPalette();
-    deps.renderProperties();
     ctx.root.querySelector<HTMLDetailsElement>('.language-menu')?.removeAttribute('open');
+    // Тексты языка — отдельный кусок сборки: сначала скачиваем, потом перерисовываем интерфейс.
+    // Без сети и без кэша остаются тексты уже скачанного языка (interfaceText).
+    void loadInterfaceText(lang).catch(() => undefined).then(() => {
+      if (deps.language.value !== lang) return; // Пока качалось, выбрали другой язык.
+      deps.setPaletteLang(lang);
+      deps.translateInterface();
+      renderPalette();
+      deps.renderProperties();
+    });
   });
   return { renderPalette };
 }
@@ -333,7 +339,7 @@ function createPaletteItem(
   const mappedType = cadTypeForCommand(item.id);
   const cadType = mappedType && PLACE_DEFAULTS[mappedType.code] ? mappedType : undefined;
   const itemName = catalog.label(item, deps.paletteLang()).trim()
-    || (deps.paletteLang() === 'ru' ? `Элемент ${item.id}` : String(item.id));
+    || fillText(currentText().elementWithId, { id: item.id });
   const button = document.createElement('button');
   button.type = 'button';
   button.className = 'palette-item';
@@ -344,10 +350,10 @@ function createPaletteItem(
   name.textContent = itemName;
   button.append(name);
   addPaletteBadge(button, item, group, itemName, deps);
-  button.title = cadType ? itemName : `${itemName} · пока недоступно для размещения`;
+  button.title = cadType ? itemName : fillText(currentText().notPlaceable, { name: itemName });
   if (!cadType) {
     button.disabled = true;
-    button.title += ' (нет соответствия с типом .cad)';
+    button.title += ` (${currentText().noCadType})`;
   } else {
     button.draggable = true;
     button.setAttribute('aria-pressed', String(deps.activePaletteCommand() === item.id));
@@ -364,7 +370,7 @@ function addPaletteBadge(
   deps: PaletteSetup,
 ): void {
   const verified = hasVerifiedBadge(group, item.id);
-  const verifiedText = deps.uiText().functionalityVerified ?? 'Функциональность элемента проверена';
+  const verifiedText = deps.uiText().functionalityVerified;
   button.setAttribute('aria-label', verified ? `${itemName} — ${verifiedText}` : itemName);
   if (!verified) return;
   const badge = document.createElement('span');
@@ -395,7 +401,7 @@ function addPlacementHandlers(
     deps.svg.classList.add('is-placing');
     renderPalette();
     deps.drawGhost();
-    deps.status.textContent = `Размещение: ${itemName} · щёлкните по листу или перетащите элемент; R — поворот, Esc — отмена.`;
+    deps.status.textContent = fillText(currentText().placingHint, { name: itemName });
   });
   button.addEventListener('dragstart', (event) => {
     if (!event.dataTransfer) return;

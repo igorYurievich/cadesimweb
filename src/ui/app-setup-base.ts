@@ -23,7 +23,8 @@ import { setupAppInterface } from './app-interface';
 import type { Point, Viewport } from './viewport';
 import type { Selectable, DragState } from './constants';
 import { cloneSchema } from './helpers';
-import { INTERFACE_TEXT } from './i18n';
+import { currentText, interfaceText, setActiveInterfaceLang } from './i18n';
+import type { InterfaceText } from './i18n';
 
 function createCoreFrame(root: HTMLElement) {
   const savedDocuments = readSavedDocuments();
@@ -41,12 +42,14 @@ function createCoreFrame(root: HTMLElement) {
   );
   const appSettings = readAppSettings();
   renderAppShell(root, appSettings.theme);
+  // Язык нужен уже здесь: строка состояния и имя файла пишутся до настройки остального интерфейса.
+  setActiveInterfaceLang(readInterfaceLanguage());
   let paletteLang!: Lang;
-  const uiText = (): typeof INTERFACE_TEXT.ru => INTERFACE_TEXT[paletteLang] as typeof INTERFACE_TEXT.ru;
+  const uiText = (): InterfaceText => interfaceText(paletteLang);
   const propertiesPanel = setupPropertiesPanel(ctx, uiText);
   const elements = queryAppElements(root);
-  elements.fileName.textContent = schema.sheet.fileName || 'Новая схема';
-  if (autosavedSchema) elements.status.textContent = 'Автосохранённая схема восстановлена.';
+  elements.fileName.textContent = schema.sheet.fileName || currentText().new;
+  if (autosavedSchema) elements.status.textContent = currentText().autosaveRestored;
   elements.svg.setAttribute('tabindex', '0');
   const canvasViewport = initializeCanvasViewport(elements.svg, schema);
   let viewSize: Point = canvasViewport.viewSize;
@@ -74,7 +77,7 @@ function createCoreFrame(root: HTMLElement) {
     get viewport() { return viewport; },
     set viewport(value: Viewport) { viewport = value; },
     get paletteLang() { return paletteLang; },
-    set paletteLang(value: Lang) { paletteLang = value; },
+    set paletteLang(value: Lang) { paletteLang = value; setActiveInterfaceLang(value); },
     uiText,
   };
 }

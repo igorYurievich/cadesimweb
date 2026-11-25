@@ -7,6 +7,7 @@ import { formatSimulationDiagnostics } from './diagnostics';
 import { createSimInputs } from './state';
 import type { SimulationDependencies, SimulationState } from './types';
 import { hasTimeAnimation, noteEvaluatedFrame, skipQuietFrame } from './quiet-skip';
+import { currentText } from '../i18n';
 
 export interface SimulationLoop {
   updateSimulationControls(): void;
@@ -76,7 +77,7 @@ export function createSimulationLoop(
     deps.simulationContextMenu.hidden = true;
     resetSimulation();
     deps.renderSchema();
-    deps.status.textContent = 'Симуляция остановлена.';
+    deps.status.textContent = currentText().simulationStopped;
   };
   return { updateSimulationControls, resetSimulation, evaluateSimulation, startSimulation, stopSimulation, togglePause };
 }

@@ -1,3 +1,4 @@
+import { currentText } from './i18n';
 export interface ToolModesSetup {
   svg: SVGSVGElement; panButton: HTMLButtonElement | null; nodeButton: HTMLButtonElement | null;
   selectButton: HTMLButtonElement | null; panTool(): boolean; setPanToolState(value: boolean): void;
@@ -21,7 +22,7 @@ export function setupToolModes(deps: ToolModesSetup) {
     deps.setPanToolState(on);
     if (on) deps.setNodeToolState(false);
     syncToolButtons();
-    if (on) deps.status.textContent = 'Рука: тяните лист левой кнопкой мыши. Нажмите кнопку курсора или V, чтобы вернуться к нему.';
+    if (on) deps.status.textContent = currentText().handHint;
   };
   const selectTool = (): void => {
     leaveNodeTool();
@@ -32,10 +33,10 @@ export function setupToolModes(deps: ToolModesSetup) {
       deps.svg.classList.remove('is-placing');
     }
     setPanTool(false);
-    deps.status.textContent = 'Курсор: выбор и перемещение элементов.';
+    deps.status.textContent = currentText().cursorHint;
   };
   const setNodeTool = (on: boolean): void => {
-    if (!on) { leaveNodeTool(); deps.status.textContent = 'Курсор: выбор и перемещение элементов.'; return; }
+    if (!on) { leaveNodeTool(); deps.status.textContent = currentText().cursorHint; return; }
     if (deps.wireDrawing()) deps.cancelWireDrawing();
     if (deps.placementType() !== undefined) {
       deps.setPlacementType(undefined); deps.setPlacementRotation(0); deps.clearActivePaletteCommand(); deps.renderPalette();
@@ -43,7 +44,7 @@ export function setupToolModes(deps: ToolModesSetup) {
       deps.svg.classList.remove('is-placing');
     }
     deps.setPanToolState(false); deps.setNodeToolState(true); syncToolButtons();
-    deps.status.textContent = 'Узел: щёлкните по месту, где провода соединяются или пересекаются. Esc или V — выйти.';
+    deps.status.textContent = currentText().nodeHint;
   };
   return { syncToolButtons, leaveNodeTool, setPanTool, selectTool, setNodeTool };
 }

@@ -214,7 +214,14 @@ export function solvePass(
     coils: nextCoils,
     contacts: switching.contacts,
     lamps: loads.lamps,
-    motors: withDriveFrequency(schema, evaluateMotors(schema, nets, graph.terminalNet, switching.edges), graph.terminalNet, potentialRoot, timers),
+    // Без точки звезды сети не менялись: моторы те же, что посчитаны выше, второй расчёт не нужен.
+    motors: withDriveFrequency(
+      schema,
+      starSources.length > 0 ? evaluateMotors(schema, nets, graph.terminalNet, switching.edges) : initialMotors,
+      graph.terminalNet,
+      potentialRoot,
+      timers,
+    ),
     tripped: thermal.tripped,
     faults: loads.faults,
     warnings: [

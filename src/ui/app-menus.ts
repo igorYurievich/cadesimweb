@@ -1,6 +1,6 @@
 import type { AppContext } from './context';
-import { setupCadExportConfirmation, setupExport } from './export';
-import type { ExportActions } from './export';
+import { setupLazyExport } from './export-lazy';
+import type { ExportCommands } from './export-lazy';
 import { setupMenus } from './menus';
 import { setupPrintPreview } from './print-preview';
 import type { Viewport, Point } from './viewport';
@@ -34,14 +34,10 @@ export interface AppMenuOptions {
   drawViewport: () => void;
 }
 
-export function setupAppMenus(options: AppMenuOptions): ExportActions {
-  const exportActions = setupExport(
-    options.ctx,
-    options.svg,
-    options.status,
-    setupCadExportConfirmation(options.root),
-    options.onSaved,
-  );
+export function setupAppMenus(options: AppMenuOptions): ExportCommands {
+  const exportActions = setupLazyExport(options.ctx, options.root, options.svg, options.status, options.onSaved);
+  // Кусок «экспорт» докачивается в фоне после запуска: потом сохранение срабатывает сразу и без сети.
+  if (typeof window !== 'undefined') window.setTimeout(() => { void exportActions.preload(); }, 2500);
   setupMenus(options.ctx, {
     fileInput: options.fileInput,
     status: options.status,

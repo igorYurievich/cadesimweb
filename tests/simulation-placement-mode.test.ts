@@ -1,9 +1,10 @@
-import { describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 import { setupEditorToolbar } from '../src/ui/editor-toolbar';
 import type { SimulationController } from '../src/ui/sim-controller';
 import type { AppContext } from '../src/ui/context';
 import type { Selectable } from '../src/ui/constants';
 import { setupToolModes } from '../src/ui/tool-modes';
+import { loadInterfaceText, setActiveInterfaceLang } from '../src/ui/i18n';
 
 function createEventTarget() {
   const listeners = new Map<string, EventListener>();
@@ -86,6 +87,9 @@ function triggerRunButton(selectTool: () => void, events: string[]): void {
 }
 
 describe('simulation launch tool mode', () => {
+  // Сообщения строки состояния берутся из словаря выбранного языка.
+  beforeAll(async () => { await loadInterfaceText('ru'); setActiveInterfaceLang('ru'); });
+
   it('clears pending placement and restores the cursor before simulation starts', () => {
     const events: string[] = [];
     const harness = createPlacementHarness(events);

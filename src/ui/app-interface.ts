@@ -5,12 +5,12 @@ import { createSettingsCommands } from './settings';
 import { setupInterfaceTranslation } from './interface-translation';
 import { setupFullscreenButton } from './fullscreen';
 import type { SimulationController } from './sim-controller';
-import type { INTERFACE_TEXT } from './i18n';
+import type { InterfaceText } from './i18n';
 
 export interface AppInterfaceOptions {
   root: HTMLElement;
   settings: AppSettings;
-  uiText: () => typeof INTERFACE_TEXT.ru;
+  uiText: () => InterfaceText;
   simulation: SimulationController;
   wireDrawing: () => boolean;
   speedButton: HTMLButtonElement;

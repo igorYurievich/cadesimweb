@@ -2,12 +2,13 @@ import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { gunzipSync } from 'node:zlib';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 import { importCad } from '../src/model/cad-import';
 import type { Schema } from '../src/model/types';
 import { setupSimulation } from '../src/ui/sim-controller';
 import type { AppContext } from '../src/ui/context';
-import { INTERFACE_TEXT } from '../src/ui/i18n';
+import ru from '../src/ui/i18n/ru';
+import { loadInterfaceText, setActiveInterfaceLang } from '../src/ui/i18n';
 
 type ScenarioTrace = [string, unknown[]];
 
@@ -111,7 +112,7 @@ function createHarness(schema: Schema): SimulationHarness {
     simulationContextMenu: menu as unknown as HTMLElement,
     overloadAction: overload as unknown as HTMLButtonElement,
     status: status as unknown as HTMLElement,
-    uiText: () => INTERFACE_TEXT.ru,
+    uiText: () => ru,
     renderSchema: () => { renderCount += 1; },
     uniformWireColors: () => false,
     clearSelection: () => undefined,
@@ -189,6 +190,9 @@ function scenarioFingerprints(scenarios: ScenarioTrace[]): Array<[string, string
 }
 
 describe('simulation controller behavior characterization', () => {
+  // Эталонная трасса записана с русскими подписями: строка состояния и подсказки проводов — из словаря ru.
+  beforeAll(async () => { await loadInterfaceText('ru'); setActiveInterfaceLang('ru'); });
+
   it('matches the pre-refactor UI trace for representative examples', () => {
     const examples = [
       ['Ejemplo 10', '../src/data/examples/Ejemplos/Ejemplo 10.cad'],

@@ -19,7 +19,7 @@ Este es un proyecto educativo independiente y sin fines comerciales. No está af
 - **Simulación de lógica de relés:** auto-mantenimiento, enclavamientos, retardos, arranque estrella-triángulo, arranque con autotransformador, relés térmicos, control manual y avisos de cortocircuito.
 - **Formato `.cad`:** importación y exportación de archivos CADe SIMU 4.x. Consulta [FORMATO_CAD.md](FORMATO_CAD.md).
 - **Exportación a PDF** y ejemplos de esquemas incluidos en la aplicación.
-- **Idiomas disponibles en el selector:** español, inglés, italiano, ruso y francés. La traducción al árabe se conserva, pero su opción está temporalmente oculta.
+- **Idiomas de la interfaz:** español, inglés, italiano, ruso y francés.
 - **Guardado automático** en el navegador; el esquema y el zoom se restauran al volver a abrir la aplicación.
 
 ### Inicio rápido
@@ -101,7 +101,7 @@ This is an independent, non-commercial educational project. It is not affiliated
 - **Relay-logic simulation:** self-holding circuits, interlocks, timer delays, star-delta starting, autotransformer starting, thermal relays, manual controls, and short-circuit warnings.
 - **`.cad` format:** import and export for CADe SIMU 4.x files. See [FORMATO_CAD.md](FORMATO_CAD.md).
 - **PDF export** and built-in schematic examples.
-- **Languages currently available in the selector:** Spanish, English, Italian, Russian, and French. The Arabic translation remains in the project, but its selector option is temporarily hidden.
+- **Interface languages:** Spanish, English, Italian, Russian, and French.
 - **Browser autosave:** the schematic and canvas zoom are restored when the app is reopened.
 
 ### Quick start

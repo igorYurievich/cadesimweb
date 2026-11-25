@@ -1,4 +1,5 @@
 import { getCadType } from '@model/cad-types';
+import { currentText, fillText } from './i18n';
 
 export interface PlacementEventsOptions {
   select: HTMLSelectElement | null;
@@ -24,9 +25,9 @@ export function setupPlacementEvents(options: PlacementEventsOptions): void {
     options.svg.classList.toggle('is-placing', type !== undefined);
     options.drawGhost();
     if (type !== undefined) {
-      options.status.textContent = `Размещение: ${getCadType(type).label} · щёлкните по листу; R — поворот; Esc — отмена.`;
+      options.status.textContent = fillText(currentText().placingClick, { name: getCadType(type).label });
     } else {
-      options.status.textContent = 'Режим выбора. Выберите объект или рамкой выделите область.';
+      options.status.textContent = currentText().selectMode;
     }
   });
 }

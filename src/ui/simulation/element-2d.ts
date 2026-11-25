@@ -13,6 +13,7 @@ import { terminalKey } from '@engine/types';
 import type { EngineState } from '@engine/types';
 import type { Schema, SchemaElement } from '@model/types';
 import type { SimulationState } from './types';
+import { currentText } from '../i18n';
 
 /**
  * Символы 2D: класс is-d2-on переключает подвижные части (группы .d2-on/.d2-off) и красит внутреннюю схему.
@@ -86,7 +87,7 @@ function applyDelayReadout(
   const counting = timer?.phase === (off ? 'releasing' : 'counting');
   const passed = off ? timer?.releaseElapsed ?? 0 : timer?.elapsed ?? 0;
   const left = counting ? Math.max(0, total - passed) : !off && on ? 0 : total;
-  const text = result === undefined ? '' : `${formatSeconds(left)} с`;
+  const text = result === undefined ? '' : `${formatSeconds(left)} ${currentText().secondsShort}`;
   if (readout && readout.textContent !== text) readout.textContent = text;
   node.classList.toggle('is-timer-counting', counting);
   node.classList.toggle('is-timer-done', on && !counting);

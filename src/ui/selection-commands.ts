@@ -13,6 +13,7 @@ import { cadTypeForCommand } from '@model/cad-types';
 import { catalog } from '@model/catalog';
 import { terminalPosition } from '@model/geometry';
 import { currentPage } from './program-pages-view';
+import { currentText, fillText } from './i18n';
 
 /** Типы панели Ladder: контакты, катушки, блоки, шины «+» / «−» (кнопки catalog 'ladder'). */
 const LADDER_TYPES: ReadonlySet<number> = new Set(catalog.inGroup('ladder')
@@ -91,14 +92,14 @@ export function setupSelectionCommands(ctx: AppContext, deps: SelectionCommandsS
     for (const wire of wires) { include(wire.from.x, wire.from.y); include(wire.to.x, wire.to.y); }
     deps.setClipboard({ elements: structuredClone(elements), wires: structuredClone(wires), anchor: { x: (bounds.minX + bounds.maxX) / 2, y: (bounds.minY + bounds.maxY) / 2 } });
     deps.updateHistoryButtons();
-    deps.status.textContent = `Скопировано объектов: ${elements.length + wires.length}. Наведите курсор и нажмите Ctrl+V.`;
+    deps.status.textContent = fillText(currentText().copied, { count: elements.length + wires.length });
     return true;
   };
 
   const pasteSelection = (): void => {
     const copied = deps.clipboard();
     if (!copied) return;
-    if (deps.simulationMode() !== 'edit') { deps.status.textContent = 'Остановите симуляцию перед вставкой объектов.'; return; }
+    if (deps.simulationMode() !== 'edit') { deps.status.textContent = currentText().stopBeforePaste; return; }
     const { schema } = ctx;
     // Вставляем на лист, который сейчас на экране (основной или лист программы ПЛК, program-pages.ts).
     const size = deps.viewSize();
@@ -107,7 +108,7 @@ export function setupSelectionCommands(ctx: AppContext, deps: SelectionCommandsS
     const clipboard = page >= 1 ? ladderOnly(copied) : copied;
     const skipped = copied.elements.length + copied.wires.length - clipboard.elements.length - clipboard.wires.length;
     if (!clipboard.elements.length) {
-      deps.status.textContent = 'На лист программы вставляются только элементы Ladder, а их в скопированном нет.';
+      deps.status.textContent = currentText().pasteLadderOnly;
       return;
     }
     const bounds = { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity };
@@ -122,7 +123,7 @@ export function setupSelectionCommands(ctx: AppContext, deps: SelectionCommandsS
     }
     for (const wire of clipboard.wires) { include(wire.from.x, wire.from.y); include(wire.to.x, wire.to.y); }
     if (bounds.maxX - bounds.minX > schema.sheet.width || bounds.maxY - bounds.minY > schema.sheet.height) {
-      deps.status.textContent = 'Выделенные объекты не помещаются на этот лист.'; return;
+      deps.status.textContent = currentText().pasteNoRoom; return;
     }
     // Курсор с другого листа (например, после перехода кнопкой) не годится — тогда в центр вида.
     const lastPointer = deps.pointer();
@@ -148,8 +149,9 @@ export function setupSelectionCommands(ctx: AppContext, deps: SelectionCommandsS
     for (const element of pastedElements) { const item: Selectable = { kind: 'element', id: element.id }; deps.selected.set(selectionKey(item), item); }
     for (const wire of pastedWires) { const item: Selectable = { kind: 'wire', id: wire.id }; deps.selected.set(selectionKey(item), item); }
     deps.commitSchema(before); deps.renderSchema();
-    deps.status.textContent = `Вставлено объектов: ${pastedElements.length + pastedWires.length}.`
-      + (skipped > 0 ? ` Не Ladder, пропущено: ${skipped}.` : '');
+    const t = currentText();
+    deps.status.textContent = fillText(t.pasted, { count: pastedElements.length + pastedWires.length })
+      + (skipped > 0 ? ` ${fillText(t.pasteSkipped, { count: skipped })}` : '');
   };
 
   const deleteSelected = (): void => {
@@ -160,10 +162,10 @@ export function setupSelectionCommands(ctx: AppContext, deps: SelectionCommandsS
     schema.elements = schema.elements.filter((element) => !elementIds.has(element.id));
     schema.wires = schema.wires.filter((wire) => !wireIds.has(wire.id));
     deps.selected.clear(); deps.commitSchema(before); deps.renderSchema();
-    deps.status.textContent = 'Выбранные объекты удалены.';
+    deps.status.textContent = currentText().selectionDeleted;
   };
   const cutSelection = (): void => {
-    if (deps.simulationMode() !== 'edit') { deps.status.textContent = 'Остановите симуляцию перед вырезанием объектов.'; return; }
+    if (deps.simulationMode() !== 'edit') { deps.status.textContent = currentText().stopBeforeCut; return; }
     if (!copySelection()) return;
     const clipboard = deps.clipboard();
     if (!clipboard) return;
@@ -178,14 +180,15 @@ export function setupSelectionCommands(ctx: AppContext, deps: SelectionCommandsS
       }
     }
     deps.commitSchema(before); deps.renderSchema();
-    deps.status.textContent = 'Объекты вырезаны. Наведите курсор и нажмите Ctrl+V.';
+    deps.status.textContent = currentText().selectionCut;
   };
   const rotateSelection = (): void => {
     const placementType = deps.placementType();
     if (placementType !== undefined) {
       const rotation = ((deps.placementRotation() + 1) % 4) as 0 | 1 | 2 | 3;
       deps.setPlacementRotation(rotation); deps.drawGhost();
-      deps.status.textContent = `Размещение: ${getCadType(placementType).label} · поворот ${rotation * 90}° · щёлкните по листу или Esc.`;
+      const name = getCadType(placementType).label;
+      deps.status.textContent = fillText(currentText().placingRotated, { name, angle: rotation * 90 });
       return;
     }
     const { schema } = ctx; const before = cloneSchema(schema);

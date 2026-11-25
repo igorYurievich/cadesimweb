@@ -3,7 +3,7 @@ import type { MotorSpec } from "./motors";
 import { MOTOR_R } from "./motors";
 import { shape } from "./svg-primitives";
 import { detectorHitFrame } from "./detector-layout";
-import { grafcetHitFrame } from "./grafcet-symbol";
+import { grafcetHitFrame } from "./grafcet-hit-frame";
 import { BLOCK_SPECS } from "@model/plc-blocks";
 import { isPlcFixedType, LOGO_TYPE } from "@model/plc-types";
 

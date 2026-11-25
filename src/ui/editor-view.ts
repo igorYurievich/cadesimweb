@@ -11,7 +11,7 @@ import { setupSheetFrame } from './sheet-frame';
 import { setupSchemaRenderer } from './schema-renderer';
 import type { SimulationController } from './sim-controller';
 import type { Point, Viewport } from './viewport';
-import { INTERFACE_TEXT } from './i18n';
+import type { InterfaceText } from './i18n';
 import { currentPage, renderPageTabs, renderProgramPageSheets } from './program-pages-view';
 import { growProgramPagesToContent } from '@model/program-pages';
 
@@ -24,7 +24,7 @@ export interface EditorViewOptions {
   wireDrawing: () => boolean;
   draftPoints: () => Point[];
   draftCursor: () => Point | undefined;
-  uiText: () => typeof INTERFACE_TEXT.ru;
+  uiText: () => InterfaceText;
   simulation: SimulationController;
   propertySnapshot: () => Schema | undefined;
   setPropertySnapshot: (schema: Schema | undefined) => void;

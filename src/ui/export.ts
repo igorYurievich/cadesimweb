@@ -3,7 +3,8 @@ import { serializeSchemaJson } from '@model/schema-json';
 import { POSITION_SPECS, currentPosition } from '@engine/behaviors';
 import type { AppContext } from './context';
 import { CAD_EXPORT_WARNING_KEY, SVG_NS, WIRE_COLORS } from './constants';
-import { fullSheet } from './helpers';
+import { fullSheet, errorReason } from './helpers';
+import { currentText, fillText } from './i18n';
 
 export interface ExportActions {
   saveJson(): void;
@@ -77,11 +78,11 @@ export function setupExport(
   };
   const outputBaseName = (): string => {
     const name = ctx.schema.sheet.fileName.replace(/\.(cad|json)$/i, '').replace(/[\\/:*?"<>|\x00-\x1f]/g, '_').trim();
-    return name || 'Схема';
+    return name || currentText().defaultFileName;
   };
   const saveJson = (): void => {
     downloadText(serializeSchemaJson(ctx.schema), `${outputBaseName()}.json`, 'application/json;charset=utf-8');
-    status.textContent = `Схема сохранена в ${outputBaseName()}.json.`;
+    status.textContent = fillText(currentText().jsonSaved, { file: `${outputBaseName()}.json` });
     onSaved();
   };
   const exportCadFile = async (): Promise<boolean> => {
@@ -102,18 +103,18 @@ export function setupExport(
         await writable.write(contents);
         await writable.close();
       } else {
-        const requestedName = window.prompt('Имя файла для экспорта:', `${outputBaseName()}.cad`);
+        const requestedName = window.prompt(currentText().exportFileNamePrompt, `${outputBaseName()}.cad`);
         if (requestedName === null) return false;
         const safeName = requestedName.trim().replace(/[\\/:*?"<>|\x00-\x1f]/g, '_').replace(/\.cad$/i, '') || outputBaseName();
         savedName = `${safeName}.cad`;
         downloadText(contents, savedName, 'text/plain;charset=utf-8');
       }
-      status.textContent = `Экспортировано ${savedName}; обратный импорт пройден.`;
+      status.textContent = fillText(currentText().cadExported, { file: savedName });
       onSaved();
       return true;
     } catch (error) {
       if (error instanceof DOMException && error.name === 'AbortError') return false;
-      status.textContent = `Не удалось экспортировать .cad: ${error instanceof Error ? error.message : String(error)}`;
+      status.textContent = fillText(currentText().cadExportFailed, { reason: errorReason(error) });
       return false;
     }
   };
@@ -221,27 +222,27 @@ export function setupExport(
         canvas.width = Math.round(width * scale);
         canvas.height = Math.round(height * scale);
         const context = canvas.getContext('2d');
-        if (!context) throw new Error('Не удалось создать изображение.');
+        if (!context) throw new Error(currentText().imageCreateFailed);
         context.fillStyle = '#fff';
         context.fillRect(0, 0, canvas.width, canvas.height);
         context.drawImage(image, 0, 0, canvas.width, canvas.height);
         canvas.toBlob((blob) => {
           URL.revokeObjectURL(svgUrl);
-          if (!blob) { status.textContent = 'Не удалось создать PNG.'; return; }
+          if (!blob) { status.textContent = currentText().pngCreateFailed; return; }
           const pngUrl = URL.createObjectURL(blob);
           const link = document.createElement('a');
           link.href = pngUrl; link.download = `${outputBaseName()}.png`; link.click();
           setTimeout(() => URL.revokeObjectURL(pngUrl), 1000);
-          status.textContent = `Схема экспортирована в ${outputBaseName()}.png.`;
+          status.textContent = fillText(currentText().pngExported, { file: `${outputBaseName()}.png` });
         }, 'image/png');
       } catch (error) {
         URL.revokeObjectURL(svgUrl);
-        status.textContent = `Не удалось экспортировать PNG: ${error instanceof Error ? error.message : String(error)}`;
+        status.textContent = fillText(currentText().pngExportFailed, { reason: errorReason(error) });
       }
     };
     image.onerror = () => {
       URL.revokeObjectURL(svgUrl);
-      status.textContent = 'Не удалось подготовить схему для экспорта в PNG.';
+      status.textContent = currentText().pngPrepareFailed;
     };
     image.src = svgUrl;
   };
@@ -276,7 +277,7 @@ export function setupExport(
   const printInWindow = (html: string): void => {
     const printWindow = window.open('', '_blank');
     if (!printWindow) {
-      status.textContent = 'Разрешите всплывающее окно, чтобы открыть печать и сохранить PDF.';
+      status.textContent = currentText().popupBlocked;
       return;
     }
     printWindow.document.open();

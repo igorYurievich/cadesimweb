@@ -9,10 +9,8 @@ import { applyMotorAnimationVisuals, applyMotorVisuals } from './element-motors'
 import { applyPoweredVisuals, applyPowerSupplyVisuals } from './element-power';
 import { applySensorVisuals } from './element-sensors';
 import { apply2dVisuals } from './element-2d';
-import { applyPlcVisuals } from './element-plc';
 import { applyVfdVisuals } from './element-vfd';
-import { applyGrafcetVisuals } from './element-grafcet';
-import { applyLiftVisuals } from './element-lift';
+import { loadedFeatureHooks } from '../features/loader';
 import { layerNode } from './layer-index';
 
 export function applyElementVisuals(
@@ -27,7 +25,8 @@ export function applyElementVisuals(
     const node = layerNode<SVGGElement>(deps.elementLayer, 'data-element-id', element.id);
     if (!node) continue;
     applyOneElement(ctx, state, element, node, nets, thermalState.trippedNames);
-    applyLiftVisuals(state, element, node, text);
+    // ПЛК, GRAFCET, лифт — из своих кусков сборки (features/loader.ts), когда они скачаны.
+    for (const hooks of loadedFeatureHooks()) hooks.applyVisuals?.(state, element, node, ctx.schema, text);
   }
 }
 
@@ -55,7 +54,5 @@ function applyOneElement(
   applyPoweredVisuals(state, element, node, nets, manuallyOpen, tripped);
   applySensorVisuals(state, element, node, ctx.schema);
   apply2dVisuals(state, element, node, ctx.schema);
-  applyPlcVisuals(state, element, node);
   applyVfdVisuals(state, element, node, ctx.schema);
-  applyGrafcetVisuals(state, element, node, ctx.schema);
 }

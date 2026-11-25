@@ -52,22 +52,6 @@ import { drawDelayBlock2d } from "./realistic-2d-delay";
 import { drawThermalRelay2d } from "./realistic-2d-thermal";
 import { drawAuxBlock2d } from "./realistic-2d-aux";
 import { drawMotor2d } from "./motor-2d";
-import { drawLadder } from "./ladder";
-import { drawLadderBlock } from "./ladder-blocks";
-import { LADDER_EXTRA, PLC_BLOCK } from "@model/plc-blocks";
-import { drawLogo } from "./logo-symbol";
-import { drawS7 } from "./s7-1200-symbol";
-import { drawMechanism } from "./mechanism-symbol";
-import { drawDm8 } from "./dm8-symbol";
-import { drawDinPowerSupply } from "./din-psu-symbol";
-import { drawStairTimer } from "./stair-timer-symbol";
-import { drawVfd2d, drawVfd2dMono } from "./vfd-2d-symbol";
-import { drawGrafcet } from "./grafcet-symbol";
-import { drawLift } from "./lift-symbol";
-import { LIFT_TYPE } from "@model/lift";
-import { GRAFCET_TYPES } from "@model/grafcet";
-import { LOGO_DM8 } from "@model/plc-modules";
-import { LADDER_COIL, LADDER_NC, LADDER_NO, LOGO_TYPE } from "@model/plc-types";
 import {
   BREAKER_2D, CONTACTOR_2D, PUSHBUTTON_2D, REALISTIC_2D_ORIGIN_DX, isDelayBlock2d, isSimpleView,
 } from "@model/realistic-2d-types";
@@ -78,14 +62,18 @@ import { drawDelayBlockColor } from "./realistic-2d-color-delay";
 import { DETECTOR_CODES, EMITTER_TYPE } from "@model/detector-types";
 import { PHOTO_BARRIER_TYPE } from "@model/cad-types-sensors";
 import { INK, NAME_COLOR, label, shape } from "./svg-primitives";
+import { requestFeatureForType } from "../features/loader";
 
-type BodyDrawer = (g: SVGGElement, element: SchemaElement, rotation: number) => void;
+export type BodyDrawer = (g: SVGGElement, element: SchemaElement, rotation: number) => void;
 
 const BODY_DRAWERS = new Map<number, BodyDrawer>();
 
 function register(types: readonly number[], draw: BodyDrawer): void {
   for (const type of types) BODY_DRAWERS.set(type, draw);
 }
+
+/** Символы ПЛК, GRAFCET, лифта и редких 2D-устройств добавляются из своих кусков сборки (features/*-feature.ts). */
+export const registerBodyDrawers = register;
 
 /**
  * Символы 2D нарисованы от клеммы 1, а позиция элемента — левый край корпуса (как в CADe_SIMU):
@@ -268,19 +256,10 @@ register2d([7019], drawAuxBlock2d);
 register2d([8101], drawPilotSimple);
 register2d([6019, 6020, 60191, 60201], drawSwitchSimple);
 register2d([4011], drawTerminalSimple);
-register([LADDER_NO, LADDER_NC, LADDER_COIL, ...LADDER_EXTRA], drawLadder);
-register(Object.values(PLC_BLOCK), drawLadderBlock);
-register([LOGO_TYPE], drawLogo);
-register([LOGO_DM8], drawDm8);
-register([10220], drawDinPowerSupply);
-register([8110], drawStairTimer);
-register([10230], drawS7);
-register([10240], drawVfd2d);
-register([10241], drawVfd2dMono);
-register([8120, 8121, 8122, 8123, 8124, 8125], drawMechanism);
-register(GRAFCET_TYPES, drawGrafcet);
-register([LIFT_TYPE], drawLift);
 
 export function drawBody(g: SVGGElement, element: SchemaElement, rotation: number): void {
-  (BODY_DRAWERS.get(element.typeCode) ?? drawFallback)(g, element, rotation);
+  const draw = BODY_DRAWERS.get(element.typeCode);
+  // ПЛК / GRAFCET / лифт: пока их кусок сборки качается — рамка-заглушка, потом схема перерисуется.
+  if (!draw) requestFeatureForType(element.typeCode);
+  (draw ?? drawFallback)(g, element, rotation);
 }

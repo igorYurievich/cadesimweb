@@ -1,9 +1,10 @@
 /** Построение сетей клемм и определение типа линии (этапы 5.2b–5.2c). */
 
 import { terminalPosition } from '../model/geometry';
-import type { Schema } from '../model/types';
+import type { Schema, WireSegment } from '../model/types';
 import { buildWireLinks, pointOnSegment } from './wire-links';
 import { UnionFind } from './union-find';
+import { SegmentGrid } from './segment-grid';
 import type { NetState, TerminalKey, TerminalRef } from './types';
 import { terminalKey } from './types';
 
@@ -41,10 +42,12 @@ export function buildNets(schema: Schema): NetsResult {
   const groupNode = new Map(groupIds.map((id, i) => [id, terminals.length + i] as const));
   const uf = new UnionFind(terminals.length + groupIds.length);
 
-  // Каждая клемма соединяет все группы отрезков, на которых она расположена.
+  // Каждая клемма соединяет все группы отрезков, на которых она расположена (кандидаты — из сетки).
+  const grid = new SegmentGrid(schema.wires);
   for (let ti = 0; ti < terminals.length; ti += 1) {
     const p = positions[ti] as { x: number; y: number };
-    for (const wire of schema.wires) {
+    for (const wireIndex of grid.atPoint(p)) {
+      const wire = schema.wires[wireIndex] as WireSegment;
       if (!pointOnSegment(p, wire.from, wire.to)) continue;
       const group = links.groupOf.get(wire.id);
       const node = group === undefined ? undefined : groupNode.get(group);

@@ -8,9 +8,8 @@
  */
 
 import rawCatalog from '../data/components.json';
-import { translateCatalogName } from './catalog-localization';
 
-export type Lang = 'es' | 'en' | 'it' | 'ru' | 'fr' | 'ar';
+export type Lang = 'es' | 'en' | 'it' | 'ru' | 'fr';
 
 /** Версия продукта, в которую входит элемент. */
 export type Release = 'v1' | 'v2';
@@ -136,212 +135,14 @@ export interface Catalog {
   label(def: ComponentDef, lang?: Lang): string;
   /** Поиск по названиям на всех языках без учёта регистра и диакритики. */
   search(query: string): ComponentDef[];
+  /** Дописать названия fr (словарь catalog-localization.ts скачивается отдельно). */
+  applyTranslations(translate: (source: string, lang: 'fr') => string): void;
+  /** Дописать автоперевод на русский (catalog-localization-ru.ts скачивается отдельно). */
+  applyRussian(translate: (source: string, id: number) => string): void;
 }
 
 const FALLBACK: readonly Lang[] = ['es', 'en', 'it'];
 
-const RU_PHRASES: ReadonlyArray<readonly [string, string]> = [
-  ['Proteccion contra sobretensiones permanentes', 'Защита от постоянных перенапряжений'],
-  ['Protección contra sobretensiones permanentes', 'Защита от постоянных перенапряжений'],
-  ['Contactor de estado sólido', 'Твердотельный контактор'],
-  ['Contactor inversor de estado sólido', 'Реверсивный твердотельный контактор'],
-  ['Relé de falta de fase', 'Реле контроля наличия фаз'],
-  ['Relé de secuencia de fase', 'Реле контроля чередования фаз'],
-  ['Relé estado sólido SSR DC', 'Твердотельное реле постоянного тока SSR'],
-  ['Relé estado sólido SSR AC', 'Твердотельное реле переменного тока SSR'],
-  ['Interruptor automático', 'Автоматический выключатель'],
-  ['Interruptor diferencial', 'Устройство защитного отключения'],
-  ['Limitador sobretensiones', 'Ограничитель перенапряжения'],
-  ['Motor trifásico como monofásico', 'Трёхфазный двигатель в однофазном режиме'],
-  ['Motor trifásico rotor bobinado', 'Трёхфазный двигатель с фазным ротором'],
-  ['Motor cc. de imán permanente', 'Двигатель постоянного тока с постоянными магнитами'],
-  ['Motor cc. de independiente', 'Двигатель постоянного тока с независимым возбуждением'],
-  ['Motor paso a paso unipolar', 'Униполярный шаговый двигатель'],
-  ['Motor paso a paso bipolar', 'Биполярный шаговый двигатель'],
-  ['Motor trifásico', 'Трёхфазный двигатель'],
-  ['Motor monofásico', 'Однофазный двигатель'],
-  ['Motor Dahalander', 'Двигатель Даландера'],
-  ['Motor Dahalander', 'Двигатель Даландера'],
-  ['Motor II Veloc', 'Двухскоростной двигатель'],
-  ['Variador velocidad c.c.', 'Преобразователь скорости двигателя постоянного тока'],
-  ['Variador velocidad c.a.', 'Преобразователь частоты переменного тока'],
-  ['Control variador velocidad c.c.', 'Управление преобразователем скорости постоянного тока'],
-  ['Control variador velocidad c.a.', 'Управление преобразователем частоты'],
-  ['Control arrancador electrónico c.a.', 'Управление электронным пускателем переменного тока'],
-  ['Control inversor electrónico c.a.', 'Управление электронным инвертором переменного тока'],
-  ['Arrancador electónico c.a.', 'Электронный пускатель переменного тока'],
-  ['Arrancador electrónico c.a.', 'Электронный пускатель переменного тока'],
-  ['Contacto auxiliar relé térmico', 'Вспомогательный контакт теплового реле'],
-  ['Contacto temporizado a la conexión desconexión', 'Контакт с задержкой включения и отключения'],
-  ['Contacto temporizado a la deconexión', 'Контакт с задержкой отключения'],
-  ['Contacto temporizado a la conexión', 'Контакт с задержкой включения'],
-  ['Contacto biestable', 'Бистабильный контакт'],
-  ['Contacto', 'Контакт'],
-  ['Final de carrera', 'Концевой выключатель'],
-  ['Barrera fotoeléctica', 'Фотоэлектрический барьер'],
-  ['Barrera fotoeléctrica', 'Фотоэлектрический барьер'],
-  ['Barrera emisor', 'Излучатель фотоэлектрического барьера'],
-  ['Barrera receptor', 'Приёмник фотоэлектрического барьера'],
-  ['Det. inductivo', 'Индуктивный датчик'],
-  ['Det. capacitivo', 'Ёмкостный датчик'],
-  ['Det. magnético', 'Магнитный датчик'],
-  ['Temporizador a la conexión desconexión', 'Реле времени с задержкой включения и отключения'],
-  ['Temporizador a la desconexión', 'Реле времени с задержкой отключения'],
-  ['Temporizador a la conexión', 'Реле времени с задержкой включения'],
-  ['Temporizador pulso conexión', 'Реле времени импульсного включения'],
-  ['Bobina biestable', 'Бистабильная катушка'],
-  ['Bobina electroválvula', 'Катушка электромагнитного клапана'],
-  ['Bobina contactor', 'Катушка контактора'],
-  ['Bobina', 'Катушка'],
-  ['Contacto auxiliar', 'Вспомогательный контакт'],
-  ['Piloto señalización intermitente', 'Мигающая сигнальная лампа'],
-  ['Piloto señalización', 'Сигнальная лампа'],
-  ['Toma de corriente', 'Розетка'],
-  ['Fuente de alimentación', 'Источник питания'],
-  ['Alimentación', 'Питание'],
-  ['Fusible seccionable', 'Предохранитель-разъединитель'],
-  ['Fusible', 'Предохранитель'],
-  ['Transformador', 'Трансформатор'],
-  ['Rectificador', 'Выпрямитель'],
-  ['Diodo', 'Диод'],
-  ['Bateria', 'Аккумулятор'],
-  ['Batería', 'Аккумулятор'],
-  ['Resistencia', 'Резистор'],
-  ['Autotransformador', 'Автотрансформатор'],
-  ['Actuador lineal eléctrico', 'Электрический линейный привод'],
-  ['Actuador doble efecto', 'Двусторонний пневмоцилиндр'],
-  ['Actuador simple efecto', 'Односторонний пневмоцилиндр'],
-  ['Actuador sin vástago magnético', 'Бесштоковый магнитный пневмоцилиндр'],
-  ['Actuador sin vástago', 'Бесштоковый пневмоцилиндр'],
-  ['Actuador giro', 'Поворотный пневмопривод'],
-  ['Pinza doble efecto', 'Двусторонний пневмозахват'],
-  ['Pinza simple efecto', 'Односторонний пневмозахват'],
-  ['Motor neumático reversible', 'Реверсивный пневмодвигатель'],
-  ['Motor neumático', 'Пневмодвигатель'],
-  ['Entrada mangueral', 'Ввод пневмолинии'],
-  ['Entrada manguera', 'Ввод пневмолинии'],
-  ['Cables y conexiones', 'Провода и соединения'],
-  ['Cable protección', 'Защитный провод PE'],
-  ['Cable neutro', 'Нейтральный провод'],
-  ['Cable fase', 'Фазный провод'],
-  ['Cable positivo', 'Положительный провод'],
-  ['Cable negativo', 'Отрицательный провод'],
-  ['Cable III vertical', 'Трёхфазный вертикальный провод'],
-  ['Cable III horizontal', 'Трёхфазный горизонтальный провод'],
-  ['Cable color', 'Цветной провод'],
-  ['Conexión de salida', 'Выходное соединение'],
-  ['Conexión de entrada', 'Входное соединение'],
-  ['Conexión', 'Соединение'],
-  ['Borne cuadrado', 'Квадратная клемма'],
-  ['Borne redondo', 'Круглая клемма'],
-  ['Manguera', 'Пневмолиния'],
-  ['Actuador', 'Привод'],
-  ['Vacuostato', 'Вакуумное реле'],
-  ['Presostato', 'Реле давления'],
-  ['Termostato', 'Термостат'],
-  ['Seta', 'грибовидная кнопка'],
-  ['Pulsador', 'Кнопка'],
-  ['Botón pulsador', 'Кнопка'],
-  ['Botonera', 'Пульт кнопочный'],
-  ['Interruptor', 'Выключатель'],
-  ['Conmutador', 'Переключатель'],
-  ['Seccionador', 'Разъединитель'],
-  ['Contactor', 'Контактор'],
-  ['Enclavamiento', 'Механическая блокировка'],
-  ['Relé térmico', 'Тепловое реле'],
-  ['Relé intermitente', 'Реле-прерыватель'],
-  ['Telerruptor', 'Импульсное реле'],
-  ['Generador de pulsos', 'Генератор импульсов'],
-  ['Contador ascendente-descendente', 'Реверсивный счётчик'],
-  ['Contador 4 bits decadas', 'Декадный 4-битный счётчик'],
-  ['Contador 4 bits ASC/DES', 'Реверсивный 4-битный счётчик'],
-  ['Contador 4 bits', '4-битный счётчик'],
-  ['Contador de pulsos', 'Счётчик импульсов'],
-  ['Contador', 'Счётчик'],
-  ['Divisor Binario', 'Двоичный делитель'],
-  ['Decodificador 7 segmentos', 'Декодер семисегментного индикатора'],
-  ['Preselctor', 'Предустановленный селектор'],
-  ['Preselектор', 'Предустановленный селектор'],
-  ['Visualiza', 'Индикатор'],
-  ['Prueba', 'Тест'],
-  ['Biestable', 'Триггер'],
-  ['Etapa inicial', 'Начальный шаг'],
-  ['Etapa', 'Шаг'],
-  ['Transición', 'Переход'],
-  ['Acción', 'Действие'],
-  ['Divergencia en "O"', 'Разветвление «ИЛИ»'],
-  ['Convergencia en "O"', 'Слияние «ИЛИ»'],
-  ['Divergencia en "Y"', 'Разветвление «И»'],
-  ['Convergencia en "Y"', 'Слияние «И»'],
-  ['Macro etapa', 'Макрошаг'],
-  ['Línea enlace', 'Линия связи'],
-  ['Enlace de entrada', 'Входная связь'],
-  ['Enlace de salida', 'Выходная связь'],
-  ['Intercambio entradas PC_SIMU', 'Обмен входами с PC_SIMU'],
-  ['Intercambio salidas PC_SIMU', 'Обмен выходами с PC_SIMU'],
-  ['Módulo lógico', 'Логический модуль'],
-  ['Entrada digital PLC', 'Цифровой вход ПЛК'],
-  ['Salida digital PLC', 'Цифровой выход ПЛК'],
-  ['CPU PLC', 'ЦПУ ПЛК'],
-  ['Alimentación I/O digital PLC', 'Питание цифровых входов и выходов ПЛК'],
-  ['Componente tamaño pequeño', 'Компонент малого размера'],
-  ['Componente tamaño medio', 'Компонент среднего размера'],
-  ['Componente tamaño grande', 'Компонент большого размера'],
-  ['Relé', 'Реле'],
-  ['Protección', 'Защита'],
-  ['Proteccion', 'Защита'],
-  ['Fase', 'фаза'],
-  ['Neutro', 'нейтраль'],
-  ['Positivo', 'положительный'],
-  ['Negativo', 'отрицательный'],
-  ['Variador', 'Преобразователь'],
-  ['velocidad', 'скорости'],
-  ['Control', 'Управление'],
-  ['electónico', 'электронный'],
-  ['electrónico', 'электронный'],
-  ['eléctrico', 'электрический'],
-  ['trifásico', 'трёхфазный'],
-  ['monofásico', 'однофазный'],
-  ['unipolar', 'униполярный'],
-  ['bipolar', 'биполярный'],
-  ['inductivo', 'индуктивный'],
-  ['capacitivo', 'ёмкостный'],
-  ['magnético', 'магнитный'],
-  ['sobretensiones', 'перенапряжения'],
-  ['permanentes', 'постоянные'],
-  ['térmico', 'тепловой'],
-  ['intermitente', 'циклический'],
-  ['señalización', 'сигнальный'],
-  ['positivo', 'положительный'],
-  ['negativo', 'отрицательный'],
-  ['Protección', 'защитный'],
-  ['NA-NC', 'НО-НЗ'],
-  ['NA+NC', 'НО+НЗ'],
-  ['NA', 'НО'],
-  ['NC', 'НЗ'],
-  ['COM', 'общий'],
-  ['CON', 'переключающий'],
-];
-
-function translateRussian(source: string, id: number): string {
-  if (!source) return `Элемент ${id}`;
-  let text = source;
-  for (const [from, to] of RU_PHRASES) {
-    const escaped = from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    text = text.replace(new RegExp(escaped, 'gi'), to);
-  }
-  text = text
-    .replace(/\bAND\b/gi, 'И').replace(/\bOR\b/gi, 'ИЛИ').replace(/\bINV\b/gi, 'НЕ')
-    .replace(/\bEXOR\b/gi, 'ИСКЛ. ИЛИ').replace(/\bNAND\b/gi, 'И-НЕ').replace(/\bNOR\b/gi, 'ИЛИ-НЕ')
-    .replace(/\bSSR\b/gi, 'SSR').replace(/\bPLC\b/gi, 'ПЛК').replace(/\bLOGO\b/gi, 'LOGO')
-    .replace(/\bFirst Scan\b/gi, 'Первый цикл').replace(/\bSet\b/gi, 'Установить').replace(/\bReset\b/gi, 'Сброс')
-    .replace(/\bAS?C\/?DES\b/gi, 'ВВЕРХ/ВНИЗ').replace(/\bCLK\b/gi, 'ТАКТ').replace(/\bDIR\b/gi, 'НАПР')
-    .replace(/\bI\/?O\b/gi, 'В/В').replace(/\bIII\b/g, 'III').replace(/\bIN\b/g, 'IN')
-    .replace(/\bc\.a\.\b/gi, 'перем. тока').replace(/\bc\.c\.\b/gi, 'пост. тока')
-    .replace(/\bNA-NC\b/gi, 'НО-НЗ').replace(/\bNA\+NC\b/gi, 'НО+НЗ').replace(/\bNA\b/gi, 'НО').replace(/\bNC\b/gi, 'НЗ')
-    .replace(/\s+/g, ' ').trim();
-  return text || `Элемент ${id}`;
-}
 
 export function normalizeText(s: string): string {
   return s
@@ -356,6 +157,10 @@ export function buildCatalog(raw: RawCatalog): Catalog {
   const groups: ComponentGroup[] = [];
   const byId = new Map<number, ComponentDef>();
   let slotCount = 0;
+  // Исходное название (es → en → it) для перевода на fr: словарь подключается позже (applyTranslations).
+  const translationSources = new Map<number, string>();
+  // Без русского названия в данных: автоперевод с этого текста (catalog-localization-ru.ts).
+  const ruSources = new Map<number, string>();
 
   for (const rg of raw.groups) {
     const def = GROUP_DEFS.find((d) => rg.name.startsWith(d.prefix));
@@ -381,14 +186,19 @@ export function buildCatalog(raw: RawCatalog): Catalog {
         if (existing.names.es === null && es !== null) existing.names.es = es;
         if (existing.names.en === null && en !== null) existing.names.en = en;
         if (existing.names.it === null && it !== null) existing.names.it = it;
-        if (!existing.names.ru) existing.names.ru = ru ?? translateRussian(es ?? en ?? it ?? '', id);
+        if (!existing.names.ru && !ruSources.has(id)) {
+          if (ru) existing.names.ru = ru; else ruSources.set(id, es ?? en ?? it ?? '');
+        }
         const sourceName = (es?.trim() ? es : en ?? it) ?? '';
-        if (existing.names.fr === null && sourceName) existing.names.fr = translateCatalogName(sourceName, 'fr');
-        if (existing.names.ar === null && sourceName) existing.names.ar = translateCatalogName(sourceName, 'ar');
+        if (!translationSources.has(id) && sourceName) translationSources.set(id, sourceName);
         continue;
       }
       const sourceName = (es?.trim() ? es : en ?? it) ?? '';
-      byId.set(id, { id, names: { es, en, it, ru: ru ?? translateRussian(sourceName, id), fr: sourceName ? translateCatalogName(sourceName, 'fr') : null, ar: sourceName ? translateCatalogName(sourceName, 'ar') : null }, groups: [def.key], release: 'v2' });
+      if (sourceName) translationSources.set(id, sourceName);
+      if (ru == null) ruSources.set(id, sourceName);
+      byId.set(id, {
+        id, names: { es, en, it, ru: ru ?? null, fr: null }, groups: [def.key], release: 'v2',
+      });
     }
     groups.push(group);
   }
@@ -442,8 +252,42 @@ export function buildCatalog(raw: RawCatalog): Catalog {
         }),
       );
     },
+    applyRussian: (translate) => {
+      for (const [id, source] of ruSources) {
+        const names = byId.get(id)?.names;
+        if (names && !names.ru) names.ru = translate(source, id);
+      }
+    },
+    applyTranslations: (translate) => {
+      for (const [id, source] of translationSources) {
+        const names = byId.get(id)?.names;
+        if (!names) continue;
+        names.fr ??= translate(source, 'fr');
+      }
+    },
   };
 }
 
 /** Каталог, собранный из встроенных данных. */
 export const catalog: Catalog = buildCatalog(rawCatalog as unknown as RawCatalog);
+
+const catalogTranslations = new Map<'ru' | 'fr', Promise<void>>();
+
+/**
+ * Автопереводы названий элементов: на fr (catalog-localization.ts) и на русский для элементов без
+ * русского названия в данных (catalog-localization-ru.ts). Это отдельные куски сборки: скачиваются вместе
+ * с интерфейсом на этом языке (ui/i18n). До этого — испанские названия. Другие языки — сразу готово.
+ */
+export function loadCatalogTranslations(lang: Lang): Promise<void> {
+  if (lang !== 'ru' && lang !== 'fr') return Promise.resolve();
+  const key = lang;
+  let task = catalogTranslations.get(key);
+  if (!task) {
+    task = key === 'ru'
+      ? import('./catalog-localization-ru').then((module) => catalog.applyRussian(module.translateRussian))
+      : import('./catalog-localization').then((module) => catalog.applyTranslations(module.translateCatalogName));
+    task.catch(() => catalogTranslations.delete(key));
+    catalogTranslations.set(key, task);
+  }
+  return task;
+}

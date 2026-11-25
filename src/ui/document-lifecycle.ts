@@ -6,6 +6,7 @@ import { fitViewport } from './viewport';
 import type { Selectable } from './constants';
 import { cloneSchema, fullSheet } from './helpers';
 import type { SimulationController } from './sim-controller';
+import { currentText } from './i18n';
 
 export interface DocumentLifecycleSetup {
   selected: Map<string, Selectable>; simulation: SimulationController;
@@ -24,8 +25,8 @@ export function setupDocumentLifecycle(ctx: AppContext, deps: DocumentLifecycleS
     deps.setPlacementType(undefined); deps.clearActivePaletteCommand(); deps.setPlacementRotation(0);
     deps.setWireDrawing(false); deps.clearDraft();
     if (deps.placeTypeSelect) deps.placeTypeSelect.value = '';
-    deps.fileInput.value = ''; deps.fileName.textContent = 'Новая схема';
-    deps.status.removeAttribute('title'); deps.status.textContent = 'Новая схема создана.';
+    deps.fileInput.value = ''; deps.fileName.textContent = currentText().new;
+    deps.status.removeAttribute('title'); deps.status.textContent = currentText().newSchemaCreated;
     deps.persistSchemaNow();
     const size = deps.viewSize();
     deps.setViewport(fitViewport(fullSheet(ctx.schema.sheet), { width: size.x, height: size.y }));

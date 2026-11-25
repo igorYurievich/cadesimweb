@@ -3,6 +3,7 @@ import { cloneSchema } from './helpers';
 import { isWireInteriorPoint } from './wire-routing';
 import { wireTypeCode } from './wire-planner';
 import type { Point } from './viewport';
+import { currentText, fillText } from './i18n';
 
 export interface WireEditorCommandsOptions {
   ctx: AppContext;
@@ -43,7 +44,7 @@ export function createWireEditorCommands(options: WireEditorCommandsOptions): Wi
     options.setCursor(undefined);
     options.svg.classList.remove('is-drawing-wire');
     options.renderSchema();
-    options.status.textContent = 'Рисование провода отменено.';
+    options.status.textContent = currentText().wireCancelled;
   };
   const start = (): void => {
     options.leaveNodeTool();
@@ -56,7 +57,7 @@ export function createWireEditorCommands(options: WireEditorCommandsOptions): Wi
     options.resetRoutePreference();
     options.svg.classList.add('is-drawing-wire');
     options.renderSchema();
-    options.status.textContent = 'Провод: клик — начало, второй клик — конец. Shift+клик — добавить излом; ↑/↓/←/→ — тип провода; C — выйти; Tab — другой угол, F — сторона пучка.';
+    options.status.textContent = currentText().wireModeHint;
   };
   const toggle = (): void => { if (options.isDrawing()) cancel(); else start(); };
   const finish = (): void => {
@@ -76,7 +77,7 @@ export function createWireEditorCommands(options: WireEditorCommandsOptions): Wi
       bundle = options.buildRoutes(draftPoints);
     }
     if (bundle.length === 0 || !bundle.every((item) => options.isInsideSheet(item.route))) {
-      options.status.textContent = 'Провода не помещаются на листе в этом месте.';
+      options.status.textContent = currentText().wireNoRoom;
       options.setPoints([]);
       options.setCursor(undefined);
       options.drawDraft();
@@ -84,7 +85,7 @@ export function createWireEditorCommands(options: WireEditorCommandsOptions): Wi
       return;
     }
     if (bundle.some((item) => options.hitsComponent(item.route))) {
-      options.status.textContent = 'Нельзя провести кабель через корпус компонента. Добавьте точки изгиба вокруг него.';
+      options.status.textContent = currentText().wireThroughBody;
       options.setPoints([]);
       options.setCursor(undefined);
       options.drawDraft();
@@ -131,8 +132,8 @@ export function createWireEditorCommands(options: WireEditorCommandsOptions): Wi
     options.commitSchema(before);
     options.renderSchema();
     options.status.textContent = bundle.length > 1
-      ? `Добавлено проводов: ${bundle.length}. Следующий клик — начало нового.`
-      : 'Провод добавлен. Следующий клик — начало нового, Esc — выйти.';
+      ? fillText(currentText().wiresAdded, { count: bundle.length })
+      : currentText().wireAdded;
   };
   return { cancel, start, toggle, finish };
 }

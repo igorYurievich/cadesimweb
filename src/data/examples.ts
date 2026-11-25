@@ -1,6 +1,11 @@
-/** Встроенные примеры схем (окно «Примеры»). Вложенные .cad подключаются как сырой текст. */
+/**
+ * Встроенные примеры схем (окно «Примеры»). Вложенные .cad подключаются как сырой текст,
+ * но лениво: каждый файл — отдельный кусок сборки, он скачивается только при открытии примера.
+ * В стартовую загрузку попадает лишь список имён файлов.
+ */
 
-const files = import.meta.glob('./examples/**/*.cad', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
+const files = import.meta.glob('./examples/**/*.cad', { query: '?raw', import: 'default' }) as
+  Record<string, () => Promise<string>>;
 
 export interface ExampleScheme {
   /** Номер примера в списке проводника. */
@@ -15,7 +20,8 @@ export interface ExampleScheme {
   file: string;
   /** Папка в окне примеров; пустая строка означает корень. */
   folder: string;
-  text: string;
+  /** Текст .cad: скачивается при первом вызове (в офлайне — из кэша service worker). */
+  load(): Promise<string>;
 }
 
 /**
@@ -44,10 +50,10 @@ const EXAMPLE_TITLES: Readonly<Record<string, string>> = {
 
 /** Пример из каталога: показывается под своим названием, а без названия — скрыт. */
 function catalogExample(number: number, file: string, folder: string): ExampleScheme | null {
-  const text = files[`./examples/${folder}/${file}`];
+  const load = files[`./examples/${folder}/${file}`];
   const title = EXAMPLE_TITLES[file];
-  if (text === undefined || title === undefined) return null;
-  return { number, code: 'CAD', title, fileName: `${title}.cad`, file, folder, text };
+  if (load === undefined || title === undefined) return null;
+  return { number, code: 'CAD', title, fileName: `${title}.cad`, file, folder, load };
 }
 
 const CATALOG: ReadonlyArray<string> = Array.from({ length: 10 }, (_, index) => `Ejemplo ${index + 1}.cad`);
@@ -69,8 +75,8 @@ const authorExamples: ExampleScheme[] = Object.keys(files)
     const fileName = key.slice(key.lastIndexOf('/') + 1);
     // «Iluminacion_escalera_3_hilos_(clasico).cad» → «Iluminacion escalera 3 hilos (clasico)».
     const title = fileName.replace(/\.cad$/i, '').replace(/_/g, ' ').replace(/\s+/g, ' ').trim();
-    const text = files[key]!;
-    return { number: 101 + index, code: 'CAD', title, fileName, file: fileName, folder: AUTHOR_FOLDER, text };
+    const load = files[key]!;
+    return { number: 101 + index, code: 'CAD', title, fileName, file: fileName, folder: AUTHOR_FOLDER, load };
   });
 
 /** Папки окна «Примеры» в порядке показа. */

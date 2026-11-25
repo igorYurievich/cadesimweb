@@ -4,6 +4,7 @@ import type { Viewport } from './viewport';
 import type { StampKey } from './constants';
 import { STAMP_CELLS } from './constants';
 import { cloneSchema, stampMetrics, stampValue } from './helpers';
+import { currentText } from './i18n';
 
 export interface StampEditorSetup {
   stage: HTMLElement | null; viewport(): Viewport;
@@ -36,8 +37,10 @@ export function setupStampEditor(ctx: AppContext, deps: StampEditorSetup) {
     const top = viewport.offsetY + (sheet.height + metrics.gap + cell.r0 * metrics.rowH) * viewport.scale;
     const input = document.createElement('input');
     input.type = 'text'; input.className = 'stamp-editor'; input.value = stampValue(sheet, key);
-    input.setAttribute('aria-label', cell.hint ?? cell.label ?? 'Графа штампа');
-    input.title = `${cell.hint ?? cell.label ?? ''} · Enter — готово, Tab — следующая графа, Esc — отмена`;
+    const t = currentText();
+    const caption = cell.hint ? t[cell.hint] : cell.label ?? t.stampCell;
+    input.setAttribute('aria-label', caption);
+    input.title = `${caption} · ${t.stampEditHint}`;
     Object.assign(input.style, {
       left: `${left}px`, top: `${top}px`,
       width: `${Math.max(60, (cell.x1 - cell.x0) * metrics.stampWidth * viewport.scale)}px`,

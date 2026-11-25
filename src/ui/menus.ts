@@ -5,14 +5,15 @@ import { fitViewport } from './viewport';
 import { growProgramPagesToContent, programPageSize } from '@model/program-pages';
 import { activeProgramPage, pageViewport } from './program-pages-view';
 import { cloneSchema, fullSheet } from './helpers';
-import type { ExportActions } from './export';
+import type { ExportCommands } from './export-lazy';
+import { currentText, fillText } from './i18n';
 
 export interface MenuSetup {
   fileInput: HTMLInputElement;
   status: HTMLElement;
   undoButton: HTMLButtonElement;
   redoButton: HTMLButtonElement;
-  exportActions: ExportActions;
+  exportActions: ExportCommands;
   requestNewSchema(): void;
   copySelection(): void;
   cutSelection(): void;
@@ -122,7 +123,7 @@ export function setupMenus(ctx: AppContext, deps: MenuSetup): void {
     if (!sheetWidth || !sheetHeight) return;
     const width = Number(sheetWidth.value); const height = Number(sheetHeight.value);
     const valid = (value: number): boolean => Number.isFinite(value) && value >= 30 && value <= 2000;
-    if (!valid(width) || !valid(height)) { deps.status.textContent = 'Размер листа: допустимо от 30 до 2000 мм.'; return; }
+    if (!valid(width) || !valid(height)) { deps.status.textContent = currentText().sheetSizeInvalid; return; }
     const page = activeProgramPage();
     if (page >= 1) {
       // Лист программы не шире основного листа: в .cad программа пишется полосами справа от его рамки.
@@ -136,9 +137,9 @@ export function setupMenus(ctx: AppContext, deps: MenuSetup): void {
         deps.commitSchema(before);
         deps.setViewport(pageViewport(ctx.schema, page, deps.viewSize)); deps.drawViewport(); deps.renderSchema();
         const size = programPageSize(sheet);
-        if (grown) deps.status.textContent = `Программа не помещается на такой лист: размер ${size.width} × ${size.height} мм.`;
+        if (grown) deps.status.textContent = fillText(currentText().programSheetTooSmall, size);
       }
-      if (pageWidth < width) deps.status.textContent = `Лист программы не шире основного листа: ${pageWidth} мм.`;
+      if (pageWidth < width) deps.status.textContent = fillText(currentText().programSheetWidth, { width: pageWidth });
       sheetDialog?.close();
       return;
     }

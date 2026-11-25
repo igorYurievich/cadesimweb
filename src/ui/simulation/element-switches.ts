@@ -5,6 +5,7 @@ import type { SchemaElement } from '@model/types';
 import { armedByDefaultTypes, latchedTypes } from '../constants';
 import type { AppContext } from '../context';
 import type { SimulationState } from './types';
+import { currentText } from '../i18n';
 
 const maintainedTypes = new Set([8008, 8009, 8010, 8011]);
 
@@ -134,7 +135,7 @@ export function applyTimerVisuals(state: SimulationState, element: SchemaElement
   const shown = done ? total : Math.min(total, Math.max(0, timer?.elapsed ?? 0));
   const text = state.result === undefined ? ''
     : `${timer?.phase === 'counting' ? shown.toFixed(1).replace('.', ',') : formatTime(shown)} / `
-      + `${formatTime(total)} с`;
+      + `${formatTime(total)} ${currentText().secondsShort}`;
   if (readout && readout.textContent !== text) readout.textContent = text;
   node.classList.toggle('is-timer-counting', timer?.phase === 'counting');
   node.classList.toggle('is-timer-done', done);

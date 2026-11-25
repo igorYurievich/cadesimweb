@@ -5,6 +5,7 @@ import type { AppContext } from '../context';
 import { createSimInputs } from './state';
 import type { SimulationDependencies, SimulationState } from './types';
 import type { SimulationLoop } from './loop';
+import { currentText, fillText } from '../i18n';
 
 export interface SimulationInputActions {
   applySimulationInput(): void;
@@ -61,14 +62,16 @@ export function createSimulationInputs(
     state.lastFrameTime = undefined;
     loop.evaluateSimulation();
     deps.renderSchema();
-    deps.status.textContent = 'Входы и память симуляции сброшены.';
+    deps.status.textContent = currentText().inputsReset;
   };
   const simulateOverload = (id: number): void => {
     if (state.mode === 'edit') loop.startSimulation();
     state.inputs.tripped[id] = true;
     applySimulationInput();
     const element = ctx.schema.elements.find((candidate) => candidate.id === id);
-    deps.status.textContent = `Смоделирована перегрузка: ${element?.name || `элемент ${id}`}.`;
+    const t = currentText();
+    const name = element?.name || fillText(t.elementWithId, { id });
+    deps.status.textContent = fillText(t.overloadSimulated, { name });
   };
   return {
     applySimulationInput, pressMomentary, releaseMomentary, resetSimulationInputs, simulateOverload,

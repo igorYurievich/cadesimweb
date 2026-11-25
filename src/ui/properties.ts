@@ -8,11 +8,9 @@ import { appendDetectorWiringField, appendReceiverEmitterField } from './detecto
 import { appendPoleVariantField } from './pole-properties';
 import { appendButtonColorField, appendTerminalColorField, appendViewField } from './view-properties';
 import { appendStairTimerField } from './stair-timer-properties';
-import { appendLiftFields } from './lift-properties';
 import { appendVfdFields } from './vfd-properties';
-import { appendLogoSupplyField, appendPlcFields } from './plc-properties';
 import { appendProgramButton } from './program-pages-view';
-import { appendGrafcetFields } from './grafcet-properties';
+import { loadedFeatureHooks } from './features/loader';
 import { isDelayBlock2d } from '@model/realistic-2d-types';
 import type { InterfaceText } from './i18n';
 
@@ -38,7 +36,7 @@ export function setupPropertiesPanel(ctx: AppContext, uiText: () => InterfaceTex
     if (propertiesDocked) { propertiesPanel.style.left = ''; propertiesPanel.style.top = ''; }
     if (propertiesPanelCommand) propertiesPanelCommand.textContent = propertiesDocked ? uiText().propsHide : uiText().propsShow;
     const done = root.querySelector<HTMLElement>('#properties-close');
-    if (done) done.textContent = uiText().propsDone;
+    if (done) { done.textContent = uiText().propsDone; done.title = uiText().propsDone; }
   };
   const closeFloatingProperties = (): void => {
     if (!propertiesFloating) return;
@@ -101,8 +99,10 @@ export function setupPropertyFields(ctx: AppContext, deps: PropertyFieldsSetup):
     if (!element) { note(deps.uiText().missingElement); return; }
     const info = getCadType(element.typeCode);
     const heading = document.createElement('p'); heading.className = 'property-type'; heading.textContent = `${info.label} · ${element.id}`; deps.propertyFields.append(heading);
-    // GRAFCET: свои поля вместо имени, функции и меток клемм (grafcet-properties.ts).
-    if (appendGrafcetFields(ctx.schema, element, { ...deps, rerender: renderProperties })) return;
+    // ПЛК / GRAFCET / лифт: поля из их кусков сборки (features/loader.ts); пока кусок качается — без них,
+    // после загрузки схема и свойства перерисовываются. GRAFCET: свои поля вместо имени, функции и меток клемм.
+    const fieldDeps = { ...deps, rerender: renderProperties };
+    if ([...loadedFeatureHooks()].some((hooks) => hooks.replaceProperties?.(ctx.schema, element, fieldDeps))) return;
     const addField = (labelText: string, value: string, update: (next: string) => void, options: { type?: string; min?: string; step?: string } = {}): HTMLInputElement => {
       const label = document.createElement('label'); label.className = 'property-field'; label.append(document.createTextNode(labelText));
       const input = document.createElement('input'); input.type = options.type ?? 'text'; input.value = value;
@@ -126,10 +126,8 @@ export function setupPropertyFields(ctx: AppContext, deps: PropertyFieldsSetup):
     appendButtonColorField(ctx.schema, element, { ...deps, rerender: renderProperties });
     appendTerminalColorField(ctx.schema, element, { ...deps, rerender: renderProperties });
     appendStairTimerField(ctx.schema, element, { ...deps, rerender: renderProperties });
-    appendLiftFields(ctx.schema, element, { ...deps, rerender: renderProperties });
     appendVfdFields(ctx.schema, element, { ...deps, rerender: renderProperties });
-    appendLogoSupplyField(ctx.schema, element, { ...deps, rerender: renderProperties });
-    appendPlcFields(ctx.schema, element, { ...deps, rerender: renderProperties });
+    for (const hooks of loadedFeatureHooks()) hooks.appendProperties?.(ctx.schema, element, fieldDeps);
     appendProgramButton(ctx.schema, element, { ...deps, root: ctx.root });
     const terminalsHeading = document.createElement('h3'); terminalsHeading.textContent = deps.uiText().terminals; deps.propertyFields.append(terminalsHeading);
     element.terminals.forEach((terminal, index) => addField(`${deps.uiText().terminal} ${index + 1}`, terminal.label, (value) => {

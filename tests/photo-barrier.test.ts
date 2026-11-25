@@ -4,7 +4,7 @@ import type { EngineState, UserInputs } from '@engine/index';
 import { getBehavior, invalidTerminalIndexes, missingBehaviors } from '@engine/behaviors';
 import { cadTypeForCommand, getCadType, isKnownCadType } from '@model/cad-types';
 import { PHOTO_BARRIER_TYPE } from '@model/cad-types-sensors';
-import { catalog } from '@model/catalog';
+import { catalog, loadCatalogTranslations } from '@model/catalog';
 import { exportCad } from '@model/cad-export';
 import { importCad } from '@model/cad-import';
 import { createEmptySchema } from '@model/types';
@@ -42,11 +42,13 @@ function live(state: EngineState, element: number, index: number): boolean {
 }
 
 describe('photoelectric barrier: catalog and .cad type', () => {
-  it('is placed from the «Detectores» panel under its new name', () => {
+  it('is placed from the «Detectores» panel under its new name', async () => {
     const def = catalog.getById(33025);
     expect(def?.groups[0]).toBe('sensors');
     expect(def?.names.es).toBe('Detector de barrera fotoeléctrico');
+    await loadCatalogTranslations('ru'); // Автоперевод на русский — отдельный кусок сборки.
     expect(catalog.label(def!, 'ru')).toBe('Фотоэлектрический датчик-барьер');
+    await loadCatalogTranslations('fr'); // Словарь fr — отдельный кусок сборки.
     expect(catalog.label(def!, 'fr')).toBe('Détecteur à barrière photoélectrique');
     expect(cadTypeForCommand(33025)?.code).toBe(PHOTO_BARRIER_TYPE);
     expect(isKnownCadType(PHOTO_BARRIER_TYPE)).toBe(true);
