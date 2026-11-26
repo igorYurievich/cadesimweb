@@ -42,13 +42,14 @@ describe('persisted UI settings', () => {
     expect(readUniformWireColors()).toBe(false);
   });
 
-  it('shows «Instalaciones» by default, also for saved selections, until the user turns it off', () => {
-    expect(readOptionalPaletteGroups()).toEqual(['installations']);
+  it('shows realistic 2D, PLC I/O, power electronics and sensors by default until the user turns them off', () => {
+    const defaults = ['realistic-2d', 'io-plc', 'power-electronics', 'sensors'];
+    expect(readOptionalPaletteGroups()).toEqual(defaults);
     values.set('cadesimu-visible-optional-groups:v1', JSON.stringify(['grafcet']));
-    expect(readOptionalPaletteGroups()).toEqual(['grafcet', 'installations']);
+    expect(readOptionalPaletteGroups()).toEqual(['grafcet', ...defaults]);
     writeOptionalPaletteGroups(new Set(['grafcet']));
     expect(readOptionalPaletteGroups()).toEqual(['grafcet']);
-    writeOptionalPaletteGroups(new Set(['grafcet', 'installations']));
-    expect(readOptionalPaletteGroups()).toEqual(['grafcet', 'installations']);
+    writeOptionalPaletteGroups(new Set(['grafcet', 'sensors', 'installations']));
+    expect(readOptionalPaletteGroups()).toEqual(['grafcet', 'sensors', 'installations']);
   });
 });

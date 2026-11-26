@@ -1,4 +1,5 @@
 import { DETECTOR_CODES } from '@model/detector-types';
+import { REFLEX_TYPE } from '@model/reflex-sensor';
 import { LIFT_TYPE } from '@model/lift';
 import { createEmptyMemory } from '@engine/simulate';
 import type { AppContext } from '../context';
@@ -18,10 +19,10 @@ export interface SimulationInputActions {
   isTrippableType(typeCode: number): boolean;
 }
 
-// Детекторы (все варианты подключения) и барьер 15000 срабатывают, пока их зажимают мышью, как кнопки.
+// Детекторы (все варианты подключения), фотодатчик Réflex и барьер 15000 срабатывают, пока их зажимают мышью.
 const momentaryTypes = new Set([
   8000, 8001, 8002, 8003, 8004, 8005, 8006, 8007, 8012, 8013, 8014, 8015,
-  ...DETECTOR_CODES, 15000, 8100, 8123, 8023,
+  ...DETECTOR_CODES, REFLEX_TYPE, 15000, 8100, 8123, 8023,
 ]);
 // Лифт: клик ставит или убирает человека у входа (engine/lift.ts).
 const maintainedTypes = new Set([8008, 8009, 8010, 8011, LIFT_TYPE]);

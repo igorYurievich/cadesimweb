@@ -2,6 +2,7 @@ import { version as appVersion } from '../../package.json';
 import { CAD_GRID_STEP, FALLBACK_VIEWPORT, PLACEABLE_TYPES } from './constants';
 import { getCadType } from '@model/cad-types';
 import type { Theme } from './constants';
+import { readStoredPaletteView } from './palette-view-toggle';
 
 /** Страница поддержки проекта на Ko-fi (обычная ссылка вместо скрипта-виджета Ko-fi). */
 const KOFI_URL = 'https://ko-fi.com/S3M12AF9Y5';
@@ -16,9 +17,8 @@ function setPaletteCollapsed(root: HTMLElement, collapsed: boolean): void {
 }
 
 export function renderAppShell(root: HTMLElement, theme: Theme): void {
-  // Вид палитры «Значки» временно отключён: всегда текстовый список (выбор в «Вид» скрыт, viewport.css).
-  // Чтобы вернуть: читать сохранённый вид, как раньше: localStorage.getItem(PALETTE_VIEW_KEY) === 'icons'.
-  root.dataset.paletteView = 'list';
+  // Старый вид «Значки» (CADe) выключен; доступны список и крупные значки (palette-view-toggle.ts).
+  root.dataset.paletteView = readStoredPaletteView();
   setPaletteCollapsed(root, readPaletteCollapsed());
   root.innerHTML = `
     <main class="app-shell">

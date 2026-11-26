@@ -2,6 +2,7 @@ import { isEnergized } from '@engine/loads';
 import { terminalKey } from '@engine/types';
 import { EMITTER_TYPE, detectorSpec } from '@model/detector-types';
 import { getCadType } from '@model/cad-types';
+import { REFLEX_TYPE } from '@model/reflex-sensor';
 import type { Schema, SchemaElement } from '@model/types';
 import { isPhotoReceiver, receiverBeamBlocked } from '@engine/photo-beam';
 import { liftActiveSensorNames } from '@engine/lift';
@@ -11,11 +12,12 @@ import type { SimulationState } from './types';
 /**
  * Датчики панели «Detectores». Вызывается после остальных визуалов, потому что барьер переопределяет is-powered.
  *  - барьер 15000: цвет показывает состояние реле — выключен серый, включён красный с серой заливкой;
- *  - детекторы: красный цвет, серая заливка и переключённый значок контакта, пока датчик зажат;
+ *  - детекторы и фотодатчик Réflex: красный цвет, серая заливка и переключённый значок контакта,
+ *    пока датчик зажат;
  *  - излучатель: серая заливка, пока на 1-2 есть напряжение.
  */
 export function applySensorVisuals(state: SimulationState, element: SchemaElement, node: SVGGElement, schema: Schema): void {
-  if (detectorSpec(element.typeCode)) {
+  if (detectorSpec(element.typeCode) || element.typeCode === REFLEX_TYPE) {
     // Зажатый датчик в CADe_SIMU рисуется красным с серой заливкой, даже без проводов.
     // Приёмник фотобарьера срабатывает и сам, когда привязанный излучатель не светит (photo-beam.ts).
     const pressed = Boolean(state.inputs.pressed[element.id])

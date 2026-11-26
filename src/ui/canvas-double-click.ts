@@ -6,6 +6,8 @@ export interface CanvasDoubleClickSetup {
   svg: SVGSVGElement; wireDrawing(): boolean; placing(): boolean; panTool(): boolean; spaceDown(): boolean;
   nodeTool(): boolean; simulationMode(): 'edit' | 'run'; selected: Map<string, Selectable>;
   renderSchema(): void; openProperties(x: number, y: number): void;
+  /** Под указателем провод, который перекрывает элемент (wire-hit.ts): двойной клик не открывает свойства элемента. */
+  wireUnderPointer(event: PointerEvent): boolean;
 }
 
 export function setupCanvasDoubleClick(deps: CanvasDoubleClickSetup): void {
@@ -16,7 +18,7 @@ export function setupCanvasDoubleClick(deps: CanvasDoubleClickSetup): void {
     }
     const hit = document.elementsFromPoint(event.clientX, event.clientY)
       .map((node) => getSelectionHit(node)).find((candidate) => candidate?.kind === 'element');
-    if (!hit) { lastPress = undefined; return; }
+    if (!hit || deps.wireUnderPointer(event)) { lastPress = undefined; return; }
     const now = performance.now(); const previous = lastPress;
     if (previous && previous.id === hit.id && now - previous.time < 450 && Math.hypot(event.clientX - previous.x, event.clientY - previous.y) < 8) {
       lastPress = undefined;

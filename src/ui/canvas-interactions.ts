@@ -6,6 +6,7 @@ import { setupMovePreview } from './move-preview';
 import { setupCanvasPointerMove, setupCanvasPointerEnd } from './canvas-pointer-move';
 import { setupCanvasPointerDown } from './canvas-pointer-down';
 import { setupCanvasDoubleClick } from './canvas-double-click';
+import { pickCanvasHit, pointInsideSymbolShape, pointerSheetHit } from './wire-hit';
 import { setupPaletteDrop } from './palette-drop';
 import { setupWireContextMenu } from './context-menu-events';
 import type { SimulationController } from './sim-controller';
@@ -90,6 +91,11 @@ export function setupCanvasInteractions(options: CanvasInteractionsOptions): voi
     selected: options.selected,
     renderSchema: options.renderSchema,
     openProperties: options.openProperties,
+    wireUnderPointer: (event) => {
+      const { point, tolerance } = pointerSheetHit(event, options.svg, options.viewSize(), options.viewport());
+      const inside = pointInsideSymbolShape(event.target, event.clientX, event.clientY);
+      return pickCanvasHit(event.target, options.ctx.schema, point, tolerance, inside)?.kind === 'wire';
+    },
   });
   setupWireContextMenu(options.svg, {
     isDrawing: options.wireDrawing,

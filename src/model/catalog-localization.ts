@@ -75,6 +75,7 @@ const PHRASES: Record<string, Locales> = {
   'Actuador sin vástago': { fr: 'Actionneur sans tige' },
   'Actuador lineal eléctrico': { fr: 'Actionneur linéaire électrique' },
   'Actuador giro': { fr: 'Actionneur rotatif' },
+  'Sensor fotoeléctrico réflex': { fr: 'Capteur photoélectrique reflex' },
   'Detector de barrera fotoeléctrico': { fr: 'Détecteur à barrière photoélectrique' },
   'Barrera fotoeléctica': { fr: 'Barrière photoélectrique' },
   'Barrera fotoeléctrica': { fr: 'Barrière photoélectrique' },

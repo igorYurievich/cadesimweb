@@ -7,11 +7,12 @@ import { STAIR_TIMER_COMMAND } from '@model/stair-timer';
 import { VFD_2D_1PH_COMMAND, VFD_2D_COMMAND } from '@model/vfd';
 import { GRAFCET_TABLE_COMMAND } from '@model/grafcet';
 import { LIFT_COMMAND } from '@model/lift';
+import { REFLEX_COMMAND } from '@model/reflex-sensor';
 
 /** Кнопки только веб-версии: в оригинальном exe их нет. */
 const WEB_ONLY = [
   DIN_PSU_COMMAND, STAIR_TIMER_COMMAND, ...Object.values(MECHANISM_COMMANDS), VFD_2D_COMMAND, VFD_2D_1PH_COMMAND,
-  GRAFCET_TABLE_COMMAND, LIFT_COMMAND,
+  GRAFCET_TABLE_COMMAND, LIFT_COMMAND, REFLEX_COMMAND,
 ];
 
 describe('catalog: data integrity', () => {

@@ -2,11 +2,13 @@
  * Типы .cad панели «Detectores / sensores».
  *
  * Барьер (33025) в образцах не встречался: его код выбран условно, вне диапазонов из образцов.
- * Детекторы (индуктивные, ёмкостные, магнитные, приёмник барьера) описаны в detector-types.ts.
+ * Детекторы (индуктивные, ёмкостные, магнитные, приёмник барьера) описаны в detector-types.ts,
+ * фотодатчик Réflex (только веб) — в reflex-sensor.ts.
  */
 
 import type { CadTypeInfo } from './cad-types';
 import { DETECTOR_CAD_TYPES } from './detector-types';
+import { REFLEX_CAD_TYPE } from './reflex-sensor';
 
 /** Фотоэлектрический датчик-барьер (кнопка 33025). Код условный (confidence 'probable'), см. комментарий файла. */
 export const PHOTO_BARRIER_TYPE = 15000;
@@ -33,4 +35,5 @@ export const SENSOR_TYPES: readonly CadTypeInfo[] = [
       + 'Питание 1-2 (L, N), переключающий контакт: 3-4 НЗ, 3-5 НО. Код типа условный, образца нет.',
   },
   ...DETECTOR_CAD_TYPES,
+  REFLEX_CAD_TYPE,
 ];

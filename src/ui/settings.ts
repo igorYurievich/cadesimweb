@@ -7,7 +7,7 @@ import type { Theme } from './constants';
 import type { InterfaceText } from './i18n';
 
 /** Доп. категории, включённые по умолчанию; в OPTIONAL_GROUP_OFF_KEY — те из них, что пользователь выключил сам. */
-const DEFAULT_ON_OPTIONAL_GROUPS: readonly GroupKey[] = ['installations'];
+const DEFAULT_ON_OPTIONAL_GROUPS: readonly GroupKey[] = ['realistic-2d', 'io-plc', 'power-electronics', 'sensors'];
 const OPTIONAL_GROUP_OFF_KEY = 'cadesimu-optional-groups-off:v1';
 
 export interface AppSettings {

@@ -18,8 +18,9 @@ export function hasVerifiedBadge(group: GroupKey, id: number): boolean {
     || group === 'contactors'
     || (group === 'protection' && id !== 33054 && id !== 33055)
     // Датчики: все, что размещаются, включая излучатель барьера 33027 (питание 1-2, луч для привязанного приёмника,
-    // engine/photo-beam.ts).
-    || (group === 'sensors' && [33032, 33020, 33021, 33022, 33023, 33024, 33025, 33027, 33034, 33033].includes(id))
+    // engine/photo-beam.ts) и фотодатчик Réflex 34013 (только веб, model/reflex-sensor.ts).
+    || (group === 'sensors'
+      && [33032, 33020, 33021, 33022, 33023, 33024, 33025, 33027, 33034, 33033, 34013].includes(id))
     // Символы 2D, уже сделанные: моторы, кнопка, контактор, дисюнтор, автомат, дифавтомат, блоки контактов, термореле,
     // Interruptor и Seccionador (33386, 33390), клемма «Borna» (33319), минутник Alst 8 (34002, только веб).
     || (group === 'realistic-2d' && [

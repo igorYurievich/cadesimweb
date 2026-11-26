@@ -1,10 +1,11 @@
 import { DETECTOR_CODES, EMITTER_TYPE, detectorSpec } from "@model/detector-types";
+import { REFLEX_TYPE } from "@model/reflex-sensor";
 
 type Anchor = "start" | "middle" | "end";
 type Spot = { x: number; y: number; anchor: Anchor };
 type LabelSpot = readonly [dx: number, dy: number, anchor: Anchor];
 
-const ALL = [...DETECTOR_CODES, EMITTER_TYPE];
+const ALL = [...DETECTOR_CODES, EMITTER_TYPE, REFLEX_TYPE];
 
 const isSide = (code: number): boolean => detectorSpec(code)?.wiring.endsWith("side") ?? false;
 const isReceiver = (code: number): boolean => detectorSpec(code)?.kind === "receiver";
@@ -23,6 +24,8 @@ export const DETECTOR_SIDE_LABELS: Readonly<Record<number, ReadonlyArray<LabelSp
 /** Область захвата: корпус и выводы, у приёмника ещё стрелка слева, у излучателя справа. */
 export function detectorHitFrame(code: number): { x: number; y: number; w: number; h: number } | undefined {
   if (!ALL.includes(code)) return undefined;
+  // Фотодатчик Réflex: корпус 12×12, выводы до y = 18 (reflex-symbol.ts).
+  if (code === REFLEX_TYPE) return { x: -7, y: -1, w: 17.5, h: 20 };
   const extraLeft = isReceiver(code) ? 3.5 : 0;
   const extraRight = code === EMITTER_TYPE ? 5 : 0;
   if (isSide(code)) return { x: -16 - extraLeft, y: -1, w: 20 + extraLeft, h: 8 };

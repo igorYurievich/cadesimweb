@@ -9,6 +9,7 @@
 import { getCadType } from '../model/cad-types';
 import { PHOTO_BARRIER_TYPE } from '../model/cad-types-sensors';
 import { DETECTOR_CODES, EMITTER_TYPE, detectorSpec } from '../model/detector-types';
+import { REFLEX_TYPE } from '../model/reflex-sensor';
 import type { SchemaElement } from '../model/types';
 import type { BehaviorLink, TypeBehavior } from './behaviors';
 import type { UserInputs } from './types';
@@ -37,9 +38,16 @@ function detectorBehavior(typeCode: number): TypeBehavior {
   return { typeCode, links: [...supply, contact] };
 }
 
+/** Фотодатчик Réflex: как индуктивный на 3 провода NA — питание + −, контакт + → S, пока датчик зажат. */
+const REFLEX_LINKS: BehaviorLink[] = [
+  { terminals: [0, 1], kind: 'load', control: 'always' },
+  { terminals: [0, 2], kind: 'switch', control: 'pressed', normallyClosed: false },
+];
+
 const detectorBehaviors = (): TypeBehavior[] => [
   ...DETECTOR_CODES.map(detectorBehavior),
   { typeCode: EMITTER_TYPE, links: [{ terminals: [0, 1], kind: 'load', control: 'always' }] },
+  { typeCode: REFLEX_TYPE, links: REFLEX_LINKS },
 ];
 
 /** Строки таблицы поведения для всей панели датчиков. */

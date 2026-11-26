@@ -13,6 +13,7 @@ import { screenToSheet } from './viewport';
 import { snapDrawingPoint } from './wire-routing';
 import { svgPoint } from './canvas-primitives';
 import { getSelectionHit, selectedObjects } from './selection';
+import { WIRE_HIT_PX, pickCanvasHit, pointInsideSymbolShape } from './wire-hit';
 import { currentText, fillText } from './i18n';
 
 export interface CanvasPointerDownSetup {
@@ -210,7 +211,9 @@ export function setupCanvasPointerDown(ctx: AppContext, deps: CanvasPointerDownS
           deps.renderSchema();
         }
       } else {
-        const hit = getSelectionHit(event.target);
+        // Провод рядом с точкой клика важнее рамки захвата элемента (wire-hit.ts).
+        const hit = pickCanvasHit(event.target, schema, sheetPoint, WIRE_HIT_PX / Math.max(deps.viewport().scale, 1e-6),
+          pointInsideSymbolShape(event.target, event.clientX, event.clientY));
         if (hit) {
           const key = selectionKey(hit);
           if (toggleSelection) {
