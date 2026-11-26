@@ -264,6 +264,7 @@ export function renderAppShell(root: HTMLElement, theme: Theme): void {
       <dialog id="about-dialog" class="app-dialog about-dialog" aria-labelledby="about-title">
         <h2 id="about-title">Web Cade</h2>
         <p id="about-bio">Автор проекта — Игорь Липский Вячин.</p>
+        <p id="about-study">Студент 2-го курса CFGS Sistemas Electrotécnicos y Automatizados в IES Las Lagunas.</p>
         <p id="about-thanks">Отдельное спасибо Артему Горохову за помощь в разработке.</p>
         <p class="about-contact"><span id="about-contact-label">По вопросам и пожеланиям пишите мне:</span> <a href="mailto:igoryurievich1@gmail.com">igoryurievich1@gmail.com</a></p>
         <p class="about-support">

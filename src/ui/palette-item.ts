@@ -108,6 +108,17 @@ function addPlacementHandlers(
     deps.leaveNodeTool();
   };
   button.addEventListener('click', () => {
+    // Повторный клик по выбранному элементу отменяет выбор, как Esc.
+    if (deps.activePaletteCommand() === item.id && deps.svg.classList.contains('is-placing')) {
+      deps.setActivePaletteCommand(undefined);
+      deps.setPlacement(undefined);
+      deps.resetPlacementRotation();
+      deps.svg.classList.remove('is-placing');
+      renderPalette();
+      deps.drawGhost();
+      deps.status.textContent = currentText().placementEnded;
+      return;
+    }
     setPlacement();
     if (deps.isWireDrawing()) deps.cancelWireDrawing();
     deps.svg.classList.add('is-placing');

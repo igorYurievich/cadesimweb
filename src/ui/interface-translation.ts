@@ -166,7 +166,7 @@ export function setupInterfaceTranslation(deps: InterfaceTranslationSetup): () =
     set('#cad-export-warning-optout-label', t.cadExportWarningOptout);
     set('#cad-export-warning-cancel', t.cadExportWarningCancel);
     set('#cad-export-warning-confirm', t.cadExportWarningConfirm);
-    const aboutDialog = deps.root.querySelector<HTMLDialogElement>('#about-dialog'); if (aboutDialog) { set('#about-bio', t.aboutBio); set('#about-thanks', t.aboutThanks); set('#about-support-label', t.supportKofi); set('#about-contact-label', t.aboutContact); const fields = aboutDialog.querySelectorAll('dt'); if (fields[0]) fields[0]!.textContent = t.version; }
+    const aboutDialog = deps.root.querySelector<HTMLDialogElement>('#about-dialog'); if (aboutDialog) { set('#about-bio', t.aboutBio); set('#about-study', t.aboutStudy); set('#about-thanks', t.aboutThanks); set('#about-support-label', t.supportKofi); set('#about-contact-label', t.aboutContact); const fields = aboutDialog.querySelectorAll('dt'); if (fields[0]) fields[0]!.textContent = t.version; }
     for (const button of [...deps.root.querySelectorAll<HTMLButtonElement>('[data-dialog-close]')]) {
       if (button.id === 'cad-export-warning-cancel') button.textContent = t.cadExportWarningCancel;
       else if (button.classList.contains('examples-window-close')) { button.textContent = '×'; button.setAttribute('aria-label', t.close); }
