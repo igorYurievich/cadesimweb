@@ -6,6 +6,7 @@ import { writePlcBlockRecord } from './plc-blocks';
 import { DM8_DEFAULT_TAIL, LOGO_DM8, logoSupply, plcAddresses, type ModuleAddress } from './plc-modules';
 import { buttonColorValue, isPushbutton2d } from './pushbutton-2d';
 import { isTerminal2d, terminalColorValue } from './terminal-2d';
+import { isPilot2d, pilotCadColorValue } from './pilot-2d-color';
 import { STAIR_TIMER_2D, stairTimerFileParam } from './stair-timer';
 import { LIFT_TYPE, liftTail } from './lift';
 import { CAD_NUM_FIELDS, CAD_TEXT_FIELDS, flagCountOf, serializeCad } from './cad-format';
@@ -96,9 +97,10 @@ function elementRecords(
   record.nums[17 + o] = element.rotation;
   // Мотор 2D — обычный 1000/1001 с nums[16] = 1 (realistic-2d-types.ts).
   if (element.params.motor2d === true) record.nums[16 + o] = MOTOR_2D_FILE_PARAM;
-  // Цвет кнопки и клеммы 2D — nums[16] (pushbutton-2d.ts, terminal-2d.ts).
+  // Цвет кнопки, клеммы и пилота 2D — nums[16] (pushbutton-2d.ts, terminal-2d.ts, pilot-2d-color.ts).
   if (isPushbutton2d(element.typeCode)) record.nums[16 + o] = buttonColorValue(element);
   if (isTerminal2d(element.typeCode)) record.nums[16 + o] = terminalColorValue(element);
+  if (isPilot2d(element.typeCode)) record.nums[16 + o] = pilotCadColorValue(element.params);
   // Минутник (только веб): выдержка и подключение кнопок — nums[16] (stair-timer.ts).
   if (element.typeCode === STAIR_TIMER_2D) record.nums[16 + o] = stairTimerFileParam(element);
   // Лифт (только веб): имена встроенных элементов — в хвосте записи через «/» (lift.ts, §40 FORMATO).
@@ -195,8 +197,8 @@ function elementRecords(
   }
 
   const parameterStart = 2 + element.terminals.length;
-  // Цвет лампы: 9008 / 9009 — как в CADe_SIMU; пилот 2D 8101 — тем же полем (кодировка CADe_SIMU у него не известна).
-  if ([9008, 9009, 8101].includes(element.typeCode) && element.params.color !== undefined) {
+  // Цвет лампы: 9008 / 9009 — как в CADe_SIMU. Пилот 2D 8101 — в nums[16] (выше), поле читаем у старых файлов веб.
+  if ([9008, 9009].includes(element.typeCode) && element.params.color !== undefined) {
     record.texts[parameterStart] = String(element.params.color);
   }
   // «Botón pulsador» 8023 (клемм нет): цвет «rrggbb» (без «#», он в .cad служебный) в первом поле после имени
@@ -254,10 +256,10 @@ function footerFor(schema: Schema): CadFooter {
 /**
  * Верхнее поле CADe_SIMU: у самого края листа старый редактор рисует рамку, и схема туда не должна заходить.
  * Сдвигаем только вниз и только если схема (корпуса, клеммы, провода) поднялась выше поля; подписи не считаем,
- * у файлов CADe_SIMU они бывают и выше. Поле 21 — самый высокий верх среди примеров и образцов, поэтому их
- * координаты не меняются. Сдвиг кратен сетке 3, и повторное сохранение уже ничего не двигает.
+ * у файлов CADe_SIMU они бывают и выше. Поле 9 — самый высокий верх среди файлов CADe_SIMU (провода кнопок в
+ * tests/fixtures/s7-1214; до них было 21), поэтому их координаты не меняются. Сдвиг кратен сетке 3, и повторное сохранение уже ничего не двигает.
  */
-const LEGACY_TOP_MARGIN = 21;
+const LEGACY_TOP_MARGIN = 9;
 const GRID_STEP = 3;
 
 function legacyFramePlacement(schema: Schema): { offsetY: number } {

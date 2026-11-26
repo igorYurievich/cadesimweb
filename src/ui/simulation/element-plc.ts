@@ -1,7 +1,6 @@
 import { isEnergized } from '@engine/loads';
 import { logoPowerKey } from '@engine/plc';
-import { s7PowerKey } from '@engine/s7-1200';
-import { S7_1200 } from '@model/s7-1200';
+import { isS7, s7PowerKey } from '@engine/s7-1200';
 import type { EngineState } from '@engine/types';
 import { terminalKey } from '@engine/types';
 import { LADDER_RESET, LADDER_SET, PLC_BLOCK, PLC_COUNTER_TYPES, isPlcBlock } from '@model/plc-blocks';
@@ -54,7 +53,7 @@ export function applyPlcVisuals(state: SimulationState, element: SchemaElement, 
     node.classList.toggle('is-ladder-on', on);
     return;
   }
-  const s7 = element.typeCode === S7_1200;
+  const s7 = isS7(element);
   if (element.typeCode !== LOGO_TYPE && element.typeCode !== 10214 && !s7) return;
   const run = result?.coils[s7 ? s7PowerKey(element) : logoPowerKey(element)] ?? false;
   node.classList.toggle('is-logo-run', run);

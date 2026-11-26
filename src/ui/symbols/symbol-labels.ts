@@ -59,7 +59,7 @@ export const NAME_SPOTS: Readonly<
   4011: { x: 1, y: 7, anchor: "end" }, // клемма 2D: имя слева от корпуса
   // LOGO: имя над левым верхним углом; Ladder: операнд по центру над символом.
   10202: { x: 0, y: -2, anchor: "start" }, 10214: { x: 0, y: -2, anchor: "start" },
-  10230: { x: 0, y: -2, anchor: "start" },
+  10230: { x: 0, y: -2, anchor: "start" }, 10203: { x: -2, y: -2, anchor: "start" },
   8120: { x: -1.5, y: 15, anchor: "end" }, 8121: { x: -1.5, y: 15, anchor: "end" },
   8122: { x: -1.5, y: 15, anchor: "end" }, 8123: { x: -1.5, y: 15, anchor: "end" },
   8124: { x: -1.5, y: 15, anchor: "end" }, 8125: { x: 1, y: 9, anchor: "end" },
@@ -117,8 +117,9 @@ export function drawTerminalLabels(g: SVGGElement, element: SchemaElement, rotat
   // У клеммы 2D выводы без номеров (terminal-2d.ts).
   if (isDelayBlock2d(element.typeCode) || element.typeCode === AUX_BLOCK_2D || isTerminal2d(element.typeCode)) return;
   // LOGO, DM8, блок питания 24 V и S7-1200 подписывают клеммы сами (logo-symbol.ts, dm8-symbol.ts, din-psu-symbol.ts,
-  // s7-1200-symbol.ts).
-  if ([10202, 10214, 10220, 10230, 10240, 10241].includes(element.typeCode) || isMechanism(element.typeCode)) return;
+  // s7-1200-symbol.ts, s7-1214-symbol.ts).
+  const selfLabelled = [10202, 10214, 10220, 10230, 10203, 10240, 10241];
+  if (selfLabelled.includes(element.typeCode) || isMechanism(element.typeCode)) return;
   if (element.terminals.length === 0) return;
   const minY = Math.min(...element.terminals.map((t) => t.offset.y));
   const sideSpots = SIDE_LABELS[element.typeCode];

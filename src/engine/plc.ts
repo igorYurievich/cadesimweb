@@ -72,18 +72,41 @@ export function plcEdgeActive(element: SchemaElement, coils: Readonly<Record<str
 const hasPlc = (schema: Schema): boolean =>
   schema.elements.some((element) => element.typeCode >= 10000 && element.typeCode in PLC_FIXED_LABELS);
 
-/** Перед релейным циклом: значения операндов прошлого кадра и признак первого кадра. */
+/** Значение операнда программы на начало скана (кадра) для контактов Ladder: ключ SCAN_PREFIX + имя. */
+export const SCAN_PREFIX = '@scan:';
+const PROGRAM_COILS: ReadonlySet<number> = new Set([LADDER_COIL, LADDER_SET, LADDER_RESET]);
+const LADDER_CONTACTS: ReadonlySet<number> = new Set([LADDER_NO, LADDER_NC]);
+
+/**
+ * Перед релейным циклом: значения операндов прошлого кадра и признак первого кадра.
+ * Кадр — один скан программы, как в CADe_SIMU: контакт Ladder на операнд, который пишет катушка программы
+ * (M, Q…), видит его значение на начало скана, а не новое в этом же кадре. Так все ступени считаются от одного
+ * состояния и не гоняются друг за другом (телерруптор Ejercicio_7: Q0.0 = M0.0 xor M0.1, M0.1 = M0.0 xor Q0.0).
+ */
 export function beginPlcScan(schema: Schema, names: readonly string[], prev: Readonly<Record<string, boolean>>,
   coils: Record<string, boolean>): void {
   if (!hasPlc(schema)) return;
   for (const name of names) coils[PREV_PREFIX + name] = prev[name] ?? false;
+  for (const element of schema.elements) {
+    if (PROGRAM_COILS.has(element.typeCode) && element.name !== '') {
+      coils[SCAN_PREFIX + element.name] = prev[element.name] ?? false;
+    }
+  }
   coils[FIRST_SCAN_KEY] = !(prev[SCANNED_KEY] ?? false);
+}
+
+/** Контакт Ladder на операнд программы: значение на начало скана; undefined — обычный контакт по имени. */
+export function ladderScanValue(element: SchemaElement, coils: Readonly<Record<string, boolean>>): boolean | undefined {
+  return LADDER_CONTACTS.has(element.typeCode) ? coils[SCAN_PREFIX + element.name] : undefined;
 }
 
 /** После цикла: убрать служебные ключи кадра, отметить, что первый кадр прошёл. */
 export function endPlcScan(schema: Schema, coils: Record<string, boolean>): void {
+  for (const key of Object.keys(coils)) if (key.startsWith(LOCK_PREFIX)) delete coils[key];
   if (!hasPlc(schema)) return;
-  for (const key of Object.keys(coils)) if (key.startsWith(PREV_PREFIX) || key === FIRST_SCAN_KEY) delete coils[key];
+  for (const key of Object.keys(coils)) {
+    if (key.startsWith(PREV_PREFIX) || key.startsWith(SCAN_PREFIX) || key === FIRST_SCAN_KEY) delete coils[key];
+  }
   coils[SCANNED_KEY] = true;
 }
 
@@ -101,9 +124,18 @@ export function logoRelayNames(schema: Schema): string[] {
 const isLatchCoil = (element: SchemaElement): boolean =>
   element.typeCode === LADDER_SET || element.typeCode === LADDER_RESET;
 
+/** Операнд, у которого в этом кадре сработали и Set, и Reset: значение закреплено до конца кадра. */
+export const LOCK_PREFIX = '@lock:';
+
+/** Порядок ступеней: сверху вниз, затем слева направо — как ПЛК проходит программу за один скан. */
+const rungOrder = (element: SchemaElement): number => element.position.y * 1e5 + element.position.x;
+
 /**
  * Set / Reset и блоки в карте катушек следующего прохода: Set включает операнд и держит его, пока нет Reset;
  * имя блока — его выход Q из памяти. `current` — состояние катушек в начале прохода.
+ * Если Set и Reset одного операнда под током одновременно, побеждает нижняя ступень (в ПЛК последняя запись
+ * в скане), и значение закрепляется до конца кадра (LOCK_PREFIX). Иначе «M0.5 сбрасывает сам себя» качается
+ * внутри релейного цикла: таймер, который его включил, обновится только в следующем кадре.
  */
 export function applyPlcCoils(
   schema: Schema,
@@ -113,8 +145,9 @@ export function applyPlcCoils(
   next: Record<string, boolean>,
   timers: Readonly<Record<number, TimerState>>,
 ): void {
-  const set = new Map<string, boolean>();
-  const reset = new Map<string, boolean>();
+  /** Самая нижняя ступень под током (порядок), −∞ — нет. */
+  const set = new Map<string, number>();
+  const reset = new Map<string, number>();
   for (const element of schema.elements) {
     if (element.name === '') continue;
     if (isPlcBlock(element.typeCode)) {
@@ -123,13 +156,22 @@ export function applyPlcCoils(
     if (!isLatchCoil(element)) continue;
     const a = netById.get(terminalNet[terminalKey(element.id, 0)] ?? -1);
     const b = netById.get(terminalNet[terminalKey(element.id, 1)] ?? -1);
-    const powered = Boolean(a && b && isEnergized(a, b).energized);
+    const order = a && b && isEnergized(a, b).energized ? rungOrder(element) : -Infinity;
     const target = element.typeCode === LADDER_SET ? set : reset;
-    target.set(element.name, (target.get(element.name) ?? false) || powered);
+    target.set(element.name, Math.max(target.get(element.name) ?? -Infinity, order));
   }
   for (const name of new Set([...set.keys(), ...reset.keys()])) {
-    const held = (set.get(name) ?? false) || (current[name] ?? false);
-    next[name] = (next[name] ?? false) || (held && !(reset.get(name) ?? false));
+    const setAt = set.get(name) ?? -Infinity;
+    const resetAt = reset.get(name) ?? -Infinity;
+    let locked = current[LOCK_PREFIX + name];
+    if (locked === undefined && setAt > -Infinity && resetAt > -Infinity) locked = setAt > resetAt;
+    if (locked !== undefined) {
+      next[LOCK_PREFIX + name] = locked;
+      next[name] = locked;
+      continue;
+    }
+    const held = setAt > -Infinity || (current[name] ?? false);
+    next[name] = (next[name] ?? false) || (held && resetAt === -Infinity);
   }
 }
 

@@ -10,6 +10,7 @@ import { LADDER_EXTRA, PLC_BLOCK } from '@model/plc-blocks';
 import { LOGO_DM8 } from '@model/plc-modules';
 import { LADDER_COIL, LADDER_NC, LADDER_NO, LOGO_TYPE } from '@model/plc-types';
 import { S7_1200 } from '@model/s7-1200';
+import { S7_1214 } from '@model/s7-1214';
 
 export type FeatureKey = 'plc' | 'grafcet' | 'lift' | 'devices2d';
 
@@ -18,7 +19,7 @@ export const DIN_PSU_SYMBOL_TYPE = 10220;
 
 export const PLC_FEATURE_TYPES: readonly number[] = [
   LADDER_NO, LADDER_NC, LADDER_COIL, ...LADDER_EXTRA, ...Object.values(PLC_BLOCK),
-  LOGO_TYPE, LOGO_DM8, DIN_PSU_SYMBOL_TYPE, S7_1200,
+  LOGO_TYPE, LOGO_DM8, DIN_PSU_SYMBOL_TYPE, S7_1200, S7_1214,
 ];
 
 /** Механизмы 8120…8125, автомат лестничного освещения 8110, преобразователь частоты 2D 10240 / 10241. */

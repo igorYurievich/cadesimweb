@@ -32,7 +32,7 @@ const INPUT_X = TOP.slice(3);
 const OUTPUT_X = BOTTOM.slice(2);
 
 /** Лампочка операнда: тусклое «стекло» и зелёная заливка поверх, включается классом is-on. */
-function ioLed(name: string, x: number, y: number, simple = false): SVGElement[] {
+export function ioLed(name: string, x: number, y: number, simple = false): SVGElement[] {
   const w = 3.4;
   const h = 2.2;
   const lit = rect(x - w / 2, y - h / 2, w, h, {
@@ -42,7 +42,7 @@ function ioLed(name: string, x: number, y: number, simple = false): SVGElement[]
   return simple ? [lit] : [rect(x - w / 2, y - h / 2, w, h, { fill: LED_OFF, stroke: "none", rx: 0.4 }), lit];
 }
 
-function screw(x: number, y: number): SVGGElement {
+export function screw(x: number, y: number): SVGGElement {
   return group(
     "d2-screw",
     circle(x, y, 2, { fill: "#b9c0c6", stroke: "#22272c", "stroke-width": 0.35 }),

@@ -1,6 +1,7 @@
 import { migrateResizedWebTerminals } from './web-terminal-migration';
 import type { Schema } from './types';
 import { realign2dTerminals } from './realistic-2d-realign';
+import { migratePilot2dTerminals } from './pilot-2d-migration';
 import { syncModuleLabels } from './plc-modules';
 
 export const SCHEMA_JSON_VERSION = 1;
@@ -64,6 +65,7 @@ export function parseSchemaJson(text: string): Schema {
   requireFinite(value.sheet.width, 'sheet.width'); requireFinite(value.sheet.height, 'sheet.height');
   const schema = value as unknown as Schema;
   realign2dTerminals(schema);
+  migratePilot2dTerminals(schema);
   migrateResizedWebTerminals(schema);
   syncModuleLabels(schema);
   return schema;

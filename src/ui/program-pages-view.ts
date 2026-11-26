@@ -66,7 +66,8 @@ export const activeProgramPage = (): number => shownPage;
 
 const pageTitle = (schema: Schema, page: number, text: PageTexts): string => {
   const owner = programPageOwner(schema, page);
-  return `${text.program} · ${owner?.name.trim() || (owner?.typeCode === 10230 ? 'S7-1200' : 'LOGO')}`;
+  const s7 = owner?.typeCode === 10230 || owner?.typeCode === 10203;
+  return `${text.program} · ${owner?.name.trim() || (s7 ? 'S7-1200' : 'LOGO')}`;
 };
 
 export interface PageTexts { program: string; mainSheet: string }

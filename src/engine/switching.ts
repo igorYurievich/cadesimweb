@@ -10,9 +10,8 @@ import { stairTimerActive } from './stair-timer';
 import { STAIR_TIMER_2D } from '../model/stair-timer';
 import { isDelayBlock2d } from '../model/realistic-2d-types';
 import type { ThermalState } from './thermal';
-import { logoOutputActive, plcEdgeActive } from './plc';
-import { S7_1200 } from '../model/s7-1200';
-import { s7OutputActive } from './s7-1200';
+import { ladderScanValue, logoOutputActive, plcEdgeActive } from './plc';
+import { isS7, s7OutputActive } from './s7-1200';
 import { vfdRelayActive } from './vfd';
 import { isVfdControl } from '../model/vfd';
 import { isPhotoReceiver, receiverBeamBlocked } from './photo-beam';
@@ -157,8 +156,9 @@ function controlActive(
       return Boolean(inputs.toggled[element.id] ?? link.defaultClosed ?? false)
         || (maintainedManual && (sameNameMomentaryPressed() || sameNameLatchedOn()));
     }
-    case 'coil-name': return auxContactActive(element, schema, coils, timers)
-      || auxContactActuatorActive(element, schema, inputs, names);
+    // Контакт Ladder на операнд программы — значение на начало скана (plc.ts).
+    case 'coil-name': return ladderScanValue(element, coils) ?? (auxContactActive(element, schema, coils, timers)
+      || auxContactActuatorActive(element, schema, inputs, names));
     // thermal.tripped — ручной вход и тепловые реле, сработавшие кликом (resolveThermalState).
     case 'thermal': return (thermal.tripped[element.id] ?? false) || (element.name.trim() !== '' && thermal.trippedNames.has(element.name.trim().toLocaleUpperCase()));
     case 'position': {
@@ -170,7 +170,7 @@ function controlActive(
       return position === link.position;
     }
     // Выход LOGO: операнд Qk и питание модуля (plc.ts).
-    case 'plc-output': return element.typeCode === S7_1200
+    case 'plc-output': return isS7(element)
       ? s7OutputActive(element, link, coils) : logoOutputActive(element, link, coils, schema);
     case 'plc-edge': return plcEdgeActive(element, coils);
     case 'always': return true;

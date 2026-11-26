@@ -48,8 +48,8 @@ describe('.cad: повторное сохранение', () => {
   it('схема выше верхнего поля сдвигается вниз один раз, по сетке', () => {
     const schema = schemaOf([seg(30, 4, 30, 40)]);
     const first = importCad(exportCad(schema)).schema;
-    expect(first.wires[0]?.from.y).toBe(22);
+    expect(first.wires[0]?.from.y).toBe(10);
     expect(exportCad(first)).toBe(exportCad(importCad(exportCad(first)).schema));
-    expect(importCad(exportCad(first)).schema.wires[0]?.from.y).toBe(22);
+    expect(importCad(exportCad(first)).schema.wires[0]?.from.y).toBe(10);
   });
 });

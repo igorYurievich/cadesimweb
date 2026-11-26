@@ -14,6 +14,7 @@ function plcHitFrame(typeCode: number): HitFrame | undefined {
   if (typeCode === 10220) return { x: 0, y: 0, w: 18, h: 102 };
   if (typeCode === 8110) return { x: 1, y: 0, w: 10, h: 27 };
   if (typeCode === 10230) return { x: 0, y: 0, w: 141, h: 102 };
+  if (typeCode === 10203) return { x: -2, y: 0, w: 163, h: 138 };
   if (typeCode === 10240 || typeCode === 10241) return { x: 0, y: 3, w: 42, h: 84 };
   if (typeCode >= 8120 && typeCode <= 8124) return { x: 0, y: 3, w: 24, h: 24 };
   if (typeCode === 8125) return { x: 1.5, y: 0.5, w: 15, h: 23 };
@@ -48,7 +49,7 @@ const FRAME_HIT: Readonly<Record<number, HitFrame>> = {
   // Фотоэлектрический барьер: корпус, выводы и стрелки справа.
   15000: { x: -4, y: -1, w: 24, h: 26 },
   // Символы 2D: корпус с выводами.
-  8100: { x: -1, y: -1, w: 18, h: 29 }, 8101: { x: -2, y: -1, w: 10, h: 23 },
+  8100: { x: -1, y: -1, w: 18, h: 29 }, 8101: { x: -5, y: -1, w: 10, h: 20 },
   7018: { x: -1, y: -1, w: 26, h: 47 },
   6015: { x: -1, y: -1, w: 26, h: 53 },
   6017: { x: -1, y: -1, w: 14, h: 29 }, 60171: { x: -1, y: -1, w: 20, h: 29 }, 60172: { x: -1, y: -1, w: 26, h: 29 },

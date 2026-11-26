@@ -78,9 +78,10 @@ describe('Ladder: contacts, Set/Reset and edges', () => {
     l.rung(70, [[10050, 'M1'], [10060, 'Y']]);
     const run = runner(l.schema);
     expect(run().Y).toBe(false);
-    expect(run([s!]).Y).toBe(true);
+    // Кадр — один скан, контакты на операнды программы видят значение на начало скана: Y — со следующего кадра.
+    expect(run([s!]).M1).toBe(true);
     expect(run().Y).toBe(true);
-    expect(run([r!]).Y).toBe(false);
+    expect(run([r!]).M1).toBe(false);
     expect(run().Y).toBe(false);
   });
 

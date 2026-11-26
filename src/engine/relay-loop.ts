@@ -10,8 +10,9 @@ import type { Fault, TimerState, UserInputs } from './types';
 import { advanceTimers } from './timers';
 import { advanceDelayBlocks } from './delay-blocks';
 import { advanceStairTimers, stairTimerKeys } from './stair-timer';
-import { beginPlcScan, endPlcScan, logoRelayNames } from './plc';
+import { LOCK_PREFIX, beginPlcScan, endPlcScan, logoRelayNames } from './plc';
 import { s7RelayNames } from './s7-1200';
+import { ladderManualNames } from './ladder-manual';
 import { advancePlcBlocks } from './plc-blocks';
 import { advanceVfds, vfdKeys } from './vfd';
 import { advanceGrafcet, grafcetRelayNames } from './grafcet';
@@ -40,7 +41,7 @@ export function relayCoilNames(schema: Schema): string[] {
   }
   // Операнды, которые задаёт LOGO: «запитан» и входы I1…I8 (plc.ts); входы минутников (stair-timer.ts).
   for (const name of [...logoRelayNames(schema), ...stairTimerKeys(schema), ...s7RelayNames(schema), ...vfdKeys(schema),
-    ...grafcetRelayNames(schema), ...photoEmitterKeys(schema)]) {
+    ...grafcetRelayNames(schema), ...photoEmitterKeys(schema), ...ladderManualNames(schema)]) {
     if (!seen.has(name)) names.push(name);
     seen.add(name);
   }
@@ -86,6 +87,10 @@ export function solveRelayLoop(
       // Датчики лифта срабатывают по положению кабины (lift.ts), как зажатые мышью.
       pass = solvePass(schema, withLiftSensors(schema, inputs, timers), coils, timers, graph);
       iterations += 1;
+      // Закреплённые в этом кадре операнды Set / Reset (plc.ts) живут до конца кадра.
+      for (const key of Object.keys(pass.coils)) {
+        if (key.startsWith(LOCK_PREFIX)) coils[key] = pass.coils[key] ?? false;
+      }
       const nextName = names.find((name) => (pass!.coils[name] ?? false) !== (coils[name] ?? false));
       if (nextName === undefined) {
         // Keep a canonical name order in serialized state.

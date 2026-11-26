@@ -2,6 +2,7 @@
 
 import type { Schema } from '../model/types';
 import { DIN_PSU_TYPE } from '../model/plc-power-supply';
+import { S7_1214, S7_1214_INDEX } from '../model/s7-1214';
 import type { NetsResult } from './graph';
 import { cachedNets } from './topology';
 import { computeSwitching } from './switching';
@@ -16,6 +17,7 @@ import { drivesNamedRelay, relayTriggerActive } from './sensors';
 import { applyLogoInputs, applyPlcCoils } from './plc';
 import { applyStairTimerInputs } from './stair-timer';
 import { applyS7Inputs } from './s7-1200';
+import { applyLadderManualInputs, ladderManualNames } from './ladder-manual';
 import { plcBlockSources } from './plc-blocks';
 import { applyGrafcetOutputs } from './grafcet';
 import { applyEmitterSupply } from './photo-beam';
@@ -106,9 +108,10 @@ export function solvePass(
   const switching = computeSwitching(schema, inputs, coils, thermal, timers);
   const sourceResult = findSources(schema, graph.terminalNet);
   let nets = propagatePotentials(graph.nets, graph.terminalNet, sourceResult.sources, switching.edges, switching.transfers);
-  // Блоки питания создают DC-шины только при наличии подходящего AC-входа (блок на DIN-рейку — как 3014).
+  // Блоки питания создают DC-шины только при наличии подходящего AC-входа (блок на DIN-рейку — как 3014;
+  // CPU 1214C AC/DC/RLY отдаёт 24 V на L+ / M, пока на L1 / N есть сеть).
   const converterSources: import('./sources').PotentialSource[] = [];
-  const converterTypes: readonly number[] = [3014, DIN_PSU_TYPE, 3018];
+  const converterTypes: readonly number[] = [3014, DIN_PSU_TYPE, 3018, S7_1214];
   for (const converter of schema.elements) {
     if (!converterTypes.includes(converter.typeCode)) continue;
     const phaseInputs = converter.typeCode === 3018 ? [0, 1, 2] : [0, 1];
@@ -136,8 +139,9 @@ export function solvePass(
       active = twoPhases || phaseAndNeutral;
     }
     if (!active) continue;
-    const positiveIndex = converter.typeCode === 3018 ? 3 : 2;
-    const negativeIndex = converter.typeCode === 3018 ? 4 : 3;
+    const dcOut = converter.typeCode === 3018 ? [3, 4]
+      : converter.typeCode === S7_1214 ? [S7_1214_INDEX.SENSOR_PLUS, S7_1214_INDEX.SENSOR_MINUS] : [2, 3];
+    const [positiveIndex = 2, negativeIndex = 3] = dcOut;
     const positiveNet = graph.terminalNet[terminalKey(converter.id, positiveIndex)];
     const negativeNet = graph.terminalNet[terminalKey(converter.id, negativeIndex)];
     if (positiveNet !== undefined) converterSources.push({ terminal: { element: converter.id, index: positiveIndex }, net: positiveNet, potential: '+' });
@@ -200,6 +204,7 @@ export function solvePass(
   applyLogoInputs(schema, graph.terminalNet, netById, nextCoils);
   applyStairTimerInputs(schema, graph.terminalNet, netById, nextCoils);
   applyS7Inputs(schema, graph.terminalNet, netById, nextCoils);
+  applyLadderManualInputs(schema, inputs, ladderManualNames(schema), nextCoils);
   applyVfdInputs(schema, graph.terminalNet, netById, nextCoils, inputs);
   // Излучатели фотобарьеров: светят, пока запитаны (photo-beam.ts).
   applyEmitterSupply(schema, graph.terminalNet, netById, nextCoils);

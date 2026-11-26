@@ -72,7 +72,7 @@ export const COLOR_VIEW_TYPES: ReadonlySet<number> = new Set([
   10202, 10214, // LOGO и DM8 (plc-types.ts)
   10220, // блок питания 24 V на DIN-рейку (plc-power-supply.ts)
   8110, // автомат лестничного освещения Alst 8 (stair-timer.ts)
-  10230, // ПЛК S7-1200 (s7-1200.ts)
+  10230, 10203, // ПЛК S7-1200: 1215C (s7-1200.ts) и 1214C (s7-1214.ts)
   8120, 8121, 8122, 8123, 8124, 8125, // механизмы Niessen и лампочка (mechanisms.ts)
 ]);
 
@@ -189,11 +189,11 @@ const TYPES_FROM_TERMINAL_1: readonly CadTypeInfo[] = [
     code: PILOT_2D,
     family: 'lamp',
     label: 'Piloto 2D (-H)',
-    layout: { kind: 'points', points: [{ x: 0, y: 0 }, { x: 0, y: 21 }] },
+    layout: { kind: 'points', points: [{ x: 0, y: 0 }, { x: 0, y: 18 }] },
     terminalCount: 2,
     commandIds: [33318],
-    confidence: 'probable',
-    note: '6×21: X1 сверху, X2 снизу по центру; цвет — текстовое поле после клемм, как у лампы 9008 (у CADe_SIMU не сверено).',
+    confidence: 'confirmed',
+    note: '6×21: X1 (0, 0) сверху, X2 (0, 18) снизу — по проводам файлов CADe_SIMU (tests/fixtures/s7-1214); цвет — текстовое поле после клемм, как у лампы 9008 (у CADe_SIMU не сверено).',
   },
   {
     code: CONTACTOR_2D,
@@ -238,7 +238,7 @@ const TYPES_FROM_TERMINAL_1: readonly CadTypeInfo[] = [
  * две клетки (6), автомат, дифавтомат и блоки с выдержкой — одна (3). Рисунки сдвигаются так же (symbols/body.ts).
  */
 export const REALISTIC_2D_ORIGIN_DX: Readonly<Record<number, number>> = {
-  8100: 6, 7018: 6, 6015: 6, 6016: 6, 8101: 3,
+  8100: 6, 7018: 6, 6015: 6, 6016: 6,
   6017: 3, 60171: 3, 60172: 3, 6018: 3, 60182: 3, 7020: 3, 7021: 3, 7019: 3,
   ...SWITCH_2D_ORIGIN_DX, // Interruptor и Seccionador 2D (switch-2d.ts)
   [TERMINAL_2D]: TERMINAL_2D_ORIGIN_DX, // клемма 2D (terminal-2d.ts)

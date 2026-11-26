@@ -29,10 +29,12 @@ import {
 } from './realistic-2d-types';
 import { delayBlockParams } from './cad-delay-blocks';
 import { isPushbutton2d } from './pushbutton-2d';
+import { isPilot2d, pilotColorParams } from './pilot-2d-color';
 import { TERMINAL_COLOR, isTerminal2d } from './terminal-2d';
 import { STAIR_TIMER_2D, stairTimerParamsFromFile } from './stair-timer';
 import { LIFT_TYPE, liftParamsFromTail } from './lift';
 import { PLC_FIXED_LABELS } from './plc-types';
+import { S7_1214, S7_1214_LABELS } from './s7-1214';
 import { plcBlockParams } from './plc-blocks';
 import { logoSupplyFromFile, syncModuleLabels } from './plc-modules';
 
@@ -104,7 +106,9 @@ function toElement(r: CadRecord, continuations: readonly CadRecord[] = []): Sche
   // У символов 2D остальные клеммы лежат в хвосте записи (cad-tail-terminals.ts).
   // У вариантов автомата слоты записи одинаковы (N 1 3 5 2 4 6), клеммы задаёт вариант.
   // У блоков 7019/7020/7021 2D клемм в записи нет совсем, они постоянные (FIXED_2D_LABELS).
-  const fixedLabels = poleVariant ? POLE_LABELS[poleVariant] : FIXED_2D_LABELS[typeCode] ?? PLC_FIXED_LABELS[typeCode];
+  // У S7-1200 1214C (10203) флагов и меток в записи нет, клеммы постоянные (s7-1214.ts).
+  const fixedLabels = poleVariant ? POLE_LABELS[poleVariant]
+    : FIXED_2D_LABELS[typeCode] ?? PLC_FIXED_LABELS[typeCode] ?? (typeCode === S7_1214 ? S7_1214_LABELS : undefined);
   const labels = fixedLabels ? [...fixedLabels] : [
     ...slots.map((i) => r.texts[2 + i] ?? ''),
     ...(tailSpec ? parseTailLabels(r.tail) : []),
@@ -139,6 +143,8 @@ function toElement(r: CadRecord, continuations: readonly CadRecord[] = []): Sche
   if ((typeCode === 1000 || typeCode === 1001) && num(r, 16) === MOTOR_2D_FILE_PARAM) params.motor2d = true;
   // Цвет кнопки 2D — nums[16] (pushbutton-2d.ts).
   if (isPushbutton2d(typeCode) && num(r, 16) !== 0) params.buttonColor = num(r, 16);
+  // Цвет пилота 2D — nums[16] (pilot-2d-color.ts); цвет из текстов (старые файлы веб-версии) главнее.
+  if (isPilot2d(typeCode)) Object.assign(params, { ...pilotColorParams(num(r, 16)), ...params });
   // Цвет клеммы 2D — nums[16] (terminal-2d.ts), серая (фаза) по умолчанию.
   if (isTerminal2d(typeCode) && num(r, 16) !== TERMINAL_COLOR.phase) params.terminalColor = num(r, 16);
   // Минутник: nums[16] — выдержка и подключение кнопок (stair-timer.ts).

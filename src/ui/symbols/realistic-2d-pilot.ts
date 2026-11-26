@@ -7,7 +7,9 @@ import { circle, group, path } from "./svg-primitives";
 // Цветной вид по образцу CADe_SIMU 4.2: цветной диск в тёмном ободке. Горит — класс is-lamp-lit
 // (simulation/element-switches.ts): видна группа .pilot-lit со свечением, .pilot-off скрыта (viewport.css).
 
-const CY = 10.5;
+/** Выводы X1 (0, 0) и X2 (0, 18), лампа посередине. */
+const CY = 9;
+const X2 = 18;
 const RIM = 4.9;
 const GLASS = 4.2;
 
@@ -22,7 +24,7 @@ const colorIndex = (element: SchemaElement): 0 | 1 | 2 => {
   return value === 1 || value === 2 ? value : 0;
 };
 
-const leads = () => path(`M 0 0 V ${CY - RIM} M 0 ${CY + RIM} V 21`);
+const leads = () => path(`M 0 0 V ${CY - RIM} M 0 ${CY + RIM} V ${X2}`);
 
 export function drawPilotColor(g: SVGGElement, element: SchemaElement): void {
   const color = PILOT_COLORS[colorIndex(element)];
@@ -45,7 +47,7 @@ export function drawPilotSimple(g: SVGGElement, element: SchemaElement): void {
   const r = 3.3;
   const d = r * Math.SQRT1_2;
   g.append(
-    path(`M 0 0 V ${CY - r} M 0 ${CY + r} V 21`),
+    path(`M 0 0 V ${CY - r} M 0 ${CY + r} V ${X2}`),
     circle(0, CY, r, { class: `lamp-glass lamp-c${colorIndex(element)}`, fill: "#f6f7f8", stroke: "#7b8794" }),
     path(`M ${-d} ${CY - d} L ${d} ${CY + d} M ${d} ${CY - d} L ${-d} ${CY + d}`, 0.7, { stroke: "#7b8189" }),
   );
