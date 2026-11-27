@@ -12,7 +12,7 @@ import { terminalKey } from '@engine/types';
 import { readMeter } from '../src/ui/multimeter/meter-reading';
 import { formatVolts } from '../src/ui/multimeter/meter-reading';
 
-const DEMO = resolve(process.cwd(), 'Motor_dos_velocidades_demo.cad');
+const DEMO = resolve(process.cwd(), 'src/data/examples/Ejemplos 2/Ejemplo 2.8.cad');
 const demo = (): Schema => importCad(readFileSync(DEMO, 'utf8')).schema;
 
 function netOf(schema: Schema, element: SchemaElement, label: string): number {
