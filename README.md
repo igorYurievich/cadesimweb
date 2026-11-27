@@ -15,6 +15,7 @@ archivos `.cad` de CADe SIMU 4.x: abre tus esquemas, simúlalos y guárdalos de 
 
 ## Contenido
 
+- [Ejemplos en acción](#ejemplos-en-acción)
 - [Qué puedes hacer](#qué-puedes-hacer)
 - [Compatibilidad con CADe SIMU](#compatibilidad-con-cade-simu)
 - [Instalación local](#instalación-local)
@@ -22,6 +23,25 @@ archivos `.cad` de CADe SIMU 4.x: abre tus esquemas, simúlalos y guárdalos de 
 - [Estructura del proyecto](#estructura-del-proyecto)
 - [Autor](#autor)
 - [Licencia](#licencia)
+
+## Ejemplos en acción
+
+Todos estos esquemas vienen incluidos en la aplicación (menú **Ejemplos**).
+
+**Ascensor de 5 plantas con variador de frecuencia:** llamada a la planta 5 y después a la planta 2.
+
+![Ascensor de 5 plantas con variador](docs/gifs/ascensor.gif)
+
+<table>
+  <tr>
+    <td width="50%"><b>Inversión de giro con PLC LOGO!</b><br>Marcha a la derecha, paro y marcha a la izquierda.<br><img src="docs/gifs/inversion-giro-plc.gif" alt="Inversión de giro con PLC LOGO!" width="100%"></td>
+    <td width="50%"><b>Variador de frecuencia monofásico 2D (entrada 230 V)</b><br>Marcha adelante, velocidad fija y marcha atrás desde los bornes.<br><img src="docs/gifs/variador-230v.gif" alt="Variador de frecuencia 230 V" width="100%"></td>
+  </tr>
+  <tr>
+    <td width="50%"><b>Arranque estrella-triángulo con temporizador</b><br>Estrella, cambio a triángulo por tiempo y paro.<br><img src="docs/gifs/estrella-triangulo.gif" alt="Arranque estrella-triángulo" width="100%"></td>
+    <td width="50%"><b>Iluminación de escalera a 3 hilos con minutero</b><br>Se enciende con un pulsador y se apaga sola al minuto (acelerado ×20).<br><img src="docs/gifs/escalera-3-hilos.gif" alt="Iluminación de escalera a 3 hilos" width="100%"></td>
+  </tr>
+</table>
 
 ## Qué puedes hacer
 
@@ -137,6 +157,10 @@ CADe SIMU 4.x `.cad` files: open your schematics, simulate them and save them ag
 **Try it online:** https://webcade3.netlify.app/
 
 > ⚠️ **Beta** version (0.5.0). It may contain bugs, and some components are not fully functional yet.
+
+**Demos:** see the [animated examples](#ejemplos-en-acción) above: a 5-floor lift with a VFD, motor
+reversing with a LOGO! PLC, a 230 V frequency drive, star-delta starting with a timer and 3-wire staircase
+lighting. All of them are built into the app (**Examples** menu).
 
 ### Features
 
