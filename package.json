@@ -4,6 +4,7 @@
   "private": true,
   "description": "Web Cade: modern electrical schematic editor and relay-logic simulator",
   "author": "Igor Lipskiy Vyatchin",
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "dev": "vite",
