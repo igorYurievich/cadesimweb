@@ -40,7 +40,7 @@ export function renderAppShell(root: HTMLElement, theme: Theme): void {
               </div>
             </details>
             <button type="button" class="menu-command" data-command="print-preview">Предпросмотр печати</button>
-            <button type="button" class="menu-command" data-command="print-pdf">Печать / PDF</button>
+            <button type="button" class="menu-command" data-command="print-pdf">Печать / PDF <kbd>Ctrl+P</kbd></button>
             <button type="button" class="menu-command" data-command="sheet">Размер листа (Ajustar hoja)…</button>
           </div></details>
           <details class="menu-group"><summary>Правка</summary><div class="menu-popover">
@@ -215,6 +215,7 @@ export function renderAppShell(root: HTMLElement, theme: Theme): void {
         <dl>
           <div><dt id="shortcut-new">Новая схема</dt><dd><kbd>Ctrl</kbd> + <kbd>N</kbd></dd></div>
           <div><dt id="shortcut-open">Открыть файл .cad</dt><dd><kbd>Ctrl</kbd> + <kbd>O</kbd></dd></div>
+          <div><dt id="shortcut-print">Печать / PDF</dt><dd><kbd>Ctrl</kbd> + <kbd>P</kbd></dd></div>
           <div><dt id="shortcut-copy-paste">Копировать / вырезать / вставить выделенное</dt><dd><kbd>Ctrl</kbd> + <kbd>C</kbd> / <kbd>X</kbd> / <kbd>V</kbd></dd></div>
           <div><dt id="shortcut-undo-redo">Отменить / повторить</dt><dd><kbd>Ctrl</kbd> + <kbd>Z</kbd> / <kbd>Y</kbd></dd></div>
           <div><dt id="shortcut-rotate">Повернуть</dt><dd><kbd>R</kbd></dd></div>

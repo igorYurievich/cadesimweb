@@ -9,7 +9,8 @@ import { currentText, fillText } from './i18n';
 import { errorReason } from './helpers';
 
 export interface ExportCommands {
-  saveJson(): void;
+  /** true — файл записан (пользователь не отменил). */
+  saveJson(): Promise<boolean>;
   /** true — файл записан (пользователь не отменил). */
   exportCadFile(): Promise<boolean>;
   exportSvgFile(): void;
@@ -35,7 +36,10 @@ export function setupLazyExport(
   };
   const run = (action: (loaded: ExportActions) => void) => (): void => { load().then(action, failed); };
   return {
-    saveJson: run((loaded) => loaded.saveJson()),
+    saveJson: () => load().then(
+      (loaded) => loaded.saveJson(),
+      (error: unknown) => { failed(error); return false; },
+    ),
     exportCadFile: () => load().then(
       (loaded) => loaded.exportCadFile(),
       (error: unknown) => { failed(error); return false; },

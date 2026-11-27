@@ -9,7 +9,7 @@
 Editor de esquemas eléctricos y simulador de automatismos que funciona en el navegador. Compatible con los
 archivos `.cad` de CADe SIMU 4.x: abre tus esquemas, simúlalos y guárdalos de nuevo sin instalar nada.
 
-**Pruébalo en línea:** https://webcade3.netlify.app/
+**Pruébalo en línea:** https://cadesimweb.vercel.app/
 
 > ⚠️ Versión **beta** (0.5.0). Puede contener errores y algunos componentes todavía no tienen todas sus funciones.
 
@@ -28,18 +28,26 @@ archivos `.cad` de CADe SIMU 4.x: abre tus esquemas, simúlalos y guárdalos de 
 
 Todos estos esquemas vienen incluidos en la aplicación (menú **Ejemplos**).
 
-**Ascensor de 5 plantas con variador de frecuencia:** llamada a la planta 5 y después a la planta 2.
+**Ascensor de 5 plantas con variador** (llamada a la planta 5 y luego a la 2)
 
 ![Ascensor de 5 plantas con variador](docs/gifs/ascensor.gif)
 
 <table>
   <tr>
-    <td width="50%"><b>Inversión de giro con PLC LOGO!</b><br>Marcha a la derecha, paro y marcha a la izquierda.<br><img src="docs/gifs/inversion-giro-plc.gif" alt="Inversión de giro con PLC LOGO!" width="100%"></td>
-    <td width="50%"><b>Variador de frecuencia monofásico 2D (entrada 230 V)</b><br>Marcha adelante, velocidad fija y marcha atrás desde los bornes.<br><img src="docs/gifs/variador-230v.gif" alt="Variador de frecuencia 230 V" width="100%"></td>
+    <td width="50%" valign="top" align="center"><b>Inversión de giro con PLC LOGO!</b></td>
+    <td width="50%" valign="top" align="center"><b>Variador de frecuencia 230 V</b></td>
   </tr>
   <tr>
-    <td width="50%"><b>Arranque estrella-triángulo con temporizador</b><br>Estrella, cambio a triángulo por tiempo y paro.<br><img src="docs/gifs/estrella-triangulo.gif" alt="Arranque estrella-triángulo" width="100%"></td>
-    <td width="50%"><b>Iluminación de escalera a 3 hilos con minutero</b><br>Se enciende con un pulsador y se apaga sola al minuto (acelerado ×20).<br><img src="docs/gifs/escalera-3-hilos.gif" alt="Iluminación de escalera a 3 hilos" width="100%"></td>
+    <td width="50%" valign="top"><img src="docs/gifs/inversion-giro-plc.gif" alt="Inversión de giro con PLC LOGO!" width="100%"></td>
+    <td width="50%" valign="top"><img src="docs/gifs/variador-230v.gif" alt="Variador de frecuencia 230 V" width="100%"></td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top" align="center"><b>Arranque estrella-triángulo con temporizador</b></td>
+    <td width="50%" valign="top" align="center"><b>Escalera a 3 hilos con minutero</b></td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><img src="docs/gifs/estrella-triangulo.gif" alt="Arranque estrella-triángulo" width="100%"></td>
+    <td width="50%" valign="top"><img src="docs/gifs/escalera-3-hilos.gif" alt="Iluminación de escalera a 3 hilos" width="100%"></td>
   </tr>
 </table>
 
@@ -154,7 +162,7 @@ sus autores y no están cubiertos por esta licencia.
 An electrical schematic editor and control-circuit simulator that runs in the browser. It works with
 CADe SIMU 4.x `.cad` files: open your schematics, simulate them and save them again, with nothing to install.
 
-**Try it online:** https://webcade3.netlify.app/
+**Try it online:** https://cadesimweb.vercel.app/
 
 > ⚠️ **Beta** version (0.5.0). It may contain bugs, and some components are not fully functional yet.
 

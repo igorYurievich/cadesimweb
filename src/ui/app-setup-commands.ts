@@ -161,10 +161,7 @@ export function setupAppCommands(state: AppSetupBase, editor: AppSetupEditor) {
   const exportActions = setupMenus(state, editor, selection);
   // «Сохранить» при закрытии вкладки: в том же формате, из которого схема открыта (.json или .cad).
   state.saveActiveDocument = async (): Promise<boolean> => {
-    if (/\.json$/i.test(state.schema.sheet.fileName)) {
-      exportActions.saveJson();
-      return true;
-    }
+    if (/\.json$/i.test(state.schema.sheet.fileName)) return exportActions.saveJson();
     return exportActions.exportCadFile();
   };
   setupToolButtons(state);

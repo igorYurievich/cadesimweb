@@ -5,9 +5,11 @@ import type { AppContext } from './context';
 import { CAD_EXPORT_WARNING_KEY, SVG_NS, WIRE_COLORS } from './constants';
 import { fullSheet, errorReason } from './helpers';
 import { currentText, fillText } from './i18n';
+import { downloadText, saveTextFile } from './save-file';
 
 export interface ExportActions {
-  saveJson(): void;
+  /** true — файл записан (пользователь не отменил). */
+  saveJson(): Promise<boolean>;
   /** true — файл записан (пользователь не отменил). */
   exportCadFile(): Promise<boolean>;
   exportSvgFile(): void;
@@ -70,50 +72,36 @@ export function setupExport(
   ctx: AppContext, svg: SVGSVGElement, status: HTMLElement, confirmCadExport: () => Promise<boolean>,
   onSaved: () => void = () => {},
 ): ExportActions {
-  const downloadText = (text: string, name: string, mime: string): void => {
-    const url = URL.createObjectURL(new Blob([text], { type: mime }));
-    const link = document.createElement('a');
-    link.href = url; link.download = name; link.click();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-  };
   const outputBaseName = (): string => {
     const name = ctx.schema.sheet.fileName.replace(/\.(cad|json)$/i, '').replace(/[\\/:*?"<>|\x00-\x1f]/g, '_').trim();
     return name || currentText().defaultFileName;
   };
-  const saveJson = (): void => {
-    downloadText(serializeSchemaJson(ctx.schema), `${outputBaseName()}.json`, 'application/json;charset=utf-8');
-    status.textContent = fillText(currentText().jsonSaved, { file: `${outputBaseName()}.json` });
-    onSaved();
+  // .json и .cad сохраняются одинаково: имя файла и папка выбираются перед записью (save-file.ts).
+  const saveJson = async (): Promise<boolean> => {
+    try {
+      const savedName = await saveTextFile(serializeSchemaJson(ctx.schema), {
+        baseName: outputBaseName(), extension: '.json', description: 'WebCADe JSON (*.json)', mime: 'application/json',
+      });
+      if (savedName === null) return false;
+      status.textContent = fillText(currentText().jsonSaved, { file: savedName });
+      onSaved();
+      return true;
+    } catch (error) {
+      status.textContent = fillText(currentText().jsonSaveFailed, { reason: errorReason(error) });
+      return false;
+    }
   };
   const exportCadFile = async (): Promise<boolean> => {
     if (!(await confirmCadExport())) return false;
     try {
-      const contents = exportCad(ctx.schema);
-      type SaveFileHandle = { name: string; createWritable(): Promise<{ write(data: string): Promise<void>; close(): Promise<void> }> };
-      type SavePicker = (options: { suggestedName: string; types: Array<{ description: string; accept: Record<string, string[]> }> }) => Promise<SaveFileHandle>;
-      const picker = (window as Window & { showSaveFilePicker?: SavePicker }).showSaveFilePicker;
-      let savedName = `${outputBaseName()}.cad`;
-      if (picker) {
-        const handle = await picker({
-          suggestedName: `${outputBaseName()}.cad`,
-          types: [{ description: 'CADe_SIMU (*.cad)', accept: { 'text/plain': ['.cad'] } }],
-        });
-        savedName = handle.name;
-        const writable = await handle.createWritable();
-        await writable.write(contents);
-        await writable.close();
-      } else {
-        const requestedName = window.prompt(currentText().exportFileNamePrompt, `${outputBaseName()}.cad`);
-        if (requestedName === null) return false;
-        const safeName = requestedName.trim().replace(/[\\/:*?"<>|\x00-\x1f]/g, '_').replace(/\.cad$/i, '') || outputBaseName();
-        savedName = `${safeName}.cad`;
-        downloadText(contents, savedName, 'text/plain;charset=utf-8');
-      }
+      const savedName = await saveTextFile(exportCad(ctx.schema), {
+        baseName: outputBaseName(), extension: '.cad', description: 'CADe_SIMU (*.cad)', mime: 'text/plain',
+      });
+      if (savedName === null) return false;
       status.textContent = fillText(currentText().cadExported, { file: savedName });
       onSaved();
       return true;
     } catch (error) {
-      if (error instanceof DOMException && error.name === 'AbortError') return false;
       status.textContent = fillText(currentText().cadExportFailed, { reason: errorReason(error) });
       return false;
     }

@@ -6,6 +6,7 @@ import { detectorHitFrame } from "./detector-layout";
 import { grafcetHitFrame } from "./grafcet-hit-frame";
 import { BLOCK_SPECS } from "@model/plc-blocks";
 import { isPlcFixedType, LOGO_TYPE } from "@model/plc-types";
+import { PUSHBUTTON_2D, isSimpleView } from "@model/realistic-2d-types";
 
 /** LOGO и блок питания 24 V — весь корпус; блоки Ladder — корпус и выводы; контакты и катушки Ladder — символ ±3 по высоте. */
 function plcHitFrame(typeCode: number): HitFrame | undefined {
@@ -23,7 +24,7 @@ function plcHitFrame(typeCode: number): HitFrame | undefined {
   return isPlcFixedType(typeCode) ? { x: -0.5, y: -3.6, w: 13, h: 7.2 } : undefined;
 }
 
-interface HitFrame {
+export interface HitFrame {
   x: number;
   y: number;
   w: number;
@@ -49,7 +50,7 @@ const FRAME_HIT: Readonly<Record<number, HitFrame>> = {
   // Фотоэлектрический барьер: корпус, выводы и стрелки справа.
   15000: { x: -4, y: -1, w: 24, h: 26 },
   // Символы 2D: корпус с выводами.
-  8100: { x: -1, y: -1, w: 18, h: 29 }, 8101: { x: -5, y: -1, w: 10, h: 20 },
+  8101: { x: -5, y: -1, w: 10, h: 20 },
   7018: { x: -1, y: -1, w: 26, h: 47 },
   6015: { x: -1, y: -1, w: 26, h: 53 },
   6017: { x: -1, y: -1, w: 14, h: 29 }, 60171: { x: -1, y: -1, w: 20, h: 29 }, 60172: { x: -1, y: -1, w: 26, h: 29 },
@@ -84,6 +85,14 @@ function defaultHitRect(canonical: SchemaElement, motorSpec?: MotorSpec): SVGRec
   return hitRect({ x: left, y: -1, w: right - left, h: bottom + 2 });
 }
 
+/**
+ * Кнопка 2D: цветной корпус (realistic-2d-color-button.ts) сдвинут на REALISTIC_2D_ORIGIN_DX и занимает x 2…19,
+ * простой рисунок — x 0…15; по высоте оба 0…27. Рамка захвата — рисунок плюс 1 с каждой стороны.
+ */
+export function pushbutton2dHitFrame(element: SchemaElement): HitFrame {
+  return isSimpleView(element) ? { x: -1, y: -1, w: 17, h: 29 } : { x: 1, y: -1, w: 19, h: 29 };
+}
+
 function frameHit(element: SchemaElement): HitFrame | undefined {
   if (element.typeCode === 8) {
     return {
@@ -93,6 +102,7 @@ function frameHit(element: SchemaElement): HitFrame | undefined {
       h: Math.max(element.size.h, 3),
     };
   }
+  if (element.typeCode === PUSHBUTTON_2D) return pushbutton2dHitFrame(element);
   return grafcetHitFrame(element) ?? FRAME_HIT[element.typeCode] ?? detectorHitFrame(element.typeCode)
     ?? plcHitFrame(element.typeCode);
 }

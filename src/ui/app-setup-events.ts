@@ -1,6 +1,7 @@
 import { setupCanvasInteractions } from './canvas-interactions';
 import type { CanvasInteractionsOptions } from './canvas-interactions';
 import { setupDocumentInputEvents, setupDocumentOpen } from './document-io';
+import { setupFileDrop } from './file-drop';
 import { setupViewportControls } from './viewport-controls';
 import { setupMobile } from './mobile';
 import { setupAppKeyboardShortcuts } from './app-setup-shortcuts';
@@ -41,6 +42,8 @@ function setupDocumentEvents(state: AppSetupBase, editor: AppSetupEditor): void 
     openDocumentText,
     state.simulation.stopSimulation,
   );
+  // Файлы .cad/.json, перетащенные из проводника на окно (file-drop.ts).
+  setupFileDrop(state.root, state.elements.status, openDocumentText);
 }
 
 function createCanvasOptions(

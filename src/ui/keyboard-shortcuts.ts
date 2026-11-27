@@ -5,6 +5,8 @@ export interface KeyboardShortcutsSetup {
   spaceDown(value: boolean): void; panTool(): boolean; setPanTool(value: boolean): void;
   nodeTool(): boolean; setNodeTool(value: boolean): void; selectTool(): void;
   copySelection(): void; cutSelection(): void; pasteSelection(): void; saveJson(): void; requestNewSchema(): void;
+  /** Печать листа схемы (Файл → «Печать / PDF»). */
+  printPdf(): void;
   undo(redo: boolean): void; wireDrawing(): boolean; changeWireRoute(key: string): void;
   toggleWireDrawing(): void; cycleWireKind(direction: -1 | 1): void;
   finishWireDrawing(): void; cancelPlacement(): void; cancelWireDrawing(): void;
@@ -24,6 +26,16 @@ export function setupKeyboardShortcuts(deps: KeyboardShortcutsSetup): void {
     const placementSelectFocused = select && event.target.id === 'place-type';
     if (event.code === 'Space' && !input && !textarea && !select) {
       deps.spaceDown(true); event.preventDefault();
+    }
+    // Ctrl+P — печать листа схемы, как Файл → «Печать / PDF», а не печать всей страницы браузером.
+    // Работает и из предпросмотра печати (окно закрывается, как по кнопке «Печать / PDF»).
+    if (isPrintShortcut(event)) {
+      event.preventDefault();
+      if (!event.repeat) {
+        deps.root.querySelector<HTMLDialogElement>('#print-preview-dialog[open]')?.close();
+        deps.printPdf();
+      }
+      return;
     }
     if (deps.root.querySelector('dialog[open]')) return;
     // Ctrl+Tab / Ctrl+Shift+Tab — следующая / предыдущая схема в панели вкладок. Только в установленном
@@ -90,6 +102,11 @@ export function setupKeyboardShortcuts(deps: KeyboardShortcutsSetup): void {
     if ((!editingField || placementSelectFocused) && event.code === 'KeyR') { deps.rotateSelection(); event.preventDefault(); }
   });
   window.addEventListener('keyup', (event) => { if (event.code === 'Space') deps.spaceDown(false); });
+}
+
+/** Ctrl+P (Cmd+P на Mac) без Shift/Alt. По `code`, чтобы работало и в русской раскладке. */
+export function isPrintShortcut(event: Pick<KeyboardEvent, 'code' | 'ctrlKey' | 'metaKey' | 'shiftKey' | 'altKey'>): boolean {
+  return (event.ctrlKey || event.metaKey) && !event.shiftKey && !event.altKey && event.code === 'KeyP';
 }
 
 /** Программа запущена как установленное приложение (PWA), а не во вкладке браузера. */

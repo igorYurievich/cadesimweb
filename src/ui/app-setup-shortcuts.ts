@@ -68,6 +68,7 @@ export function setupAppKeyboardShortcuts(
     cutSelection: commands.selection.cutSelection,
     pasteSelection: commands.selection.pasteSelection,
     saveJson: commands.exportActions.saveJson,
+    printPdf: commands.exportActions.printPdf,
     requestNewSchema: editor.createDocumentTab,
     undo: (redo) => undoAction(state, editor, redo),
     wireDrawing: () => state.wireDrawing,

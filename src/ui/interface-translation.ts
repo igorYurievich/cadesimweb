@@ -138,7 +138,7 @@ export function setupInterfaceTranslation(deps: InterfaceTranslationSetup): () =
     const shortcutsDialog = deps.root.querySelector<HTMLDialogElement>('#shortcuts-dialog'); if (shortcutsDialog) {
       set('#shortcuts-title', t.shortcutsTitle);
       const shortcutLabels: Array<[string, string]> = [
-        ['#shortcut-new', t.shortcutNew], ['#shortcut-open', t.shortcutOpen], ['#shortcut-copy-paste', t.shortcutCopyPaste],
+        ['#shortcut-new', t.shortcutNew], ['#shortcut-open', t.shortcutOpen], ['#shortcut-print', t.printPdf], ['#shortcut-copy-paste', t.shortcutCopyPaste],
         ['#shortcut-undo-redo', t.shortcutUndoRedo], ['#shortcut-rotate', t.shortcutRotate], ['#shortcut-delete', t.shortcutDelete],
         ['#shortcut-wire', t.shortcutWire], ['#shortcut-wire-type', t.shortcutWireType], ['#shortcut-finish', t.shortcutFinish],
         ['#shortcut-cursor-pan', t.shortcutCursorPan], ['#shortcut-panning', t.shortcutPanning], ['#shortcut-zoom', t.shortcutZoom], ['#shortcut-fit', t.shortcutFit],
