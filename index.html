@@ -3,12 +3,48 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Web Cade: simulador de esquemas eléctricos online (CADe SIMU web)</title>
+    <meta
+      name="description"
+      content="Dibuja y simula esquemas eléctricos en el navegador: contactores, relés, temporizadores, motores y PLC. Abre archivos .cad de CADe SIMU. Gratis, sin instalar, también sin conexión."
+    />
     <meta name="author" content="Igor Lipskiy Vyatchin" />
     <meta name="theme-color" content="#16202b" />
+    <link rel="canonical" href="https://cadesimweb.vercel.app/" />
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="icon" type="image/png" sizes="32x32" href="./pwa/favicon-32.png" />
     <link rel="apple-touch-icon" href="./pwa/apple-touch-icon.png" />
-    <title>Web Cade</title>
+    <!-- Превью ссылки в мессенджерах и соцсетях (Open Graph / Twitter) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Web Cade" />
+    <meta property="og:locale" content="es_ES" />
+    <meta property="og:url" content="https://cadesimweb.vercel.app/" />
+    <meta property="og:title" content="Web Cade: simulador de esquemas eléctricos online" />
+    <meta
+      property="og:description"
+      content="Editor y simulador de esquemas eléctricos y lógica de relés en el navegador. Compatible con archivos .cad de CADe SIMU."
+    />
+    <meta property="og:image" content="https://cadesimweb.vercel.app/pwa/icon-512.png" />
+    <meta property="og:image:width" content="512" />
+    <meta property="og:image:height" content="512" />
+    <meta name="twitter:card" content="summary" />
+    <!-- Описание приложения для поисковиков (schema.org) -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Web Cade",
+        "url": "https://cadesimweb.vercel.app/",
+        "description": "Editor y simulador de esquemas eléctricos y lógica de relés, compatible con CADe SIMU.",
+        "applicationCategory": "EducationalApplication",
+        "operatingSystem": "Any",
+        "inLanguage": ["es", "en", "fr", "it", "ru"],
+        "isAccessibleForFree": true,
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" },
+        "author": { "@type": "Person", "name": "Igor Lipskiy Vyatchin" },
+        "license": "https://opensource.org/licenses/MIT"
+      }
+    </script>
   </head>
   <body>
     <div id="app"></div>
