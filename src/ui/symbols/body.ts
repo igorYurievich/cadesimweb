@@ -46,6 +46,7 @@ import {
 import { drawPhotoBarrier } from "./sensors";
 import { drawDetector } from "./detectors";
 import { drawReflexSensor } from "./reflex-symbol";
+import { drawOvervoltage, drawPhaseRelay, drawSmallRelay, drawSsr } from "./electronic-relays";
 import { drawRealistic2d } from "./realistic-2d";
 import { drawPoles2d } from "./realistic-2d-poles";
 import { drawPilotSimple } from "./realistic-2d-pilot";
@@ -251,6 +252,11 @@ register([1057, 1058, 1059, 1060], drawDcDrive);
 register([PHOTO_BARRIER_TYPE], drawPhotoBarrier);
 register([...DETECTOR_CODES, EMITTER_TYPE], drawDetector);
 register([REFLEX_TYPE], drawReflexSensor);
+// Панель «Relés electrónicos y protecciones» (electronic-relays.ts).
+register([1070, 1071, 1072, 1073], drawSsr);
+register([9040, 9041, 9042, 9043], drawPhaseRelay);
+register([9044, 9045], drawOvervoltage);
+register([1074, 1075], drawSmallRelay);
 register2d([PUSHBUTTON_2D, CONTACTOR_2D, BREAKER_2D], drawRealistic2d);
 register2d([6017, 60171, 60172, 6018, 60182], drawPoles2d);
 register2d([7020, 7021], drawDelayBlock2d);

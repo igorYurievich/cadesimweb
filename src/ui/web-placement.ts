@@ -6,6 +6,7 @@ import { GRAFCET_SIZES, GRAFCET_TYPES } from '@model/grafcet';
 import { SWITCH_2D_CODES, SWITCH_2D_SPECS } from '@model/switch-2d';
 import { TERMINAL_2D, TERMINAL_2D_LABELS, TERMINAL_2D_SIZE } from '@model/terminal-2d';
 import { LIFT_SIZE, LIFT_TYPE } from '@model/lift';
+import { ELECTRONIC_RELAY_CODES, ELECTRONIC_RELAY_SPECS } from '@model/electronic-relays';
 import { PLC_LABEL_OFFSETS, PLC_PLACE_DEFAULTS, PLC_PLACEABLE_TYPES } from './plc-placement';
 
 // Размещение элементов, которые constants.ts берёт целыми таблицами: LOGO, блок питания и Ladder (plc-placement.ts)
@@ -14,7 +15,7 @@ import { PLC_LABEL_OFFSETS, PLC_PLACE_DEFAULTS, PLC_PLACEABLE_TYPES } from './pl
 
 export const WEB_PLACEABLE_TYPES = [
   ...PLC_PLACEABLE_TYPES, STAIR_TIMER_2D, S7_1200, VFD_2D, VFD_2D_1PH, ...MECHANISM_TYPES, ...GRAFCET_TYPES,
-  ...SWITCH_2D_CODES, LIFT_TYPE, TERMINAL_2D,
+  ...SWITCH_2D_CODES, LIFT_TYPE, TERMINAL_2D, ...ELECTRONIC_RELAY_CODES,
 ];
 
 export const WEB_PLACE_DEFAULTS: typeof PLC_PLACE_DEFAULTS = {
@@ -37,6 +38,10 @@ export const WEB_PLACE_DEFAULTS: typeof PLC_PLACE_DEFAULTS = {
   ...Object.fromEntries(GRAFCET_TYPES.map((code) => [code, {
     prefix: '', size: { ...GRAFCET_SIZES[code]! }, labels: [],
   }])),
+  // Панель «Relés electrónicos y protecciones» (model/electronic-relays.ts): имена -K / -F, как в образце.
+  ...Object.fromEntries(ELECTRONIC_RELAY_SPECS.map((spec) => [spec.code, {
+    prefix: spec.prefix, size: { ...spec.size }, labels: [...spec.labels],
+  }])),
 };
 
 export const WEB_LABEL_OFFSETS: typeof PLC_LABEL_OFFSETS = {
@@ -51,4 +56,5 @@ export const WEB_LABEL_OFFSETS: typeof PLC_LABEL_OFFSETS = {
   // Interruptor и Seccionador 2D: смещение подписи из образцов inystec.cad и inystec2.cad.
   ...Object.fromEntries(SWITCH_2D_CODES.map((code) => [code, { x: -12, y: -3 }])),
   [TERMINAL_2D]: { x: -12, y: -3 }, // клемма 2D: из образца borneras.cad
+  ...Object.fromEntries(ELECTRONIC_RELAY_SPECS.map((spec) => [spec.code, { ...spec.labelOffset }])),
 };

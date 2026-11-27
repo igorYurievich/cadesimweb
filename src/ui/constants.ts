@@ -28,7 +28,7 @@ export const OPTIONAL_GROUP_STORAGE_KEY = 'cadesimu-visible-optional-groups:v1';
  * символы 3D и пневматика пока не нужны.
  */
 export const HIDDEN_OPTIONAL_GROUPS: readonly GroupKey[] = [
-  'wiring', 'realistic-3d', 'pneumatics', 'logic', 'electronic-relays', // логика и электронные реле — временно
+  'wiring', 'realistic-3d', 'pneumatics', 'logic', // логика — временно
 ];
 export const PALETTE_VIEW_KEY = 'cadesimu-palette-view:v1';
 
@@ -74,7 +74,7 @@ export const POTENTIAL_ORDER: readonly PotentialLabel[] = ['L1', 'L2', 'L3', 'N'
 
 export const latchedTypes = new Set([2003, 2004, 2005, 2007, 5000, 5001, 5002, 5003, 5004, 5005, 5006, 5007, 5008, 5009, 6000, 6001, 6002, 6003, 6004, 6005, 6006, 6007, 6008, 6009, 6010, 6011, 6012, 6015,
   6017, 60171, 60172, 6018, 60182, 6016, 8110,
-  8120, 8121, 8122, 6019, 6020, 60191, 60201]);
+  8120, 8121, 8122, 6019, 6020, 60191, 60201, 9044, 9045]);
 
 export const armedByDefaultTypes = new Set([5000, 5001, 5002, 5003, 5004, 6007, 6016]);
 

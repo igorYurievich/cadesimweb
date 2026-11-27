@@ -1,0 +1,36 @@
+/* Виртуальный мультиметр (multimeter.ts): слой поверх окна, сам слой мышь не ловит. */
+.multimeter-layer { position: fixed; inset: 0; z-index: 60; pointer-events: none; }
+.multimeter-layer[hidden] { display: none; }
+.multimeter-cables { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.multimeter-cables path { fill: none; stroke-width: 7px; stroke-linecap: round;
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.25)); }
+.multimeter-body, .multimeter-probe, .multimeter-alert { position: absolute; left: 0; top: 0; pointer-events: auto; }
+.multimeter-body { cursor: grab; touch-action: none; user-select: none;
+  filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.35)); }
+.multimeter-body.is-dragging, .multimeter-probe.is-dragging { cursor: grabbing; }
+.multimeter-body svg { display: block; }
+.multimeter-body .mm-lcd-bg { fill: #c9e3b6; }
+.multimeter-body.is-off .mm-lcd-bg { fill: #9aa892; }
+.multimeter-body.is-broken .mm-lcd-bg { fill: #9aa58c; }
+.multimeter-body .mm-cracks { display: none; }
+.multimeter-body.is-broken .mm-cracks { display: inline; }
+.multimeter-body.is-broken [data-part="value"] { opacity: 0.75; }
+.multimeter-body .mm-dial-label, .multimeter-body .mm-dial-knob, .multimeter-body .mm-button { cursor: pointer; }
+.multimeter-body .mm-dial-label:hover { fill: #ffb36b; }
+.multimeter-body .mm-button:hover rect { fill: #5d6872; }
+.multimeter-body [data-part="pointer"] { transition: transform 0.18s ease-out; }
+.multimeter-probe { width: 40px; transform-origin: 20px 0; cursor: grab; touch-action: none;
+  filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.3)); }
+.multimeter-probe svg { display: block; overflow: visible; }
+.multimeter-alert { width: 400px; box-sizing: border-box; padding: 16px 18px;
+  border: 3px solid #e65100; border-radius: 12px; background: #fff4e5; color: #4e2600;
+  font: 400 16px/1.4 system-ui, sans-serif; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25); }
+.multimeter-alert[hidden] { display: none; }
+.multimeter-alert strong { display: block; font-size: 20px; }
+.multimeter-alert p { margin: 6px 0 12px; }
+.multimeter-alert button { border: 0; border-radius: 8px; padding: 8px 16px; background: #e65100; color: #fff;
+  font: 600 16px system-ui, sans-serif; cursor: pointer; }
+.multimeter-alert button:hover { background: #c94600; }
+/* Щуп приложен к проводу или клемме: зелёное кольцо на кончике. */
+.multimeter-probe .mm-probe-ring { display: none; }
+.multimeter-probe.is-attached .mm-probe-ring { display: inline; }

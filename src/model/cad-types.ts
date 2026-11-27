@@ -23,6 +23,7 @@ import { S7_1214_CAD_TYPE } from './s7-1214';
 import { VFD_2D_1PH_CAD_TYPE, VFD_2D_CAD_TYPE } from './vfd';
 import { MECHANISM_CAD_TYPES } from './mechanisms';
 import { LIFT_CAD_TYPE } from './lift';
+import { ELECTRONIC_RELAY_CAD_TYPES } from './electronic-relays';
 import type { Point, WireKind } from './types';
 
 export type CadFamily =
@@ -266,16 +267,16 @@ const TABLE: readonly CadTypeInfo[] = [
   { code: 9004, family: 'coil', label: 'Temporizador a la conexión', layout: ROWS2, commandIds: [32952], confidence: 'probable', note: 'Клеммы A1 A2, в текстовых полях после клемм два параметра (в образцах 0 и 5, 0 и 10).' },
   // ── Катушки и сигнализация (панель «Bobinas, temporizadores…», 17 кнопок) ──
   // Образец: elementos_bobinas.cad, по одной кнопке панели. Коды 9000..9016 идут в порядке панели, кроме пары 9015/9014:
-  // «Generador de pulsos» записан как 9015, «Interruptor horario» как 9014 (символы подтверждают: «E» и часы). Все новые типы пока только символы.
-  { code: 9001, family: 'relay-coil', label: 'Bobina biestable contactor, relé', layout: BISTABLE_POINTS, commandIds: [32956], confidence: 'confirmed', note: 'Клеммы A1 B1 сверху, A2 снизу по центру; внутри две косые линии. Только символ.' },
-  { code: 9002, family: 'relay-coil', label: 'Telerruptor', layout: ROWS2, commandIds: [32964], confidence: 'confirmed', note: 'Клеммы A1 A2; слева отсек со знаком «<». Только символ.' },
-  { code: 9003, family: 'relay-coil', label: 'Bobina electroválvula', layout: ROWS2, commandIds: [32951], confidence: 'confirmed', note: 'Клеммы A1 A2, имя -EV; косая черта в корпусе и клапан справа. Только символ.' },
+  // «Generador de pulsos» записан как 9015, «Interruptor horario» как 9014 (символы подтверждают: «E» и часы). Логика 9001–9003, 9007, 9014–9016 — engine/coil-relays.ts.
+  { code: 9001, family: 'relay-coil', label: 'Bobina biestable contactor, relé', layout: BISTABLE_POINTS, commandIds: [32956], confidence: 'confirmed', note: 'Клеммы A1 B1 сверху, A2 снизу по центру; внутри две косые линии. A1–A2 включает, B1–A2 выключает, состояние держится.' },
+  { code: 9002, family: 'relay-coil', label: 'Telerruptor', layout: ROWS2, commandIds: [32964], confidence: 'confirmed', note: 'Клеммы A1 A2; слева отсек со знаком «<». Каждый импульс на A1–A2 переключает контакты.' },
+  { code: 9003, family: 'relay-coil', label: 'Bobina electroválvula', layout: ROWS2, commandIds: [32951], confidence: 'confirmed', note: 'Клеммы A1 A2, имя -EV; косая черта в корпусе и клапан справа. Работает как катушка 9000.' },
   { code: 9005, family: 'relay-coil', label: 'Temporizador a la desconexión', layout: ROWS2, commandIds: [32953], confidence: 'confirmed', note: 'Клеммы A1 A2 + параметры масштаба и времени; импульс запускает сохраняющийся отсчёт, после завершения которого переключаются контакты 7008–7011 с тем же именем.' },
   { code: 9006, family: 'relay-coil', label: 'Temporizador a la conexión desconexión', layout: ROWS2, commandIds: [32954], confidence: 'confirmed', note: 'Клеммы A1 A2 + масштаб и время выдержки; контакты 7012–7015 переключаются по истечении выдержки и возвращаются в исходное состояние через 2 с после снятия питания.' },
-  { code: 9007, family: 'relay-coil', label: 'Relé intermitente', layout: ROWS2, commandIds: [32955], confidence: 'confirmed', note: 'Клеммы A1 A2 + параметры 0 и 1; слева отсек со знаком «5». Только символ.' },
-  { code: 9015, family: 'relay-coil', label: 'Generador de pulsos', layout: ROWS2, commandIds: [33223], confidence: 'probable', note: 'Клеммы A1 A2 + четыре параметра (0 1 0 1); слева отсек со знаком «E». Соответствие 9015 ↔ «Generador de pulsos» и 9014 ↔ «Interruptor horario» выведено из порядка и вида символов. Только символ.' },
-  { code: 9014, family: 'relay-coil', label: 'Interruptor horario', layout: ROWS2, commandIds: [33098], confidence: 'probable', note: 'Клеммы A1 A2 + шесть параметров (расписание, в образце нули); в корпусе значок часов. Только символ.' },
-  { code: 9016, family: 'relay-coil', label: 'Contador de pulsos', layout: COUNTER_POINTS, commandIds: [33236], confidence: 'confirmed', note: 'Клеммы A1 C D R сверху, A2 снизу; рамка 18×15. В файле флаги 0..3 и 6, метки лежат в слотах флагов (texts[2..5] и texts[8]), параметры 0 0 между ними. Только символ.' },
+  { code: 9007, family: 'relay-coil', label: 'Relé intermitente', layout: ROWS2, commandIds: [32955], confidence: 'confirmed', note: 'Клеммы A1 A2 + параметры 0 и 1; слева отсек со знаком «5». Под питанием контакты мигают с полупериодом «время».' },
+  { code: 9015, family: 'relay-coil', label: 'Generador de pulsos', layout: ROWS2, commandIds: [33223], confidence: 'probable', note: 'Клеммы A1 A2 + четыре параметра (0 1 0 1); слева отсек со знаком «E». Соответствие 9015 ↔ «Generador de pulsos» и 9014 ↔ «Interruptor horario» выведено из порядка и вида символов. Время включения и паузы — поля 2 и 4.' },
+  { code: 9014, family: 'relay-coil', label: 'Interruptor horario', layout: ROWS2, commandIds: [33098], confidence: 'probable', note: 'Клеммы A1 A2 + «чч#мм#неактивно» включения и отключения (interruptor_horario.cad), дни пн…сб — коды «1»/«0» в nums[2..7]; в корпусе значок часов. Идёт по часам компьютера.' },
+  { code: 9016, family: 'relay-coil', label: 'Contador de pulsos', layout: COUNTER_POINTS, commandIds: [33236], confidence: 'confirmed', note: 'Клеммы A1 C D R сверху, A2 снизу; рамка 18×15. В файле флаги 0..3 и 6, метки лежат в слотах флагов (texts[2..5] и texts[8]), между ними пределы включения и отключения (по окну свойств CADe SIMU).' },
 
   { code: 9008, family: 'lamp', label: 'Piloto señalización', layout: ROWS2, commandIds: [32957], confidence: 'confirmed', note: 'Клеммы X1 X2; параметр после клемм: индекс цвета (в образцах 0, 1, 2).' },
   { code: 9009, family: 'lamp', label: 'Piloto señalización intermitente', layout: ROWS2, commandIds: [32958], confidence: 'confirmed', note: 'Клеммы X1 X2 + выбранный цвет; лампа мигает с периодом 1 с (0,5 с включена и 0,5 с выключена), когда запитана.' },
@@ -328,6 +329,8 @@ const TABLE: readonly CadTypeInfo[] = [
   ...MECHANISM_CAD_TYPES,
   ...GRAFCET_CAD_TYPES,
   LIFT_CAD_TYPE,
+  // Панель «Relés electrónicos y protecciones» (electronic-relays.ts).
+  ...ELECTRONIC_RELAY_CAD_TYPES,
 ];
 
 const BY_CODE = new Map<number, CadTypeInfo>(TABLE.map((t) => [t.code, t]));

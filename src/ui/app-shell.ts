@@ -72,6 +72,7 @@ export function renderAppShell(root: HTMLElement, theme: Theme): void {
             <div class="menu-toggle-list">
               <label class="menu-toggle"><input type="checkbox" data-optional-group="realistic-2d"><span data-extra-label="extraReal2d">Реалистичные символы · 2D</span></label>
               <label class="menu-toggle"><input type="checkbox" data-optional-group="power-electronics"><span data-extra-label="extraPowerElectronics">Силовая электроника</span></label>
+              <label class="menu-toggle"><input type="checkbox" data-optional-group="electronic-relays"><span data-extra-label="extraElectronicRelays">Электронные реле</span></label>
               <label class="menu-toggle"><input type="checkbox" data-optional-group="sensors"><span data-extra-label="extraSensors">Датчики</span></label>
               <label class="menu-toggle"><input type="checkbox" data-optional-group="mechanisms"><span data-extra-label="extraMechanisms">Механизмы</span></label>
               <label class="menu-toggle"><input type="checkbox" data-optional-group="grafcet"><span data-extra-label="extraGrafcet">GRAFCET</span></label>

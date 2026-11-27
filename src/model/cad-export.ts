@@ -1,3 +1,4 @@
+import { COUNTER_SLOTS, PULSE_COUNTER, writeCoilRelayParams } from './coil-relays';
 import { detectorSpec } from './detector-types';
 import { packProgramPagesForCad } from './program-pages';
 import { importCad } from './cad-import';
@@ -44,6 +45,7 @@ const DEFAULT_TAILS: Readonly<Record<number, string>> = {
 const SLOT_MAP: Readonly<Record<number, readonly number[]>> = {
   1066: [0, 1, 2, 4, 5, 6, 7],
   1067: [0, 1, 2, 4, 5, 6, 7],
+  [PULSE_COUNTER]: COUNTER_SLOTS,
 };
 
 /** Типы, у которых клеммы не помещаются в одну запись: сколько клемм в основной, остальные идут записью-продолжением -1 (как в образце). */
@@ -214,6 +216,7 @@ function elementRecords(
     if (element.params.scale !== undefined) record.texts[parameterStart] = String(element.params.scale);
     if (element.params.time !== undefined) record.texts[parameterStart + 1] = String(element.params.time);
   }
+  writeCoilRelayParams(record, element);
   return [record, ...continuations];
 }
 

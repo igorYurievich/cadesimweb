@@ -1,3 +1,5 @@
+import { COIL_RELAY_TYPES } from '@model/coil-relays';
+import { coilRelayActive } from '@engine/coil-relays';
 import { POSITION_SPECS, currentPosition, getBehavior, nextPosition } from '@engine/behaviors';
 import { auxContactActive, auxContactActuatorActive, isMomentaryManual } from '@engine/switching';
 import { THERMAL_RELAY_TYPES } from '@engine/thermal';
@@ -112,7 +114,9 @@ export function applyContactAndIndicatorVisuals(
     ? (result?.coils[element.name] ?? false)
     : element.typeCode === 9005 || element.typeCode === 9006
       ? (result?.memory.timers[element.id]?.powered ?? false)
-      : false;
+      // Бистабильная, импульсное реле, клапан и др.: подсветка, пока включён выход (coil-relays.ts).
+      : COIL_RELAY_TYPES.has(element.typeCode) && result !== undefined
+        && coilRelayActive(element, result.coils, result.memory.timers);
   node.classList.toggle('is-coil-energized', coilEnergized);
   applyLampVisuals(state, element, node);
 }

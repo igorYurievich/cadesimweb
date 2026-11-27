@@ -10,7 +10,7 @@ import type { GroupKey } from '@model/catalog';
 const GROUPS_WITH_BIG_ICONS: readonly GroupKey[] = [
   'power-sources', 'fuses', 'protection', 'contactors', 'motors', 'power-electronics', 'aux-contacts',
   'manual-controls', 'mechanisms', 'installations', 'sensors', 'coils-signaling', 'ladder', 'grafcet',
-  'io-plc', 'realistic-2d',
+  'io-plc', 'realistic-2d', 'electronic-relays',
 ];
 
 describe('крупные значки палитры', () => {

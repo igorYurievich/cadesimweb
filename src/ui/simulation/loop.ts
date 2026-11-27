@@ -1,5 +1,6 @@
 import { createEmptyMemory, simulate } from '@engine/simulate';
 import { findShortCircuitTrips } from '@engine/cc-trip';
+import { findOvervoltageTrips } from '@engine/electronic-relays';
 import { breakersTripOnShortCircuit } from '../options-menu';
 import type { AppContext } from '../context';
 import { startsOpen } from '../constants';
@@ -7,6 +8,7 @@ import { formatSimulationDiagnostics } from './diagnostics';
 import { createSimInputs } from './state';
 import type { SimulationDependencies, SimulationState } from './types';
 import { hasTimeAnimation, noteEvaluatedFrame, skipQuietFrame } from './quiet-skip';
+import { applyWallClock } from './wall-clock';
 import { currentText } from '../i18n';
 
 export interface SimulationLoop {
@@ -38,6 +40,8 @@ export function createSimulationLoop(
     const elapsed = Math.min(0.25, Math.max(0, (timestamp - previous) / 1000));
     state.lastFrameTime = timestamp;
     state.time += elapsed * state.speed;
+    // Реле времени: часы компьютера меняют входы раз в секунду, и покой прерывается (wall-clock.ts).
+    applyWallClock(ctx.schema, state.inputs);
     // В покое кадр не пересчитывается (quiet-skip.ts); моторы и мигание всё равно перерисовываются.
     if (!skipQuietFrame(ctx, state)) evaluateSimulation();
     else if (hasTimeAnimation(ctx, state)) applyVisuals();
@@ -135,6 +139,7 @@ function evaluate(
   state: SimulationState,
   applyVisuals: () => void,
 ): void {
+  applyWallClock(ctx.schema, state.inputs);
   const input = { schema: ctx.schema, inputs: state.inputs, time: state.time, memory: state.memory };
   state.result = simulate(input);
   // Опция «Автоматы выбивают при КЗ»: автомат выше по цепи уходит в «выкл», схема пересчитывается (cc-trip.ts).
@@ -157,6 +162,10 @@ function evaluate(
     }
     if (trips.length) state.result = simulate({ ...input, inputs: state.inputs });
   }
+  // Защита от перенапряжений 9044 / 9045 отключается сама и ждёт ручного включения (electronic-relays.ts).
+  const overvoltage = state.mode === 'run' ? findOvervoltageTrips(ctx.schema, state.result, state.inputs) : [];
+  for (const id of overvoltage) state.inputs.toggled[id] = false;
+  if (overvoltage.length) state.result = simulate({ ...input, inputs: state.inputs });
   // Взведённый заново автомат больше не считается выбитым.
   for (const id of [...state.ccTrips.keys()]) if (state.inputs.toggled[id] !== false) state.ccTrips.delete(id);
   const before = state.memory;

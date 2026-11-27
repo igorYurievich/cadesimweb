@@ -17,6 +17,8 @@ import { advancePlcBlocks } from './plc-blocks';
 import { advanceVfds, vfdKeys } from './vfd';
 import { advanceGrafcet, grafcetRelayNames } from './grafcet';
 import { photoEmitterKeys } from './photo-beam';
+import { electronicRelayKeys } from './electronic-relays';
+import { advanceCoilRelays, coilRelayKeys } from './coil-relays';
 import { advanceLifts, withLiftSensors } from './lift';
 
 export interface RelayLoopResult {
@@ -41,7 +43,8 @@ export function relayCoilNames(schema: Schema): string[] {
   }
   // Операнды, которые задаёт LOGO: «запитан» и входы I1…I8 (plc.ts); входы минутников (stair-timer.ts).
   for (const name of [...logoRelayNames(schema), ...stairTimerKeys(schema), ...s7RelayNames(schema), ...vfdKeys(schema),
-    ...grafcetRelayNames(schema), ...photoEmitterKeys(schema), ...ladderManualNames(schema)]) {
+    ...grafcetRelayNames(schema), ...photoEmitterKeys(schema), ...ladderManualNames(schema),
+    ...electronicRelayKeys(schema), ...coilRelayKeys(schema)]) {
     if (!seen.has(name)) names.push(name);
     seen.add(name);
   }
@@ -107,7 +110,8 @@ export function solveRelayLoop(
     const coilTimers = advanceTimers(schema, pass.nets, pass.terminalNet, time, timers);
     // Блоки с выдержкой 2D считают от устойчивого состояния своих катушек.
     const delayTimers = advanceStairTimers(
-      schema, coils, pass.nets, pass.terminalNet, time, advanceDelayBlocks(schema, coils, time, coilTimers),
+      schema, coils, pass.nets, pass.terminalNet, time,
+      advanceCoilRelays(schema, coils, time, advanceDelayBlocks(schema, coils, time, coilTimers), inputs.clock),
     );
     // Блоки Ladder: таймеры, счётчики, биестабильный и делитель (plc-blocks.ts).
     // Преобразователи частоты: частота по рампам (vfd.ts).

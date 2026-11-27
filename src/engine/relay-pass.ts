@@ -22,6 +22,8 @@ import { plcBlockSources } from './plc-blocks';
 import { applyGrafcetOutputs } from './grafcet';
 import { applyEmitterSupply } from './photo-beam';
 import { applyVfdInputs, vfdOutput, vfdSources } from './vfd';
+import { applyElectronicRelayInputs } from './electronic-relays';
+import { applyCoilRelayInputs } from './coil-relays';
 import { VFD_POWER_INDEX, isVfdDrive } from '../model/vfd';
 
 export interface RelayPassResult {
@@ -203,7 +205,11 @@ export function solvePass(
   // LOGO: питание модуля и входы I1…I8 (plc.ts).
   applyLogoInputs(schema, graph.terminalNet, netById, nextCoils);
   applyStairTimerInputs(schema, graph.terminalNet, netById, nextCoils);
+  // SSR, реле SPST/SPDT и реле контроля фаз (electronic-relays.ts).
+  applyElectronicRelayInputs(schema, graph.terminalNet, netById, nextCoils);
   applyS7Inputs(schema, graph.terminalNet, netById, nextCoils);
+  // Бистабильная, импульсное реле, клапан, прерыватель и др. панели «Bobinas…» (coil-relays.ts).
+  applyCoilRelayInputs(schema, graph.terminalNet, netById, timers, nextCoils);
   applyLadderManualInputs(schema, inputs, ladderManualNames(schema), nextCoils);
   applyVfdInputs(schema, graph.terminalNet, netById, nextCoils, inputs);
   // Излучатели фотобарьеров: светят, пока запитаны (photo-beam.ts).

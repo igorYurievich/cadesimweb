@@ -8,6 +8,8 @@ import { appendDetectorWiringField, appendReceiverEmitterField } from './detecto
 import { appendPoleVariantField } from './pole-properties';
 import { appendButtonColorField, appendTerminalColorField, appendViewField } from './view-properties';
 import { appendStairTimerField } from './stair-timer-properties';
+import { appendCoilRelayFields } from './coil-relay-properties';
+import { appendTimeSwitchFields } from './time-switch-properties';
 import { appendVfdFields } from './vfd-properties';
 import { appendProgramButton } from './program-pages-view';
 import { loadedFeatureHooks } from './features/loader';
@@ -126,6 +128,8 @@ export function setupPropertyFields(ctx: AppContext, deps: PropertyFieldsSetup):
     appendButtonColorField(ctx.schema, element, { ...deps, rerender: renderProperties });
     appendTerminalColorField(ctx.schema, element, { ...deps, rerender: renderProperties });
     appendStairTimerField(ctx.schema, element, { ...deps, rerender: renderProperties });
+    appendCoilRelayFields(ctx.schema, element, { ...deps, rerender: renderProperties });
+    appendTimeSwitchFields(ctx.schema, element, { ...deps, rerender: renderProperties });
     appendVfdFields(ctx.schema, element, { ...deps, rerender: renderProperties });
     for (const hooks of loadedFeatureHooks()) hooks.appendProperties?.(ctx.schema, element, fieldDeps);
     appendProgramButton(ctx.schema, element, { ...deps, root: ctx.root });

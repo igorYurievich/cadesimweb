@@ -14,8 +14,11 @@ export function hasVerifiedBadge(group: GroupKey, id: number): boolean {
     || group === 'mechanisms'
     // Инсталляции (только веб, model/lift.ts): лифт на 5 этажей.
     || group === 'installations'
-    || (group === 'coils-signaling' && [32949, 32952, 32953, 32954, 32957, 32958, 32959, 32960, 32961, 32962].includes(id))
+    // Вся панель катушек; у 9001 9002 9003 9007 9014 9015 9016 логика в engine/coil-relays.ts.
+    || group === 'coils-signaling'
     || group === 'contactors'
+    // Электронные реле и защита от перенапряжений (model/electronic-relays.ts): все 12 кнопок панели.
+    || group === 'electronic-relays'
     || (group === 'protection' && id !== 33054 && id !== 33055)
     // Датчики: все, что размещаются, включая излучатель барьера 33027 (питание 1-2, луч для привязанного приёмника,
     // engine/photo-beam.ts) и фотодатчик Réflex 34013 (только веб, model/reflex-sensor.ts).

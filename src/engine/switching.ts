@@ -156,9 +156,13 @@ function controlActive(
       return Boolean(inputs.toggled[element.id] ?? link.defaultClosed ?? false)
         || (maintainedManual && (sameNameMomentaryPressed() || sameNameLatchedOn()));
     }
-    // Контакт Ladder на операнд программы — значение на начало скана (plc.ts).
-    case 'coil-name': return ladderScanValue(element, coils) ?? (auxContactActive(element, schema, coils, timers)
-      || auxContactActuatorActive(element, schema, inputs, names));
+    case 'coil-name': {
+      // Второй вход реверсивного SSR 1073: свой ключ катушки (electronic-relays.ts).
+      if (link.coilSuffix) return element.name !== '' && (coils[element.name + link.coilSuffix] ?? false);
+      // Контакт Ladder на операнд программы — значение на начало скана (plc.ts).
+      return ladderScanValue(element, coils) ?? (auxContactActive(element, schema, coils, timers)
+        || auxContactActuatorActive(element, schema, inputs, names));
+    }
     // thermal.tripped — ручной вход и тепловые реле, сработавшие кликом (resolveThermalState).
     case 'thermal': return (thermal.tripped[element.id] ?? false) || (element.name.trim() !== '' && thermal.trippedNames.has(element.name.trim().toLocaleUpperCase()));
     case 'position': {

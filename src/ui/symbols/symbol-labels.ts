@@ -8,6 +8,7 @@ import { DETECTOR_NAME_SPOTS, DETECTOR_SIDE_LABELS } from "./detector-layout";
 import { AUX_BLOCK_2D, isDelayBlock2d } from "@model/realistic-2d-types";
 import { isTerminal2d } from "@model/terminal-2d";
 import { LADDER_EXTRA, PLC_BLOCK } from "@model/plc-blocks";
+import { ELECTRONIC_RELAY_NAME_SPOTS } from "./electronic-relays";
 
 const LADDER_NAME = { x: 6, y: -5, anchor: "middle" } as const;
 const BLOCK_NAME = { x: 7.5, y: -5, anchor: "middle" } as const;
@@ -43,6 +44,8 @@ export const NAME_SPOTS: Readonly<
   15000: { x: -4.5, y: 12, anchor: "end" },
   // Детекторы: имя слева над корпусом, как в CADe_SIMU (detector-layout.ts).
   ...DETECTOR_NAME_SPOTS,
+  // Электронные реле и защита от перенапряжений: имя слева от корпуса (electronic-relays.ts).
+  ...ELECTRONIC_RELAY_NAME_SPOTS,
   // Лифт 8300: имя над машинным помещением.
   8300: { x: 33, y: -2.5, anchor: "middle" },
   // Символы 2D: имя слева у верхнего края.

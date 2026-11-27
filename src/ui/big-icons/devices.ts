@@ -37,7 +37,8 @@ const MECHANISM_BIG_ICONS: Readonly<Record<number, () => SVGSVGElement>> = {
   34004: wallSwitch([50, 230]),
   34005: crossSwitch,
   34006: () => drawShapes([circle(32, 24, 14)], [circle(32, 24, 6)]),
-  34007: () => drawShapes(['M16 30A16 16 0 0 1 48 30H16Z', 'M32 30V46', 'M14 14H50']),
+  // Розетка, как кнопка CADe_SIMU: вывод сверху упирается в плоскую вершину открытой дуги ⌒ (без заливки и черты).
+  34007: () => drawShapes(['M32 10V28', 'M18 40C18 35 21 30 25 28H39C43 30 46 35 46 40']),
   34008: () => drawShapes([circle(32, 24, 15), 'M21.4 13.4L42.6 34.6M42.6 13.4L21.4 34.6']),
 };
 

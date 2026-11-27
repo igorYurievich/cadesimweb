@@ -1,3 +1,4 @@
+import { COIL_RELAY_TYPES, coilRelayPlacedParams } from '@model/coil-relays';
 import type { Point, Viewport } from './viewport';
 import { snapPointToGrid } from './viewport';
 import type { Schema, SheetInfo } from '@model/types';
@@ -77,6 +78,8 @@ export function createPlacedElement(typeCode: number, position: Point, rotation:
   if (typeCode === 2009) { element.name = 'KM1'; element.func = 'KM2'; }
   // Блок с выдержкой 2D: шкала и выдержка как у свежего блока в образце 2d-simbolos.cad.
   if (isDelayBlock2d(typeCode)) element.params = { scale: 0, time: DELAY_BLOCK_DEFAULT_TIME };
+  // Катушки панели «Bobinas…»: поля параметров, как у свежего элемента в образце (coil-relays.ts).
+  if (COIL_RELAY_TYPES.has(typeCode)) element.params = coilRelayPlacedParams(typeCode);
   // LOGO и Ladder: функция пустая (у First Scan — «SCAN»), у блоков время 1 с и PV 0, как в ladder.cad.
   if (isPlcFixedType(typeCode)) Object.assign(element, plcPlacedFields(typeCode));
   // Мотор 2D: обычный 1000/1001 с цветным рисунком (realistic-2d-types.ts).

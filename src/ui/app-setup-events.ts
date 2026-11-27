@@ -6,6 +6,7 @@ import { setupViewportControls } from './viewport-controls';
 import { setupMobile } from './mobile';
 import { setupAppKeyboardShortcuts } from './app-setup-shortcuts';
 import { setupWireTrace } from './wire-trace';
+import { setupMultimeterTool } from './app-setup-multimeter';
 import { setupOptionsMenu } from './options-menu';
 import type { AppSetupBase } from './app-setup-base';
 import type { AppSetupEditor } from './app-setup-editor';
@@ -128,6 +129,7 @@ function setupCanvasEvents(
       return { title: t.wireTraceTitle, wires: t.wireTraceWires, terminals: t.wireTraceTerminals, none: t.wireTraceNone, hint: t.wireTraceHint };
     },
   });
+  setupMultimeterTool(state);
 }
 
 function setupMomentaryInputRelease(state: AppSetupBase): void {

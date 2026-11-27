@@ -10,6 +10,7 @@ import { applyPoweredVisuals, applyPowerSupplyVisuals } from './element-power';
 import { applySensorVisuals } from './element-sensors';
 import { apply2dVisuals } from './element-2d';
 import { applyVfdVisuals } from './element-vfd';
+import { applyElectronicRelayVisuals } from './element-electronic-relays';
 import { loadedFeatureHooks } from '../features/loader';
 import { layerNode } from './layer-index';
 
@@ -55,4 +56,5 @@ function applyOneElement(
   applySensorVisuals(state, element, node, ctx.schema);
   apply2dVisuals(state, element, node, ctx.schema);
   applyVfdVisuals(state, element, node, ctx.schema);
+  applyElectronicRelayVisuals(state, element, node);
 }

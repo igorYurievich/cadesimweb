@@ -42,8 +42,8 @@ describe('persisted UI settings', () => {
     expect(readUniformWireColors()).toBe(false);
   });
 
-  it('shows realistic 2D, PLC I/O, power electronics and sensors by default until the user turns them off', () => {
-    const defaults = ['realistic-2d', 'io-plc', 'power-electronics', 'sensors'];
+  it('shows realistic 2D, PLC I/O, power electronics, electronic relays and sensors by default until turned off', () => {
+    const defaults = ['realistic-2d', 'io-plc', 'power-electronics', 'electronic-relays', 'sensors'];
     expect(readOptionalPaletteGroups()).toEqual(defaults);
     values.set('cadesimu-visible-optional-groups:v1', JSON.stringify(['grafcet']));
     expect(readOptionalPaletteGroups()).toEqual(['grafcet', ...defaults]);

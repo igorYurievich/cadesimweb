@@ -2,6 +2,7 @@
 
 import { allCadTypes } from '../model/cad-types';
 import { PANEL_BEHAVIORS } from './panel-behaviors';
+import { COIL_RELAY_BEHAVIORS } from './coil-relays';
 
 export type ControlMode = 'pressed' | 'toggled' | 'coil-name' | 'thermal' | 'position' | 'plc-output' | 'plc-edge' | 'always';
 export type BehaviorLinkKind = 'switch' | 'transfer' | 'load' | 'source-strip' | 'none';
@@ -19,6 +20,8 @@ export interface BehaviorLink {
   position?: number;
   /** Размыкать полюс при ручной имитации срабатывания защиты. */
   opensWhenTripped?: boolean;
+  /** Для control 'coil-name': суффикс ключа катушки (вход A3 реверсивного SSR 1073, electronic-relays.ts). */
+  coilSuffix?: string;
   /** Для control 'plc-output': номер выхода LOGO (0 = Q1). */
   output?: number;
   /** Для source-strip: потенциалы клемм по порядку, если в файле нет меток. */
@@ -260,16 +263,10 @@ const TABLE: readonly TypeBehavior[] = [
   { typeCode: 9011, links: [{ terminals: [0, 1], kind: 'load', control: 'always' }] },
   { typeCode: 9012, links: [{ terminals: [0, 1], kind: 'load', control: 'always' }] },
   { typeCode: 9013, links: [{ terminals: [0, 1], kind: 'load', control: 'always' }] },
-  // Остальные катушки и реле панели пока только символы (логика биестабильных катушек и т. д. в шаге 9.2).
-  { typeCode: 9001, links: inert() },
-  { typeCode: 9002, links: inert() },
-  { typeCode: 9003, links: inert() },
   { typeCode: 9005, links: inert() },
-  { typeCode: 9007, links: inert() },
-  { typeCode: 9014, links: inert() },
-  { typeCode: 9015, links: inert() },
-  { typeCode: 9016, links: inert() },
-  // Панели «Detectores» и «Símbolos 2D» (см. panel-behaviors.ts).
+  // Бистабильная, импульсное реле, клапан, прерыватель, генератор, реле по часам, счётчик (coil-relays.ts).
+  ...COIL_RELAY_BEHAVIORS,
+  // Панели «Detectores», «Símbolos 2D», «Relés electrónicos» и др. (см. panel-behaviors.ts).
   ...PANEL_BEHAVIORS,
   { typeCode: 4000, links: [{ terminals: [], kind: 'none', control: 'always' }] },
   { typeCode: 4009, links: [{ terminals: [], kind: 'none', control: 'always' }] },

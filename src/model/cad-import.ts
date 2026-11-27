@@ -1,3 +1,4 @@
+import { TIME_SWITCH, coilRelayParamsFromFile } from './coil-relays';
 import { detectorSpec } from './detector-types';
 import { unpackProgramPagesFromCad } from './program-pages';
 import { migrateResizedWebTerminals } from './web-terminal-migration';
@@ -95,7 +96,8 @@ function toElement(r: CadRecord, continuations: readonly CadRecord[] = []): Sche
   const rotation = toRotation(num(r, 17));
   // Метка клеммы лежит в текстовом поле того же номера, что и её флаг: флаг i → texts[2 + i].
   // Обычно флаги идут подряд с нуля, но у счётчика 9016 флаги 0..3 и 6, а между метками стоят параметры.
-  const flaggedSlots = flagSlots(r);
+  // У реле времени 9014 в nums[2..7] не флаги, а дни недели (coil-relays.ts).
+  const flaggedSlots = typeCode === TIME_SWITCH ? flagSlots(r).filter((i) => i < 2) : flagSlots(r);
   // Для контактной группы код типа задаёт реальную топологию. В старых/повреждённых
   // .cad-записях после клемм может оставаться мусор в дополнительных слотах флагов.
   const tailSpec = TAIL_TERMINALS[r.type];
@@ -138,6 +140,8 @@ function toElement(r: CadRecord, continuations: readonly CadRecord[] = []): Sche
     if (extra[0] !== undefined) params.scale = Number(extra[0]);
     if (extra[1] !== undefined) params.time = Number(extra[1]);
   }
+  // Прерыватель, генератор импульсов, реле по часам и счётчик панели «Bobinas…» (coil-relays.ts).
+  Object.assign(params, coilRelayParamsFromFile(typeCode, extra, r.nums));
   if (isDelayBlock2d(typeCode)) Object.assign(params, delayBlockParams(extra));
   Object.assign(params, plcBlockParams(typeCode, r.texts));
   if ((typeCode === 1000 || typeCode === 1001) && num(r, 16) === MOTOR_2D_FILE_PARAM) params.motor2d = true;

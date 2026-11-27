@@ -19,6 +19,8 @@ export const TAIL_TERMINALS: Readonly<Record<number, TailTerminalSpec>> = {
   6015: { start: 6, pairs: 9 },
   6016: { start: 6, pairs: 9 },
   7018: { start: 6, pairs: 11 },
+  // Защита от перенапряжений IV 9045: A1 A2 трёх катушек U после восьми полюсных клемм (reles_electronicos.cad).
+  9045: { start: 8, pairs: 9 },
 };
 
 /** Метки клемм из хвоста по порядку, только с флагом 1. */

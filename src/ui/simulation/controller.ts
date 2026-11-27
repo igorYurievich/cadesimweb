@@ -1,4 +1,4 @@
-import type { UserInputs } from '@engine/types';
+import type { EngineState, UserInputs } from '@engine/types';
 import type { AppContext } from '../context';
 import { showSimulationContextMenu } from './context-menu';
 import { createSimulationInputs } from './inputs';
@@ -13,6 +13,8 @@ export interface SimulationController {
   readonly paused: boolean;
   speed: number;
   readonly inputs: UserInputs;
+  /** Последний расчёт движка (для мультиметра); в редакторе undefined. */
+  readonly result: EngineState | undefined;
   readonly heldInputs: Set<number>;
   contextElementId: number | undefined;
   isMomentaryType(typeCode: number): boolean;
@@ -50,6 +52,7 @@ export function setupSimulation(ctx: AppContext, deps: SimulationSetup): Simulat
     get speed() { return state.speed; },
     set speed(value) { state.speed = value; },
     get inputs() { return state.inputs; },
+    get result() { return state.mode === 'run' ? state.result : undefined; },
     heldInputs: state.heldInputs,
     get contextElementId() { return state.contextElementId; },
     set contextElementId(value) { state.contextElementId = value; },

@@ -76,6 +76,15 @@ function timerCoil(mark: 'on' | 'off' | 'both'): () => SVGSVGElement {
   return () => drawShapes(strokes, fills);
 }
 
+/** Катушка с отсеком слева (как у реле времени), внутри отсека — свой знак. */
+function sideCoil(mark: string): () => SVGSVGElement {
+  return () => drawShapes([rect(10, 14, 16, 20), rect(26, 14, 26, 20), 'M39 2V14M39 34V46', mark]);
+}
+
+/** Катушка шире обычной: выводы сверху и снизу по x, внутри — знак. */
+const wideCoil = (tops: readonly number[], bottom: number, mark: string) => (): SVGSVGElement =>
+  drawShapes([rect(10, 14, 44, 20), tops.map((x) => `M${x} 2V14`).join('') + `M${bottom} 34V46`, mark]);
+
 const LAMP = `${circle(32, 24, 13)}M22.8 14.8L41.2 33.2M41.2 14.8L22.8 33.2M32 2V11M32 37V46`;
 
 /** Динамик: корпус-рупор. */
@@ -83,9 +92,22 @@ const SPEAKER = 'M10 18H20L34 8V40L20 30H10Z';
 
 const COIL_BIG_ICONS: Readonly<Record<number, () => SVGSVGElement>> = {
   32949: () => drawShapes([rect(18, 14, 28, 20), 'M32 2V14M32 34V46']),
+  // Бистабильная: два вывода A1 B1 сверху, A2 снизу, внутри две косые черты.
+  32956: wideCoil([22, 42], 32, 'M24 30L30 18M34 30L40 18'),
+  // Импульсное реле: в отсеке стрелка «<».
+  32964: sideCoil('M22 18L14 24L22 30M14 24H24'),
+  // Электроклапан: косая черта в катушке и клапан справа.
+  32951: () => drawShapes([rect(10, 14, 28, 20), 'M24 2V14M24 34V46M18 32L30 16M38 24H44', 'M44 16H58L44 32H58Z']),
   32952: timerCoil('on'),
   32953: timerCoil('off'),
   32954: timerCoil('both'),
+  // Реле-прерыватель: в отсеке меандр; генератор импульсов: один импульс «⊓».
+  32955: sideCoil('M12 30V20H18V30H24V20'),
+  33223: sideCoil('M12 30H15V19H21V30H24'),
+  // Реле времени по часам: циферблат со стрелками.
+  33098: () => drawShapes([rect(14, 14, 36, 20), 'M32 2V14M32 34V46', `${circle(32, 24, 7)}M32 19V24H36`]),
+  // Счётчик импульсов: выводы A1 C D R сверху, A2 снизу, в левом отсеке круг.
+  33236: wideCoil([14, 30, 40, 50], 30, `M24 14V34${circle(17, 24, 5)}`),
   32957: () => drawShapes([LAMP]),
   // Мигающая: та же лампа и лучи по углам.
   32958: () => drawShapes([LAMP, 'M10 6L15 11M54 6L49 11M10 42L15 37M54 42L49 37']),

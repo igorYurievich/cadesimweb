@@ -5,6 +5,7 @@
 import { BLOCK_BIG_ICONS } from './blocks';
 import { CONTACT_COIL_BIG_ICONS } from './contacts-coils';
 import { DEVICE_BIG_ICONS } from './devices';
+import { ELECTRONIC_RELAY_BIG_ICONS } from './electronic-relays';
 import { MACHINE_BIG_ICONS } from './machines';
 import { MANUAL_CONTROL_BIG_ICONS } from './manual-controls';
 import { PLC_2D_BIG_ICONS } from './plc-2d';
@@ -24,6 +25,7 @@ const BIG_ICONS: Readonly<Record<number, () => SVGSVGElement>> = {
   ...REALISTIC_2D_BIG_ICONS,
   ...BLOCK_BIG_ICONS,
   ...PLC_2D_BIG_ICONS,
+  ...ELECTRONIC_RELAY_BIG_ICONS,
 };
 
 /** Крупный значок команды каталога или undefined, если его ещё не нарисовали. */
