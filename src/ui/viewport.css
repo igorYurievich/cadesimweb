@@ -750,7 +750,7 @@ kbd { padding: 2px 6px; border: 1px solid var(--border); border-radius: 4px; bac
 #app[data-mobile="true"] .menu-command[data-command="print-preview"],
 #app[data-mobile="true"] .menu-command[data-command="zoom-in"],
 #app[data-mobile="true"] .menu-command[data-command="zoom-out"],
-#app[data-mobile="true"] .menu-command[data-command="fit"],
+#app[data-mobile="true"] .menu-command[data-command="fit"] { display: none !important; }
 #app[data-mobile="true"] .editor-workspace { display: flex; flex-direction: column; }
 #app[data-mobile="true"] .viewport-stage { flex: 1 1 auto; min-height: 0; }
 /* Телефон: панель симуляции — вертикальная, плавает у левого края поля схемы (как кнопки масштаба справа);
