@@ -1,7 +1,11 @@
+import { inject } from '@vercel/analytics';
 import { mountApp } from '@ui/app';
 import { loadInterfaceText } from '@ui/i18n';
 import { readInterfaceLanguage } from '@ui/settings';
 import { preloadAllFeatures } from '@ui/features/loader';
+
+// Initialize Vercel Web Analytics
+inject();
 
 const root = document.getElementById('app');
 if (!root) throw new Error('#app not found');
