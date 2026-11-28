@@ -167,7 +167,6 @@ function setupAppBaseControllers(state: ReturnType<typeof createAppFrame>) {
     status: state.elements.status,
     uiText: state.uiText,
     renderSchema: () => state.renderSchema(),
-    uniformWireColors: () => state.appSettings.uniformWireColors,
     clearSelection: () => { state.selected.clear(); state.renderSchema(); },
   });
   const appInterface = setupAppInterface({

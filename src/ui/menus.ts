@@ -23,7 +23,6 @@ export interface MenuSetup {
   toggleTheme(): void;
   toggleGrid(): void;
   toggleDockedProperties(): void;
-  toggleWireColors(): void;
   setPaletteView(value: 'list' | 'icons'): void;
   commitSchema(before: Schema): void;
   renderSchema(): void;
@@ -184,7 +183,6 @@ export function setupMenus(ctx: AppContext, deps: MenuSetup): void {
       case 'theme': deps.toggleTheme(); break;
       case 'grid': deps.toggleGrid(); break;
       case 'properties-panel': deps.toggleDockedProperties(); break;
-      case 'wire-colors': deps.toggleWireColors(); break;
       case 'palette-view-list': deps.setPaletteView('list'); break;
       case 'palette-view-icons': deps.setPaletteView('icons'); break;
       case 'sheet': openSheetDialog(); break;

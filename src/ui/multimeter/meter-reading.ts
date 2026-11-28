@@ -4,7 +4,8 @@ import { continuity, netIsLive, voltageBetween } from '@engine/meter';
 import type { EngineState, UserInputs } from '@engine/types';
 import type { Schema } from '@model/types';
 
-export type DialMode = 'off' | 'volt' | 'ohm';
+/** Положения переключателя: выкл., переменное напряжение, постоянное напряжение, прозвонка. */
+export type DialMode = 'off' | 'acv' | 'dcv' | 'ohm';
 
 export type MeterDisplay =
   | { kind: 'off' }
@@ -16,6 +17,9 @@ export interface MeterProbeNets {
   red: number | undefined;
   /** Сеть под чёрным щупом (COM). */
   black: number | undefined;
+  /** Группы проводов под щупами: прозвонка голых проводов, не дошедших ни до одной клеммы. */
+  redWire?: number;
+  blackWire?: number;
 }
 
 export interface MeterSituation {
@@ -48,11 +52,18 @@ function touchesLive(result: EngineState | undefined, nets: MeterProbeNets): boo
 export function readMeter(situation: MeterSituation, nets: MeterProbeNets): MeterReading {
   if (situation.mode === 'off') return { display: { kind: 'off' }, burns: false };
   const { result } = situation;
-  if (situation.mode === 'volt') {
+  if (situation.mode === 'acv' || situation.mode === 'dcv') {
     const reading = voltageBetween(potentialsOf(result, nets.red), potentialsOf(result, nets.black));
-    return { display: { kind: 'volt', volts: reading.volts, dc: reading.dc }, burns: false };
+    const dc = situation.mode === 'dcv';
+    // Не тот род тока: на V⎓ переменное усредняется в ноль, на V~ постоянное не проходит — как у настоящего прибора.
+    const volts = reading.dc === dc ? reading.volts : 0;
+    return { display: { kind: 'volt', volts, dc }, burns: false };
   }
   if (touchesLive(result, nets)) return { display: { kind: 'ohm', closed: false }, burns: true };
+  // Оба щупа на одном куске провода (даже если он ни к чему не подключён) — цепь есть.
+  if (nets.redWire !== undefined && nets.redWire === nets.blackWire) {
+    return { display: { kind: 'ohm', closed: true }, burns: false };
+  }
   if (nets.red === undefined || nets.black === undefined) {
     return { display: { kind: 'ohm', closed: false }, burns: false };
   }

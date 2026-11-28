@@ -295,6 +295,4 @@ export const VERIFIED_ONLY_KEY = 'cadesimu-palette-verified-only';
 
 export const BETA_NOTICE_KEY = 'cadesimu-beta-notice-seen';
 
-export const WIRE_COLOR_MODE_KEY = 'cadesimu-wire-colors';
-
 export const INTERFACE_LANGUAGE_KEY = 'cadesimu-language';

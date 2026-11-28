@@ -76,7 +76,6 @@ function setupMenus(state: AppSetupBase, editor: AppSetupEditor, selection: Retu
     toggleTheme: state.toggleTheme,
     toggleGrid: state.toggleGrid,
     toggleDockedProperties: state.toggleDockedProperties,
-    toggleWireColors: state.toggleWireColors,
     setPaletteView: (value) => {
       state.root.dataset.paletteView = value;
       try { localStorage.setItem(PALETTE_VIEW_KEY, value); } catch { /* Режим действует до закрытия вкладки. */ }

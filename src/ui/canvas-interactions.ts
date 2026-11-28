@@ -159,6 +159,7 @@ export function setupCanvasInteractions(options: CanvasInteractionsOptions): voi
     drawNodeCursor: options.drawNodeCursor,
     moveGhost: options.moveGhost,
     wireDrawing: options.wireDrawing,
+    draftPoints: options.draftPoints,
     drawDraft: options.drawDraft,
     drawViewport: options.drawViewport,
     scheduleMovePreview: pointerPosition.schedule,

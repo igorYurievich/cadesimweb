@@ -49,7 +49,6 @@ export interface SimulationDependencies {
   status: HTMLElement;
   uiText(): InterfaceText;
   renderSchema(): void;
-  uniformWireColors(): boolean;
   clearSelection(): void;
 }
 

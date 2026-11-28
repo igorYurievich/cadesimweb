@@ -1,6 +1,6 @@
 import type { Schema } from '@model/types';
 import type { Lang } from '@model/catalog';
-import type { AppSettings, SettingsCommands } from './settings';
+import type { AppSettings } from './settings';
 import { createSettingsCommands } from './settings';
 import { setupInterfaceTranslation } from './interface-translation';
 import { setupFullscreenButton } from './fullscreen';
@@ -27,7 +27,6 @@ export interface AppInterface {
   translateInterface: () => void;
   toggleTheme: () => void;
   toggleGrid: () => void;
-  toggleWireColors: SettingsCommands['toggleWireColors'];
 }
 
 export function setupAppInterface(options: AppInterfaceOptions): AppInterface {
@@ -35,7 +34,6 @@ export function setupAppInterface(options: AppInterfaceOptions): AppInterface {
     options.root,
     options.settings,
     options.uiText,
-    options.simulation.applySimulationVisuals,
   );
   const translateInterface = setupInterfaceTranslation({
     root: options.root,
@@ -46,7 +44,6 @@ export function setupAppInterface(options: AppInterfaceOptions): AppInterface {
     speedButton: options.speedButton,
     gridVisible: () => options.settings.gridVisible,
     applyPropertiesPanel: options.applyPropertiesPanel,
-    updateWireColorsCommand: settingsCommands.updateWireColorsCommand,
     paletteSearch: options.paletteSearch,
     paletteLanguage: options.paletteLanguage,
     paletteLang: options.paletteLang,
@@ -60,6 +57,5 @@ export function setupAppInterface(options: AppInterfaceOptions): AppInterface {
     translateInterface,
     toggleTheme: () => settingsCommands.toggleTheme(translateInterface),
     toggleGrid: () => settingsCommands.toggleGrid(translateInterface),
-    toggleWireColors: settingsCommands.toggleWireColors,
   };
 }

@@ -60,7 +60,6 @@ export function renderAppShell(root: HTMLElement, theme: Theme): void {
             <button type="button" class="menu-command" data-command="properties-panel" id="properties-panel-command"></button>
             <button type="button" class="menu-command" data-command="theme" id="theme-command"></button>
             <button type="button" class="menu-command" data-command="fullscreen" id="fullscreen-command"></button>
-            <button type="button" class="menu-command" data-command="wire-colors" id="wire-colors-command"></button>
             <p class="menu-heading" id="palette-view-title">Панель элементов</p>
             <button type="button" class="menu-command" data-command="palette-view-list" id="palette-view-list">Текстовый список</button>
             <button type="button" class="menu-command" data-command="palette-view-icons" id="palette-view-icons">Значки элементов</button>
@@ -103,6 +102,7 @@ export function renderAppShell(root: HTMLElement, theme: Theme): void {
           <details class="menu-group options-menu"><summary>Опции</summary><div class="menu-popover">
             <div class="menu-toggle-list">
               <label class="menu-toggle"><input type="checkbox" id="option-breakers-trip-cc"><span id="option-breakers-trip-cc-label">Автоматы выбивают при КЗ</span></label>
+              <label class="menu-toggle" id="option-smart-wire-row"><input type="checkbox" id="option-smart-wire"><span id="option-smart-wire-label">Умная прокладка кабеля</span></label>
             </div>
           </div></details>
         </nav>

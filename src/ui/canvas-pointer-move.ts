@@ -4,7 +4,8 @@ import type { DragState, Selectable } from './constants';
 import type { Point, Viewport } from './viewport';
 import { clampDeltaToSheet, clampPointToSheet, elementExtent } from './bounds';
 import { panBy, screenToSheet } from './viewport';
-import { snapDrawingPoint } from './wire-routing';
+import { snapDrawingPoint, straightenFromAnchor } from './wire-routing';
+import { smartWireRouting } from './options-menu';
 import { svgPoint } from './canvas-primitives';
 import { normalizedBounds } from './helpers';
 import { updateMarqueeSelection } from './selection';
@@ -13,7 +14,7 @@ export interface CanvasPointerMoveSetup {
   svg: SVGSVGElement; viewSize(): Point; viewport(): Viewport; setViewport(value: Viewport): void;
   drag(): DragState | undefined; setPointerSheetPosition(value: Point): void; setDraftCursor(value: Point | undefined): void;
   cursorCoords: HTMLOutputElement | null; nodeTool(): boolean; drawNodeCursor(point: Point): void;
-  moveGhost(event: MouseEvent): void; wireDrawing(): boolean; drawDraft(): void;
+  moveGhost(event: MouseEvent): void; wireDrawing(): boolean; draftPoints(): readonly Point[]; drawDraft(): void;
   drawViewport(): void; scheduleMovePreview(): void; renderSchema(): void;
 }
 
@@ -29,7 +30,9 @@ export function setupCanvasPointerMove(ctx: AppContext, deps: CanvasPointerMoveS
     if (!drag || drag.pointerId !== event.pointerId) {
       if (!drag && deps.wireDrawing()) {
         const raw = clampPointToSheet(screenToSheet(svgPoint(event, deps.svg, deps.viewSize()), deps.viewport()), ctx.schema.sheet);
-        deps.setDraftCursor(clampPointToSheet(snapDrawingPoint(raw, ctx.schema).point, ctx.schema.sheet));
+        const free = clampPointToSheet(snapDrawingPoint(raw, ctx.schema).point, ctx.schema.sheet);
+        const anchor = smartWireRouting() ? undefined : deps.draftPoints()[deps.draftPoints().length - 1];
+        deps.setDraftCursor(straightenFromAnchor(free, anchor));
         deps.drawDraft();
       }
       return;

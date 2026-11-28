@@ -17,6 +17,8 @@ export interface ProbeContact {
   net: number | undefined;
   /** Точка касания на листе: центр клеммы или ближайшая точка провода. */
   point: Point;
+  /** Группа соединённых проводов под щупом (нужна для проводов без клемм); на клемме — undefined. */
+  wireGroup?: number;
 }
 
 interface WireNetIndex {
@@ -87,7 +89,7 @@ export function probeContact(schema: Schema, point: Point, tolerance: number): P
     const index = wireNetIndex(schema, graph);
     const group = index.links.groupOf.get(nearestWire.wire.id);
     const net = group === undefined ? undefined : index.groupNet.get(group);
-    return { net, point: nearestWire.at };
+    return { net, point: nearestWire.at, wireGroup: group };
   }
   return best?.contact;
 }

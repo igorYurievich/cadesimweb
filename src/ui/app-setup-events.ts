@@ -8,6 +8,7 @@ import { setupAppKeyboardShortcuts } from './app-setup-shortcuts';
 import { setupWireTrace } from './wire-trace';
 import { setupMultimeterTool } from './app-setup-multimeter';
 import { setupOptionsMenu } from './options-menu';
+import { setupSnakeEntry } from './easter-snake/snake-entry';
 import type { AppSetupBase } from './app-setup-base';
 import type { AppSetupEditor } from './app-setup-editor';
 import type { AppSetupCommands } from './app-setup-commands';
@@ -115,7 +116,9 @@ function setupCanvasEvents(
   setupCanvasInteractions(createCanvasOptions(state, editor, commands));
   // Меню «Opciones» (options-menu.ts).
   setupOptionsMenu(state.root);
-  // Лупа: подсветка всей связи провода при наведении (wire-trace.ts).
+  // «Ayuda → Пароль»: вход в пасхалку «Змейка по проводам» (easter-snake/snake-entry.ts).
+  setupSnakeEntry(state.root);
+  // Лупа: подсветка всей связи провода или одноимённых элементов при наведении (wire-trace.ts).
   setupWireTrace({
     schema: () => state.ctx.schema,
     svg: state.elements.svg,
@@ -126,7 +129,7 @@ function setupCanvasEvents(
     viewport: () => state.viewport,
     text: () => {
       const t = state.uiText();
-      return { title: t.wireTraceTitle, wires: t.wireTraceWires, terminals: t.wireTraceTerminals, none: t.wireTraceNone, hint: t.wireTraceHint };
+      return { title: t.wireTraceTitle, wires: t.wireTraceWires, terminals: t.wireTraceTerminals, none: t.wireTraceNone, hint: t.wireTraceHint, elements: t.wireTraceElements };
     },
   });
   setupMultimeterTool(state);

@@ -1,0 +1,61 @@
+/** Anecdotes pour l’écran de court-circuit du Serpent (fr). Même ordre dans toutes les langues. */
+const fr = [
+  'Un automate (API) est un petit ordinateur industriel : il lit boutons et capteurs et allume moteurs et voyants.',
+  'Avant les automates, on commandait les machines uniquement avec des relais : une armoire pouvait en '
+    + 'contenir des centaines.',
+  'Le premier automate a été fabriqué en 1968 pour l’usine automobile General Motors, aux États-Unis.',
+  'Le langage Ladder (à contacts) se dessine comme un schéma à relais : c’est pour ça qu’il est facile '
+    + 'pour un électricien.',
+  'Un automate répète son programme plusieurs fois par seconde : il lit les entrées, décide et écrit les sorties.',
+  'Les entrées de l’automate (I) reçoivent boutons et capteurs ; les sorties (Q) commandent contacteurs et voyants.',
+  'Beaucoup d’automates fonctionnent en 24 V continu : une tension sûre pour le circuit de commande.',
+  'Le bouton d’arrêt est normalement fermé : si son fil est coupé, la machine s’arrête aussi.',
+  'Le bouton de marche est normalement ouvert : il ne donne un signal que tant qu’on appuie dessus.',
+  'L’auto-maintien est un contact du contacteur lui-même qui le garde enclenché quand on relâche la marche.',
+  'Un contacteur est un interrupteur actionné par une bobine : avec un petit courant, on commande un gros moteur.',
+  'Les contacts principaux du contacteur alimentent le moteur ; les contacts auxiliaires servent au '
+    + 'circuit de commande.',
+  'Contacts auxiliaires : 13-14 est normalement ouvert et 21-22 normalement fermé. Regarde le dernier chiffre.',
+  'La bobine d’un contacteur est toujours repérée A1 et A2.',
+  'Le relais thermique protège le moteur des surcharges : s’il consomme trop pendant un moment, il le coupe.',
+  'Le relais thermique se règle sur le courant nominal écrit sur la plaque du moteur.',
+  'Le relais thermique ne protège pas des courts-circuits : c’est le rôle des fusibles ou du disjoncteur.',
+  'Un disjoncteur-moteur réunit dans un seul appareil la protection contre la surcharge et le court-circuit.',
+  'Pour inverser le sens d’un moteur triphasé, il suffit de permuter deux phases.',
+  'Dans un inverseur, les deux contacteurs ne doivent jamais se fermer ensemble : ce serait un '
+    + 'court-circuit entre phases.',
+  'C’est pourquoi on les verrouille : un contact normalement fermé de chaque contacteur est en série '
+    + 'avec la bobine de l’autre.',
+  'Au démarrage, un moteur peut consommer de 5 à 8 fois son courant normal.',
+  'Le démarrage étoile-triangle permet au moteur de démarrer en demandant moins de courant au réseau.',
+  'En démarrant en étoile, le courant de démarrage est 3 fois plus faible qu’en démarrage direct en triangle.',
+  'En étoile-triangle, le moteur démarre en étoile et une temporisation le passe en triangle après quelques secondes.',
+  'Dans la boîte à bornes, étoile : une barrette relie W2, U2 et V2. Triangle : trois barrettes verticales.',
+  'Une plaque « 230/400 V » veut dire : triangle sur réseau 230 V et étoile sur réseau 400 V.',
+  'Un moteur triphasé à 4 pôles sous 50 Hz tourne à environ 1450 tours par minute.',
+  'Le moteur asynchrone tourne un peu moins vite que son champ magnétique ; cette différence s’appelle le glissement.',
+  'Le rotor à cage d’écureuil s’appelle ainsi parce que ses barres ressemblent à une roue de hamster.',
+  'Si un moteur en marche perd une phase, il continue à tourner mais chauffe beaucoup : le thermique doit déclencher.',
+  'Un variateur de fréquence change la vitesse du moteur en changeant la fréquence du courant.',
+  'En Europe le réseau est en 50 Hz et aux États-Unis en 60 Hz : là-bas, le même moteur tourne plus vite.',
+  'La temporisation au travail attend un certain temps avant d’activer sa sortie.',
+  'La temporisation au repos garde la sortie active un moment après la disparition du signal.',
+  'Un compteur ajoute un à chaque signal, par exemple à chaque pièce qui passe sur un convoyeur.',
+  'Un capteur inductif détecte les métaux sans les toucher.',
+  'Un capteur capacitif détecte presque tous les matériaux : plastique, bois et même eau.',
+  'Une cellule photoélectrique en barrage détecte un objet quand il coupe le faisceau entre émetteur et récepteur.',
+  'Un fin de course est un interrupteur actionné quand la machine arrive à une position.',
+  'Le coup de poing d’arrêt d’urgence est rouge sur fond jaune et reste verrouillé une fois enfoncé.',
+  'Après un arrêt d’urgence, la machine ne doit pas redémarrer seule : il faut déverrouiller et '
+    + 'appuyer de nouveau sur marche.',
+  'Couleurs des boutons : rouge pour l’arrêt et l’urgence ; vert ou blanc pour la marche.',
+  'Couleurs des voyants : vert, fonctionnement normal ; jaune, avertissement ; rouge, défaut ou danger.',
+  'Le conducteur de protection (terre) est vert-jaune et le neutre est bleu.',
+  'Les phases sont en général marron, noir et gris.',
+  'Les cinq règles d’or : séparer, condamner, vérifier l’absence de tension, mettre à la terre et signaler.',
+  'Le différentiel 30 mA protège les personnes : il déclenche si le courant fuit vers la terre, par '
+    + 'exemple à travers le corps.',
+  'Les moteurs électriques consomment environ les deux tiers de l’électricité utilisée par l’industrie.',
+  'Le moteur triphasé à cage est le plus utilisé dans l’industrie : simple, robuste et presque sans entretien.',
+];
+export default fr;

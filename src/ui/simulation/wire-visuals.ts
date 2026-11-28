@@ -45,8 +45,9 @@ export function applyWireVisuals(
     const energized = ordered.length > 0 || motorCurrent;
     const idle = wire.kind === 'junction' ? IDLE_WIRE_COLORS.junction : IDLE_WIRE_COLORS[wire.kind];
     const first = ordered[0];
+    // Фаза под напряжением — всегда красная (старое значение «cadesimu-wire-colors» в localStorage игнорируется).
     const liveColor = first
-      ? (deps.uniformWireColors() && PHASE_LABELS.includes(first) ? UNIFORM_LIVE_COLOR : POTENTIAL_COLORS[first])
+      ? (PHASE_LABELS.includes(first) ? UNIFORM_LIVE_COLOR : POTENTIAL_COLORS[first])
       : idle;
     const color = ordered.length > 1 ? CONFLICT_COLOR : motorCurrent ? UNIFORM_LIVE_COLOR : liveColor;
     applyWireNode(node, wire.kind === 'junction', wire.thickness, color, energized);

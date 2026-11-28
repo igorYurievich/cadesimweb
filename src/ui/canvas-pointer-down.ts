@@ -10,7 +10,8 @@ import type { SimulationController } from './sim-controller';
 import { clampPointToSheet } from './bounds';
 import { cloneSchema, createPlacedElement, selectionKey } from './helpers';
 import { screenToSheet } from './viewport';
-import { snapDrawingPoint } from './wire-routing';
+import { snapDrawingPoint, straightenFromAnchor } from './wire-routing';
+import { smartWireRouting } from './options-menu';
 import { svgPoint } from './canvas-primitives';
 import { getSelectionHit, selectedObjects } from './selection';
 import { WIRE_HIT_PX, pickCanvasHit, pointInsideSymbolShape } from './wire-hit';
@@ -55,8 +56,9 @@ export function setupCanvasPointerDown(ctx: AppContext, deps: CanvasPointerDownS
     if (event.button === 0 && deps.wireDrawing()) {
       const { schema } = ctx;
       const raw = clampPointToSheet(screenToSheet(screen, deps.viewport()), schema.sheet);
-      const snapped = clampPointToSheet(snapDrawingPoint(raw, schema).point, schema.sheet);
       const previous = draftPoints[draftPoints.length - 1];
+      const free = clampPointToSheet(snapDrawingPoint(raw, schema).point, schema.sheet);
+      const snapped = smartWireRouting() ? free : straightenFromAnchor(free, previous);
       if (!previous) draftPoints.push(snapped);
       else if (previous.x !== snapped.x || previous.y !== snapped.y) {
         draftPoints.push(snapped);

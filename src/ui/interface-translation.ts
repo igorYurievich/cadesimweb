@@ -8,7 +8,7 @@ import type { InterfaceText } from './i18n';
 export interface InterfaceTranslationSetup {
   root: HTMLElement; uiText(): InterfaceText; visibleOptionalGroups: Set<GroupKey>;
   wireDrawing(): boolean; simulationMode(): 'edit' | 'run'; speedButton: HTMLButtonElement;
-  gridVisible(): boolean; applyPropertiesPanel(): void; updateWireColorsCommand(): void;
+  gridVisible(): boolean; applyPropertiesPanel(): void;
   paletteSearch: HTMLInputElement; paletteLanguage: HTMLSelectElement; paletteLang(): string;
   zoomValue: HTMLOutputElement;
   schema(): Schema; fileName: HTMLElement;
@@ -80,6 +80,8 @@ export function setupInterfaceTranslation(deps: InterfaceTranslationSetup): () =
     deps.root.querySelector<HTMLButtonElement>('#multimeter-tool')?.setAttribute('aria-label', t.multimeter);
     deps.root.querySelector<HTMLButtonElement>('#multimeter-tool')?.setAttribute('title', t.multimeter);
     set('#option-breakers-trip-cc-label', t.optionBreakersTripCc);
+    set('#option-smart-wire-label', t.optionSmartWire);
+    deps.root.querySelector('#option-smart-wire-row')?.setAttribute('title', t.optionSmartWireHint);
     // Кнопки симуляции — только значки (SVG в app-shell.ts); название — в подсказке и для экранных дикторов.
     deps.root.querySelector<HTMLButtonElement>('#sim-run')?.setAttribute('title', t.run);
     deps.root.querySelector<HTMLButtonElement>('#sim-run')?.setAttribute('aria-label', t.run);
@@ -123,7 +125,6 @@ export function setupInterfaceTranslation(deps: InterfaceTranslationSetup): () =
     const grid = deps.root.querySelector<HTMLButtonElement>('#grid-command');
     if (grid) grid.textContent = deps.gridVisible() ? t.gridHide : t.gridShow;
     deps.applyPropertiesPanel();
-    deps.updateWireColorsCommand();
     const sheetDialog = deps.root.querySelector<HTMLDialogElement>('#sheet-dialog');
     if (sheetDialog) {
       set('#sheet-title', t.sheetSize);

@@ -1,7 +1,6 @@
 import type { GroupKey } from '@model/catalog';
 import {
   GRID_KEY, HIDDEN_OPTIONAL_GROUPS, INTERFACE_LANGUAGE_KEY, OPTIONAL_GROUP_STORAGE_KEY, OPTIONAL_PALETTE_GROUPS, THEME_KEY,
-  WIRE_COLOR_MODE_KEY,
 } from './constants';
 import type { Theme } from './constants';
 import type { InterfaceText } from './i18n';
@@ -15,7 +14,6 @@ const OPTIONAL_GROUP_OFF_KEY = 'cadesimu-optional-groups-off:v1';
 export interface AppSettings {
   theme: Theme;
   gridVisible: boolean;
-  uniformWireColors: boolean;
   visibleOptionalGroups: Set<GroupKey>;
 }
 
@@ -23,7 +21,6 @@ export function readAppSettings(): AppSettings {
   return {
     theme: readTheme(),
     gridVisible: readGridVisible(),
-    uniformWireColors: readUniformWireColors(),
     visibleOptionalGroups: new Set(readOptionalPaletteGroups()),
   };
 }
@@ -31,16 +28,12 @@ export function readAppSettings(): AppSettings {
 export interface SettingsCommands {
   toggleTheme(refreshInterface: () => void): void;
   toggleGrid(refreshInterface: () => void): void;
-  toggleWireColors(): void;
-  updateWireColorsCommand(): void;
 }
 
 export function createSettingsCommands(
   root: HTMLElement,
   settings: AppSettings,
-  uiText: () => Pick<InterfaceText,
-    'wireColorsUniform' | 'wireColorsPerPhase' | 'themeLight' | 'themeDark' | 'gridHide' | 'gridShow'>,
-  applySimulationVisuals: () => void,
+  uiText: () => Pick<InterfaceText, 'themeLight' | 'themeDark' | 'gridHide' | 'gridShow'>,
 ): SettingsCommands {
   const themeCommand = root.querySelector<HTMLButtonElement>('#theme-command');
   const updateThemeCommand = (): void => {
@@ -68,23 +61,7 @@ export function createSettingsCommands(
   };
   applyGrid();
 
-  const wireColorsCommand = root.querySelector<HTMLButtonElement>('#wire-colors-command');
-  const updateWireColorsCommand = (): void => {
-    // Подпись показывает действующий режим; клик переключает на другой.
-    if (wireColorsCommand) {
-      const label = settings.uniformWireColors ? uiText().wireColorsUniform : uiText().wireColorsPerPhase;
-      wireColorsCommand.textContent = `${label} ✓`;
-    }
-  };
-  const toggleWireColors = (): void => {
-    settings.uniformWireColors = !settings.uniformWireColors;
-    updateWireColorsCommand();
-    applySimulationVisuals();
-    try {
-      localStorage.setItem(WIRE_COLOR_MODE_KEY, settings.uniformWireColors ? 'uniform' : 'phase');
-    } catch { /* Mode still works for this session. */ }
-  };
-  return { toggleTheme, toggleGrid, toggleWireColors, updateWireColorsCommand };
+  return { toggleTheme, toggleGrid };
 }
 
 export function readOptionalPaletteGroups(): GroupKey[] {
@@ -111,11 +88,6 @@ export function writeOptionalPaletteGroups(visible: ReadonlySet<GroupKey>): void
 
 export function readGridVisible(): boolean {
   try { return localStorage.getItem(GRID_KEY) !== 'off'; } catch { return true; }
-}
-
-/** По умолчанию включён единый режим: красный — под напряжением, серый — нет. */
-export function readUniformWireColors(): boolean {
-  try { return localStorage.getItem(WIRE_COLOR_MODE_KEY) !== 'phase'; } catch { return true; }
 }
 
 export function readTheme(): Theme {

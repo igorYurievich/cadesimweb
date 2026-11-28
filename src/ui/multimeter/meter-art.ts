@@ -12,7 +12,7 @@ export const JACK_V = { x: 168, y: 382 } as const;
 /** Длина щупа от кончика до хвоста, где начинается провод. */
 export const PROBE_LENGTH = 150;
 /** Угол стрелки переключателя по положениям, градусы. */
-export const DIAL_ANGLE = { off: -60, volt: 0, ohm: 60 } as const;
+export const DIAL_ANGLE = { off: -80, acv: -28, dcv: 28, ohm: 80 } as const;
 
 const FONT = 'font-family="system-ui, \'Segoe UI\', Arial, sans-serif" font-weight="700"';
 const MONO = 'font-family="\'DejaVu Sans Mono\', Consolas, \'Courier New\', monospace" font-weight="700"';
@@ -33,12 +33,14 @@ function lcd(): string {
 
 function dial(): string {
   return `<g transform="translate(115 248)">
-    <text x="-74" y="-40" ${FONT} font-size="15" fill="#e9eef2" text-anchor="middle" class="mm-dial-label"
+    <text x="-52" y="-8" ${FONT} font-size="15" fill="#e9eef2" text-anchor="end" class="mm-dial-label"
       data-dial="off">OFF</text>
-    <text x="0" y="-62" ${FONT} font-size="20" fill="#e9eef2" text-anchor="middle" class="mm-dial-label"
-      data-dial="volt">V~⎓</text>
-    <text x="74" y="-40" ${FONT} font-size="17" fill="#e9eef2" text-anchor="middle" class="mm-dial-label"
-      data-dial="ohm">Ω )))</text>
+    <text x="-30" y="-56" ${FONT} font-size="21" fill="#e9eef2" text-anchor="middle" class="mm-dial-label"
+      data-dial="acv">V~</text>
+    <text x="30" y="-56" ${FONT} font-size="21" fill="#e9eef2" text-anchor="middle" class="mm-dial-label"
+      data-dial="dcv">V⎓</text>
+    <text x="52" y="-8" ${FONT} font-size="17" fill="#e9eef2" text-anchor="start" class="mm-dial-label"
+      data-dial="ohm">Ω)))</text>
     <g class="mm-dial-knob" data-part="knob">
       <circle r="44" fill="#1b1f23"/>
       <circle r="38" fill="#ff7a1a"/>

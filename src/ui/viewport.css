@@ -430,10 +430,14 @@ kbd { padding: 2px 6px; border: 1px solid var(--border); border-radius: 4px; bac
 .schematic-element.is-sim-active.is-sim-open { color: #8b9097; }
 .schematic-element.is-sim-fault-glow { filter: drop-shadow(0 0 2px #d3483e); }
 
-/* Положения лопасти контакта: по умолчанию показан покой (NO разомкнут, NC и автоматы замкнуты). */
+/* Положения лопасти контакта: по умолчанию показан покой (NO разомкнут, NC замкнут). */
 .contact .blade-closed { display: none; }
 .contact.rest-closed .blade-open { display: none; }
 .contact.rest-closed .blade-closed { display: inline; }
+/* Автоматы, дифференциалы и автоматы защиты двигателя (by-open) в редакторе разомкнуты, как в CADe_SIMU;
+   в симуляции они стартуют разомкнутыми и замыкаются кликом (is-sim-open снимается). */
+.schematic-element:not(.is-sim-active) .contact.by-open .blade-closed { display: none; }
+.schematic-element:not(.is-sim-active) .contact.by-open .blade-open { display: inline; }
 .is-sim-active.is-sim-closed .contact.by-engine .blade-open { display: none; }
 .is-sim-active.is-sim-closed .contact.by-engine .blade-closed { display: inline; }
 .is-sim-active:not(.is-sim-closed) .contact.by-engine .blade-open { display: inline; }
@@ -747,7 +751,6 @@ kbd { padding: 2px 6px; border: 1px solid var(--border); border-radius: 4px; bac
 #app[data-mobile="true"] .menu-command[data-command="zoom-in"],
 #app[data-mobile="true"] .menu-command[data-command="zoom-out"],
 #app[data-mobile="true"] .menu-command[data-command="fit"],
-#app[data-mobile="true"] .menu-command[data-command="wire-colors"] { display: none !important; }
 #app[data-mobile="true"] .editor-workspace { display: flex; flex-direction: column; }
 #app[data-mobile="true"] .viewport-stage { flex: 1 1 auto; min-height: 0; }
 /* Телефон: панель симуляции — вертикальная, плавает у левого края поля схемы (как кнопки масштаба справа);
@@ -821,6 +824,7 @@ kbd { padding: 2px 6px; border: 1px solid var(--border); border-radius: 4px; bac
 /* Лупа: подсветка всей связи провода (wire-trace.ts). */
 #wire-trace-layer .wire-trace-line { stroke: #ff9500; stroke-width: 5px; stroke-opacity: 0.55; stroke-linecap: round; fill: none; }
 #wire-trace-layer .wire-trace-terminal { fill: rgba(255, 149, 0, 0.18); stroke: #ff6a00; stroke-width: 2px; }
+#wire-trace-layer .name-trace-box { fill: rgba(255, 149, 0, 0.16); stroke: #ff6a00; stroke-width: 2px; }
 .viewport-svg.is-wire-trace { cursor: zoom-in; }
 
 /* Перетаскивание файлов .cad/.json из проводника на окно (file-drop.ts). */

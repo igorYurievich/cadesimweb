@@ -1,0 +1,103 @@
+/* Пасхалка «Змейка по проводам»: окно-прибор (snake-modal.ts). Грузится только вместе с игрой. */
+@keyframes snake-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes snake-led { 50% { opacity: .55; } }
+
+.snake-backdrop {
+  position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; padding: 12px;
+  background: rgba(5, 10, 15, 0.78); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
+  animation: snake-fade 200ms ease-out;
+}
+.snake-device {
+  position: relative; display: grid; gap: 10px; padding: 12px 16px;
+  width: min(660px, 100%, calc((100vh - 230px) * 4 / 3 + 44px));
+  border: 1px solid #3a4651; border-radius: 14px; outline: none;
+  background: linear-gradient(180deg, #2a323a 0%, #1b2127 100%); color: #c9d4dd;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, .06);
+  font-family: ui-monospace, 'Cascadia Mono', Consolas, 'DejaVu Sans Mono', monospace;
+}
+/* Винты корпуса в углах. */
+.snake-device::before, .snake-device::after {
+  content: ''; position: absolute; top: 7px; width: 7px; height: 7px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #8995a0, #3a434c);
+}
+.snake-device::before { left: 7px; }
+.snake-device::after { right: 7px; }
+
+.snake-head { display: flex; align-items: center; gap: 12px; padding: 0 6px; }
+.snake-power {
+  display: inline-flex; align-items: center; gap: 6px; color: #7ee787; font-size: 11px;
+  letter-spacing: .08em;
+}
+.snake-led {
+  width: 9px; height: 9px; border-radius: 50%; background: #3dff6e;
+  box-shadow: 0 0 8px #3dff6e; animation: snake-led 1.6s ease-in-out infinite;
+}
+.snake-title {
+  flex: 1; margin: 0; color: #e6edf3; font-size: 14px; font-weight: 700; letter-spacing: .12em;
+  text-transform: uppercase;
+}
+.snake-close-x, .snake-hud-button, .snake-exit, .snake-overlay-button {
+  border: 1px solid #46525e; border-radius: 7px; background: #11171c; color: #d5dee6; font: inherit; cursor: pointer;
+}
+.snake-close-x { width: 30px; height: 30px; font-size: 15px; }
+.snake-close-x:hover, .snake-hud-button:hover, .snake-exit:hover, .snake-overlay-button:hover {
+  border-color: #00f0ff; color: #fff;
+}
+.snake-device :focus-visible { outline: 2px solid #00f0ff; outline-offset: 2px; }
+
+.snake-hud { display: flex; align-items: stretch; gap: 8px; }
+.snake-display {
+  display: grid; flex: 1; gap: 2px; padding: 5px 10px; border: 1px solid #0d2a24; border-radius: 6px;
+  background: #061612; box-shadow: inset 0 2px 6px rgba(0, 0, 0, .7);
+}
+.snake-display-label { color: #5f8f86; font-size: 10px; letter-spacing: .1em; }
+.snake-display-value {
+  color: #3dff9e; font-size: 20px; font-weight: 700; letter-spacing: .08em;
+  text-shadow: 0 0 8px rgba(61, 255, 158, .55);
+}
+.snake-hud-button { width: 44px; font-size: 18px; }
+.snake-hud-button:disabled { opacity: .4; cursor: default; }
+
+.snake-screen {
+  position: relative; padding: 6px; border: 1px solid #0a0f12; border-radius: 10px; background: #0b1013;
+  box-shadow: inset 0 0 18px rgba(0, 0, 0, .9);
+}
+/* Поле растягивается на ширину прибора (крупнее для слабого зрения), пропорции сетки 24×18. */
+.snake-canvas { display: block; width: 100%; height: auto; aspect-ratio: 4 / 3; border-radius: 5px; }
+.snake-overlay {
+  position: absolute; inset: 6px; display: grid; place-content: center; justify-items: center; gap: 10px;
+  padding: 16px; border-radius: 5px; background: rgba(2, 8, 10, .72); text-align: center;
+}
+.snake-overlay[hidden] { display: none; }
+.snake-overlay-title {
+  color: #00f0ff; font-size: 20px; letter-spacing: .14em; text-shadow: 0 0 10px rgba(0, 240, 255, .6);
+}
+.snake-overlay.is-over .snake-overlay-title {
+  max-width: 380px; color: #ffd000; font-size: 17px; line-height: 1.35;
+  text-shadow: 0 0 12px rgba(255, 140, 0, .7);
+}
+.snake-overlay-line { color: #c9d4dd; font-size: 14px; }
+.snake-overlay-record {
+  color: #3dff9e; font-size: 15px; font-weight: 700; letter-spacing: .1em;
+  animation: snake-led .8s ease-in-out infinite;
+}
+.snake-overlay-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 6px; }
+.snake-overlay-button { min-height: 34px; padding: 0 14px; font-size: 12px; }
+.snake-overlay-button.is-primary { border-color: #b88f00; background: #2b2306; color: #ffd000; }
+
+.snake-foot { display: flex; align-items: center; gap: 12px; padding: 0 6px; font-size: 10px; }
+.snake-mark { color: #6c7984; letter-spacing: .1em; }
+.snake-help { flex: 1; color: #8794a0; text-align: center; }
+.snake-exit { min-height: 28px; padding: 0 12px; font-size: 11px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .snake-backdrop, .snake-led, .snake-overlay-record { animation: none; }
+}
+
+/* Факт об электрике на табличке нового рекорда. */
+.snake-fact {
+  display: grid; gap: 4px; max-width: 420px; padding: 8px 12px; border: 1px solid #1f4a42; border-radius: 6px;
+  background: rgba(6, 22, 18, .85); text-align: left;
+}
+.snake-fact-title { color: #3dff9e; font-size: 11px; letter-spacing: .12em; }
+.snake-fact-text { color: #d5dee6; font-size: 13px; line-height: 1.45; }

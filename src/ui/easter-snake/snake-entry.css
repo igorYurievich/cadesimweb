@@ -1,0 +1,40 @@
+/* Пункт «Пароль» в меню «Ayuda» и окошко для кода (snake-entry.ts). */
+.password-dialog { width: min(320px, calc(100% - 32px)); }
+.password-dialog-input {
+  width: 100%; height: 38px; padding: 0 10px; border: 1px solid var(--border-strong); border-radius: 7px;
+  background: var(--surface-soft); color: var(--text); font: inherit; font-size: 16px; letter-spacing: .08em;
+}
+.password-dialog-input:focus { border-color: var(--accent); outline: 2px solid var(--accent-soft); }
+.password-dialog-error { margin: 8px 0 0; color: #d1453b !important; }
+.password-dialog-error[hidden] { display: none; }
+
+/* Достижение «Старая школа» (snake-achievement.ts): въезжает сверху, кубок подпрыгивает, по плашке бежит блик. */
+@keyframes achievement-in {
+  0% { opacity: 0; transform: translate(-50%, -140%) scale(.8); }
+  60% { opacity: 1; transform: translate(-50%, 8%) scale(1.04); }
+  100% { opacity: 1; transform: translate(-50%, 0) scale(1); }
+}
+@keyframes achievement-out { to { opacity: 0; transform: translate(-50%, -140%) scale(.9); } }
+@keyframes achievement-icon { 0%, 100% { transform: rotate(0) scale(1); } 30% { transform: rotate(-14deg) scale(1.3); }
+  60% { transform: rotate(10deg) scale(1.15); } }
+@keyframes achievement-shine { from { left: -60%; } to { left: 130%; } }
+.achievement-toast {
+  position: fixed; top: 18px; left: 50%; z-index: 1100; display: flex; align-items: center; gap: 14px;
+  min-width: 280px; padding: 12px 22px 12px 14px; overflow: hidden; border: 2px solid #d9a400; border-radius: 14px;
+  background: linear-gradient(135deg, #2a2108, #4a3a0a 55%, #2a2108); color: #fff3c4; cursor: pointer;
+  box-shadow: 0 12px 34px rgba(0, 0, 0, .45), 0 0 22px rgba(255, 196, 0, .45);
+  animation: achievement-in 650ms cubic-bezier(.2, .9, .3, 1.2) both;
+}
+.achievement-toast::after {
+  content: ''; position: absolute; top: 0; bottom: 0; left: -60%; width: 40%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .45), transparent);
+  animation: achievement-shine 1.1s ease-in-out 500ms 2;
+}
+.achievement-toast.is-leaving { animation: achievement-out 400ms ease-in forwards; }
+.achievement-icon { font-size: 34px; animation: achievement-icon 900ms ease-in-out 450ms 2; }
+.achievement-text { display: grid; gap: 2px; }
+.achievement-text small { color: #ffd65c; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; }
+.achievement-text strong { font-size: 20px; letter-spacing: .03em; }
+@media (prefers-reduced-motion: reduce) {
+  .achievement-toast, .achievement-toast::after, .achievement-icon { animation: none; }
+}

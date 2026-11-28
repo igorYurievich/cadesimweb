@@ -5,6 +5,7 @@
  */
 
 import { probeContact } from '@engine/meter-probe';
+import type { ProbeContact } from '@engine/meter-probe';
 import type { EngineState, UserInputs } from '@engine/types';
 import type { Point as SheetPoint, Schema } from '@model/types';
 import { screenToSheet, sheetToScreen } from '../viewport';
@@ -13,7 +14,7 @@ import { createMeterBeep } from './meter-beep';
 import { BODY_HEIGHT, BODY_WIDTH } from './meter-art';
 import type { ScreenPoint } from './meter-geometry';
 import { readMeter } from './meter-reading';
-import type { DialMode, MeterDisplay } from './meter-reading';
+import type { DialMode, MeterDisplay, MeterProbeNets } from './meter-reading';
 import { applyMeterTexts, createMeterView, layoutMeter, renderMeterScreen } from './meter-view';
 import type { MeterTexts, MeterView } from './meter-view';
 import { bindMeterDrag } from './meter-drag';
@@ -48,7 +49,7 @@ export interface MeterProbe {
 const SNAP_PX = 10;
 /** Как часто пересчитывать показания, мс. */
 const READ_EVERY_MS = 100;
-const DIAL_ORDER: readonly DialMode[] = ['off', 'volt', 'ohm'];
+const DIAL_ORDER: readonly DialMode[] = ['off', 'acv', 'dcv', 'ohm'];
 
 const TOOL_ICON = `<svg class="tool-icon" viewBox="0 0 24 24" aria-hidden="true">
   <rect x="5" y="2" width="14" height="20" rx="3" fill="#ff7a1a"/>
@@ -107,6 +108,10 @@ export function meterCoordinates(deps: MultimeterSetup): {
   };
 }
 
+function probeNets(red: ProbeContact | undefined, black: ProbeContact | undefined): MeterProbeNets {
+  return { red: red?.net, black: black?.net, redWire: red?.wireGroup, blackWire: black?.wireGroup };
+}
+
 export function setupMultimeter(deps: MultimeterSetup): void {
   const button = createToolButton(deps.root);
   const view = createMeterView(deps.texts());
@@ -123,13 +128,13 @@ export function setupMultimeter(deps: MultimeterSetup): void {
   let lastRead = 0;
 
   const tipOf = (probe: MeterProbe): ScreenPoint => (probe.sheet ? coords.toClient(probe.sheet) : probe.client);
-  const netOf = (probe: MeterProbe): number | undefined =>
-    probe.sheet ? probeContact(deps.schema(), probe.sheet, 0.5)?.net : undefined;
+  const contactOf = (probe: MeterProbe): ProbeContact | undefined =>
+    probe.sheet ? probeContact(deps.schema(), probe.sheet, 0.5) : undefined;
 
   const read = (): void => {
     const reading = readMeter(
       { mode: state.mode, schema: deps.schema(), result: deps.engineResult(), inputs: deps.inputs() },
-      { red: netOf(state.red), black: netOf(state.black) },
+      probeNets(contactOf(state.red), contactOf(state.black)),
     );
     if (reading.burns && !state.broken) {
       state.broken = true;

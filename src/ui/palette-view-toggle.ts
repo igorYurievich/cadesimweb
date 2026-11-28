@@ -1,7 +1,8 @@
 /**
  * Кнопка в шапке палитры: крупные значки ↔ текстовый список. Крупные значки сделаны для
  * слабовидящих: те же категории и поиск, но элементы — плитками 2–3 в ряд.
- * Выбор хранится в PALETTE_VIEW_KEY; старое значение 'icons' (выключенный вид CADe) читается как список.
+ * Выбор хранится в PALETTE_VIEW_KEY. По умолчанию — крупные значки; список только если пользователь
+ * сам его выбрал ('list'). Старое значение 'icons' (выключенный вид CADe) читается как значки.
  */
 import type { AppContext } from './context';
 import type { PaletteSetup } from './palette-types';
@@ -10,7 +11,7 @@ import { PALETTE_VIEW_KEY } from './constants';
 export type StoredPaletteView = 'list' | 'grid';
 
 export function readStoredPaletteView(): StoredPaletteView {
-  try { return localStorage.getItem(PALETTE_VIEW_KEY) === 'grid' ? 'grid' : 'list'; } catch { return 'list'; }
+  try { return localStorage.getItem(PALETTE_VIEW_KEY) === 'list' ? 'list' : 'grid'; } catch { return 'grid'; }
 }
 
 function writeStoredPaletteView(value: StoredPaletteView): void {

@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import {
-  readGridVisible, readInterfaceLanguage, readOptionalPaletteGroups, readTheme, readUniformWireColors, writeOptionalPaletteGroups,
+  readAppSettings, readGridVisible, readInterfaceLanguage, readOptionalPaletteGroups, readTheme,
+  writeOptionalPaletteGroups,
 } from '@ui/settings';
 
 const values = new Map<string, string>();
@@ -21,7 +22,6 @@ describe('persisted UI settings', () => {
   it('uses the existing defaults when no saved preference exists', () => {
     expect(readInterfaceLanguage()).toBe('es');
     expect(readGridVisible()).toBe(true);
-    expect(readUniformWireColors()).toBe(true);
   });
 
   it('accepts only supported language codes and retains the selected theme', () => {
@@ -35,11 +35,11 @@ describe('persisted UI settings', () => {
     expect(readInterfaceLanguage()).toBe('es');
   });
 
-  it('preserves the existing grid and wire-color preferences', () => {
+  it('preserves the grid preference and ignores the removed wire-color option', () => {
     values.set('cadesimu-grid', 'off');
     values.set('cadesimu-wire-colors', 'phase');
     expect(readGridVisible()).toBe(false);
-    expect(readUniformWireColors()).toBe(false);
+    expect(Object.keys(readAppSettings())).not.toContain('uniformWireColors');
   });
 
   it('shows realistic 2D, PLC I/O, power electronics, electronic relays and sensors by default until turned off', () => {

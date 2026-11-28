@@ -120,3 +120,14 @@ export function isWireInteriorPoint(point: Point, wire: WireSegment, tolerance =
   return (horizontal && Math.abs(point.y - wire.from.y) < tolerance && onInterior(point.x, wire.from.x, wire.to.x))
     || (vertical && Math.abs(point.x - wire.from.x) < tolerance && onInterior(point.y, wire.from.y, wire.to.y));
 }
+
+/**
+ * «Умная прокладка кабеля» выключена: отрезок от последней точки идёт прямо — только по горизонтали
+ * или только по вертикали, в ту сторону, куда мышь ушла дальше (при равенстве — по горизонтали).
+ */
+export function straightenFromAnchor(point: Point, anchor: Point | undefined): Point {
+  if (!anchor) return point;
+  const dx = Math.abs(point.x - anchor.x);
+  const dy = Math.abs(point.y - anchor.y);
+  return dy > dx ? { x: anchor.x, y: point.y } : { x: point.x, y: anchor.y };
+}

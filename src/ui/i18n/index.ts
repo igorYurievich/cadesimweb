@@ -56,6 +56,11 @@ export function setActiveInterfaceLang(lang: string): void {
   activeLang = isInterfaceLang(lang) ? lang : 'es';
 }
 
+/** Код выбранного сейчас языка: для отдельных словарей вроде пасхалки (i18n/snake-text.ts). */
+export function currentInterfaceLang(): InterfaceLang {
+  return activeLang;
+}
+
 /** Тексты выбранного сейчас языка: для сообщений в строке состояния и подсказок без своих зависимостей. */
 export function currentText(): InterfaceText {
   return interfaceText(activeLang);

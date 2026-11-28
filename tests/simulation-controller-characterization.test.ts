@@ -9,6 +9,7 @@ import { setupSimulation } from '../src/ui/sim-controller';
 import type { AppContext } from '../src/ui/context';
 import ru from '../src/ui/i18n/ru';
 import { loadInterfaceText, setActiveInterfaceLang } from '../src/ui/i18n';
+import { UNIFORM_LIVE_COLOR } from '../src/ui/constants';
 
 type ScenarioTrace = [string, unknown[]];
 
@@ -114,7 +115,6 @@ function createHarness(schema: Schema): SimulationHarness {
     status: status as unknown as HTMLElement,
     uiText: () => ru,
     renderSchema: () => { renderCount += 1; },
-    uniformWireColors: () => false,
     clearSelection: () => undefined,
   });
 
@@ -185,6 +185,26 @@ function digest(value: unknown): string {
   return createHash('sha256').update(text).digest('hex');
 }
 
+type WireTrace = [number, string[], Array<[string, string]>, string];
+
+/**
+ * Эталон записан, когда фазы L1/L2/L3 ещё раскрашивались по отдельности. Опция «цвета фаз» убрана:
+ * провод с одной фазой теперь всегда красный (UNIFORM_LIVE_COLOR), поэтому эталон приводим к этому виду.
+ */
+function withUniformPhaseColors(scenarios: ScenarioTrace[]): ScenarioTrace[] {
+  const recolor = (wire: WireTrace): WireTrace => {
+    const label = wire[2].find(([name]) => name === 'aria-label')?.[1] ?? '';
+    if (!/: L[123]$/.test(label)) return wire;
+    const attributes = wire[2].map(([name, value]): [string, string] =>
+      [name, name === 'stroke' || name === 'fill' ? UNIFORM_LIVE_COLOR : value]);
+    return [wire[0], wire[1], attributes, wire[3]];
+  };
+  return scenarios.map(([name, stages]) => [name, stages.map((stage) => {
+    const snapshotStage = stage as { wires: WireTrace[] };
+    return { ...snapshotStage, wires: snapshotStage.wires.map(recolor) };
+  })]);
+}
+
 function scenarioFingerprints(scenarios: ScenarioTrace[]): Array<[string, string[]]> {
   return scenarios.map(([name, stages]) => [name, stages.map((stage) => digest(stage))]);
 }
@@ -211,6 +231,6 @@ describe('simulation controller behavior characterization', () => {
     ));
     const baselineText = gunzipSync(readFileSync(baselineFile)).toString('utf8');
     const baseline = JSON.parse(baselineText) as ScenarioTrace[];
-    expect(scenarioFingerprints(trace)).toEqual(scenarioFingerprints(baseline));
+    expect(scenarioFingerprints(trace)).toEqual(scenarioFingerprints(withUniformPhaseColors(baseline)));
   });
 });

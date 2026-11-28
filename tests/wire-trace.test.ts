@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { traceWire, wireNear } from '../src/ui/wire-trace';
+import { nameKey, sameNameElements } from '../src/ui/name-trace';
 import { el, schemaOf, seg } from './builders';
 
 /** Две линии через контакт S1: L — S1:1 и S1:2 — H1:X1 (+ ответвление к H2:X1); отдельная линия N. */
@@ -30,5 +31,26 @@ describe('wire trace (magnifier)', () => {
   it('finds the wire under the cursor within the tolerance', () => {
     expect(wireNear(schema(), { x: 15, y: 11 }, 2)).toBe(10);
     expect(wireNear(schema(), { x: 15, y: 20 }, 2)).toBeUndefined();
+  });
+});
+
+describe('same-name trace (magnifier over an element)', () => {
+  it('matches names ignoring the leading dash and case', () => {
+    expect(nameKey(' -KM1 ')).toBe('KM1');
+    expect(nameKey('km1')).toBe('KM1');
+    expect(nameKey('-')).toBe('');
+  });
+
+  it('finds the coil and every contact named KM1, not KM2', () => {
+    const s = schemaOf([], [
+      el(9000, 0, 0, { id: 1, name: '-KM1' }),
+      el(8000, 20, 0, { id: 2, name: 'KM1' }),
+      el(8001, 40, 0, { id: 3, name: '-km1' }),
+      el(9000, 60, 0, { id: 4, name: '-KM2' }),
+      el(8000, 80, 0, { id: 5, name: '' }),
+    ]);
+    expect(sameNameElements(s, 2)).toEqual([1, 2, 3]);
+    expect(sameNameElements(s, 4)).toEqual([4]);
+    expect(sameNameElements(s, 5)).toEqual([]);
   });
 });

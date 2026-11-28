@@ -28,7 +28,7 @@ describe('крупные значки палитры', () => {
     expect(missing).toEqual([]);
   });
 
-  it('вид палитры: сохранённое «grid» — значки, всё остальное (в том числе старое «icons») — список', () => {
+  it('вид палитры: по умолчанию значки, список — только если сохранено «list»', () => {
     const store = new Map<string, string>();
     const memory = {
       getItem: (key: string) => store.get(key) ?? null,
@@ -36,11 +36,13 @@ describe('крупные значки палитры', () => {
     };
     Object.defineProperty(globalThis, 'localStorage', { value: memory, configurable: true });
     try {
-      expect(readStoredPaletteView()).toBe('list');
+      expect(readStoredPaletteView()).toBe('grid');
       store.set(PALETTE_VIEW_KEY, 'icons');
-      expect(readStoredPaletteView()).toBe('list');
+      expect(readStoredPaletteView()).toBe('grid');
       store.set(PALETTE_VIEW_KEY, 'grid');
       expect(readStoredPaletteView()).toBe('grid');
+      store.set(PALETTE_VIEW_KEY, 'list');
+      expect(readStoredPaletteView()).toBe('list');
     } finally {
       Reflect.deleteProperty(globalThis, 'localStorage');
     }

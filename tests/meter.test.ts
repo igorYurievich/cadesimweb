@@ -88,3 +88,38 @@ describe('multimeter: probe contact', () => {
     expect(probeContact(schema, { x: -1000, y: -1000 }, 2)).toBeUndefined();
   });
 });
+
+describe('multimeter: AC and DC ranges', () => {
+  const schema = (): Schema => demo();
+  it('V~ reads mains and ignores DC; V⎓ reads DC and ignores mains', () => {
+    const s = schema();
+    const result = simulate({ schema: s, inputs: createEmptyInputs(), time: 0 });
+    const inputs = createEmptyInputs();
+    const net = (label: string) => {
+      const strip = s.elements.find((element) => element.terminals.some((t) => t.label === label)) as SchemaElement;
+      return netOf(s, strip, label);
+    };
+    const ac = { red: net('L1'), black: net('N') };
+    const read = (mode: 'acv' | 'dcv') => readMeter({ mode, schema: s, result, inputs }, ac).display;
+    expect(read('acv')).toEqual({ kind: 'volt', volts: 230, dc: false });
+    expect(read('dcv')).toEqual({ kind: 'volt', volts: 0, dc: true });
+  });
+});
+
+describe('multimeter: bare wires', () => {
+  it('beeps between both ends of a wire that reaches no terminal', () => {
+    const schema: Schema = { ...demo(), elements: [], wires: [
+      { id: 1, kind: 'phase', typeCode: 4000, from: { x: 0, y: 0 }, to: { x: 0, y: 30 }, thickness: 1, dot: false },
+      { id: 2, kind: 'phase', typeCode: 4000, from: { x: 0, y: 30 }, to: { x: 40, y: 30 }, thickness: 1, dot: false },
+      { id: 3, kind: 'phase', typeCode: 4000, from: { x: 80, y: 0 }, to: { x: 80, y: 30 }, thickness: 1, dot: false },
+    ] } as Schema;
+    const a = probeContact(schema, { x: 0, y: 1 }, 2);
+    const b = probeContact(schema, { x: 39, y: 30 }, 2);
+    const c = probeContact(schema, { x: 80, y: 10 }, 2);
+    const inputs = createEmptyInputs();
+    const read = (x: typeof a, y: typeof a) => readMeter({ mode: 'ohm', schema, result: undefined, inputs },
+      { red: x?.net, black: y?.net, redWire: x?.wireGroup, blackWire: y?.wireGroup }).display;
+    expect(read(a, b)).toEqual({ kind: 'ohm', closed: true });
+    expect(read(a, c)).toEqual({ kind: 'ohm', closed: false });
+  });
+});

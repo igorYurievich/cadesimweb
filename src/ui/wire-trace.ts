@@ -3,6 +3,7 @@
  * электрическую связь — все провода, соединённые с ним напрямую (концами, узлами, через совпадающие клеммы),
  * и все клеммы, к которым он приходит. Через элементы (контакты, катушки) подсветка не идёт: это ровно
  * одна сеть движка (engine/graph.ts), поэтому лишнее соединение сразу видно. Список клемм — в строке состояния.
+ * При наведении на элемент с именем подсвечиваются все элементы с тем же именем (name-trace.ts).
  */
 
 import { buildNets } from '@engine/graph';
@@ -12,6 +13,7 @@ import { SegmentGrid } from '@engine/segment-grid';
 import { terminalPosition } from '@model/geometry';
 import type { Point as SheetPoint, Schema, WireSegment } from '@model/types';
 import { SVG_NS } from './constants';
+import { drawNameTrace, nameKey, sameNameElements } from './name-trace';
 import { svgPoint } from './canvas-primitives';
 import { screenToSheet } from './viewport';
 import type { Point, Viewport } from './viewport';
@@ -101,8 +103,8 @@ export interface WireTraceSetup {
   status: HTMLElement;
   viewSize(): Point;
   viewport(): Viewport;
-  /** Подписи: «Соединение», «провода», «клеммы», «не подключено». */
-  text(): { title: string; wires: string; terminals: string; none: string; hint: string };
+  /** Подписи: «Соединение», «провода», «клеммы», «не подключено», «элементов». */
+  text(): { title: string; wires: string; terminals: string; none: string; hint: string; elements: string };
 }
 
 export function setupWireTrace(deps: WireTraceSetup): void {
@@ -111,7 +113,8 @@ export function setupWireTrace(deps: WireTraceSetup): void {
   layer.setAttribute('pointer-events', 'none');
   deps.elementLayer.after(layer);
   let active = false;
-  let hovered: number | undefined;
+  /** Что подсвечено сейчас: 'w<id>' — провод, 'e<имя>' — одноимённые элементы. */
+  let hovered: string | undefined;
   let previousStatus: string | undefined;
 
   const clear = (): void => {
@@ -149,6 +152,28 @@ export function setupWireTrace(deps: WireTraceSetup): void {
     deps.status.textContent = `${t.title}: ${segments} ${t.wires} · ${t.terminals}: ${labels.length ? labels.join(', ') : t.none}`;
   };
 
+  /** Подсветка одноимённых элементов; false — у элемента нет имени. */
+  const drawSameName = (elementId: number): boolean => {
+    const schema = deps.schema();
+    const ids = sameNameElements(schema, elementId);
+    if (!ids.length) return false;
+    layer.replaceChildren();
+    drawNameTrace(layer, deps.elementLayer, ids);
+    const name = schema.elements.find((element) => element.id === elementId)?.name.trim() ?? '';
+    previousStatus ??= deps.status.textContent ?? '';
+    deps.status.textContent = `${name}: ${ids.length} ${deps.text().elements}`;
+    return true;
+  };
+
+  /** Элемент под курсором (символ на слое элементов). */
+  const elementAt = (target: EventTarget | null): { id: number; key: string } | undefined => {
+    const symbol = target instanceof Element ? target.closest<SVGGElement>('[data-element-id]') : null;
+    if (!symbol || !deps.elementLayer.contains(symbol)) return undefined;
+    const id = Number(symbol.dataset.elementId);
+    const element = deps.schema().elements.find((candidate) => candidate.id === id);
+    return element ? { id, key: `e${nameKey(element.name)}` } : undefined;
+  };
+
   const setActive = (on: boolean): void => {
     active = on;
     deps.svg.classList.toggle('is-wire-trace', on);
@@ -171,10 +196,17 @@ export function setupWireTrace(deps: WireTraceSetup): void {
     const point = screenToSheet(svgPoint(event, deps.svg, deps.viewSize()), viewport);
     // Захват ~7 экранных пикселей при любом масштабе.
     const wireId = wireNear(deps.schema(), point, 7 / Math.max(0.01, viewport.scale));
-    if (wireId === hovered) return;
-    if (wireId === undefined) { clear(); return; }
-    draw(wireId);
-    hovered = wireId;
+    if (wireId !== undefined) {
+      if (hovered === `w${wireId}`) return;
+      draw(wireId);
+      hovered = `w${wireId}`;
+      return;
+    }
+    // Не над проводом: элемент с именем — подсветить все одноимённые.
+    const element = elementAt(event.target);
+    if (element && element.key === hovered) return;
+    if (!element || !drawSameName(element.id)) { clear(); return; }
+    hovered = element.key;
   });
   deps.svg.addEventListener('pointerleave', () => { if (active) clear(); });
   // Клик или перетаскивание могут изменить схему: подсветка пересчитается при следующем движении мыши.
