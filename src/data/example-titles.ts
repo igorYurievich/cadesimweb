@@ -1,5 +1,6 @@
 // ── Названия примеров на языках интерфейса (окно «Примеры», document-io.ts) ─────────────────────────
-// Ключ — имя файла .cad. Испанский — как в списке EXAMPLE_TITLES (examples.ts) и в именах файлов автора.
+// Ключ — имя файла примера (.cad или .json). Испанский — как в EXAMPLE_TITLES (examples.ts)
+// и в именах файлов автора.
 // Нет перевода — показывается испанское название (новый файл автора — по имени файла).
 
 export type ExampleLang = 'es' | 'en' | 'it' | 'ru' | 'fr';
@@ -10,8 +11,6 @@ const t = (es: string, en: string, it: string, ru: string, fr: string): Titles =
 
 export const EXAMPLE_TITLE_TRANSLATIONS: Readonly<Record<string, Titles>> = {
   // Примеры автора.
-  'Arranque_estrella_triangulo_2D.cad': t('Arranque estrella-triángulo 2D', 'Star-delta starter 2D',
-    'Avviamento stella-triangolo 2D', 'Пуск «звезда — треугольник» 2D', 'Démarrage étoile-triangle 2D'),
   'Dos_modos_de_giro_programados_mediante_PLC.cad': t('Dos modos de giro programados mediante PLC',
     'Two rotation modes programmed with a PLC', 'Due modalità di rotazione programmate con PLC',
     'Два режима вращения, запрограммированные на ПЛК', 'Deux modes de rotation programmés par automate'),
@@ -20,39 +19,40 @@ export const EXAMPLE_TITLE_TRANSLATIONS: Readonly<Record<string, Titles>> = {
   'Iluminacion_escalera_3_hilos_(clasico).cad': t('Iluminación de escalera a 3 hilos (clásico)',
     'Staircase lighting, 3-wire (classic)', 'Illuminazione scale a 3 fili (classico)',
     'Освещение лестницы, 3 провода (классика)', 'Éclairage d’escalier à 3 fils (classique)'),
-  'Iluminacion_escalera_4_hilos_(moderno).cad': t('Iluminación de escalera a 4 hilos (moderno)',
+  'Iluminacion_escalera_4_hilos_(moderno).json': t('Iluminación de escalera a 4 hilos (moderno)',
     'Staircase lighting, 4-wire (modern)', 'Illuminazione scale a 4 fili (moderno)',
     'Освещение лестницы, 4 провода (современная)', 'Éclairage d’escalier à 4 fils (moderne)'),
-  // Ejemplos.
-  'Ejemplo 1.cad': t('Marcha-paro con final de carrera', 'Start-stop with limit switch', 'Marcia-arresto con finecorsa',
-    'Пуск — стоп с концевым выключателем', 'Marche-arrêt avec fin de course'),
-  'Ejemplo 2.cad': t('Marcha-paro con seta de emergencia', 'Start-stop with emergency stop button',
-    'Marcia-arresto con fungo di emergenza', 'Пуск — стоп с аварийной кнопкой «грибок»',
-    'Marche-arrêt avec arrêt d’urgence coup de poing'),
-  'Ejemplo 3.cad': t('Marcha-paro de dos motores', 'Start-stop of two motors', 'Marcia-arresto di due motori',
-    'Пуск — стоп двух двигателей', 'Marche-arrêt de deux moteurs'),
-  'Ejemplo 4.cad': t('Dos motores con enclavamiento eléctrico', 'Two motors with electrical interlock',
-    'Due motori con interblocco elettrico', 'Два двигателя с электрической блокировкой',
-    'Deux moteurs avec verrouillage électrique'),
-  'Ejemplo 5.cad': t('Dos motores: paro general por relé térmico', 'Two motors: general stop by thermal relay',
-    'Due motori: arresto generale da relè termico', 'Два двигателя: общий стоп от теплового реле',
-    'Deux moteurs : arrêt général par relais thermique'),
-  'Ejemplo 6.cad': t('Tres motores: paro general por relé térmico', 'Three motors: general stop by thermal relay',
-    'Tre motori: arresto generale da relè termico', 'Три двигателя: общий стоп от теплового реле',
-    'Trois moteurs : arrêt général par relais thermique'),
-  'Ejemplo 7.cad': t('Arranque estrella-triángulo temporizado', 'Timed star-delta starter',
-    'Avviamento stella-triangolo temporizzato', 'Пуск «звезда — треугольник» с выдержкой времени',
-    'Démarrage étoile-triangle temporisé'),
-  'Ejemplo 9.cad': t('Arranque FIFO', 'FIFO start', 'Avviamento FIFO', 'Пуск по принципу FIFO', 'Démarrage FIFO'),
-  'Ejemplo 10.cad': t('Semáforo', 'Traffic light', 'Semaforo', 'Светофор', 'Feu de circulation'),
-  // Ejemplos 2.
+  // Motores.
+  '01_Marcha_paro.json': t('Marcha-paro de un motor', 'Start-stop of one motor', 'Marcia-arresto di un motore',
+    'Пуск — стоп одного двигателя', 'Marche-arrêt d’un moteur'),
+  '02_Arranque_dos_motores.json': t('Arranque de dos motores', 'Starting two motors', 'Avviamento di due motori',
+    'Пуск двух двигателей', 'Démarrage de deux moteurs'),
+  '03_Dos_motores_enclavamiento.json': t('Dos motores con enclavamiento', 'Two motors with interlock',
+    'Due motori con interblocco', 'Два двигателя с блокировкой', 'Deux moteurs avec verrouillage'),
+  '04_Disparo_rele_termico_comun.json': t('Dos motores: disparo común por relé térmico',
+    'Two motors: common thermal relay trip', 'Due motori: intervento comune del relè termico',
+    'Два двигателя: общее отключение от тепловых реле',
+    'Deux moteurs : déclenchement commun par relais thermique'),
+  '05_Arranque_secuencial.json': t('Arranque secuencial', 'Sequential start', 'Avviamento sequenziale',
+    'Последовательный пуск', 'Démarrage séquentiel'),
+  '06_Arranque_secuencial_temporizado.json': t('Arranque secuencial temporizado', 'Timed sequential start',
+    'Avviamento sequenziale temporizzato', 'Последовательный пуск с выдержкой времени',
+    'Démarrage séquentiel temporisé'),
+  '07_Arranque_E_T.json': t('Arranque estrella-triángulo', 'Star-delta starter', 'Avviamento stella-triangolo',
+    'Пуск «звезда — треугольник»', 'Démarrage étoile-triangle'),
+  '08_Inversor_de_giro_temporizado.json': t('Inversor de giro temporizado', 'Timed reversing starter',
+    'Inversione di marcia temporizzata', 'Реверс двигателя с выдержкой времени', 'Inverseur de sens temporisé'),
+  '09_Inversor_de_giro_temporizado_2D.json': t('Inversor de giro temporizado 2D', 'Timed reversing starter 2D',
+    'Inversione di marcia temporizzata 2D', 'Реверс двигателя с выдержкой времени 2D',
+    'Inverseur de sens temporisé 2D'),
+  '10_Arranque_E_T_2D.json': t('Arranque estrella-triángulo 2D', 'Star-delta starter 2D',
+    'Avviamento stella-triangolo 2D', 'Пуск «звезда — треугольник» 2D', 'Démarrage étoile-triangle 2D'),
+  // Ejemplos 2 (Ejemplo 2.4 и 2.8 показываются в «Motores»).
   'Ejemplo 2.3.cad': t('Arranque por autotransformador', 'Autotransformer starter', 'Avviamento con autotrasformatore',
     'Пуск через автотрансформатор', 'Démarrage par autotransformateur'),
   'Ejemplo 2.4.cad': t('Columpio: dos motores alternos', 'Swing: two alternating motors',
     'Altalena: due motori alternati',
     'Качели: два двигателя попеременно', 'Balançoire : deux moteurs en alternance'),
-  'Ejemplo 2.6.cad': t('Giro en dos direcciones', 'Rotation in two directions', 'Rotazione in due direzioni',
-    'Вращение в двух направлениях', 'Rotation dans les deux sens'),
   'Ejemplo 2.7.cad': t('Inversor de giro con temporizador a la desconexión', 'Reversing starter with off-delay timer',
     'Inversione di marcia con temporizzatore alla diseccitazione', 'Реверс с реле времени на отключение',
     'Inverseur de sens avec temporisation au déclenchement'),
@@ -77,9 +77,9 @@ export const EXAMPLE_TITLE_TRANSLATIONS: Readonly<Record<string, Titles>> = {
     'Ascenseur 5 étages avec variateur (10–25 Hz)'),
 };
 
-/** Папки окна «Примеры» (кроме папки автора: её название в текстах интерфейса, examplesAuthor). */
+/** Папки окна «Примеры» (кроме папки автора «Misceláneo»: её название в текстах интерфейса, examplesAuthor). */
 export const EXAMPLE_FOLDER_TRANSLATIONS: Readonly<Record<string, Titles>> = {
-  Ejemplos: t('Ejemplos', 'Examples', 'Esempi', 'Примеры', 'Exemples'),
+  Motores: t('Motores', 'Motors', 'Motori', 'Двигатели', 'Moteurs'),
   'Ejemplos 2': t('Ejemplos 2', 'Examples 2', 'Esempi 2', 'Примеры 2', 'Exemples 2'),
 };
 

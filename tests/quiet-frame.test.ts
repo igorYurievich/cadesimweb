@@ -18,7 +18,8 @@ const EXAMPLES = [
   'Ejemplos del autor/Ascensor_5_plantas_con_variador.cad',
   'Ejemplos del autor/GRAFCET_secuencia_de_pilotos.cad',
   'Ejemplos del autor/Dos_modos_de_giro_programados_mediante_PLC.cad',
-  'Ejemplos del autor/Iluminacion_escalera_4_hilos_(moderno).cad',
+  // Старая версия .cad: в окне примеров её заменил JSON, файл остался только для этого теста.
+  '../../../tests/fixtures/escalera_4_hilos_moderno.cad',
 ];
 
 const load = (file: string): Schema =>
