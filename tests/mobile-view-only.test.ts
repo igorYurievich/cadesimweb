@@ -7,7 +7,9 @@ const css = readFileSync(new URL('../src/ui/viewport.css', import.meta.url), 'ut
 function ruleWith(selector: string): { selectors: string[]; body: string } {
   const plain = css.replace(/\/\*[\s\S]*?\*\//g, '');
   const rules = plain.matchAll(/([^{}]+)\{([^{}]*)\}/g);
-  for (const [, head, body] of rules) {
+  for (const match of rules) {
+    const head = match[1] ?? '';
+    const body = match[2] ?? '';
     const selectors = head.split(',').map((part) => part.trim());
     if (selectors.includes(selector)) return { selectors, body };
   }
